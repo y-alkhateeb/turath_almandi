@@ -82,8 +82,19 @@ axiosInstance.interceptors.response.use(
       }
     }
 
+    // Handle 403 Forbidden
+    if (error.response?.status === 403) {
+      const errorMessage = (error.response?.data as any)?.message || 'Access denied. Insufficient permissions.';
+
+      // Dynamically import toast to avoid circular dependencies
+      import('../utils/toast').then(({ toast }) => {
+        toast.error(errorMessage, 4000);
+      });
+    }
+
     return Promise.reject(error);
   }
 );
 
 export default axiosInstance;
+export { axiosInstance as api };

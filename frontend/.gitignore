@@ -1,12 +1,12 @@
 # Dependencies
-node_modules/
-.pnp
+/node_modules
+/.pnp
 .pnp.js
 
 # Production
-build/
-dist/
-dist-ssr/
+/build
+/dist
+dist-ssr
 *.local
 
 # Logs
@@ -29,17 +29,17 @@ lerna-debug.log*
 *.sln
 *.sw?
 
-# Environment variables
+# dotenv environment variable files
 .env
 .env.local
 .env.development
 .env.test
 .env.production
 
-# Temporary files
+# temp directory
 .temp
 .tmp
-tmp/
+/tmp
 
 # TypeScript
 *.tsbuildinfo
@@ -51,14 +51,3 @@ coverage
 # OS
 .DS_Store
 Thumbs.db
-
-# Frontend specific
-frontend/node_modules/
-frontend/dist/
-frontend/.env
-
-# Backend specific (when added)
-backend/node_modules/
-backend/dist/
-backend/.env
-backend/uploads/

@@ -1,10 +1,67 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async create(createUserDto: CreateUserDto) {
+    // Check if username already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { username: createUserDto.username },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('اسم المستخدم موجود بالفعل');
+    }
+
+    // If branchId is provided, verify it exists
+    if (createUserDto.branchId) {
+      const branch = await this.prisma.branch.findUnique({
+        where: { id: createUserDto.branchId },
+      });
+
+      if (!branch) {
+        throw new NotFoundException('الفرع غير موجود');
+      }
+    }
+
+    // Hash the password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(createUserDto.password, saltRounds);
+
+    // Create user
+    const user = await this.prisma.user.create({
+      data: {
+        username: createUserDto.username,
+        passwordHash,
+        role: createUserDto.role,
+        branchId: createUserDto.branchId || null,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        username: true,
+        role: true,
+        branchId: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            location: true,
+          },
+        },
+      },
+    });
+
+    return user;
+  }
 
   async findAll() {
     return this.prisma.user.findMany({
@@ -83,5 +140,31 @@ export class UsersService {
 
   async assignBranch(userId: string, branchId: string | null) {
     return this.update(userId, { branchId });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id); // Check existence
+
+    // Soft delete by setting isActive to false
+    return this.prisma.user.update({
+      where: { id },
+      data: { isActive: false },
+      select: {
+        id: true,
+        username: true,
+        role: true,
+        branchId: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            location: true,
+          },
+        },
+      },
+    });
   }
 }

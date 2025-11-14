@@ -1,38 +1,34 @@
 import { api } from './axios';
-
-export interface User {
-  id: string;
-  username: string;
-  role: 'ADMIN' | 'ACCOUNTANT';
-  branchId: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  branch?: {
-    id: string;
-    name: string;
-    location: string;
-  };
-}
+import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
 
 export const usersService = {
-  getAll: async (): Promise<User[]> => {
+  create: async (data: CreateUserDto): Promise<UserWithBranch> => {
+    const response = await api.post('/users', data);
+    return response.data;
+  },
+
+  getAll: async (): Promise<UserWithBranch[]> => {
     const response = await api.get('/users');
     return response.data;
   },
 
-  getOne: async (id: string): Promise<User> => {
+  getOne: async (id: string): Promise<UserWithBranch> => {
     const response = await api.get(`/users/${id}`);
     return response.data;
   },
 
-  update: async (id: string, data: Partial<User>): Promise<User> => {
+  update: async (id: string, data: UpdateUserDto): Promise<UserWithBranch> => {
     const response = await api.patch(`/users/${id}`, data);
     return response.data;
   },
 
-  assignBranch: async (userId: string, branchId: string | null): Promise<User> => {
+  assignBranch: async (userId: string, branchId: string | null): Promise<UserWithBranch> => {
     const response = await api.patch(`/users/${userId}/assign-branch`, { branchId });
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<UserWithBranch> => {
+    const response = await api.delete(`/users/${id}`);
     return response.data;
   },
 };

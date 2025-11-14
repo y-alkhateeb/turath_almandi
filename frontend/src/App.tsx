@@ -4,6 +4,7 @@ import MainLayout from '@components/layout/MainLayout';
 import LoginPage from '@pages/auth/LoginPage';
 import DashboardPage from '@pages/dashboard/DashboardPage';
 import { BranchesPage } from '@pages/branches';
+import { UsersPage } from '@pages/users';
 import ProtectedRoute from '@components/ProtectedRoute';
 
 // Public Route Component (redirect to dashboard if already authenticated)
@@ -42,6 +43,7 @@ function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="branches" element={<BranchesPage />} />
+        <Route path="users" element={<UsersPage />} />
         {/* Add more protected routes here */}
       </Route>
 

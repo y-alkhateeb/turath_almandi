@@ -3,17 +3,7 @@ import { useAuth } from '@hooks/useAuth';
 import MainLayout from '@components/layout/MainLayout';
 import LoginPage from '@pages/auth/LoginPage';
 import DashboardPage from '@pages/dashboard/DashboardPage';
-
-// Protected Route Component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
+import ProtectedRoute from '@components/ProtectedRoute';
 
 // Public Route Component (redirect to dashboard if already authenticated)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {

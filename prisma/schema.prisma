@@ -1,0 +1,202 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  ACCOUNTANT
+  CASHIER
+  WAITER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  MOBILE_PAYMENT
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// User Management
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(WAITER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders       Order[]
+  transactions Transaction[]
+  createdBy    User?         @relation("CreatedUsers", fields: [createdById], references: [id])
+  createdById  String?
+  createdUsers User[]        @relation("CreatedUsers")
+
+  @@map("users")
+}
+
+// Menu Management
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  menuItems MenuItem[]
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  cost        Decimal? @db.Decimal(10, 2) // Cost for profit calculation
+  categoryId  String
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("menu_items")
+}
+
+// Order Management
+model Order {
+  id          String      @id @default(uuid())
+  orderNumber String      @unique
+  tableNumber String?
+  status      OrderStatus @default(PENDING)
+  subtotal    Decimal     @db.Decimal(10, 2)
+  tax         Decimal     @default(0) @db.Decimal(10, 2)
+  discount    Decimal     @default(0) @db.Decimal(10, 2)
+  total       Decimal     @db.Decimal(10, 2)
+  notes       String?
+  waiterId    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  waiter    User        @relation(fields: [waiterId], references: [id])
+  items     OrderItem[]
+  payment   Payment?
+  invoices  Invoice[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  orderId    String
+  menuItemId String
+  quantity   Int
+  price      Decimal @db.Decimal(10, 2) // Price at time of order
+  subtotal   Decimal @db.Decimal(10, 2)
+  notes      String?
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+// Payment Management
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  reference     String?       // Transaction reference
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+// Invoice Management
+model Invoice {
+  id            String   @id @default(uuid())
+  invoiceNumber String   @unique
+  orderId       String
+  amount        Decimal  @db.Decimal(10, 2)
+  tax           Decimal  @db.Decimal(10, 2)
+  total         Decimal  @db.Decimal(10, 2)
+  issuedAt      DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("invoices")
+}
+
+// Accounting/Transaction Management
+model Transaction {
+  id              String          @id @default(uuid())
+  type            TransactionType
+  category        String
+  amount          Decimal         @db.Decimal(10, 2)
+  description     String
+  reference       String?
+  transactionDate DateTime        @default(now())
+  createdById     String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@map("transactions")
+}
+
+// Inventory Management (Basic)
+model Inventory {
+  id            String   @id @default(uuid())
+  itemName      String
+  quantity      Decimal  @db.Decimal(10, 2)
+  unit          String
+  cost          Decimal  @db.Decimal(10, 2)
+  supplier      String?
+  lastRestocked DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("inventory")
+}

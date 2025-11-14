@@ -9,6 +9,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'لوحة التحكم', path: '/dashboard', icon: '📊' },
   { name: 'إدارة الفروع', path: '/branches', icon: '🏢' },
+  { name: 'إدارة المستخدمين', path: '/users', icon: '👥' },
   { name: 'المبيعات', path: '/sales', icon: '💰' },
   { name: 'المشتريات', path: '/purchases', icon: '🛒' },
   { name: 'المخزون', path: '/inventory', icon: '📦' },

@@ -1,102 +1,133 @@
-# Backend - تراث المندي
+# Turath Almandi Restaurant Accounting System - Backend
 
-الخادم الخلفي لنظام محاسبة تراث المندي
-Backend server for Turath Al-Mandi Accounting System
+نظام الخادم الخلفي لمحاسبة مطاعم تراث المندي
+Backend server for Turath Al-Mandi Restaurant Accounting System
 
-## 🚧 قيد التطوير / Under Development
+A comprehensive restaurant accounting system backend built with NestJS, TypeScript, PostgreSQL, and Prisma.
 
-سيتم إضافة الخادم الخلفي قريباً باستخدام إحدى التقنيات التالية:
-Backend will be added soon using one of the following technologies:
+---
 
-### خيارات التقنيات المقترحة / Proposed Tech Options:
+## 🚀 Tech Stack
 
-#### خيار 1: Node.js + Express
-```
-- Node.js + Express
-- TypeScript
-- PostgreSQL / MySQL
-- Prisma ORM
-- JWT Authentication
-```
+- **NestJS** v11.1.9 - Progressive Node.js framework
+- **TypeScript** v5.9.3 - Typed JavaScript
+- **PostgreSQL** 18 - Relational database
+- **Prisma** v6.19.0 - Modern ORM
+- **JWT** - Authentication & authorization
+- **Bcrypt** - Password hashing
+- **Class Validator** - DTO validation
+- **Passport** - Authentication middleware
 
-#### خيار 2: NestJS
-```
-- NestJS Framework
-- TypeScript
-- PostgreSQL / MySQL
-- TypeORM / Prisma
-- Passport JWT
-```
+---
 
-#### خيار 3: Python + FastAPI
-```
-- FastAPI
-- Python 3.11+
-- PostgreSQL / MySQL
-- SQLAlchemy
-- JWT Authentication
+## ✨ Features
+
+- ✅ JWT-based authentication
+- ✅ Role-based access control (RBAC)
+- ✅ Global validation pipes
+- ✅ CORS configuration for frontend
+- ✅ Comprehensive database schema
+- ✅ User management
+- ✅ Password hashing with bcrypt
+- 🔄 Menu management (coming soon)
+- 🔄 Order processing (coming soon)
+- 🔄 Payment tracking (coming soon)
+
+---
+
+## 📋 Prerequisites
+
+- Node.js v18 or higher
+- PostgreSQL 18 (or use Docker)
+- npm or yarn
+
+---
+
+## 🚀 Quick Start
+
+### Using Docker (Recommended)
+
+```bash
+# 1. Start PostgreSQL
+docker-compose up -d postgres
+
+# 2. Install dependencies
+npm install
+
+# 3. Copy environment variables
+cp .env.example .env
+
+# 4. Generate Prisma client and run migrations
+npm run prisma:generate
+npm run prisma:migrate
+
+# 5. Start development server
+npm run start:dev
+
+# 6. Test the API
+curl http://localhost:3000/api/v1/health
 ```
 
 ---
 
-## 📋 متطلبات API المخطط لها / Planned API Requirements
+## 🔐 Environment Variables
 
-### المصادقة / Authentication
-- `POST /api/auth/login` - تسجيل الدخول
-- `POST /api/auth/logout` - تسجيل الخروج
-- `POST /api/auth/refresh` - تحديث الرمز
-- `GET /api/auth/me` - معلومات المستخدم الحالي
-
-### المبيعات / Sales
-- `GET /api/sales` - قائمة المبيعات
-- `POST /api/sales` - إضافة عملية بيع
-- `GET /api/sales/:id` - تفاصيل عملية بيع
-- `PUT /api/sales/:id` - تعديل عملية بيع
-- `DELETE /api/sales/:id` - حذف عملية بيع
-
-### المشتريات / Purchases
-- `GET /api/purchases` - قائمة المشتريات
-- `POST /api/purchases` - إضافة عملية شراء
-- `GET /api/purchases/:id` - تفاصيل عملية شراء
-- `PUT /api/purchases/:id` - تعديل عملية شراء
-- `DELETE /api/purchases/:id` - حذف عملية شراء
-
-### المخزون / Inventory
-- `GET /api/inventory` - قائمة المخزون
-- `POST /api/inventory` - إضافة صنف
-- `GET /api/inventory/:id` - تفاصيل صنف
-- `PUT /api/inventory/:id` - تعديل صنف
-- `DELETE /api/inventory/:id` - حذف صنف
-
-### التقارير / Reports
-- `GET /api/reports/sales` - تقرير المبيعات
-- `GET /api/reports/purchases` - تقرير المشتريات
-- `GET /api/reports/inventory` - تقرير المخزون
-- `GET /api/reports/financial` - التقرير المالي
-
----
-
-## 🗄️ نموذج قاعدة البيانات / Database Schema
-
-```sql
--- سيتم إضافة نماذج قاعدة البيانات هنا
--- Database schemas will be added here
-
--- Users (المستخدمون)
--- Products (المنتجات)
--- Sales (المبيعات)
--- Purchases (المشتريات)
--- Inventory (المخزون)
--- Transactions (المعاملات)
+```env
+NODE_ENV=development
+PORT=3000
+DATABASE_URL="postgresql://postgres:password@localhost:5432/turath_almandi?schema=public"
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRATION=7d
+CORS_ORIGIN=http://localhost:3000
+BCRYPT_SALT_ROUNDS=10
 ```
 
 ---
 
-## 🔜 القادم / Coming Soon
+## 🔌 API Endpoints
 
-تابع هذا المستودع للحصول على آخر التحديثات!
-Stay tuned for updates!
+Base URL: `http://localhost:3000/api/v1`
+
+### Authentication
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - Login user
+- `GET /auth/me` - Get current user (requires JWT)
 
 ---
 
-**تحت التطوير / Under Development** 🚧
+## 📝 Common Commands
+
+```bash
+# Development
+npm run start:dev          # Start in watch mode
+npm run start:debug        # Start in debug mode
+
+# Database
+npm run prisma:studio      # Open Prisma Studio
+npm run prisma:migrate     # Create and run migration
+npm run prisma:generate    # Generate Prisma client
+
+# Code Quality
+npm run lint               # Run linter
+npm run format             # Format code
+
+# Testing
+npm run test              # Run tests
+npm run test:cov          # Run tests with coverage
+
+# Production
+npm run build             # Build for production
+npm run start:prod        # Start production server
+```
+
+---
+
+## 📖 Additional Documentation
+
+- [Quick Setup Guide](./SETUP.md)
+- [Prisma Schema](./prisma/schema.prisma)
+- [Main Project README](../README.md)
+
+---
+
+**Built with ❤️ for Turath Al-Mandi Restaurant**

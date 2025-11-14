@@ -1,27 +1,27 @@
 import { IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator';
 
 export class UpdateBranchDto {
-  @IsString()
+  @IsString({ message: 'اسم الفرع يجب أن يكون نصاً' })
   @IsOptional()
-  @MaxLength(200)
+  @MaxLength(200, { message: 'اسم الفرع يجب ألا يتجاوز 200 حرف' })
   name?: string;
 
-  @IsString()
+  @IsString({ message: 'الموقع يجب أن يكون نصاً' })
   @IsOptional()
-  @MaxLength(500)
+  @MaxLength(500, { message: 'الموقع يجب ألا يتجاوز 500 حرف' })
   location?: string;
 
-  @IsString()
+  @IsString({ message: 'اسم المدير يجب أن يكون نصاً' })
   @IsOptional()
-  @MaxLength(200)
+  @MaxLength(200, { message: 'اسم المدير يجب ألا يتجاوز 200 حرف' })
   managerName?: string;
 
-  @IsString()
+  @IsString({ message: 'رقم الهاتف يجب أن يكون نصاً' })
   @IsOptional()
-  @MaxLength(50)
+  @MaxLength(50, { message: 'رقم الهاتف يجب ألا يتجاوز 50 حرف' })
   phone?: string;
 
-  @IsBoolean()
+  @IsBoolean({ message: 'حالة النشاط يجب أن تكون قيمة منطقية' })
   @IsOptional()
   isActive?: boolean;
 }

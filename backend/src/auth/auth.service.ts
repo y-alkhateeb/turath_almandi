@@ -230,4 +230,13 @@ export class AuthService {
       where: { token },
     });
   }
+
+  async logout(userId: string): Promise<{ message: string }> {
+    // Revoke all refresh tokens for this user
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+
+    return { message: 'تم تسجيل الخروج بنجاح' };
+  }
 }

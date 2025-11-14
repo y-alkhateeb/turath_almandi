@@ -2,10 +2,12 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -49,17 +51,19 @@ export class AuthService {
       },
     });
 
-    // Generate JWT token
+    // Generate tokens
     const access_token = await this.generateToken(
       user.id,
       user.username,
       user.role,
       user.branchId,
     );
+    const refresh_token = await this.generateRefreshToken(user.id);
 
     return {
       user,
       access_token,
+      refresh_token,
     };
   }
 
@@ -95,13 +99,14 @@ export class AuthService {
       throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
 
-    // Generate JWT token
+    // Generate tokens
     const access_token = await this.generateToken(
       user.id,
       user.username,
       user.role,
       user.branchId,
     );
+    const refresh_token = await this.generateRefreshToken(user.id);
 
     return {
       user: {
@@ -112,6 +117,7 @@ export class AuthService {
         isActive: user.isActive,
       },
       access_token,
+      refresh_token,
     };
   }
 
@@ -155,5 +161,73 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('الرمز غير صالح');
     }
+  }
+
+  async generateRefreshToken(userId: string): Promise<string> {
+    const token = crypto.randomBytes(64).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+
+    // Clean up old expired tokens
+    await this.prisma.refreshToken.deleteMany({
+      where: {
+        userId,
+        expiresAt: { lt: new Date() },
+      },
+    });
+
+    // Store new token
+    await this.prisma.refreshToken.create({
+      data: {
+        token,
+        userId,
+        expiresAt,
+      },
+    });
+
+    return token;
+  }
+
+  async refreshAccessToken(refreshTokenDto: RefreshTokenDto): Promise<{ access_token: string }> {
+    const { refresh_token } = refreshTokenDto;
+
+    // Find token in database
+    const tokenRecord = await this.prisma.refreshToken.findUnique({
+      where: { token: refresh_token },
+      include: { user: true },
+    });
+
+    if (!tokenRecord) {
+      throw new UnauthorizedException('رمز التحديث غير صالح');
+    }
+
+    // Check if expired
+    if (tokenRecord.expiresAt < new Date()) {
+      await this.prisma.refreshToken.delete({
+        where: { token: refresh_token },
+      });
+      throw new UnauthorizedException('رمز التحديث منتهي الصلاحية');
+    }
+
+    // Check if user is active
+    if (!tokenRecord.user.isActive) {
+      throw new UnauthorizedException('الحساب معطل');
+    }
+
+    // Generate new access token
+    const access_token = await this.generateToken(
+      tokenRecord.user.id,
+      tokenRecord.user.username,
+      tokenRecord.user.role,
+      tokenRecord.user.branchId,
+    );
+
+    return { access_token };
+  }
+
+  async revokeRefreshToken(token: string): Promise<void> {
+    await this.prisma.refreshToken.deleteMany({
+      where: { token },
+    });
   }
 }

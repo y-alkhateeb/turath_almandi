@@ -97,6 +97,7 @@ model User {
 
   // Relations
   branch                Branch?               @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  refreshTokens         RefreshToken[]
   createdTransactions   Transaction[]         @relation("TransactionCreator")
   createdDebts          Debt[]                @relation("DebtCreator")
   recordedPayments      DebtPayment[]         @relation("PaymentRecorder")
@@ -111,7 +112,24 @@ model User {
   @@map("users")
 }
 
-// 2. Branches Table
+// 2. Refresh Tokens Table
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  token     String   @unique @db.VarChar(500)
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// 3. Branches Table
 model Branch {
   id          String    @id @default(uuid()) @db.Uuid
   name        String    @db.VarChar(200)
@@ -134,7 +152,7 @@ model Branch {
   @@map("branches")
 }
 
-// 3. Transactions Table
+// 4. Transactions Table
 model Transaction {
   id                 String           @id @default(uuid()) @db.Uuid
   branchId           String           @map("branch_id") @db.Uuid
@@ -164,7 +182,7 @@ model Transaction {
   @@map("transactions")
 }
 
-// 4. Debts Table
+// 5. Debts Table
 model Debt {
   id              String      @id @default(uuid()) @db.Uuid
   branchId        String      @map("branch_id") @db.Uuid
@@ -192,7 +210,7 @@ model Debt {
   @@map("debts")
 }
 
-// 5. Debt Payments Table
+// 6. Debt Payments Table
 model DebtPayment {
   id          String   @id @default(uuid()) @db.Uuid
   debtId      String   @map("debt_id") @db.Uuid
@@ -212,7 +230,7 @@ model DebtPayment {
   @@map("debt_payments")
 }
 
-// 6. Inventory Items Table
+// 7. Inventory Items Table
 model InventoryItem {
   id           String        @id @default(uuid()) @db.Uuid
   branchId     String        @map("branch_id") @db.Uuid
@@ -234,7 +252,7 @@ model InventoryItem {
   @@map("inventory_items")
 }
 
-// 7. Notifications Table
+// 8. Notifications Table
 model Notification {
   id          String                 @id @default(uuid()) @db.Uuid
   type        String                 @db.VarChar(100)
@@ -262,7 +280,7 @@ model Notification {
   @@map("notifications")
 }
 
-// 8. Notification Settings Table
+// 9. Notification Settings Table
 model NotificationSetting {
   id                String          @id @default(uuid()) @db.Uuid
   userId            String          @map("user_id") @db.Uuid
@@ -284,7 +302,7 @@ model NotificationSetting {
   @@map("notification_settings")
 }
 
-// 9. Audit Log Table
+// 10. Audit Log Table
 model AuditLog {
   id         String   @id @default(uuid()) @db.Uuid
   userId     String   @map("user_id") @db.Uuid

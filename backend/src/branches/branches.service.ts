@@ -14,7 +14,9 @@ export class BranchesService {
   }
 
   async findAll(branchId?: string) {
-    const where = branchId ? { id: branchId } : {};
+    const where = branchId
+      ? { id: branchId, isActive: true }
+      : { isActive: true };
 
     return this.prisma.branch.findMany({
       where,
@@ -53,7 +55,7 @@ export class BranchesService {
     });
 
     if (!branch) {
-      throw new NotFoundException(`Branch with ID ${id} not found`);
+      throw new NotFoundException('الفرع غير موجود');
     }
 
     return branch;
@@ -71,8 +73,10 @@ export class BranchesService {
   async remove(id: string) {
     await this.findOne(id); // Check existence
 
-    return this.prisma.branch.delete({
+    // Soft delete: set isActive to false
+    return this.prisma.branch.update({
       where: { id },
+      data: { isActive: false },
     });
   }
 }

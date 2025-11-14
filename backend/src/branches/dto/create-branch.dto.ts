@@ -1,23 +1,23 @@
-import { IsString, IsNotEmpty, IsPhoneNumber, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
 
 export class CreateBranchDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(200)
+  @IsString({ message: 'اسم الفرع يجب أن يكون نصاً' })
+  @IsNotEmpty({ message: 'اسم الفرع مطلوب' })
+  @MaxLength(200, { message: 'اسم الفرع يجب ألا يتجاوز 200 حرف' })
   name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(500)
+  @IsString({ message: 'الموقع يجب أن يكون نصاً' })
+  @IsNotEmpty({ message: 'الموقع مطلوب' })
+  @MaxLength(500, { message: 'الموقع يجب ألا يتجاوز 500 حرف' })
   location: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(200)
+  @IsString({ message: 'اسم المدير يجب أن يكون نصاً' })
+  @IsNotEmpty({ message: 'اسم المدير مطلوب' })
+  @MaxLength(200, { message: 'اسم المدير يجب ألا يتجاوز 200 حرف' })
   managerName: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(50)
+  @IsString({ message: 'رقم الهاتف يجب أن يكون نصاً' })
+  @IsNotEmpty({ message: 'رقم الهاتف مطلوب' })
+  @MaxLength(50, { message: 'رقم الهاتف يجب ألا يتجاوز 50 حرف' })
   phone: string;
 }

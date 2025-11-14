@@ -45,6 +45,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // Call logout API first
+        authService.logout().catch(console.error);
+
         // Clear tokens from both storages
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
@@ -60,8 +63,8 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
         });
 
-        // Call logout API
-        authService.logout().catch(console.error);
+        // Redirect to login page
+        window.location.href = '/login';
       },
 
       setUser: (user: User) => {

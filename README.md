@@ -1,317 +1,276 @@
-# Turath Almandi Restaurant Accounting System - Backend
+# تراث المندي - نظام المحاسبة للمطاعم
+## Turath Al-Mandi Restaurant Accounting System
 
-A comprehensive restaurant accounting system backend built with NestJS, TypeScript, PostgreSQL, and Prisma.
+نظام محاسبة متكامل للمطاعم مبني بتقنيات حديثة مع دعم كامل للغة العربية.
+A comprehensive restaurant accounting system built with modern technologies and full Arabic language support.
 
-## Tech Stack
+---
 
-- **NestJS** v11.1.9 - Progressive Node.js framework
-- **TypeScript** v5.9.3 - Typed JavaScript
-- **PostgreSQL** 18 - Relational database
-- **Prisma** v6.19.0 - Modern ORM
-- **JWT** - Authentication & authorization
-- **Bcrypt** - Password hashing
-- **Class Validator** - DTO validation
-
-## Features
-
-- JWT-based authentication
-- Role-based access control (RBAC)
-- Global validation pipes
-- CORS configuration for frontend
-- Comprehensive database schema for restaurant operations
-- User management
-- Menu management
-- Order processing
-- Payment tracking
-- Invoice generation
-- Transaction management
-- Inventory tracking
-
-## Project Structure
+## 📁 هيكل المشروع / Project Structure
 
 ```
 turath_almandi/
-├── prisma/
-│   └── schema.prisma          # Database schema
-├── src/
-│   ├── auth/                  # Authentication module
-│   │   ├── dto/              # Data transfer objects
-│   │   │   ├── register.dto.ts
-│   │   │   └── login.dto.ts
-│   │   ├── guards/           # Auth guards
-│   │   │   ├── jwt-auth.guard.ts
-│   │   │   └── local-auth.guard.ts
-│   │   ├── strategies/       # Passport strategies
-│   │   │   ├── jwt.strategy.ts
-│   │   │   └── local.strategy.ts
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   └── auth.module.ts
-│   ├── common/               # Shared resources
-│   │   ├── decorators/      # Custom decorators
-│   │   │   ├── roles.decorator.ts
-│   │   │   └── current-user.decorator.ts
-│   │   ├── guards/          # Common guards
-│   │   │   └── roles.guard.ts
-│   │   ├── filters/         # Exception filters
-│   │   └── interceptors/    # Interceptors
-│   ├── prisma/              # Prisma module
-│   │   ├── prisma.service.ts
-│   │   └── prisma.module.ts
-│   ├── app.controller.ts
-│   ├── app.service.ts
-│   ├── app.module.ts
-│   └── main.ts              # Application entry point
-├── .env.example             # Environment variables template
-├── .gitignore
-├── .prettierrc
-├── .eslintrc.js
-├── nest-cli.json
-├── tsconfig.json
-├── tsconfig.build.json
-└── package.json
+├── frontend/          # واجهة المستخدم / Frontend Application
+│   ├── src/          # React + TypeScript + Vite
+│   ├── package.json
+│   └── README.md     # Frontend documentation
+│
+├── backend/           # الخادم / Backend Application
+│   ├── src/          # NestJS + TypeScript + Prisma
+│   ├── prisma/       # Database schema
+│   ├── package.json
+│   └── README.md     # Backend documentation
+│
+└── README.md         # هذا الملف / This file
 ```
 
-## Database Schema
+---
 
-The system includes the following models:
+## 🏗️ البنية التقنية / Tech Stack
 
-### User Management
-- **User** - System users with role-based access
+### Frontend (واجهة المستخدم)
+- **React 19.2** - مكتبة واجهة المستخدم / UI Library
+- **Vite 7.2** - أداة البناء / Build Tool
+- **TypeScript 5.9.3** - لغة البرمجة / Programming Language
+- **TailwindCSS 4.1.17** - إطار التصميم مع RTL / CSS Framework with RTL
+- **React Router 7.9.6** - التنقل / Routing
+- **Zustand 5.0.8** - إدارة الحالة / State Management
+- **TanStack Query 5.90.9** - إدارة حالة الخادم / Server State
+- **Axios** - طلبات HTTP / HTTP Requests
 
-### Menu Management
-- **Category** - Menu categories
-- **MenuItem** - Menu items with pricing
+### Backend (الخادم)
+- **NestJS 11.1.9** - إطار عمل Node.js / Node.js Framework
+- **TypeScript 5.9.3** - لغة البرمجة / Programming Language
+- **PostgreSQL 18** - قاعدة البيانات / Database
+- **Prisma 6.19.0** - ORM حديث / Modern ORM
+- **JWT** - المصادقة والتفويض / Authentication & Authorization
+- **Bcrypt** - تشفير كلمات المرور / Password Hashing
+- **Passport** - وسيط المصادقة / Authentication Middleware
 
-### Order Management
-- **Order** - Customer orders
-- **OrderItem** - Individual items in orders
+---
 
-### Payment & Invoicing
-- **Payment** - Payment records
-- **Invoice** - Invoice generation
+## 🚀 البدء السريع / Quick Start
 
-### Accounting
-- **Transaction** - Income and expense tracking
-- **Inventory** - Basic inventory management
-
-### User Roles
-- `ADMIN` - Full system access
-- `MANAGER` - Management operations
-- `ACCOUNTANT` - Financial operations
-- `CASHIER` - Payment processing
-- `WAITER` - Order management
-
-## Prerequisites
-
-- Node.js v18 or higher
-- PostgreSQL 18
+### المتطلبات / Prerequisites
+- Node.js 18+
+- PostgreSQL 18 (or Docker)
 - npm or yarn
 
-## Installation
+### تثبيت Frontend
 
-1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd turath_almandi
-```
-
-2. Install dependencies:
-```bash
+cd frontend
 npm install
-```
-
-3. Set up environment variables:
-```bash
 cp .env.example .env
+npm run dev
 ```
 
-4. Update `.env` with your configuration:
-```env
-NODE_ENV=development
-PORT=3000
-DATABASE_URL="postgresql://postgres:password@localhost:5432/turath_almandi?schema=public"
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRATION=7d
-CORS_ORIGIN=http://localhost:5173
-BCRYPT_SALT_ROUNDS=10
-```
+Frontend will run on: `http://localhost:3000`
 
-5. Set up the database:
+### تثبيت Backend
+
 ```bash
-# Generate Prisma client
-npm run prisma:generate
+cd backend
 
-# Run migrations
+# Using Docker (Recommended)
+docker-compose up -d postgres
+
+# Install dependencies
+npm install
+cp .env.example .env
+
+# Setup database
+npm run prisma:generate
 npm run prisma:migrate
 
-# (Optional) Open Prisma Studio to view/edit data
-npm run prisma:studio
-```
-
-## Running the Application
-
-### Development mode
-```bash
+# Start development server
 npm run start:dev
 ```
 
-### Production mode
-```bash
-npm run build
-npm run start:prod
+Backend API will run on: `http://localhost:3000/api/v1`
+
+---
+
+## 📋 الميزات / Features
+
+### ✅ المكتمل / Completed
+
+#### Frontend
+- ✅ واجهة عربية كاملة مع دعم RTL / Full Arabic UI with RTL support
+- ✅ نظام المصادقة / Authentication system
+- ✅ لوحة التحكم الرئيسية / Main dashboard
+- ✅ إدارة الجلسات / Session management
+- ✅ تصميم متجاوب / Responsive design
+- ✅ مسارات محمية / Protected routes
+
+#### Backend
+- ✅ مصادقة JWT / JWT authentication
+- ✅ التحكم بالصلاحيات (RBAC) / Role-based access control
+- ✅ إدارة المستخدمين / User management
+- ✅ تشفير كلمات المرور / Password hashing
+- ✅ التحقق من البيانات / Data validation
+- ✅ إعدادات CORS / CORS configuration
+
+### 🔄 قيد التطوير / In Progress
+- 🔄 نظام المبيعات / Sales management
+- 🔄 نظام المشتريات / Purchases management
+- 🔄 إدارة المخزون / Inventory management
+- 🔄 إدارة القوائم / Menu management
+- 🔄 معالجة الطلبات / Order processing
+- 🔄 التقارير والإحصائيات / Reports & Analytics
+
+### 📝 مخطط / Planned
+- 📝 طباعة الفواتير / Invoice printing
+- 📝 إدارة الموظفين / Employee management
+- 📝 نظام الحسابات المالية / Financial accounting
+- 📝 تطبيق الموبايل / Mobile app
+- 📝 لوحة تحكم متقدمة / Advanced analytics
+
+---
+
+## 📖 التوثيق / Documentation
+
+- [Frontend Documentation](./frontend/README.md) - توثيق واجهة المستخدم
+- [Backend Documentation](./backend/README.md) - توثيق الخادم
+- [Backend Quick Setup](./backend/SETUP.md) - دليل الإعداد السريع للخادم
+
+---
+
+## 🔧 البيئة التطويرية / Development Environment
+
+### Frontend Environment Variables
+```env
+VITE_API_URL=http://localhost:3000/api/v1
 ```
 
-### Debug mode
-```bash
-npm run start:debug
+### Backend Environment Variables
+```env
+NODE_ENV=development
+PORT=3000
+DATABASE_URL="postgresql://postgres:password@localhost:5432/turath_almandi"
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRATION=7d
+CORS_ORIGIN=http://localhost:3000
 ```
 
-The API will be available at `http://localhost:3000/api/v1`
+---
 
-## API Endpoints
+## 🏛️ الهيكل المعماري / Architecture
 
-### Health Check
-- `GET /api/v1` - Welcome message
-- `GET /api/v1/health` - Health check
-
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
-- `GET /api/v1/auth/me` - Get current user (requires JWT)
-
-### Example Requests
-
-#### Register User
-```bash
-curl -X POST http://localhost:3000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@restaurant.com",
-    "password": "securepassword123",
-    "firstName": "Admin",
-    "lastName": "User",
-    "role": "ADMIN"
-  }'
+```
+┌─────────────────────────────────────────┐
+│          Frontend (React)               │
+│  - UI Components                        │
+│  - State Management (Zustand)           │
+│  - API Client (Axios + TanStack Query)  │
+│  - RTL Arabic Interface                 │
+└─────────────────┬───────────────────────┘
+                  │
+                  │ HTTP/REST API
+                  │ JWT Authentication
+                  │
+┌─────────────────▼───────────────────────┐
+│        Backend (NestJS)                 │
+│  - REST API Endpoints                   │
+│  - Business Logic                       │
+│  - Authentication & Authorization       │
+│  - Data Validation                      │
+└─────────────────┬───────────────────────┘
+                  │
+                  │ Prisma ORM
+                  │
+┌─────────────────▼───────────────────────┐
+│       Database (PostgreSQL 18)          │
+│  - Users & Roles                        │
+│  - Menu & Orders                        │
+│  - Transactions & Inventory             │
+└─────────────────────────────────────────┘
 ```
 
-#### Login
-```bash
-curl -X POST http://localhost:3000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "admin@restaurant.com",
-    "password": "securepassword123"
-  }'
-```
+---
 
-#### Get Current User
-```bash
-curl -X GET http://localhost:3000/api/v1/auth/me \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
+## 🎯 الأدوار والصلاحيات / User Roles
 
-## Testing
+- **ADMIN** (مدير النظام) - Full system access
+- **MANAGER** (مدير المطعم) - Management operations
+- **ACCOUNTANT** (المحاسب) - Financial operations
+- **CASHIER** (أمين الصندوق) - Payment processing
+- **WAITER** (النادل) - Order management
 
-```bash
-# Unit tests
-npm run test
+---
 
-# E2E tests
-npm run test:e2e
+## 🤝 المساهمة / Contributing
 
-# Test coverage
-npm run test:cov
-```
+هذا المشروع قيد التطوير النشط. للمساهمة:
+This project is under active development. To contribute:
 
-## Code Quality
+1. Fork المشروع / Fork the project
+2. أنشئ فرع للميزة / Create a feature branch
+3. Commit التغييرات / Commit your changes
+4. Push إلى الفرع / Push to the branch
+5. افتح Pull Request / Open a Pull Request
 
-```bash
-# Linting
-npm run lint
+---
 
-# Formatting
-npm run format
-```
+## 🗺️ خارطة الطريق / Roadmap
 
-## Prisma Commands
+### المرحلة 1: الأساسيات ✅ Phase 1: Foundation
+- [x] إعداد Frontend / Frontend setup
+- [x] إعداد Backend / Backend setup
+- [x] نظام المصادقة / Authentication system
+- [x] لوحة التحكم الأساسية / Basic dashboard
 
-```bash
-# Generate Prisma client
-npm run prisma:generate
+### المرحلة 2: الوظائف الأساسية 🔄 Phase 2: Core Features
+- [ ] API للمبيعات / Sales API
+- [ ] API للمشتريات / Purchases API
+- [ ] API للمخزون / Inventory API
+- [ ] API للقوائم / Menu API
+- [ ] معالجة الطلبات / Order processing
 
-# Create and apply migrations
-npm run prisma:migrate
+### المرحلة 3: الميزات المتقدمة 📝 Phase 3: Advanced Features
+- [ ] التقارير المالية / Financial reports
+- [ ] إدارة الموظفين / Employee management
+- [ ] طباعة الفواتير / Invoice printing
+- [ ] النسخ الاحتياطي / Backup system
 
-# Open Prisma Studio
-npm run prisma:studio
+### المرحلة 4: التحسينات 📝 Phase 4: Enhancements
+- [ ] تطبيق الموبايل / Mobile app
+- [ ] التكامل مع أنظمة خارجية / External integrations
+- [ ] لوحات تحكم متقدمة / Advanced analytics
+- [ ] إشعارات فورية / Real-time notifications
 
-# Run seed data (if configured)
-npm run prisma:seed
-```
+---
 
-## Using Role-Based Access Control
+## 🐛 استكشاف الأخطاء / Troubleshooting
 
-Example controller with role protection:
+### Frontend Issues
+- Check that backend is running on correct port
+- Verify `VITE_API_URL` in `.env`
+- Clear browser cache and restart dev server
 
-```typescript
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { RolesGuard } from './common/guards/roles.guard';
-import { Roles } from './common/decorators/roles.decorator';
-import { CurrentUser } from './common/decorators/current-user.decorator';
+### Backend Issues
+- Ensure PostgreSQL is running
+- Check `DATABASE_URL` in `.env`
+- Regenerate Prisma client: `npm run prisma:generate`
+- See [Backend SETUP.md](./backend/SETUP.md) for more details
 
-@Controller('admin')
-@UseGuards(JwtAuthGuard, RolesGuard)
-export class AdminController {
-  @Get('dashboard')
-  @Roles('ADMIN', 'MANAGER')
-  getDashboard(@CurrentUser() user) {
-    return { message: 'Admin dashboard', user };
-  }
-}
-```
+---
 
-## Environment Variables
+## 📄 الترخيص / License
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Application environment | `development` |
-| `PORT` | Server port | `3000` |
-| `DATABASE_URL` | PostgreSQL connection string | - |
-| `JWT_SECRET` | Secret key for JWT | - |
-| `JWT_EXPIRATION` | JWT token expiration | `7d` |
-| `CORS_ORIGIN` | Allowed CORS origin | `http://localhost:5173` |
-| `BCRYPT_SALT_ROUNDS` | Bcrypt salt rounds | `10` |
+جميع الحقوق محفوظة © 2025 تراث المندي
+All rights reserved © 2025 Turath Al-Mandi
 
-## Security Best Practices
+UNLICENSED - Private Project
 
-1. Never commit `.env` files
-2. Use strong JWT secrets in production
-3. Keep dependencies updated
-4. Use HTTPS in production
-5. Implement rate limiting
-6. Enable helmet for security headers
-7. Validate all user inputs
-8. Use parameterized queries (Prisma handles this)
+---
 
-## Next Steps
+## 📧 التواصل / Contact
 
-1. Add business logic modules (orders, menu, transactions, etc.)
-2. Implement comprehensive error handling
-3. Add logging (Winston/Pino)
-4. Set up API documentation (Swagger)
-5. Configure rate limiting
-6. Add caching (Redis)
-7. Implement file upload
-8. Add email notifications
-9. Set up CI/CD pipeline
-10. Write comprehensive tests
+للاستفسارات والدعم / For inquiries and support:
+- Project: Turath Al-Mandi Restaurant Accounting System
+- Built with ❤️ in Saudi Arabia
 
-## License
+---
 
-UNLICENSED - Private project
-
-## Support
-
-For issues or questions, please contact the development team.
+**مبني بـ ❤️ في السعودية / Built with ❤️ in Saudi Arabia**

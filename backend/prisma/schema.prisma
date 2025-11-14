@@ -1,4 +1,6 @@
-// This is your Prisma schema file
+// Restaurant Accounting System - Prisma Schema
+// PostgreSQL Database Schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,195 +10,298 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================================
+// ENUMS
+// ============================================================================
+
 enum UserRole {
   ADMIN
-  MANAGER
   ACCOUNTANT
-  CASHIER
-  WAITER
+
+  @@map("user_role")
 }
 
 enum TransactionType {
   INCOME
   EXPENSE
-}
 
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  PREPARING
-  READY
-  DELIVERED
-  CANCELLED
+  @@map("transaction_type")
 }
 
 enum PaymentMethod {
   CASH
-  CARD
-  BANK_TRANSFER
-  MOBILE_PAYMENT
+  MASTER
+
+  @@map("payment_method")
 }
 
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
+enum Currency {
+  USD
+  EUR
+  IQD
+  SAR
+  AED
+
+  @@map("currency")
 }
 
-// User Management
+enum DebtStatus {
+  ACTIVE
+  PAID
+  PARTIAL
+
+  @@map("debt_status")
+}
+
+enum InventoryUnit {
+  KG
+  PIECE
+  LITER
+  OTHER
+
+  @@map("inventory_unit")
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+
+  @@map("notification_severity")
+}
+
+enum DisplayMethod {
+  POPUP
+  TOAST
+  EMAIL
+  SMS
+
+  @@map("display_method")
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+// 1. Users Table
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  firstName String
-  lastName  String
-  role      UserRole @default(WAITER)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(uuid()) @db.Uuid
+  username      String    @unique @db.VarChar(100)
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+  role          UserRole  @default(ACCOUNTANT)
+  branchId      String?   @map("branch_id") @db.Uuid
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  orders       Order[]
-  transactions Transaction[]
-  createdBy    User?         @relation("CreatedUsers", fields: [createdById], references: [id])
-  createdById  String?
-  createdUsers User[]        @relation("CreatedUsers")
+  // Relations
+  branch                Branch?               @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  createdTransactions   Transaction[]         @relation("TransactionCreator")
+  createdDebts          Debt[]                @relation("DebtCreator")
+  recordedPayments      DebtPayment[]         @relation("PaymentRecorder")
+  createdNotifications  Notification[]        @relation("NotificationCreator")
+  notificationSettings  NotificationSetting[]
+  auditLogs             AuditLog[]
 
+  @@index([branchId])
+  @@index([role])
+  @@index([isActive])
+  @@index([username])
   @@map("users")
 }
 
-// Menu Management
-model Category {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// 2. Branches Table
+model Branch {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @db.VarChar(200)
+  location    String    @db.VarChar(500)
+  managerName String    @map("manager_name") @db.VarChar(200)
+  phone       String    @db.VarChar(50)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  menuItems MenuItem[]
+  // Relations
+  users            User[]
+  transactions     Transaction[]
+  debts            Debt[]
+  inventoryItems   InventoryItem[]
+  notifications    Notification[]
 
-  @@map("categories")
+  @@index([isActive])
+  @@index([name])
+  @@map("branches")
 }
 
-model MenuItem {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal  @db.Decimal(10, 2)
-  cost        Decimal? @db.Decimal(10, 2) // Cost for profit calculation
-  categoryId  String
-  isAvailable Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  category   Category    @relation(fields: [categoryId], references: [id])
-  orderItems OrderItem[]
-
-  @@map("menu_items")
-}
-
-// Order Management
-model Order {
-  id          String      @id @default(uuid())
-  orderNumber String      @unique
-  tableNumber String?
-  status      OrderStatus @default(PENDING)
-  subtotal    Decimal     @db.Decimal(10, 2)
-  tax         Decimal     @default(0) @db.Decimal(10, 2)
-  discount    Decimal     @default(0) @db.Decimal(10, 2)
-  total       Decimal     @db.Decimal(10, 2)
-  notes       String?
-  waiterId    String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  waiter    User        @relation(fields: [waiterId], references: [id])
-  items     OrderItem[]
-  payment   Payment?
-  invoices  Invoice[]
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id         String  @id @default(uuid())
-  orderId    String
-  menuItemId String
-  quantity   Int
-  price      Decimal @db.Decimal(10, 2) // Price at time of order
-  subtotal   Decimal @db.Decimal(10, 2)
-  notes      String?
-
-  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
-
-  @@map("order_items")
-}
-
-// Payment Management
-model Payment {
-  id            String        @id @default(uuid())
-  orderId       String        @unique
-  amount        Decimal       @db.Decimal(10, 2)
-  method        PaymentMethod
-  status        PaymentStatus @default(PENDING)
-  reference     String?       // Transaction reference
-  paidAt        DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  order Order @relation(fields: [orderId], references: [id])
-
-  @@map("payments")
-}
-
-// Invoice Management
-model Invoice {
-  id            String   @id @default(uuid())
-  invoiceNumber String   @unique
-  orderId       String
-  amount        Decimal  @db.Decimal(10, 2)
-  tax           Decimal  @db.Decimal(10, 2)
-  total         Decimal  @db.Decimal(10, 2)
-  issuedAt      DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  order Order @relation(fields: [orderId], references: [id])
-
-  @@map("invoices")
-}
-
-// Accounting/Transaction Management
+// 3. Transactions Table
 model Transaction {
-  id              String          @id @default(uuid())
-  type            TransactionType
-  category        String
-  amount          Decimal         @db.Decimal(10, 2)
-  description     String
-  reference       String?
-  transactionDate DateTime        @default(now())
-  createdById     String
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id                 String           @id @default(uuid()) @db.Uuid
+  branchId           String           @map("branch_id") @db.Uuid
+  type               TransactionType
+  amount             Decimal          @db.Decimal(15, 2)
+  currency           Currency         @default(USD)
+  paymentMethod      PaymentMethod?   @map("payment_method")
+  category           String           @db.VarChar(100)
+  date               DateTime         @db.Date
+  employeeVendorName String           @map("employee_vendor_name") @db.VarChar(200)
+  notes              String?          @db.Text
+  createdBy          String           @map("created_by") @db.Uuid
+  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
 
-  createdBy User @relation(fields: [createdById], references: [id])
+  // Relations
+  branch  Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator User   @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
 
+  @@index([branchId])
+  @@index([type])
+  @@index([date])
+  @@index([category])
+  @@index([createdBy])
+  @@index([paymentMethod])
+  @@index([currency])
   @@map("transactions")
 }
 
-// Inventory Management (Basic)
-model Inventory {
-  id            String   @id @default(uuid())
-  itemName      String
-  quantity      Decimal  @db.Decimal(10, 2)
-  unit          String
-  cost          Decimal  @db.Decimal(10, 2)
-  supplier      String?
-  lastRestocked DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+// 4. Debts Table
+model Debt {
+  id              String      @id @default(uuid()) @db.Uuid
+  branchId        String      @map("branch_id") @db.Uuid
+  creditorName    String      @map("creditor_name") @db.VarChar(200)
+  originalAmount  Decimal     @map("original_amount") @db.Decimal(15, 2)
+  remainingAmount Decimal     @map("remaining_amount") @db.Decimal(15, 2)
+  date            DateTime    @db.Date
+  dueDate         DateTime?   @map("due_date") @db.Date
+  status          DebtStatus  @default(ACTIVE)
+  notes           String?     @db.Text
+  createdBy       String      @map("created_by") @db.Uuid
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz
 
-  @@map("inventory")
+  // Relations
+  branch   Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator  User          @relation("DebtCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  payments DebtPayment[]
+
+  @@index([branchId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([createdBy])
+  @@index([date])
+  @@map("debts")
+}
+
+// 5. Debt Payments Table
+model DebtPayment {
+  id          String   @id @default(uuid()) @db.Uuid
+  debtId      String   @map("debt_id") @db.Uuid
+  amountPaid  Decimal  @map("amount_paid") @db.Decimal(15, 2)
+  paymentDate DateTime @map("payment_date") @db.Date
+  notes       String?  @db.Text
+  recordedBy  String   @map("recorded_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  debt     Debt @relation(fields: [debtId], references: [id], onDelete: Cascade)
+  recorder User @relation("PaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+
+  @@index([debtId])
+  @@index([paymentDate])
+  @@index([recordedBy])
+  @@map("debt_payments")
+}
+
+// 6. Inventory Items Table
+model InventoryItem {
+  id           String        @id @default(uuid()) @db.Uuid
+  branchId     String        @map("branch_id") @db.Uuid
+  name         String        @db.VarChar(200)
+  quantity     Decimal       @db.Decimal(12, 3)
+  unit         InventoryUnit
+  costPerUnit  Decimal       @map("cost_per_unit") @db.Decimal(12, 2)
+  lastUpdated  DateTime      @map("last_updated") @db.Timestamptz
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@index([branchId])
+  @@index([name])
+  @@index([unit])
+  @@index([lastUpdated])
+  @@map("inventory_items")
+}
+
+// 7. Notifications Table
+model Notification {
+  id          String                 @id @default(uuid()) @db.Uuid
+  type        String                 @db.VarChar(100)
+  title       String                 @db.VarChar(255)
+  message     String                 @db.Text
+  relatedId   String?                @map("related_id") @db.Uuid
+  relatedType String?                @map("related_type") @db.VarChar(50)
+  branchId    String?                @map("branch_id") @db.Uuid
+  createdBy   String                 @map("created_by") @db.Uuid
+  isRead      Boolean                @default(false) @map("is_read")
+  readAt      DateTime?              @map("read_at") @db.Timestamptz
+  severity    NotificationSeverity   @default(INFO)
+  createdAt   DateTime               @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  branch  Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator User    @relation("NotificationCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([branchId])
+  @@index([createdBy])
+  @@index([type])
+  @@index([isRead])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// 8. Notification Settings Table
+model NotificationSetting {
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @map("user_id") @db.Uuid
+  notificationType  String          @map("notification_type") @db.VarChar(100)
+  isEnabled         Boolean         @default(true) @map("is_enabled")
+  minAmount         Decimal?        @map("min_amount") @db.Decimal(15, 2)
+  selectedBranches  Json?           @map("selected_branches") @db.JsonB
+  displayMethod     DisplayMethod   @map("display_method") @default(POPUP)
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, notificationType])
+  @@index([userId])
+  @@index([notificationType])
+  @@index([isEnabled])
+  @@map("notification_settings")
+}
+
+// 9. Audit Log Table
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  action     String   @db.VarChar(100)
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   String   @map("entity_id") @db.Uuid
+  changes    Json     @db.JsonB
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_log")
 }

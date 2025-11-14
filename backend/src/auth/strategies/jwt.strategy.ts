@@ -22,16 +22,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       where: { id: payload.sub },
       select: {
         id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
+        username: true,
         role: true,
+        branchId: true,
         isActive: true,
       },
     });
 
     if (!user || !user.isActive) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('الرمز غير صالح أو منتهي الصلاحية');
     }
 
     return user;

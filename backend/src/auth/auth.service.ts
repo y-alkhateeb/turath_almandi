@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,15 +16,15 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const { email, password, firstName, lastName, role } = registerDto;
+    const { username, password, role, branchId } = registerDto;
 
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
-      where: { email },
+      where: { username },
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException('المستخدم بهذا الاسم موجود مسبقاً');
     }
 
     // Hash password
@@ -33,93 +34,118 @@ export class AuthService {
     // Create user
     const user = await this.prisma.user.create({
       data: {
-        email,
-        password: hashedPassword,
-        firstName,
-        lastName,
-        role: role || 'WAITER',
+        username,
+        passwordHash: hashedPassword,
+        role: role || 'ACCOUNTANT',
+        branchId: branchId || null,
       },
       select: {
         id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
+        username: true,
         role: true,
+        branchId: true,
         isActive: true,
         createdAt: true,
       },
     });
 
     // Generate JWT token
-    const token = await this.generateToken(user.id, user.email, user.role);
+    const access_token = await this.generateToken(
+      user.id,
+      user.username,
+      user.role,
+      user.branchId,
+    );
 
     return {
       user,
-      token,
+      access_token,
     };
   }
 
-  async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+    const { username, password } = loginDto;
 
-    // Find user
+    // Find user with branch relation
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: { username },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
 
     // Check if user is active
     if (!user.isActive) {
-      throw new UnauthorizedException('Account is deactivated');
+      throw new UnauthorizedException('الحساب معطل. يرجى التواصل مع المسؤول');
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
 
     // Generate JWT token
-    const token = await this.generateToken(user.id, user.email, user.role);
+    const access_token = await this.generateToken(
+      user.id,
+      user.username,
+      user.role,
+      user.branchId,
+    );
 
     return {
       user: {
         id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        username: user.username,
         role: user.role,
+        branchId: user.branchId,
         isActive: user.isActive,
       },
-      token,
+      access_token,
     };
   }
 
-  async validateUser(email: string, password: string) {
+  async validateUser(username: string, password: string) {
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: { username },
     });
 
     if (!user) {
       return null;
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
       return null;
     }
 
-    const { password: _, ...result } = user;
+    const { passwordHash: _, ...result } = user;
     return result;
   }
 
-  async generateToken(userId: string, email: string, role: string) {
-    const payload = { sub: userId, email, role };
+  async generateToken(
+    userId: string,
+    username: string,
+    role: string,
+    branchId: string | null,
+  ) {
+    const payload = {
+      sub: userId,
+      username,
+      role,
+      branch_id: branchId,
+    };
     return this.jwtService.sign(payload);
   }
 
@@ -127,7 +153,7 @@ export class AuthService {
     try {
       return this.jwtService.verify(token);
     } catch (error) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('الرمز غير صالح');
     }
   }
 }

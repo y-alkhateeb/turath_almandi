@@ -1,30 +1,25 @@
-import { IsEmail, IsString, MinLength, IsEnum, IsOptional } from 'class-validator';
+import { IsString, MinLength, MaxLength, IsEnum, IsOptional, IsUUID } from 'class-validator';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
   ACCOUNTANT = 'ACCOUNTANT',
-  CASHIER = 'CASHIER',
-  WAITER = 'WAITER',
 }
 
 export class RegisterDto {
-  @IsEmail()
-  email: string;
+  @IsString()
+  @MinLength(3, { message: 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل' })
+  @MaxLength(100, { message: 'اسم المستخدم يجب ألا يتجاوز 100 حرف' })
+  username: string;
 
   @IsString()
-  @MinLength(8)
+  @MinLength(6, { message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' })
   password: string;
 
-  @IsString()
-  @MinLength(2)
-  firstName: string;
-
-  @IsString()
-  @MinLength(2)
-  lastName: string;
+  @IsOptional()
+  @IsEnum(UserRole, { message: 'الدور يجب أن يكون ADMIN أو ACCOUNTANT' })
+  role?: UserRole;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsUUID('4', { message: 'معرف الفرع يجب أن يكون UUID صالح' })
+  branchId?: string;
 }

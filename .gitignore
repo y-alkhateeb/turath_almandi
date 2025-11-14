@@ -1,8 +1,13 @@
-# Nestjs specific
-/dist
+# Dependencies
 /node_modules
+/.pnp
+.pnp.js
+
+# Production
 /build
-/tmp
+/dist
+dist-ssr
+*.local
 
 # Logs
 logs
@@ -13,8 +18,20 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 # dotenv environment variable files
 .env
+.env.local
 .env.development
 .env.test
 .env.production
@@ -22,3 +39,15 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+/tmp
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage
+.nyc_output
+
+# OS
+.DS_Store
+Thumbs.db

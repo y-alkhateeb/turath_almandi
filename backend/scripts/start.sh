@@ -7,10 +7,25 @@ set -e
 
 echo "🚀 Starting تراث المندي Backend..."
 
+# Display environment info for debugging
+echo "📊 Environment Information:"
+echo "   NODE_ENV: ${NODE_ENV}"
+echo "   PORT: ${PORT}"
+if [ -n "$DATABASE_URL" ]; then
+  # Mask password in DATABASE_URL for security
+  MASKED_URL=$(echo "$DATABASE_URL" | sed -E 's/:([^:@]+)@/:****@/')
+  echo "   DATABASE_URL: ${MASKED_URL}"
+else
+  echo "   ⚠️  DATABASE_URL: NOT SET!"
+  echo "   ❌ ERROR: DATABASE_URL environment variable is required"
+  exit 1
+fi
+
 # Function to wait for database to be ready
 wait_for_db() {
   echo "⏳ Waiting for database to be ready..."
-  local max_attempts=30
+  echo "   This may take up to 2 minutes on first deployment..."
+  local max_attempts=60  # Increased from 30 to 60
   local attempt=1
   local wait_time=2
 
@@ -28,9 +43,23 @@ EOF
     echo "⏸️  Database not ready yet, waiting ${wait_time}s..."
     sleep $wait_time
     attempt=$((attempt + 1))
+
+    # Show helpful message at certain milestones
+    if [ $attempt -eq 15 ]; then
+      echo "ℹ️  Still waiting... Database might still be provisioning"
+    elif [ $attempt -eq 30 ]; then
+      echo "⚠️  Taking longer than expected. Checking connection..."
+    elif [ $attempt -eq 45 ]; then
+      echo "⚠️  If this persists, check Render Dashboard for database status"
+    fi
   done
 
-  echo "❌ Database failed to become ready after $max_attempts attempts"
+  echo "❌ Database failed to become ready after $max_attempts attempts ($(($max_attempts * $wait_time)) seconds)"
+  echo "🔍 Troubleshooting steps:"
+  echo "   1. Verify database service is 'Available' in Render Dashboard"
+  echo "   2. Check DATABASE_URL is set correctly in backend environment variables"
+  echo "   3. Ensure database and backend are in the same region"
+  echo "   4. Try using the Internal Database URL (not External)"
   return 1
 }
 

@@ -179,6 +179,12 @@ export class DebtsService {
         throw new NotFoundException('Debt not found');
       }
 
+      // Capture old debt data for audit log
+      const oldDebtData = {
+        remainingAmount: debt.remainingAmount,
+        status: debt.status,
+      };
+
       // Role-based access control
       if (user.role === UserRole.ACCOUNTANT && debt.branchId !== user.branchId) {
         throw new ForbiddenException('You can only pay debts from your branch');
@@ -244,7 +250,7 @@ export class DebtsService {
         },
       });
 
-      return { payment, debt: updatedDebt };
+      return { payment, debt: updatedDebt, oldDebtData };
     });
 
     // Log the payment in audit log
@@ -260,6 +266,7 @@ export class DebtsService {
       user.id,
       AuditEntityType.DEBT,
       debtId,
+      result.oldDebtData,
       { remainingAmount: result.debt.remainingAmount, status: result.debt.status },
     );
 

@@ -2,8 +2,10 @@ import api from './axios';
 import type {
   Transaction,
   CreateTransactionInput,
+  UpdateTransactionInput,
   CreatePurchaseExpenseInput,
   TransactionFilters,
+  PaginatedTransactionsResponse,
   DashboardSummary,
   DashboardSummaryFilters,
 } from '../types/transactions.types';
@@ -14,9 +16,9 @@ import type {
  */
 export const transactionsService = {
   /**
-   * Get all transactions with optional filters
+   * Get all transactions with optional filters and pagination
    */
-  getAll: async (filters?: TransactionFilters): Promise<Transaction[]> => {
+  getAll: async (filters?: TransactionFilters): Promise<PaginatedTransactionsResponse> => {
     const params = new URLSearchParams();
 
     if (filters?.branchId) {
@@ -25,17 +27,32 @@ export const transactionsService = {
     if (filters?.type) {
       params.append('type', filters.type);
     }
+    if (filters?.category) {
+      params.append('category', filters.category);
+    }
+    if (filters?.paymentMethod) {
+      params.append('paymentMethod', filters.paymentMethod);
+    }
     if (filters?.startDate) {
       params.append('startDate', filters.startDate);
     }
     if (filters?.endDate) {
       params.append('endDate', filters.endDate);
     }
+    if (filters?.search) {
+      params.append('search', filters.search);
+    }
+    if (filters?.page) {
+      params.append('page', filters.page.toString());
+    }
+    if (filters?.limit) {
+      params.append('limit', filters.limit.toString());
+    }
 
     const queryString = params.toString();
     const url = queryString ? `/transactions?${queryString}` : '/transactions';
 
-    const response = await api.get<Transaction[]>(url);
+    const response = await api.get<PaginatedTransactionsResponse>(url);
     return response.data;
   },
 
@@ -68,7 +85,7 @@ export const transactionsService = {
   /**
    * Update an existing transaction
    */
-  update: async (id: string, data: Partial<CreateTransactionInput>): Promise<Transaction> => {
+  update: async (id: string, data: UpdateTransactionInput): Promise<Transaction> => {
     const response = await api.put<Transaction>(`/transactions/${id}`, data);
     return response.data;
   },

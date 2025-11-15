@@ -1,0 +1,217 @@
+import { useState } from 'react';
+import { useTransactions, useDeleteTransaction } from '../../hooks/useTransactions';
+import TransactionTable from '../../components/TransactionTable';
+import TransactionModal from '../../components/TransactionModal';
+import type { Transaction, TransactionFilters } from '../../types/transactions.types';
+
+export default function TransactionsPage() {
+  const [filters, setFilters] = useState<TransactionFilters>({
+    page: 1,
+    limit: 20,
+  });
+
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    transaction: Transaction | null;
+  }>({ isOpen: false, transaction: null });
+
+  const { data, isLoading, error } = useTransactions(filters);
+  const deleteTransaction = useDeleteTransaction();
+
+  const handleView = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setModalMode('view');
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setModalMode('edit');
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (transaction: Transaction) => {
+    setDeleteConfirmation({ isOpen: true, transaction });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmation.transaction) return;
+
+    try {
+      await deleteTransaction.mutateAsync(deleteConfirmation.transaction.id);
+      setDeleteConfirmation({ isOpen: false, transaction: null });
+    } catch (error) {
+      // Error is handled in the hook
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation({ isOpen: false, transaction: null });
+  };
+
+  const handleFiltersChange = (newFilters: TransactionFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedTransaction(null);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">إدارة العمليات المالية</h1>
+        <p className="mt-2 text-gray-600">
+          عرض وإدارة جميع الإيرادات والمصروفات
+        </p>
+      </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="mr-3">
+              <h3 className="text-sm font-medium text-red-800">
+                حدث خطأ أثناء تحميل البيانات
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                {(error as any)?.response?.data?.message || 'حدث خطأ غير متوقع'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
+      <TransactionTable
+        transactions={data?.data || []}
+        pagination={
+          data?.pagination || {
+            page: 1,
+            limit: 20,
+            total: 0,
+            totalPages: 0,
+          }
+        }
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        isLoading={isLoading}
+      />
+
+      {/* Transaction Modal (View/Edit) */}
+      <TransactionModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        transaction={selectedTransaction}
+        mode={modalMode}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmation.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" dir="rtl">
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center ml-4">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">تأكيد الحذف</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  هل أنت متأكد من حذف هذه العملية؟
+                </p>
+              </div>
+            </div>
+
+            {deleteConfirmation.transaction && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+                <div className="text-sm text-gray-700">
+                  <p>
+                    <span className="font-medium">النوع:</span>{' '}
+                    <span
+                      className={
+                        deleteConfirmation.transaction.type === 'INCOME'
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                      }
+                    >
+                      {deleteConfirmation.transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
+                    </span>
+                  </p>
+                  <p className="mt-1">
+                    <span className="font-medium">المبلغ:</span>{' '}
+                    {deleteConfirmation.transaction.amount.toLocaleString('ar-IQ')} IQD
+                  </p>
+                  <p className="mt-1">
+                    <span className="font-medium">التاريخ:</span>{' '}
+                    {new Date(deleteConfirmation.transaction.date).toLocaleDateString('ar-IQ')}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <p className="text-sm text-gray-600 mb-6">
+              هذا الإجراء لا يمكن التراجع عنه. سيتم حذف العملية نهائياً من النظام.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelDelete}
+                disabled={deleteTransaction.isPending}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleteTransaction.isPending}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+              >
+                {deleteTransaction.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>جاري الحذف...</span>
+                  </>
+                ) : (
+                  'حذف'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole, TransactionType, PaymentMethod } from '@prisma/client';
 
 interface RequestUser {
   id: string;
@@ -35,8 +36,34 @@ export class TransactionsController {
   }
 
   @Get()
-  findAll(@Query('branchId') branchId?: string) {
-    return this.transactionsService.findAll(branchId);
+  findAll(
+    @CurrentUser() user: RequestUser,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('type') type?: TransactionType,
+    @Query('branchId') branchId?: string,
+    @Query('category') category?: string,
+    @Query('paymentMethod') paymentMethod?: PaymentMethod,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('search') search?: string,
+  ) {
+    const pagination = {
+      page: page ? parseInt(page, 10) : 1,
+      limit: limit ? parseInt(limit, 10) : 20,
+    };
+
+    const filters = {
+      type,
+      branchId,
+      category,
+      paymentMethod,
+      startDate,
+      endDate,
+      search,
+    };
+
+    return this.transactionsService.findAll(user, pagination, filters);
   }
 
   @Get('summary')
@@ -49,7 +76,21 @@ export class TransactionsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.transactionsService.findOne(id, user);
+  }
+
+  @Put(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateTransactionDto: UpdateTransactionDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    return this.transactionsService.update(id, updateTransactionDto, user);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.transactionsService.remove(id, user);
   }
 }

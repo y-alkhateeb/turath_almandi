@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { StatCard } from '@/components/ui/StatCard';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -6,11 +7,14 @@ import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useBranches } from '@/hooks/useBranches';
 import {
   TrendingUp,
   TrendingDown,
   DollarSign,
   Activity,
+  Building,
 } from 'lucide-react';
 
 /**
@@ -21,12 +25,22 @@ import {
  * - Revenue vs Expenses line chart
  * - Category distribution pie chart
  * - Recent transactions table
+ * - Branch filter for admin users
  * - Responsive design (mobile/tablet/desktop)
  * - RTL layout with Arabic text
  * - Auto-refresh every 30 seconds
  */
 export default function DashboardPage() {
-  const { data: stats, isLoading, error } = useDashboardStats();
+  const { user, isAdmin } = useAuth();
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+
+  // Fetch branches for admin users
+  const { data: branches } = useBranches({ enabled: isAdmin() });
+
+  // Fetch dashboard stats with branch filter
+  const { data: stats, isLoading, error } = useDashboardStats({
+    branchId: selectedBranchId || undefined,
+  });
 
   if (isLoading) {
     return (
@@ -51,11 +65,32 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
-        <p className="text-sm text-gray-600 mt-2">
-          مرحباً بك في نظام إدارة تراث المندي
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
+          <p className="text-sm text-gray-600 mt-2">
+            مرحباً بك {user?.name || user?.username}
+          </p>
+        </div>
+
+        {/* Branch Filter - Admin Only */}
+        {isAdmin() && branches && branches.length > 0 && (
+          <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+            <Building className="w-5 h-5 text-gray-500" />
+            <select
+              value={selectedBranchId}
+              onChange={(e) => setSelectedBranchId(e.target.value)}
+              className="border-0 focus:ring-2 focus:ring-blue-500 rounded-lg text-sm bg-transparent"
+            >
+              <option value="">جميع الفروع</option>
+              {branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Stats Grid */}
@@ -64,24 +99,21 @@ export default function DashboardPage() {
           title="إجمالي الإيرادات"
           value={formatCurrency(stats.totalRevenue)}
           icon={TrendingUp}
-          change={12.5}
-          description="مقارنة بالشهر الماضي"
+          description="إيرادات اليوم"
           color="blue"
         />
         <StatCard
           title="إجمالي المصروفات"
           value={formatCurrency(stats.totalExpenses)}
           icon={TrendingDown}
-          change={-8.2}
-          description="مقارنة بالشهر الماضي"
+          description="مصروفات اليوم"
           color="red"
         />
         <StatCard
           title="صافي الربح"
           value={formatCurrency(stats.netProfit)}
           icon={DollarSign}
-          change={18.7}
-          description="مقارنة بالشهر الماضي"
+          description="الربح الصافي اليوم"
           color="green"
         />
         <StatCard

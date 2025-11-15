@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { BranchesModule } from './branches/branches.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
+import { DebtsModule } from './debts/debts.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UsersModule } from './users/users.module';
     BranchesModule,
     TransactionsModule,
     UsersModule,
+    DebtsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,150 +4,139 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  console.log('🌱 Seeding database for تراث المندي Restaurant...');
+
+  // Create sample branches first
+  const mainBranch = await prisma.branch.upsert({
+    where: { id: '00000000-0000-0000-0000-000000000001' },
+    update: {},
+    create: {
+      id: '00000000-0000-0000-0000-000000000001',
+      name: 'الفرع الرئيسي',
+      location: 'بغداد - المنصور',
+      managerName: 'أحمد محمد',
+      phone: '+964 770 123 4567',
+      isActive: true,
+    },
+  });
+
+  const secondBranch = await prisma.branch.upsert({
+    where: { id: '00000000-0000-0000-0000-000000000002' },
+    update: {},
+    create: {
+      id: '00000000-0000-0000-0000-000000000002',
+      name: 'فرع الكرادة',
+      location: 'بغداد - الكرادة',
+      managerName: 'علي حسن',
+      phone: '+964 771 234 5678',
+      isActive: true,
+    },
+  });
+
+  console.log('✅ Created branches');
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash('Admin123!@#', 10);
+  const adminPassword = 'Admin123!@#';
+  const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@restaurant.com' },
-    update: {},
-    create: {
-      email: 'admin@restaurant.com',
-      password: hashedPassword,
-      firstName: 'Admin',
-      lastName: 'User',
+    where: { username: 'admin' },
+    update: {
+      passwordHash: hashedAdminPassword,
       role: 'ADMIN',
       isActive: true,
+      branchId: null, // Admin has access to all branches
+    },
+    create: {
+      username: 'admin',
+      passwordHash: hashedAdminPassword,
+      role: 'ADMIN',
+      isActive: true,
+      branchId: null, // Admin has access to all branches
     },
   });
 
-  console.log('✅ Created admin user:', admin.email);
+  console.log('✅ Created admin user:', {
+    username: admin.username,
+    role: admin.role,
+    password: adminPassword,
+  });
 
-  // Create sample categories
-  const appetizers = await prisma.category.upsert({
-    where: { id: '1' },
-    update: {},
+  // Create accountant users for each branch
+  const accountant1Password = 'Accountant123';
+  const hashedAccountant1Password = await bcrypt.hash(accountant1Password, 10);
+
+  const accountant1 = await prisma.user.upsert({
+    where: { username: 'accountant1' },
+    update: {
+      passwordHash: hashedAccountant1Password,
+      role: 'ACCOUNTANT',
+      branchId: mainBranch.id,
+      isActive: true,
+    },
     create: {
-      id: '1',
-      name: 'Appetizers',
-      description: 'Starters and small dishes',
+      username: 'accountant1',
+      passwordHash: hashedAccountant1Password,
+      role: 'ACCOUNTANT',
+      branchId: mainBranch.id,
       isActive: true,
     },
   });
 
-  const mainCourses = await prisma.category.upsert({
-    where: { id: '2' },
-    update: {},
+  const accountant2Password = 'Accountant123';
+  const hashedAccountant2Password = await bcrypt.hash(accountant2Password, 10);
+
+  const accountant2 = await prisma.user.upsert({
+    where: { username: 'accountant2' },
+    update: {
+      passwordHash: hashedAccountant2Password,
+      role: 'ACCOUNTANT',
+      branchId: secondBranch.id,
+      isActive: true,
+    },
     create: {
-      id: '2',
-      name: 'Main Courses',
-      description: 'Main dishes',
+      username: 'accountant2',
+      passwordHash: hashedAccountant2Password,
+      role: 'ACCOUNTANT',
+      branchId: secondBranch.id,
       isActive: true,
     },
   });
 
-  const beverages = await prisma.category.upsert({
-    where: { id: '3' },
-    update: {},
-    create: {
-      id: '3',
-      name: 'Beverages',
-      description: 'Drinks and beverages',
-      isActive: true,
+  console.log('✅ Created accountant users:', {
+    accountant1: {
+      username: accountant1.username,
+      branch: mainBranch.name,
+      password: accountant1Password,
+    },
+    accountant2: {
+      username: accountant2.username,
+      branch: secondBranch.name,
+      password: accountant2Password,
     },
   });
 
-  console.log('✅ Created categories');
-
-  // Create sample menu items
-  await prisma.menuItem.createMany({
-    data: [
-      {
-        name: 'Hummus',
-        description: 'Traditional chickpea dip',
-        price: 8.99,
-        cost: 3.50,
-        categoryId: appetizers.id,
-        isAvailable: true,
-      },
-      {
-        name: 'Falafel',
-        description: 'Crispy chickpea fritters',
-        price: 10.99,
-        cost: 4.00,
-        categoryId: appetizers.id,
-        isAvailable: true,
-      },
-      {
-        name: 'Grilled Chicken',
-        description: 'Tender grilled chicken with vegetables',
-        price: 24.99,
-        cost: 12.00,
-        categoryId: mainCourses.id,
-        isAvailable: true,
-      },
-      {
-        name: 'Lamb Kebab',
-        description: 'Marinated lamb skewers',
-        price: 28.99,
-        cost: 15.00,
-        categoryId: mainCourses.id,
-        isAvailable: true,
-      },
-      {
-        name: 'Fresh Juice',
-        description: 'Freshly squeezed fruit juice',
-        price: 5.99,
-        cost: 2.00,
-        categoryId: beverages.id,
-        isAvailable: true,
-      },
-      {
-        name: 'Arabic Coffee',
-        description: 'Traditional Arabic coffee',
-        price: 4.99,
-        cost: 1.50,
-        categoryId: beverages.id,
-        isAvailable: true,
-      },
-    ],
-    skipDuplicates: true,
-  });
-
-  console.log('✅ Created menu items');
-
-  // Create sample inventory items
-  await prisma.inventory.createMany({
-    data: [
-      {
-        itemName: 'Chickpeas',
-        quantity: 50,
-        unit: 'kg',
-        cost: 3.50,
-        supplier: 'Local Supplier',
-      },
-      {
-        itemName: 'Chicken Breast',
-        quantity: 30,
-        unit: 'kg',
-        cost: 8.00,
-        supplier: 'Meat Supplier',
-      },
-      {
-        itemName: 'Lamb Meat',
-        quantity: 20,
-        unit: 'kg',
-        cost: 15.00,
-        supplier: 'Meat Supplier',
-      },
-    ],
-    skipDuplicates: true,
-  });
-
-  console.log('✅ Created inventory items');
-
+  console.log('');
   console.log('🎉 Seeding completed successfully!');
+  console.log('');
+  console.log('📋 LOGIN CREDENTIALS:');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('👑 ADMIN:');
+  console.log('   Username: admin');
+  console.log('   Password: Admin123!@#');
+  console.log('   Access: All branches');
+  console.log('');
+  console.log('👤 ACCOUNTANT 1 (الفرع الرئيسي):');
+  console.log('   Username: accountant1');
+  console.log('   Password: Accountant123');
+  console.log('   Branch: الفرع الرئيسي');
+  console.log('');
+  console.log('👤 ACCOUNTANT 2 (فرع الكرادة):');
+  console.log('   Username: accountant2');
+  console.log('   Password: Accountant123');
+  console.log('   Branch: فرع الكرادة');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('');
 }
 
 main()

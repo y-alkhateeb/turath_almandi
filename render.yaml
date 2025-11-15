@@ -1,0 +1,42 @@
+services:
+  # Frontend Service
+  - type: web
+    name: turath-almandi-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      - key: VITE_API_URL
+        value: https://turath-almandi-backend.onrender.com/api/v1
+    plan: free
+
+  # Backend Service
+  - type: web
+    name: turath-almandi-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: turath-almandi-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 7d
+      - key: CORS_ORIGIN
+        value: https://turath-almandi-frontend.onrender.com
+    plan: free
+    healthCheckPath: /api/v1/health
+
+databases:
+  # PostgreSQL Database
+  - name: turath-almandi-db
+    databaseName: turath_almandi
+    user: turath_user
+    plan: free

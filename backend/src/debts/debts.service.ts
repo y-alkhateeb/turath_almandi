@@ -1,4 +1,9 @@
-import { Injectable, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
@@ -78,12 +83,7 @@ export class DebtsService {
     });
 
     // Log the creation in audit log
-    await this.auditLogService.logCreate(
-      user.id,
-      AuditEntityType.DEBT,
-      debt.id,
-      debt,
-    );
+    await this.auditLogService.logCreate(user.id, AuditEntityType.DEBT, debt.id, debt);
 
     return debt;
   }

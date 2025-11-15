@@ -19,10 +19,7 @@ export class DebtsController {
   constructor(private readonly debtsService: DebtsService) {}
 
   @Post()
-  create(
-    @Body() createDebtDto: CreateDebtDto,
-    @CurrentUser() user: RequestUser,
-  ) {
+  create(@Body() createDebtDto: CreateDebtDto, @CurrentUser() user: RequestUser) {
     return this.debtsService.create(createDebtDto, user);
   }
 

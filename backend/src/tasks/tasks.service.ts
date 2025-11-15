@@ -21,9 +21,7 @@ export class TasksService {
       'OVERDUE_DEBT_CHECK_CRON',
       '0 9 * * *', // Default: Every day at 9:00 AM
     );
-    this.logger.log(
-      `Overdue debt check scheduled with CRON: ${this.cronSchedule}`,
-    );
+    this.logger.log(`Overdue debt check scheduled with CRON: ${this.cronSchedule}`);
   }
 
   /**
@@ -48,9 +46,7 @@ export class TasksService {
 
         if (adminUser) {
           this.systemUserId = adminUser.id;
-          this.logger.log(
-            `Using first admin user as system user: ${this.systemUserId}`,
-          );
+          this.logger.log(`Using first admin user as system user: ${this.systemUserId}`);
         } else {
           this.logger.warn(
             'No system user or admin user found. Notifications will use the first available user.',
@@ -62,10 +58,7 @@ export class TasksService {
         }
       }
     } catch (error) {
-      this.logger.error(
-        `Failed to initialize system user: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Failed to initialize system user: ${error.message}`, error.stack);
     }
   }
 
@@ -121,37 +114,29 @@ export class TasksService {
       const adminUsers = await this.notificationsService.getAdminUsers();
 
       if (adminUsers.length === 0) {
-        this.logger.warn(
-          'No admin users found to receive overdue debt notifications',
-        );
+        this.logger.warn('No admin users found to receive overdue debt notifications');
         return;
       }
 
-      this.logger.log(
-        `Creating notifications for ${adminUsers.length} admin user(s)...`,
-      );
+      this.logger.log(`Creating notifications for ${adminUsers.length} admin user(s)...`);
 
       // Create notifications for each overdue debt
       let notificationCount = 0;
       for (const debt of overdueDebts) {
         try {
           // Check if a notification for this debt was already created today
-          const existingNotification = await this.prisma.notification.findFirst(
-            {
-              where: {
-                type: 'overdue_debt',
-                relatedId: debt.id,
-                createdAt: {
-                  gte: today,
-                },
+          const existingNotification = await this.prisma.notification.findFirst({
+            where: {
+              type: 'overdue_debt',
+              relatedId: debt.id,
+              createdAt: {
+                gte: today,
               },
             },
-          );
+          });
 
           if (existingNotification) {
-            this.logger.debug(
-              `Notification for debt ${debt.id} already exists today. Skipping.`,
-            );
+            this.logger.debug(`Notification for debt ${debt.id} already exists today. Skipping.`);
             continue;
           }
 
@@ -183,10 +168,7 @@ export class TasksService {
         `Overdue debt check completed. Created ${notificationCount} notification(s) for ${overdueDebts.length} overdue debt(s).`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error during overdue debt check: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Error during overdue debt check: ${error.message}`, error.stack);
     }
   }
 

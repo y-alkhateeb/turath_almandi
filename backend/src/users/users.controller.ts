@@ -34,10 +34,7 @@ export class UsersController {
   }
 
   @Patch(':id/assign-branch')
-  assignBranch(
-    @Param('id') id: string,
-    @Body('branchId') branchId: string | null,
-  ) {
+  assignBranch(@Param('id') id: string, @Body('branchId') branchId: string | null) {
     return this.usersService.assignBranch(id, branchId);
   }
 

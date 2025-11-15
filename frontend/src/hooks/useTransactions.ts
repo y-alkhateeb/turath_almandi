@@ -4,6 +4,7 @@ import { toast } from '../utils/toast';
 import type {
   Transaction,
   CreateTransactionInput,
+  CreatePurchaseExpenseInput,
   TransactionFilters,
 } from '../types/transactions.types';
 
@@ -108,6 +109,59 @@ export const useCreateTransaction = () => {
       const message = variables.type === 'INCOME'
         ? 'تم إضافة الإيراد بنجاح'
         : 'تم إضافة المصروف بنجاح';
+      toast.success(message);
+    },
+
+    onSettled: () => {
+      // Refetch to ensure data is in sync with backend
+      queryClient.invalidateQueries({ queryKey: transactionsKeys.lists() });
+    },
+  });
+};
+
+/**
+ * Hook to create a purchase expense with optional inventory update
+ * Includes optimistic updates and cache invalidation
+ */
+export const useCreatePurchaseExpense = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreatePurchaseExpenseInput) => transactionsService.createPurchase(data),
+
+    onMutate: async () => {
+      // Cancel any outgoing refetches to avoid optimistic update being overwritten
+      await queryClient.cancelQueries({ queryKey: transactionsKeys.lists() });
+
+      // Snapshot the previous value
+      const previousTransactions = queryClient.getQueryData<Transaction[]>(
+        transactionsKeys.lists()
+      );
+
+      // Return context with snapshot for rollback
+      return { previousTransactions };
+    },
+
+    onError: (error: any, _newTransaction, context) => {
+      // Rollback on error
+      if (context?.previousTransactions) {
+        queryClient.setQueryData(
+          transactionsKeys.lists(),
+          context.previousTransactions
+        );
+      }
+
+      // Show error message
+      const errorMessage =
+        error?.response?.data?.message || 'حدث خطأ أثناء إضافة مصروف الشراء';
+      toast.error(errorMessage, 4000);
+    },
+
+    onSuccess: (data, variables) => {
+      // Show success message based on whether inventory was updated
+      const message = variables.addToInventory
+        ? 'تم إضافة مصروف الشراء وتحديث المخزون بنجاح'
+        : 'تم إضافة مصروف الشراء بنجاح';
       toast.success(message);
     },
 

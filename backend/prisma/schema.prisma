@@ -164,13 +164,15 @@ model Transaction {
   date               DateTime         @db.Date
   employeeVendorName String           @map("employee_vendor_name") @db.VarChar(200)
   notes              String?          @db.Text
+  inventoryItemId    String?          @map("inventory_item_id") @db.Uuid
   createdBy          String           @map("created_by") @db.Uuid
   createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  branch  Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  creator User   @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  branch        Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator       User           @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
 
   @@index([branchId])
   @@index([type])
@@ -179,6 +181,7 @@ model Transaction {
   @@index([createdBy])
   @@index([paymentMethod])
   @@index([currency])
+  @@index([inventoryItemId])
   @@map("transactions")
 }
 
@@ -243,7 +246,8 @@ model InventoryItem {
   updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch       Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
 
   @@index([branchId])
   @@index([name])

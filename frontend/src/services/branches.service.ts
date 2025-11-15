@@ -1,4 +1,5 @@
 import { api } from './axios';
+import type { CreateBranchInput, UpdateBranchInput } from '@/types/branches.types';
 
 export interface Branch {
   id: string;
@@ -22,13 +23,13 @@ export const branchesService = {
     return response.data;
   },
 
-  create: async (data: Omit<Branch, 'id' | 'isActive' | 'createdAt' | 'updatedAt'>): Promise<Branch> => {
+  create: async (data: CreateBranchInput): Promise<Branch> => {
     const response = await api.post('/branches', data);
     return response.data;
   },
 
-  update: async (id: string, data: Partial<Branch>): Promise<Branch> => {
-    const response = await api.patch(`/branches/${id}`, data);
+  update: async (id: string, data: UpdateBranchInput): Promise<Branch> => {
+    const response = await api.put(`/branches/${id}`, data);
     return response.data;
   },
 

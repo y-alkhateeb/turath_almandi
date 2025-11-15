@@ -15,6 +15,7 @@ import {
   DollarSign,
   Activity,
   Building,
+  Calendar,
 } from 'lucide-react';
 
 /**
@@ -33,14 +34,23 @@ import {
 export default function DashboardPage() {
   const { user, isAdmin } = useAuth();
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
 
   // Fetch branches for admin users
   const { data: branches } = useBranches({ enabled: isAdmin() });
 
-  // Fetch dashboard stats with branch filter
+  // Fetch dashboard stats with filters
   const { data: stats, isLoading, error } = useDashboardStats({
+    date: selectedDate,
     branchId: selectedBranchId || undefined,
   });
+
+  // Set date to today
+  const handleTodayClick = () => {
+    setSelectedDate(new Date().toISOString().split('T')[0]);
+  };
 
   if (isLoading) {
     return (
@@ -65,32 +75,54 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
-          <p className="text-sm text-gray-600 mt-2">
-            مرحباً بك {user?.name || user?.username}
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
+            <p className="text-sm text-gray-600 mt-2">
+              مرحباً بك {user?.name || user?.username}
+            </p>
+          </div>
         </div>
 
-        {/* Branch Filter - Admin Only */}
-        {isAdmin() && branches && branches.length > 0 && (
-          <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-            <Building className="w-5 h-5 text-gray-500" />
-            <select
-              value={selectedBranchId}
-              onChange={(e) => setSelectedBranchId(e.target.value)}
+        {/* Filters Row */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Date Filter */}
+          <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+            <Calendar className="w-5 h-5 text-gray-500" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
               className="border-0 focus:ring-2 focus:ring-blue-500 rounded-lg text-sm bg-transparent"
+            />
+            <button
+              onClick={handleTodayClick}
+              className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
             >
-              <option value="">جميع الفروع</option>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
+              اليوم
+            </button>
           </div>
-        )}
+
+          {/* Branch Filter - Admin Only */}
+          {isAdmin() && branches && branches.length > 0 && (
+            <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+              <Building className="w-5 h-5 text-gray-500" />
+              <select
+                value={selectedBranchId}
+                onChange={(e) => setSelectedBranchId(e.target.value)}
+                className="border-0 focus:ring-2 focus:ring-blue-500 rounded-lg text-sm bg-transparent"
+              >
+                <option value="">جميع الفروع</option>
+                {branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -133,6 +165,23 @@ export default function DashboardPage() {
 
       {/* Recent Transactions */}
       <RecentTransactions transactions={stats.recentTransactions} />
+
+      {/* Empty State - No Transactions */}
+      {stats.todayTransactions === 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+              <Activity className="w-8 h-8 text-yellow-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-yellow-900">
+              لا توجد عمليات لهذا التاريخ
+            </h3>
+            <p className="text-sm text-yellow-700 max-w-md">
+              لم يتم تسجيل أي عمليات مالية في التاريخ المحدد. اختر تاريخ آخر أو ابدأ بإضافة عمليات جديدة.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

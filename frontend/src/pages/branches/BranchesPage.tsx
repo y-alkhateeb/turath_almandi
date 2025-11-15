@@ -47,9 +47,9 @@ export const BranchesPage: React.FC = () => {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gray-50 p-6">
+    <div dir="rtl" className="w-full">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">إدارة الفروع</h1>

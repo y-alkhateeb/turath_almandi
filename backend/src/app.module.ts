@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { DebtsModule } from './debts/debts.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { TasksModule } from './tasks/tasks.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { TasksModule } from './tasks/tasks.module';
     DebtsModule,
     NotificationsModule,
     TasksModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

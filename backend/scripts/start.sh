@@ -15,6 +15,19 @@ if [ -n "$DATABASE_URL" ]; then
   # Mask password in DATABASE_URL for security
   MASKED_URL=$(echo "$DATABASE_URL" | sed -E 's/:([^:@]+)@/:****@/')
   echo "   DATABASE_URL: ${MASKED_URL}"
+
+  # Extract and test hostname
+  HOSTNAME=$(echo "$DATABASE_URL" | sed -E 's|postgresql://[^@]+@([^:/]+).*|\1|')
+  echo "   Database Host: ${HOSTNAME}"
+
+  # Test DNS resolution
+  echo "🔍 Testing DNS resolution..."
+  if nslookup "$HOSTNAME" >/dev/null 2>&1; then
+    echo "   ✅ DNS resolves successfully"
+  else
+    echo "   ⚠️  DNS resolution failed for: ${HOSTNAME}"
+    echo "   💡 This might be normal for Render internal hostnames"
+  fi
 else
   echo "   ⚠️  DATABASE_URL: NOT SET!"
   echo "   ❌ ERROR: DATABASE_URL environment variable is required"
@@ -32,12 +45,18 @@ wait_for_db() {
   while [ $attempt -le $max_attempts ]; do
     echo "🔍 Attempt $attempt/$max_attempts: Checking database connection..."
 
-    if npx prisma db execute --stdin <<EOF 2>/dev/null
+    # Capture error output for debugging
+    if ERROR_OUTPUT=$(npx prisma db execute --stdin 2>&1 <<EOF
 SELECT 1;
 EOF
-    then
+    ); then
       echo "✅ Database is ready!"
       return 0
+    else
+      # Show error details on first few attempts
+      if [ $attempt -le 3 ]; then
+        echo "   ⚠️  Connection error: $(echo "$ERROR_OUTPUT" | head -n 1)"
+      fi
     fi
 
     echo "⏸️  Database not ready yet, waiting ${wait_time}s..."

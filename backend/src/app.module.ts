@@ -11,6 +11,7 @@ import { DebtsModule } from './debts/debts.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { TasksModule } from './tasks/tasks.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { InventoryModule } from './inventory/inventory.module';
     NotificationsModule,
     TasksModule,
     InventoryModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

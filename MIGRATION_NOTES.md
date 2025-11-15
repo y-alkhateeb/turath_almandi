@@ -32,29 +32,36 @@ Successfully upgraded the following libraries in priority order:
 
 #### Breaking Changes Fixed:
 
-**1. JWT Module - expiresIn Type Change** (`backend/src/auth/auth.module.ts:18`)
+**1. JWT Module - expiresIn Type Change** (`backend/src/auth/auth.module.ts:19`)
 - **Issue:** NestJS 11's JWT module now uses `StringValue` type from the `ms` package instead of plain `string`
 - **Error:** `Type 'string' is not assignable to type 'number | StringValue'`
-- **Fix:** Added type assertion `as any` to satisfy the new type requirement (runtime validation by jsonwebtoken ensures safety)
+- **Fix:** Import and use the `StringValue` type from the `ms` package (proper type-safe solution)
 - **Migration Guide Reference:** [NestJS JWT Issue #1369](https://github.com/nestjs/jwt/issues/1369)
 
 ```typescript
 // Before:
+import { ConfigModule, ConfigService } from '@nestjs/config';
+// ...
 signOptions: {
   expiresIn: configService.get<string>('JWT_EXPIRATION') || '24h',
 }
 
-// After:
+// After (Best Practice):
+import type * as ms from 'ms';
+// ...
 signOptions: {
-  expiresIn: (configService.get<string>('JWT_EXPIRATION') || '24h') as any,
+  expiresIn: (configService.get<string>('JWT_EXPIRATION') || '24h') as ms.StringValue,
 }
 ```
 
-**Note:** The `as any` assertion is safe here because:
-1. The value is a string in ms format (e.g., "24h", "7d")
-2. Runtime validation happens in the jsonwebtoken library
-3. Environment variables can't be strongly typed at compile time
-4. Alternative would require importing `StringValue` from ms package
+**Why this is the best practice:**
+1. **Type-safe**: Uses the actual `StringValue` type from the `ms` package
+2. **No `any` casting**: Maintains full TypeScript type safety
+3. **Self-documenting**: Makes it clear that the value must be in ms format (e.g., "24h", "7d", "60s")
+4. **Zero dependencies**: The `ms` package is already installed as a transitive dependency of `jsonwebtoken`
+5. **Future-proof**: Works with strict TypeScript configurations
+
+**Valid StringValue formats:** `"60"`, `"2 days"`, `"10h"`, `"7d"`, `"60s"`, or plain number
 
 #### Key Migration Points:
 - **Node.js Version:** NestJS 11 requires Node.js v20+ (currently using v22.21.1 ✅)

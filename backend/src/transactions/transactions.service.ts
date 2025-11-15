@@ -105,6 +105,101 @@ export class TransactionsService {
   }
 
   /**
+   * Get financial summary for a specific date and branch
+   * @param date - Date to get summary for (ISO string, defaults to today)
+   * @param branchId - Branch ID to filter by (optional for admin, ignored for accountant)
+   * @param user - Current user (used to enforce branch access for accountants)
+   * @returns Financial summary with income breakdown, expenses, and net profit
+   */
+  async getSummary(date?: string, branchId?: string, user?: RequestUser) {
+    // Determine the target date (default to today)
+    const targetDate = date ? new Date(date) : new Date();
+
+    // Set to start and end of day for the query
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Determine which branch to filter by
+    let filterBranchId: string | undefined = undefined;
+
+    if (user) {
+      if (user.role === UserRole.ACCOUNTANT) {
+        // Accountants can only see their assigned branch
+        if (!user.branchId) {
+          throw new ForbiddenException('Accountant must be assigned to a branch');
+        }
+        filterBranchId = user.branchId;
+      } else if (user.role === UserRole.ADMIN) {
+        // Admins can filter by any branch, or see all branches if not specified
+        filterBranchId = branchId;
+      }
+    } else {
+      // If no user provided (shouldn't happen with auth guard), use branchId param
+      filterBranchId = branchId;
+    }
+
+    // Build where clause for date and branch filtering
+    const where: any = {
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    };
+
+    if (filterBranchId) {
+      where.branchId = filterBranchId;
+    }
+
+    // Get all income transactions (CASH and MASTER)
+    const incomeTransactions = await this.prisma.transaction.findMany({
+      where: {
+        ...where,
+        type: TransactionType.INCOME,
+      },
+    });
+
+    // Calculate income by payment method
+    const income_cash = incomeTransactions
+      .filter(t => t.paymentMethod === 'CASH')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const income_master = incomeTransactions
+      .filter(t => t.paymentMethod === 'MASTER')
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const total_income = income_cash + income_master;
+
+    // Get all expense transactions
+    const expenseTransactions = await this.prisma.transaction.findMany({
+      where: {
+        ...where,
+        type: TransactionType.EXPENSE,
+      },
+    });
+
+    const total_expense = expenseTransactions.reduce(
+      (sum, t) => sum + Number(t.amount),
+      0,
+    );
+
+    // Calculate net profit
+    const net = total_income - total_expense;
+
+    return {
+      date: targetDate.toISOString().split('T')[0],
+      branchId: filterBranchId || null,
+      income_cash,
+      income_master,
+      total_income,
+      total_expense,
+      net,
+    };
+  }
+
+  /**
    * Create a purchase expense transaction with optional inventory update
    * Uses Prisma transaction to ensure atomicity
    */

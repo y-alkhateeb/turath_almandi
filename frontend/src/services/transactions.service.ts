@@ -4,6 +4,8 @@ import type {
   CreateTransactionInput,
   CreatePurchaseExpenseInput,
   TransactionFilters,
+  DashboardSummary,
+  DashboardSummaryFilters,
 } from '../types/transactions.types';
 
 /**
@@ -76,5 +78,26 @@ export const transactionsService = {
    */
   delete: async (id: string): Promise<void> => {
     await api.delete(`/transactions/${id}`);
+  },
+
+  /**
+   * Get financial summary for a specific date and branch
+   * Admin can filter by branch, accountant automatically filtered by their branch
+   */
+  getSummary: async (filters?: DashboardSummaryFilters): Promise<DashboardSummary> => {
+    const params = new URLSearchParams();
+
+    if (filters?.date) {
+      params.append('date', filters.date);
+    }
+    if (filters?.branchId) {
+      params.append('branchId', filters.branchId);
+    }
+
+    const queryString = params.toString();
+    const url = queryString ? `/transactions/summary?${queryString}` : '/transactions/summary';
+
+    const response = await api.get<DashboardSummary>(url);
+    return response.data;
   },
 };

@@ -115,3 +115,18 @@ export interface TransactionFilters {
   startDate?: string;
   endDate?: string;
 }
+
+export interface DashboardSummary {
+  date: string; // ISO date string
+  branchId: string | null;
+  income_cash: number;
+  income_master: number;
+  total_income: number;
+  total_expense: number;
+  net: number;
+}
+
+export interface DashboardSummaryFilters {
+  date?: string; // ISO date string, defaults to today
+  branchId?: string; // Optional, admin only
+}

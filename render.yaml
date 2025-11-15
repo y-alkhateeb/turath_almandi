@@ -1,4 +1,15 @@
 services:
+  # Frontend Service
+  - type: web
+    name: turath-almandi-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      - key: VITE_API_URL
+        value: https://turath-almandi-backend.onrender.com/api/v1
+    plan: free
+
   # Backend Service
   - type: web
     name: turath-almandi-backend
@@ -19,9 +30,8 @@ services:
       - key: JWT_EXPIRATION
         value: 7d
       - key: CORS_ORIGIN
-        value: https://YOUR-GITHUB-USERNAME.github.io
-    buildCommand: npm ci && npx prisma generate && npm run build
-    startCommand: npx prisma migrate deploy && node dist/main
+        value: https://turath-almandi-frontend.onrender.com
+    plan: free
     healthCheckPath: /api/v1/health
 
 databases:

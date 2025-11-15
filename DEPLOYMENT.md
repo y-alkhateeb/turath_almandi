@@ -1,6 +1,6 @@
 # 🚀 Deployment Guide - Turath Almandi Restaurant Accounting System
 
-This guide will help you deploy your fullstack application using **GitHub Pages (Frontend)** and **Render (Backend + Database)**.
+This guide will help you deploy your fullstack application entirely on **Render** (Frontend + Backend + Database).
 
 ## 📋 Prerequisites
 
@@ -13,21 +13,50 @@ This guide will help you deploy your fullstack application using **GitHub Pages 
 ## 🎯 Deployment Architecture
 
 ```
-┌─────────────────┐      HTTPS      ┌──────────────────┐
-│  GitHub Pages   │ ────────────────▶│  Render Backend  │
-│   (Frontend)    │                  │   (NestJS API)   │
-└─────────────────┘                  └────────┬─────────┘
-                                              │
-                                              ▼
-                                     ┌─────────────────┐
-                                     │  PostgreSQL DB  │
-                                     │    (Render)     │
-                                     └─────────────────┘
+┌─────────────────────┐
+│  Render Frontend    │
+│  (React/Vite/Nginx) │
+└──────────┬──────────┘
+           │ HTTPS
+           ▼
+┌──────────────────────┐
+│  Render Backend      │
+│  (NestJS API)        │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│  PostgreSQL Database │
+│  (Render)            │
+└──────────────────────┘
 ```
+
+**All on Render - 100% FREE Tier!**
 
 ---
 
-## 🔧 Part 1: Deploy Backend to Render
+## 🚀 Quick Deploy (Recommended)
+
+Render supports deploying from a `render.yaml` blueprint file!
+
+### Option 1: One-Click Deploy (Easiest)
+
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click "New" → "Blueprint"
+3. Connect your `turath_almandi` GitHub repository
+4. Render will automatically detect `render.yaml`
+5. Click "Apply" - Render will create all services automatically!
+   - ✅ PostgreSQL Database
+   - ✅ Backend Service
+   - ✅ Frontend Service
+
+**That's it!** Render will deploy everything in about 5-10 minutes.
+
+---
+
+## 🔧 Manual Deploy (Step-by-Step)
+
+If you prefer manual control, follow these steps:
 
 ### Step 1: Create Render Account
 1. Go to [render.com](https://render.com)
@@ -35,69 +64,86 @@ This guide will help you deploy your fullstack application using **GitHub Pages 
 3. Authorize Render to access your repositories
 
 ### Step 2: Create PostgreSQL Database
-1. From Render Dashboard, click "New +"
-2. Select "PostgreSQL"
-3. Fill in the details:
+1. From Render Dashboard, click "New +" → "PostgreSQL"
+2. Configure:
    - **Name**: `turath-almandi-db`
    - **Database**: `turath_almandi`
    - **User**: `turath_user`
-   - **Region**: Choose closest to you
+   - **Region**: Choose closest to you (e.g., Oregon)
    - **Plan**: Free
-4. Click "Create Database"
-5. Once created, go to "Info" tab and copy the **Internal Database URL**
+3. Click "Create Database"
+4. Wait for database to be ready (~1 minute)
+5. Go to "Info" tab and copy the **Internal Database URL**
 
 ### Step 3: Deploy Backend Service
-1. From Render Dashboard, click "New +" → "Web Service"
+1. Click "New +" → "Web Service"
 2. Connect your `turath_almandi` repository
-3. Configure the service:
+3. Configure:
 
 **Basic Settings:**
 - **Name**: `turath-almandi-backend`
-- **Region**: Same as database
+- **Region**: Same as database (important for performance!)
 - **Branch**: `main`
 - **Root Directory**: `backend`
 - **Runtime**: Docker
 - **Plan**: Free
 
-**Build & Deploy:**
+**Docker Settings:**
 - **Dockerfile Path**: `./Dockerfile`
-- **Docker Command**: Leave empty (uses Dockerfile CMD)
+- **Docker Command**: Leave empty (uses Dockerfile default)
 
-4. Click "Advanced" to add environment variables
-
-### Step 4: Configure Environment Variables
-
-Click "Add Environment Variable" and add these one by one:
+4. Click "Advanced" and add environment variables:
 
 ```env
 NODE_ENV=production
 PORT=3000
 DATABASE_URL=<paste-internal-database-url-from-step-2>
-JWT_SECRET=<generate-random-strong-secret>
+JWT_SECRET=<generate-strong-random-secret>
 JWT_EXPIRATION=7d
-CORS_ORIGIN=https://YOUR-GITHUB-USERNAME.github.io
+CORS_ORIGIN=https://turath-almandi-frontend.onrender.com
 ```
 
-**Important:**
-- Replace `<paste-internal-database-url-from-step-2>` with the Internal Database URL you copied
-- Replace `<generate-random-strong-secret>` with a strong random string (use a password generator)
-- Replace `YOUR-GITHUB-USERNAME` with your actual GitHub username
-
-**To generate a strong JWT secret:**
+**Generate JWT Secret:**
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
-### Step 5: Deploy
-1. Click "Create Web Service"
-2. Render will start building and deploying (takes 3-5 minutes)
-3. Wait for "Live" status
-4. Copy your service URL (e.g., `https://turath-almandi-backend.onrender.com`)
+5. Click "Create Web Service"
+6. Wait for deployment (~3-5 minutes)
+7. Note your backend URL: `https://turath-almandi-backend.onrender.com`
 
-### Step 6: Verify Deployment
-1. Click on "Logs" tab to monitor deployment
-2. Verify Prisma migrations ran successfully
-3. Test the API endpoint:
+### Step 4: Deploy Frontend Service
+1. Click "New +" → "Web Service"
+2. Connect your `turath_almandi` repository
+3. Configure:
+
+**Basic Settings:**
+- **Name**: `turath-almandi-frontend`
+- **Region**: Same as backend
+- **Branch**: `main`
+- **Root Directory**: `frontend`
+- **Runtime**: Docker
+- **Plan**: Free
+
+**Docker Settings:**
+- **Dockerfile Path**: `./Dockerfile`
+- **Docker Command**: Leave empty
+
+4. Click "Advanced" and add environment variable:
+
+```env
+VITE_API_URL=https://turath-almandi-backend.onrender.com/api/v1
+```
+
+⚠️ **Important**: This must be set as a build-time environment variable!
+
+5. Click "Create Web Service"
+6. Wait for deployment (~3-5 minutes)
+7. Your frontend URL: `https://turath-almandi-frontend.onrender.com`
+
+### Step 5: Verify Deployment
+
+**Test Backend:**
 ```bash
 curl https://turath-almandi-backend.onrender.com/api/v1/health
 ```
@@ -110,328 +156,368 @@ Expected response:
 }
 ```
 
----
-
-## 🌐 Part 2: Deploy Frontend to GitHub Pages
-
-### Step 1: Enable GitHub Pages
-1. Go to your GitHub repository: `https://github.com/YOUR-USERNAME/turath_almandi`
-2. Click "Settings" tab
-3. Scroll down to "Pages" in the left sidebar
-4. Under "Source", select "GitHub Actions"
-
-### Step 2: Add Backend URL as GitHub Secret
-1. In your repository, go to "Settings" → "Secrets and variables" → "Actions"
-2. Click "New repository secret"
-3. Name: `VITE_API_URL`
-4. Value: `https://turath-almandi-backend.onrender.com/api/v1`
-   - Replace with your actual Render backend URL from Part 1, Step 5
-5. Click "Add secret"
-
-### Step 3: Trigger Deployment
-The deployment workflow is already configured! Just push to main:
-
-```bash
-git add .
-git commit -m "feat: add deployment configuration for Render"
-git push origin main
-```
-
-### Step 4: Monitor Deployment
-1. Go to your repository on GitHub
-2. Click "Actions" tab
-3. You should see "Deploy Frontend to GitHub Pages" workflow running
-4. Wait for it to complete (usually 2-3 minutes)
-
-### Step 5: Access Your Application
-Once deployment completes:
-- **Frontend URL**: `https://YOUR-GITHUB-USERNAME.github.io/turath_almandi/`
-- **Backend URL**: `https://turath-almandi-backend.onrender.com`
-
----
-
-## 🔐 Part 3: Update CORS Settings
-
-After deploying frontend, verify your Render backend CORS:
-
-1. Go to Render Dashboard → Your Backend Service → Environment
-2. Verify `CORS_ORIGIN` is set to:
-```
-https://YOUR-GITHUB-USERNAME.github.io
-```
-3. If you changed it, save and it will auto-redeploy
-
----
-
-## 🧪 Testing Your Deployment
-
-### 1. Test Backend API
-```bash
-# Health check
-curl https://turath-almandi-backend.onrender.com/api/v1/health
-
-# Test API endpoint (should return 401 unauthorized)
-curl https://turath-almandi-backend.onrender.com/api/v1/users
-```
-
-### 2. Test Frontend
-1. Open your GitHub Pages URL
-2. Try to login with seeded credentials (if you ran seed script)
+**Test Frontend:**
+1. Open `https://turath-almandi-frontend.onrender.com`
+2. You should see the login page
 3. Open browser DevTools → Network tab
-4. Verify API calls are going to your Render backend
-
-### 3. Test CORS
-1. Open frontend in browser
-2. Open DevTools → Console
-3. Look for CORS errors (should be none)
+4. Try to login (will fail if no users, but API call should work)
+5. Verify requests go to backend URL
 
 ---
 
-## 📊 Monitoring & Logs
+## 🔐 Important Configuration
 
-### Render Logs
-- **Live Logs**: Dashboard → Your Service → Logs
-- **Events**: Dashboard → Your Service → Events (deployment history)
-- **Metrics**: Dashboard → Your Service → Metrics (CPU, memory, bandwidth)
+### CORS Settings
 
-### GitHub Actions Logs
-- Go to Repository → Actions → Select workflow run
-- Check build and deployment logs
+Make sure your backend `CORS_ORIGIN` matches your frontend URL:
+- Backend Environment Variable: `CORS_ORIGIN=https://turath-almandi-frontend.onrender.com`
 
----
+### Database Migrations
 
-## 💰 Cost Estimation
+Migrations run automatically on backend startup (configured in Dockerfile):
+```bash
+npx prisma migrate deploy && node dist/main
+```
 
-### GitHub Pages
-- **100% FREE** ✅
-- 100GB bandwidth/month
-- 1GB storage
+Check backend logs to verify migrations succeeded.
 
-### Render Free Tier
-- **100% FREE** for starters ✅
-- 750 hours/month free (enough for one service)
-- PostgreSQL: Free tier available
-- **Note**: Free services spin down after 15 minutes of inactivity
-  - First request after inactivity takes ~30-60 seconds to wake up
-  - Upgrade to paid ($7/month) for always-on service
+### Environment Variables Summary
 
-**Total: 100% FREE for both!** 🎉
+**Database (PostgreSQL):**
+- Automatically configured by Render
 
----
-
-## ⚡ Important: Free Tier Limitations
-
-### Render Free Tier Behavior
-Your free backend service will:
-- ✅ Run 24/7 for active users
-- ⚠️ Spin down after 15 minutes of inactivity
-- ⏰ Take 30-60 seconds to wake up on first request
-- ♻️ Automatically restart after wake-up request
-
-**How to handle spin-down:**
-1. Show loading spinner on frontend
-2. Add timeout to API calls (90 seconds)
-3. Display "Server waking up..." message
-4. Consider upgrading to paid plan ($7/month) for production
-
----
-
-## 🔄 Automatic Deployments
-
-### Frontend (GitHub Pages)
-- ✅ Automatically deploys when you push to `main` branch
-- ✅ Only triggers if files in `frontend/` directory change
-- ✅ View status in GitHub Actions tab
-
-### Backend (Render)
-- ✅ Automatically deploys when you push to `main` branch
-- ✅ Render watches your GitHub repository
-- ✅ View deployment status in Render Dashboard
-
-**To disable auto-deploy:**
-- Render: Service Settings → Build & Deploy → Disable "Auto-Deploy"
-- GitHub: Remove or disable the workflow file
-
----
-
-## 🐛 Troubleshooting
-
-### Frontend Not Loading
-1. ✓ Check GitHub Actions logs for build errors
-2. ✓ Verify `VITE_API_URL` secret is set correctly
-3. ✓ Check browser console (F12) for errors
-4. ✓ Verify GitHub Pages is enabled in repo settings
-
-### Backend API Errors (500 Internal Server Error)
-1. ✓ Check Render logs for detailed errors
-2. ✓ Verify all environment variables are set correctly
-3. ✓ Ensure `DATABASE_URL` is the **Internal** URL (not external)
-4. ✓ Check database connection in Render logs
-
-### Slow First Load (Cold Start)
-- This is normal for Render free tier
-- Backend spins down after 15 minutes of inactivity
-- First request takes 30-60 seconds to wake up
-- **Solution**: Upgrade to paid plan or implement a ping service
-
-### CORS Errors
-1. ✓ Update `CORS_ORIGIN` in Render to match GitHub Pages URL exactly
-2. ✓ Ensure no trailing slash in URL
-3. ✓ Verify frontend is making requests to correct backend URL
-4. ✓ Check browser console for specific CORS error message
-
-### Database Connection Issues
-1. ✓ Verify `DATABASE_URL` is the Internal URL (starts with `postgresql://`)
-2. ✓ Check PostgreSQL service status in Render Dashboard
-3. ✓ Review migration logs in backend service logs
-4. ✓ Ensure Prisma migrations ran successfully
-
-### Deployment Failed
-1. ✓ Check Render build logs for specific error
-2. ✓ Verify Dockerfile syntax is correct
-3. ✓ Ensure all dependencies are in package.json
-4. ✓ Check that backend/Dockerfile exists
-
----
-
-## 🔒 Security Checklist
-
-Before going to production:
-
-- [ ] Generate strong `JWT_SECRET` (64+ characters random string)
-- [ ] Set `CORS_ORIGIN` to your specific domain (not `*`)
-- [ ] Never commit `.env` files to git
-- [ ] Use GitHub Secrets for all sensitive frontend variables
-- [ ] Enable 2FA on Render account
-- [ ] Review database access permissions
-- [ ] Set up database backups
-- [ ] Implement rate limiting on API endpoints
-- [ ] Use environment-specific configuration
-- [ ] Review and update all default passwords
-
----
-
-## 📝 Environment Variables Reference
-
-### Backend (Render)
+**Backend:**
 ```env
 NODE_ENV=production
 PORT=3000
-DATABASE_URL=postgresql://user:password@host:5432/database
-JWT_SECRET=your-super-secret-random-string-64-chars-minimum
+DATABASE_URL=<internal-database-url>
+JWT_SECRET=<64-char-random-string>
 JWT_EXPIRATION=7d
-CORS_ORIGIN=https://your-username.github.io
+CORS_ORIGIN=https://turath-almandi-frontend.onrender.com
 ```
 
-### Frontend (GitHub Secrets)
+**Frontend:**
 ```env
 VITE_API_URL=https://turath-almandi-backend.onrender.com/api/v1
 ```
 
 ---
 
-## 🎓 Next Steps
+## 💰 Cost Breakdown
 
-### 1. Custom Domain (Optional)
-**GitHub Pages:**
-- Settings → Pages → Custom domain
-- Add CNAME record in your DNS provider
+### Render Free Tier (All Services)
 
-**Render:**
-- Service → Settings → Custom Domain
-- Add CNAME or A record as instructed
+| Service | Cost | Limits |
+|---------|------|--------|
+| **PostgreSQL** | FREE | 1GB storage, 97 connection limit |
+| **Backend** | FREE | 750 hours/month, 512MB RAM |
+| **Frontend** | FREE | 750 hours/month, 512MB RAM |
 
-### 2. Database Backups
-- Render free tier: Manual backups
-- Paid tier: Automatic daily backups
-- Recommended: Set up manual backup schedule
+**Total: $0/month** 🎉
 
-### 3. Monitoring & Alerts
-**Free Options:**
-- Render built-in metrics
-- UptimeRobot (free uptime monitoring)
-- LogRocket (free tier for error tracking)
+### Important Limitations
 
-**Paid Options:**
-- Sentry (error tracking)
-- Datadog (comprehensive monitoring)
-- New Relic (application performance)
+⚠️ **Free Tier Spin Down:**
+- Services spin down after **15 minutes** of inactivity
+- First request takes **30-60 seconds** to wake up
+- Both frontend and backend can spin down independently
 
-### 4. CI/CD Enhancements
-- Add automated tests before deployment
-- Set up staging environment
-- Implement preview deployments for PRs
-- Add code quality checks (SonarQube)
-
-### 5. Performance Optimization
-- Implement Redis caching
-- Add CDN for static assets
-- Optimize database queries
-- Implement lazy loading on frontend
+**Solutions:**
+1. **Upgrade to Paid Plan**: $7/month per service for always-on
+2. **Use a Ping Service**: Keep services alive (e.g., UptimeRobot)
+3. **Accept the delay**: Show "Loading..." message to users
 
 ---
 
-## 🔧 Alternative Deployment Options
+## 📊 Monitoring & Logs
 
-If Render doesn't meet your needs:
+### View Logs
+1. Go to Render Dashboard
+2. Click on service (Frontend/Backend/Database)
+3. Click "Logs" tab
+4. Monitor real-time logs
 
-| Service | Free Tier | Pros | Cons |
-|---------|-----------|------|------|
-| **Railway** | $5 credit/month | Easy setup, great DX | Credit-based |
-| **Fly.io** | 3 VMs free | Global edge network | Complex setup |
-| **Vercel** | Generous free tier | Best for frontend | Serverless only |
-| **Heroku** | Limited free tier | Simple, mature | Limited free tier |
+### Check Metrics
+1. Click on service
+2. Click "Metrics" tab
+3. View:
+   - CPU usage
+   - Memory usage
+   - Bandwidth
+   - Request count
+
+### Set Up Alerts (Optional)
+1. Service Settings → Notifications
+2. Add email or Slack webhook
+3. Get notified of deployment failures or service issues
+
+---
+
+## 🔄 Automatic Deployments
+
+Render automatically deploys when you push to `main` branch!
+
+**How it works:**
+1. Push code to GitHub
+2. Render detects changes
+3. Automatically builds and deploys affected services
+4. Zero downtime deployment
+
+**Disable auto-deploy:**
+- Service Settings → Build & Deploy → Disable "Auto-Deploy"
+
+**Manual deploy:**
+- Service → "Manual Deploy" → "Deploy latest commit"
+
+---
+
+## 🧪 Testing Your Deployment
+
+### 1. Test Database Connection
+```bash
+# From backend logs, verify:
+# ✅ "Database connected successfully"
+# ✅ "Prisma migrations completed"
+```
+
+### 2. Test Backend API
+```bash
+# Health check
+curl https://turath-almandi-backend.onrender.com/api/v1/health
+
+# Auth endpoint (should return 401)
+curl https://turath-almandi-backend.onrender.com/api/v1/auth/profile
+```
+
+### 3. Test Frontend
+1. Visit: `https://turath-almandi-frontend.onrender.com`
+2. Open DevTools → Console (check for errors)
+3. Open DevTools → Network tab
+4. Try any action (login, etc.)
+5. Verify API calls go to backend
+
+### 4. Test CORS
+- API calls from frontend should work (no CORS errors)
+- Check browser console for CORS-related errors
+
+---
+
+## 🐛 Troubleshooting
+
+### Frontend Shows Blank Page
+**Symptoms:** White screen, no content
+**Solutions:**
+1. Check browser console for errors (F12)
+2. Verify build completed successfully in Render logs
+3. Check nginx is serving files: `curl -I https://turath-almandi-frontend.onrender.com`
+4. Verify `index.html` exists in build output
+
+### Backend API Not Responding
+**Symptoms:** 503 Service Unavailable, Connection timeout
+**Solutions:**
+1. Check if service is "Live" in Render Dashboard
+2. First request after spin-down takes 30-60s - be patient!
+3. Check backend logs for startup errors
+4. Verify DATABASE_URL is correct
+5. Ensure Prisma migrations succeeded
+
+### CORS Errors
+**Symptoms:** "Access-Control-Allow-Origin" errors in browser console
+**Solutions:**
+1. Verify `CORS_ORIGIN` in backend matches frontend URL exactly
+2. No trailing slash in CORS_ORIGIN
+3. Restart backend after changing CORS_ORIGIN
+4. Check frontend is making requests to correct backend URL
+
+### Database Connection Failed
+**Symptoms:** "Can't reach database server" in backend logs
+**Solutions:**
+1. Verify `DATABASE_URL` uses **Internal URL** (not External)
+2. Check PostgreSQL service is "Available" in Render
+3. Ensure backend and database are in same region
+4. Review database connection string format
+
+### Build Failed
+**Symptoms:** Deployment fails during build
+**Solutions:**
+1. Check build logs for specific error
+2. Verify Dockerfile syntax
+3. Ensure all dependencies in package.json
+4. Check Node.js version compatibility
+5. Try building locally with Docker first
+
+### Slow Performance / Cold Starts
+**Symptoms:** First load takes 30-60 seconds
+**Solutions:**
+- This is **normal** for free tier!
+- Services spin down after 15 minutes inactivity
+- **Options:**
+  1. Upgrade to paid plan ($7/month per service)
+  2. Use a ping service (UptimeRobot free tier)
+  3. Accept the delay and show loading message
+
+---
+
+## 🔒 Security Best Practices
+
+### Before Production
+
+- [ ] Generate strong `JWT_SECRET` (64+ characters)
+- [ ] Set `CORS_ORIGIN` to specific domain (not `*`)
+- [ ] Never commit `.env` files to git
+- [ ] Enable 2FA on Render account
+- [ ] Review database access permissions
+- [ ] Set up database backups
+- [ ] Implement rate limiting on API
+- [ ] Use HTTPS only (Render provides free SSL)
+- [ ] Regularly update dependencies
+- [ ] Review and audit access logs
+
+### Environment Variable Security
+- Use Render's secret management (not in render.yaml for sensitive data)
+- Rotate `JWT_SECRET` periodically
+- Use different secrets for dev/staging/prod
+
+---
+
+## 🎯 Post-Deployment Checklist
+
+After deployment is complete:
+
+- [ ] Backend health check returns 200 OK
+- [ ] Frontend loads without errors
+- [ ] API calls from frontend work
+- [ ] No CORS errors in browser console
+- [ ] Database migrations completed successfully
+- [ ] Create first admin user (if seed script didn't run)
+- [ ] Test login functionality
+- [ ] Test core features (users, branches, transactions)
+- [ ] Set up monitoring/alerts
+- [ ] Document service URLs for team
+
+---
+
+## 🔧 Advanced Configuration
+
+### Custom Domains
+
+**Add Custom Domain to Frontend:**
+1. Service → Settings → Custom Domain
+2. Add your domain (e.g., `app.yourdomain.com`)
+3. Add CNAME record in your DNS provider:
+   - Type: CNAME
+   - Name: app
+   - Value: turath-almandi-frontend.onrender.com
+4. Wait for DNS propagation (~5-30 minutes)
+
+**Add Custom Domain to Backend:**
+1. Service → Settings → Custom Domain
+2. Add your API domain (e.g., `api.yourdomain.com`)
+3. Add CNAME record in DNS provider
+4. Update frontend `VITE_API_URL` to use new domain
+5. Update backend `CORS_ORIGIN` to frontend custom domain
+6. Redeploy both services
+
+### Database Backups
+
+**Manual Backup:**
+1. PostgreSQL service → "Backups" tab
+2. Click "Create Backup"
+3. Download backup file
+
+**Scheduled Backups:**
+- Free tier: Manual only
+- Paid tier: Automatic daily backups
+
+**Restore from Backup:**
+1. Create new PostgreSQL service
+2. Upload backup file
+3. Update backend `DATABASE_URL`
+4. Redeploy backend
+
+### Monitoring & Observability
+
+**Free Tools:**
+- **Render Metrics**: Built-in CPU/Memory/Bandwidth
+- **UptimeRobot**: Free uptime monitoring (50 monitors)
+- **LogRocket**: Free tier for session replay
+
+**Paid Tools:**
+- **Sentry**: Error tracking ($26/month)
+- **Datadog**: Full observability ($15/month)
+- **New Relic**: APM ($25/month)
+
+### Performance Optimization
+
+**Enable Redis Caching:**
+1. Add Redis service on Render (paid)
+2. Install `@nestjs/cache-manager` in backend
+3. Configure caching for expensive queries
+
+**CDN for Static Assets:**
+1. Use Cloudflare (free tier)
+2. Point CDN to your frontend domain
+3. Configure caching rules
+
+**Database Query Optimization:**
+1. Add indexes to frequently queried columns
+2. Use Prisma query optimization
+3. Implement pagination for large datasets
+4. Use database connection pooling
 
 ---
 
 ## 📚 Additional Resources
 
 - [Render Documentation](https://render.com/docs)
-- [GitHub Pages Documentation](https://docs.github.com/en/pages)
-- [Vite Deployment Guide](https://vitejs.dev/guide/static-deploy.html)
-- [NestJS Deployment](https://docs.nestjs.com/deployment)
-- [Prisma Production Best Practices](https://www.prisma.io/docs/guides/performance-and-optimization/production-best-practices)
+- [Render Blueprint Spec](https://render.com/docs/blueprint-spec)
+- [Vite Deployment](https://vitejs.dev/guide/static-deploy.html)
+- [NestJS Production](https://docs.nestjs.com/deployment)
+- [Prisma Best Practices](https://www.prisma.io/docs/guides/performance-and-optimization/production-best-practices)
+- [Docker Multi-stage Builds](https://docs.docker.com/build/building/multi-stage/)
+- [Nginx Configuration](https://nginx.org/en/docs/)
 
 ---
 
-## 🆘 Need Help?
+## 🆘 Getting Help
 
-### Step-by-Step Debugging
+### Check These First
+1. Review this troubleshooting guide
+2. Check service logs in Render Dashboard
+3. Verify all environment variables are set
+4. Ensure services are in same region
+5. Wait 60 seconds if service just woke up
 
-**1. Backend not accessible:**
-```bash
-# Check if service is up
-curl -I https://turath-almandi-backend.onrender.com
-
-# Check health endpoint
-curl https://turath-almandi-backend.onrender.com/api/v1/health
-```
-
-**2. Frontend can't reach backend:**
-- Open browser DevTools → Network tab
-- Try to login or make any API call
-- Check the request URL (should match your Render URL)
-- Check response status code and error message
-
-**3. Database issues:**
-- Go to Render → PostgreSQL service → Logs
-- Look for connection errors
-- Verify DATABASE_URL format is correct
-
-### Getting Support
+### Community Support
 - [Render Community Forum](https://community.render.com)
 - [Render Discord](https://render.com/discord)
-- [GitHub Issues](https://github.com/YOUR-USERNAME/turath_almandi/issues)
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/render.com)
+
+### Contact Support
+- Render: [help@render.com](mailto:help@render.com)
+- Create ticket: Render Dashboard → Help → Submit Request
 
 ---
 
 ## 🎉 Deployment Complete!
 
-Your application is now live and accessible:
-- **Frontend**: https://YOUR-GITHUB-USERNAME.github.io/turath_almandi/
-- **Backend**: https://turath-almandi-backend.onrender.com
-- **Total Cost**: $0 (100% FREE!)
+Your application is now live:
 
-**Next login will take 30-60 seconds if backend is sleeping. This is normal for free tier.**
+- **Frontend**: `https://turath-almandi-frontend.onrender.com`
+- **Backend**: `https://turath-almandi-backend.onrender.com`
+- **Database**: Managed PostgreSQL on Render
+- **Total Cost**: **$0/month** (Free Tier)
 
-Happy deploying! 🚀
+### Your URLs (Update After Deployment)
+```
+Frontend: https://<your-frontend-service>.onrender.com
+Backend:  https://<your-backend-service>.onrender.com
+```
+
+**⚠️ First load may take 30-60 seconds (cold start - normal for free tier)**
+
+---
+
+**Happy Deploying! 🚀**
+
+Need updates to this guide? Open an issue on GitHub!

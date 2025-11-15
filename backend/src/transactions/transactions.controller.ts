@@ -2,18 +2,18 @@ import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/co
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { BranchGuard } from '../common/guards/branch.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { UserRole } from '@prisma/client';
 
 interface RequestUser {
   id: string;
   username: string;
-  role: string;
+  role: UserRole;
   branchId: string | null;
 }
 
 @Controller('transactions')
-@UseGuards(JwtAuthGuard, BranchGuard)
+@UseGuards(JwtAuthGuard)
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
@@ -22,7 +22,7 @@ export class TransactionsController {
     @Body() createTransactionDto: CreateTransactionDto,
     @CurrentUser() user: RequestUser,
   ) {
-    return this.transactionsService.create(createTransactionDto, user.id);
+    return this.transactionsService.create(createTransactionDto, user);
   }
 
   @Get()

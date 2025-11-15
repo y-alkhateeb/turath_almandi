@@ -2,6 +2,7 @@ import api from './axios';
 import type {
   Transaction,
   CreateTransactionInput,
+  CreatePurchaseExpenseInput,
   TransactionFilters,
 } from '../types/transactions.types';
 
@@ -50,6 +51,15 @@ export const transactionsService = {
    */
   create: async (data: CreateTransactionInput): Promise<Transaction> => {
     const response = await api.post<Transaction>('/transactions', data);
+    return response.data;
+  },
+
+  /**
+   * Create a purchase expense transaction with optional inventory update
+   * Note: branchId is auto-filled by backend from user's branch
+   */
+  createPurchase: async (data: CreatePurchaseExpenseInput): Promise<Transaction> => {
+    const response = await api.post<Transaction>('/transactions/purchase', data);
     return response.data;
   },
 

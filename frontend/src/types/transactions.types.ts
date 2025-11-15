@@ -13,6 +13,13 @@ export enum PaymentMethod {
   MASTER = 'MASTER',
 }
 
+export enum InventoryUnit {
+  KG = 'KG',
+  PIECE = 'PIECE',
+  LITER = 'LITER',
+  OTHER = 'OTHER',
+}
+
 export interface Transaction {
   id: string;
   branchId: string;
@@ -78,6 +85,28 @@ export interface SalaryExpenseFormData {
   amount: string; // String for form input, converted to number on submit
   employee_name: string;
   notes: string;
+}
+
+export interface PurchaseExpenseFormData {
+  date: Date;
+  amount: string; // String for form input, converted to number on submit
+  vendorName: string;
+  addToInventory: boolean;
+  itemName: string;
+  quantity: string; // String for form input, converted to number on submit
+  unit: InventoryUnit;
+  notes: string;
+}
+
+export interface CreatePurchaseExpenseInput {
+  date: string; // ISO date string
+  amount: number;
+  vendorName: string;
+  addToInventory: boolean;
+  itemName?: string;
+  quantity?: number;
+  unit?: InventoryUnit;
+  notes?: string;
 }
 
 export interface TransactionFilters {

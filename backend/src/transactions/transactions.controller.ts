@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
@@ -23,6 +24,14 @@ export class TransactionsController {
     @CurrentUser() user: RequestUser,
   ) {
     return this.transactionsService.create(createTransactionDto, user);
+  }
+
+  @Post('purchase')
+  createPurchase(
+    @Body() createPurchaseDto: CreatePurchaseExpenseDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    return this.transactionsService.createPurchaseWithInventory(createPurchaseDto, user);
   }
 
   @Get()

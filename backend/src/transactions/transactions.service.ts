@@ -3,7 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
-import { TransactionType, Currency, UserRole, Decimal } from '@prisma/client';
+import { TransactionType, Currency, UserRole } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 
 interface RequestUser {

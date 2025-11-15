@@ -31,6 +31,10 @@ services:
         value: 7d
       - key: CORS_ORIGIN
         value: https://turath-almandi-frontend.onrender.com
+      - key: BCRYPT_SALT_ROUNDS
+        value: 10
+      - key: RUN_SEED
+        value: true  # Set to "false" after first deployment to skip seeding
     plan: free
     healthCheckPath: /api/v1/health
 

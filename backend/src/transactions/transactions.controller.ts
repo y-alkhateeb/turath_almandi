@@ -39,6 +39,15 @@ export class TransactionsController {
     return this.transactionsService.findAll(branchId);
   }
 
+  @Get('summary')
+  getSummary(
+    @Query('date') date?: string,
+    @Query('branchId') branchId?: string,
+    @CurrentUser() user?: RequestUser,
+  ) {
+    return this.transactionsService.getSummary(date, branchId, user);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.transactionsService.findOne(id);

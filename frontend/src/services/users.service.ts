@@ -27,8 +27,7 @@ export const usersService = {
     return response.data;
   },
 
-  delete: async (id: string): Promise<UserWithBranch> => {
-    const response = await api.delete(`/users/${id}`);
-    return response.data;
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/users/${id}`);
   },
 };

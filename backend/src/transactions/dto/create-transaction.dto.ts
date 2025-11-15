@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsDateString,
   Min,
-  ValidateIf
+  ValidateIf,
 } from 'class-validator';
 import { TransactionType, PaymentMethod } from '@prisma/client';
 import { Transform } from 'class-transformer';

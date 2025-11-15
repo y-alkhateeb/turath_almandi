@@ -14,9 +14,7 @@ export class BranchesService {
   }
 
   async findAll(branchId?: string) {
-    const where = branchId
-      ? { id: branchId, isActive: true }
-      : { isActive: true };
+    const where = branchId ? { id: branchId, isActive: true } : { isActive: true };
 
     return this.prisma.branch.findMany({
       where,

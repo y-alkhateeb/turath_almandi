@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -49,9 +54,13 @@ export class TransactionsService {
 
     // Validate payment method for income transactions
     if (createTransactionDto.type === TransactionType.INCOME) {
-      if (createTransactionDto.paymentMethod &&
-          !['CASH', 'MASTER'].includes(createTransactionDto.paymentMethod)) {
-        throw new BadRequestException('Payment method must be either CASH or MASTER for income transactions');
+      if (
+        createTransactionDto.paymentMethod &&
+        !['CASH', 'MASTER'].includes(createTransactionDto.paymentMethod)
+      ) {
+        throw new BadRequestException(
+          'Payment method must be either CASH or MASTER for income transactions',
+        );
       }
     }
 
@@ -265,17 +274,23 @@ export class TransactionsService {
       updateTransactionDto.paymentMethod &&
       !['CASH', 'MASTER'].includes(updateTransactionDto.paymentMethod)
     ) {
-      throw new BadRequestException('Payment method must be either CASH or MASTER for income transactions');
+      throw new BadRequestException(
+        'Payment method must be either CASH or MASTER for income transactions',
+      );
     }
 
     // Build update data
     const updateData: any = {};
     if (updateTransactionDto.type !== undefined) updateData.type = updateTransactionDto.type;
     if (updateTransactionDto.amount !== undefined) updateData.amount = updateTransactionDto.amount;
-    if (updateTransactionDto.paymentMethod !== undefined) updateData.paymentMethod = updateTransactionDto.paymentMethod;
-    if (updateTransactionDto.category !== undefined) updateData.category = updateTransactionDto.category;
-    if (updateTransactionDto.date !== undefined) updateData.date = new Date(updateTransactionDto.date);
-    if (updateTransactionDto.employeeVendorName !== undefined) updateData.employeeVendorName = updateTransactionDto.employeeVendorName;
+    if (updateTransactionDto.paymentMethod !== undefined)
+      updateData.paymentMethod = updateTransactionDto.paymentMethod;
+    if (updateTransactionDto.category !== undefined)
+      updateData.category = updateTransactionDto.category;
+    if (updateTransactionDto.date !== undefined)
+      updateData.date = new Date(updateTransactionDto.date);
+    if (updateTransactionDto.employeeVendorName !== undefined)
+      updateData.employeeVendorName = updateTransactionDto.employeeVendorName;
     if (updateTransactionDto.notes !== undefined) updateData.notes = updateTransactionDto.notes;
 
     // Update the transaction
@@ -334,12 +349,7 @@ export class TransactionsService {
     });
 
     // Log the deletion in audit log
-    await this.auditLogService.logDelete(
-      user.id,
-      AuditEntityType.TRANSACTION,
-      id,
-      transaction,
-    );
+    await this.auditLogService.logDelete(user.id, AuditEntityType.TRANSACTION, id, transaction);
 
     return { message: 'Transaction deleted successfully', id };
   }
@@ -403,11 +413,11 @@ export class TransactionsService {
 
     // Calculate income by payment method
     const income_cash = incomeTransactions
-      .filter(t => t.paymentMethod === 'CASH')
+      .filter((t) => t.paymentMethod === 'CASH')
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const income_master = incomeTransactions
-      .filter(t => t.paymentMethod === 'MASTER')
+      .filter((t) => t.paymentMethod === 'MASTER')
       .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const total_income = income_cash + income_master;
@@ -420,10 +430,7 @@ export class TransactionsService {
       },
     });
 
-    const total_expense = expenseTransactions.reduce(
-      (sum, t) => sum + Number(t.amount),
-      0,
-    );
+    const total_expense = expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
 
     // Calculate net profit
     const net = total_income - total_expense;

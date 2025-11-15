@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
@@ -29,10 +19,7 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Post()
-  create(
-    @Body() createInventoryDto: CreateInventoryDto,
-    @CurrentUser() user: RequestUser,
-  ) {
+  create(@Body() createInventoryDto: CreateInventoryDto, @CurrentUser() user: RequestUser) {
     return this.inventoryService.create(createInventoryDto, user);
   }
 

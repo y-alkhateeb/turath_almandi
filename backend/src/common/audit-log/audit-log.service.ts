@@ -130,10 +130,7 @@ export class AuditLogService {
     const changes: Record<string, any> = {};
 
     // Get all unique keys from both objects
-    const allKeys = new Set([
-      ...Object.keys(oldData || {}),
-      ...Object.keys(newData || {}),
-    ]);
+    const allKeys = new Set([...Object.keys(oldData || {}), ...Object.keys(newData || {})]);
 
     for (const key of allKeys) {
       const oldValue = oldData?.[key];
@@ -156,11 +153,7 @@ export class AuditLogService {
   /**
    * Get audit logs for a specific entity
    */
-  async getLogsForEntity(
-    entityType: AuditEntityType,
-    entityId: string,
-    limit: number = 50,
-  ) {
+  async getLogsForEntity(entityType: AuditEntityType, entityId: string, limit: number = 50) {
     return this.prisma.auditLog.findMany({
       where: {
         entityType,

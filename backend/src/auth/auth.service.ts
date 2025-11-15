@@ -52,12 +52,7 @@ export class AuthService {
     });
 
     // Generate tokens
-    const access_token = await this.generateToken(
-      user.id,
-      user.username,
-      user.role,
-      user.branchId,
-    );
+    const access_token = await this.generateToken(user.id, user.username, user.role, user.branchId);
     const refresh_token = await this.generateRefreshToken(user.id);
 
     return {
@@ -100,12 +95,7 @@ export class AuthService {
     }
 
     // Generate tokens
-    const access_token = await this.generateToken(
-      user.id,
-      user.username,
-      user.role,
-      user.branchId,
-    );
+    const access_token = await this.generateToken(user.id, user.username, user.role, user.branchId);
     const refresh_token = await this.generateRefreshToken(user.id);
 
     return {
@@ -140,12 +130,7 @@ export class AuthService {
     return result;
   }
 
-  async generateToken(
-    userId: string,
-    username: string,
-    role: string,
-    branchId: string | null,
-  ) {
+  async generateToken(userId: string, username: string, role: string, branchId: string | null) {
     const payload = {
       sub: userId,
       username,

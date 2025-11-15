@@ -66,10 +66,7 @@ export class NotificationsService {
 
       return notification;
     } catch (error) {
-      this.logger.error(
-        `Failed to create notification: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Failed to create notification: ${error.message}`, error.stack);
       throw error;
     }
   }
@@ -92,9 +89,7 @@ export class NotificationsService {
     branchId: string,
     systemUserId: string,
   ) {
-    const daysPastDue = Math.floor(
-      (Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const daysPastDue = Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
 
     const notification = await this.createNotification({
       type: 'overdue_debt',

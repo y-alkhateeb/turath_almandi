@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
 import { TransactionType, Currency, UserRole, Decimal } from '@prisma/client';
+import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 
 interface RequestUser {
   id: string;
@@ -11,9 +13,27 @@ interface RequestUser {
   branchId: string | null;
 }
 
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+interface TransactionFilters {
+  type?: TransactionType;
+  branchId?: string;
+  category?: string;
+  paymentMethod?: string;
+  startDate?: string;
+  endDate?: string;
+  search?: string;
+}
+
 @Injectable()
 export class TransactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser) {
     // Validate user has a branch assigned
@@ -48,7 +68,7 @@ export class TransactionsService {
       createdBy: user.id,
     };
 
-    return this.prisma.transaction.create({
+    const transaction = await this.prisma.transaction.create({
       data: transactionData,
       include: {
         branch: true,
@@ -61,16 +81,94 @@ export class TransactionsService {
         },
       },
     });
+
+    // Log the creation in audit log
+    await this.auditLogService.logCreate(
+      user.id,
+      AuditEntityType.TRANSACTION,
+      transaction.id,
+      transaction,
+    );
+
+    return transaction;
   }
 
-  async findAll(branchId?: string) {
-    const where = branchId ? { branchId } : {};
+  /**
+   * Find all transactions with pagination and filters
+   */
+  async findAll(
+    user: RequestUser,
+    pagination: PaginationParams = {},
+    filters: TransactionFilters = {},
+  ) {
+    const { page = 1, limit = 20 } = pagination;
+    const skip = (page - 1) * limit;
 
-    return this.prisma.transaction.findMany({
+    // Build where clause based on filters and user role
+    const where: any = {};
+
+    // Role-based access control
+    if (user.role === UserRole.ACCOUNTANT) {
+      // Accountants can only see transactions from their branch
+      if (!user.branchId) {
+        throw new ForbiddenException('Accountant must be assigned to a branch');
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && filters.branchId) {
+      // Admins can filter by specific branch
+      where.branchId = filters.branchId;
+    }
+
+    // Apply filters
+    if (filters.type) {
+      where.type = filters.type;
+    }
+
+    if (filters.category) {
+      where.category = filters.category;
+    }
+
+    if (filters.paymentMethod) {
+      where.paymentMethod = filters.paymentMethod;
+    }
+
+    // Date range filter
+    if (filters.startDate || filters.endDate) {
+      where.date = {};
+      if (filters.startDate) {
+        where.date.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        where.date.lte = new Date(filters.endDate);
+      }
+    }
+
+    // Search filter (searches in employeeVendorName, category, and notes)
+    if (filters.search) {
+      where.OR = [
+        { employeeVendorName: { contains: filters.search, mode: 'insensitive' } },
+        { category: { contains: filters.search, mode: 'insensitive' } },
+        { notes: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Get total count for pagination
+    const total = await this.prisma.transaction.count({ where });
+
+    // Get transactions
+    const transactions = await this.prisma.transaction.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { date: 'desc' },
+      skip,
+      take: limit,
       include: {
-        branch: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            location: true,
+          },
+        },
         creator: {
           select: {
             id: true,
@@ -78,20 +176,53 @@ export class TransactionsService {
             role: true,
           },
         },
+        inventoryItem: {
+          select: {
+            id: true,
+            name: true,
+            quantity: true,
+            unit: true,
+          },
+        },
       },
     });
+
+    return {
+      data: transactions,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, user?: RequestUser) {
     const transaction = await this.prisma.transaction.findUnique({
       where: { id },
       include: {
-        branch: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            location: true,
+          },
+        },
         creator: {
           select: {
             id: true,
             username: true,
             role: true,
+          },
+        },
+        inventoryItem: {
+          select: {
+            id: true,
+            name: true,
+            quantity: true,
+            unit: true,
+            costPerUnit: true,
           },
         },
       },
@@ -101,7 +232,115 @@ export class TransactionsService {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
 
+    // Role-based access control
+    if (user && user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException('Accountant must be assigned to a branch');
+      }
+      if (transaction.branchId !== user.branchId) {
+        throw new ForbiddenException('You do not have access to this transaction');
+      }
+    }
+
     return transaction;
+  }
+
+  /**
+   * Update a transaction
+   */
+  async update(id: string, updateTransactionDto: UpdateTransactionDto, user: RequestUser) {
+    // First, find the existing transaction
+    const existingTransaction = await this.findOne(id, user);
+
+    // Validate amount if provided
+    if (updateTransactionDto.amount !== undefined && updateTransactionDto.amount <= 0) {
+      throw new BadRequestException('Amount must be greater than 0');
+    }
+
+    // Validate payment method for income transactions
+    if (
+      (updateTransactionDto.type === TransactionType.INCOME ||
+        existingTransaction.type === TransactionType.INCOME) &&
+      updateTransactionDto.paymentMethod &&
+      !['CASH', 'MASTER'].includes(updateTransactionDto.paymentMethod)
+    ) {
+      throw new BadRequestException('Payment method must be either CASH or MASTER for income transactions');
+    }
+
+    // Build update data
+    const updateData: any = {};
+    if (updateTransactionDto.type !== undefined) updateData.type = updateTransactionDto.type;
+    if (updateTransactionDto.amount !== undefined) updateData.amount = updateTransactionDto.amount;
+    if (updateTransactionDto.paymentMethod !== undefined) updateData.paymentMethod = updateTransactionDto.paymentMethod;
+    if (updateTransactionDto.category !== undefined) updateData.category = updateTransactionDto.category;
+    if (updateTransactionDto.date !== undefined) updateData.date = new Date(updateTransactionDto.date);
+    if (updateTransactionDto.employeeVendorName !== undefined) updateData.employeeVendorName = updateTransactionDto.employeeVendorName;
+    if (updateTransactionDto.notes !== undefined) updateData.notes = updateTransactionDto.notes;
+
+    // Update the transaction
+    const updatedTransaction = await this.prisma.transaction.update({
+      where: { id },
+      data: updateData,
+      include: {
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            location: true,
+          },
+        },
+        creator: {
+          select: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
+        inventoryItem: {
+          select: {
+            id: true,
+            name: true,
+            quantity: true,
+            unit: true,
+          },
+        },
+      },
+    });
+
+    // Log the update in audit log
+    await this.auditLogService.logUpdate(
+      user.id,
+      AuditEntityType.TRANSACTION,
+      id,
+      existingTransaction,
+      updatedTransaction,
+    );
+
+    return updatedTransaction;
+  }
+
+  /**
+   * Delete a transaction (soft delete by setting a flag or hard delete)
+   * Using hard delete for now
+   */
+  async remove(id: string, user: RequestUser) {
+    // First, find the existing transaction to ensure it exists and user has access
+    const transaction = await this.findOne(id, user);
+
+    // Delete the transaction
+    await this.prisma.transaction.delete({
+      where: { id },
+    });
+
+    // Log the deletion in audit log
+    await this.auditLogService.logDelete(
+      user.id,
+      AuditEntityType.TRANSACTION,
+      id,
+      transaction,
+    );
+
+    return { message: 'Transaction deleted successfully', id };
   }
 
   /**
@@ -308,6 +547,14 @@ export class TransactionsService {
           inventoryItem: true,
         },
       });
+
+      // Log the creation in audit log (within the transaction context)
+      await this.auditLogService.logCreate(
+        user.id,
+        AuditEntityType.TRANSACTION,
+        transaction.id,
+        transaction,
+      );
 
       return transaction;
     });

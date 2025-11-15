@@ -20,6 +20,14 @@ export enum InventoryUnit {
   OTHER = 'OTHER',
 }
 
+export interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: InventoryUnit;
+  costPerUnit?: number;
+}
+
 export interface Transaction {
   id: string;
   branchId: string;
@@ -31,6 +39,7 @@ export interface Transaction {
   date: string; // ISO date string
   employeeVendorName: string | null;
   notes: string | null;
+  inventoryItemId?: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -44,6 +53,7 @@ export interface Transaction {
     username: string;
     role: string;
   };
+  inventoryItem?: InventoryItem | null;
 }
 
 export interface CreateTransactionInput {
@@ -109,11 +119,38 @@ export interface CreatePurchaseExpenseInput {
   notes?: string;
 }
 
+export interface UpdateTransactionInput {
+  type?: TransactionType;
+  amount?: number;
+  paymentMethod?: PaymentMethod;
+  category?: string;
+  date?: string; // ISO date string
+  employeeVendorName?: string;
+  notes?: string;
+}
+
 export interface TransactionFilters {
   branchId?: string;
   type?: TransactionType;
+  category?: string;
+  paymentMethod?: PaymentMethod;
   startDate?: string;
   endDate?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedTransactionsResponse {
+  data: Transaction[];
+  pagination: PaginationMeta;
 }
 
 export interface DashboardSummary {

@@ -4,8 +4,10 @@ import { toast } from '../utils/toast';
 import type {
   Transaction,
   CreateTransactionInput,
+  UpdateTransactionInput,
   CreatePurchaseExpenseInput,
   TransactionFilters,
+  PaginatedTransactionsResponse,
 } from '../types/transactions.types';
 
 /**
@@ -179,7 +181,7 @@ export const useUpdateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CreateTransactionInput> }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateTransactionInput }) =>
       transactionsService.update(id, data),
 
     onMutate: async ({ id, data }) => {

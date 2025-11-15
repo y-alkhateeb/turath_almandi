@@ -9,6 +9,9 @@ import {
 import { Modal } from '@/components/Modal';
 import { BranchForm } from '@/components/BranchForm';
 import { ConditionalRender } from '@/components/ConditionalRender';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Alert } from '@/components/ui/Alert';
 import type { Branch, BranchFormData } from '@/types';
 
 export const BranchesPage: React.FC = () => {
@@ -88,90 +91,53 @@ export const BranchesPage: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <svg
-                className="animate-spin h-10 w-10 text-primary-600 mx-auto mb-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <p className="text-gray-600">جاري تحميل الفروع...</p>
-            </div>
+            <LoadingSpinner size="lg" text="جاري تحميل الفروع..." />
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="p-6">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <p className="text-red-800">
-                حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى.
-              </p>
-            </div>
+            <Alert variant="danger" title="خطأ">
+              حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى.
+            </Alert>
           </div>
         )}
 
         {/* Empty State */}
         {!isLoading && !error && branches.length === 0 && (
-          <div className="p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-16 h-16 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              لا توجد فروع
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {isAdmin()
-                ? 'لم يتم إضافة أي فرع بعد. ابدأ بإضافة فرع جديد.'
-                : 'لم يتم تعيين فرع لك بعد.'}
-            </p>
-            <ConditionalRender roles={['ADMIN']}>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center gap-2"
-              >
+          <div className="p-12">
+            <EmptyState
+              icon={
                 <svg
-                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  className="w-full h-full"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
+                    strokeWidth={1.5}
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                   />
                 </svg>
-                إضافة فرع جديد
-              </button>
-            </ConditionalRender>
+              }
+              title="لا توجد فروع"
+              description={
+                isAdmin()
+                  ? 'لم يتم إضافة أي فرع بعد. ابدأ بإضافة فرع جديد.'
+                  : 'لم يتم تعيين فرع لك بعد.'
+              }
+              action={
+                isAdmin()
+                  ? {
+                      label: 'إضافة فرع جديد',
+                      onClick: () => setIsCreateModalOpen(true),
+                    }
+                  : undefined
+              }
+            />
           </div>
         )}
 
@@ -345,35 +311,12 @@ export const BranchesPage: React.FC = () => {
             <button
               onClick={() => deletingBranchId && handleDelete(deletingBranchId)}
               disabled={deleteBranch.isPending}
-              className="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+              className="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
             >
-              {deleteBranch.isPending ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  جاري الحذف...
-                </span>
-              ) : (
-                'حذف'
+              {deleteBranch.isPending && (
+                <LoadingSpinner size="sm" color="white" />
               )}
+              {deleteBranch.isPending ? 'جاري الحذف...' : 'حذف'}
             </button>
             <button
               onClick={() => setDeletingBranchId(null)}

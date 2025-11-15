@@ -9,6 +9,9 @@ import {
 import { Modal } from '@/components/Modal';
 import { UserForm } from '@/components/UserForm';
 import { ConditionalRender } from '@/components/ConditionalRender';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Alert } from '@/components/ui/Alert';
 import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
 
 export const UsersPage: React.FC = () => {
@@ -105,88 +108,49 @@ export const UsersPage: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <svg
-                className="animate-spin h-10 w-10 text-primary-600 mx-auto mb-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <p className="text-gray-600">جاري تحميل المستخدمين...</p>
-            </div>
+            <LoadingSpinner size="lg" text="جاري تحميل المستخدمين..." />
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="p-6">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <p className="text-red-800">
-                حدث خطأ أثناء تحميل المستخدمين. يرجى المحاولة مرة أخرى.
-              </p>
-            </div>
+            <Alert variant="danger" title="خطأ">
+              حدث خطأ أثناء تحميل المستخدمين. يرجى المحاولة مرة أخرى.
+            </Alert>
           </div>
         )}
 
         {/* Empty State */}
         {!isLoading && !error && users.length === 0 && (
-          <div className="p-12 text-center">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-16 h-16 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              لا يوجد مستخدمون
-            </h3>
-            <p className="text-gray-600 mb-4">
-              لم يتم إضافة أي مستخدم بعد. ابدأ بإضافة مستخدم جديد.
-            </p>
-            <ConditionalRender roles={['ADMIN']}>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors inline-flex items-center gap-2"
-              >
+          <div className="p-12">
+            <EmptyState
+              icon={
                 <svg
-                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  className="w-full h-full"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
+                    strokeWidth={1.5}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                   />
                 </svg>
-                إضافة مستخدم جديد
-              </button>
-            </ConditionalRender>
+              }
+              title="لا يوجد مستخدمون"
+              description="لم يتم إضافة أي مستخدم بعد. ابدأ بإضافة مستخدم جديد."
+              action={
+                isAdmin()
+                  ? {
+                      label: 'إضافة مستخدم جديد',
+                      onClick: () => setIsCreateModalOpen(true),
+                    }
+                  : undefined
+              }
+            />
           </div>
         )}
 

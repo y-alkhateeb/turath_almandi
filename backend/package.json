@@ -22,10 +22,10 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed": "tsx prisma/seed.ts",
     "deploy:migrate": "prisma migrate deploy",
-    "deploy:seed": "ts-node prisma/seed.ts",
-    "deploy:setup": "prisma generate && prisma migrate deploy && ts-node prisma/seed.ts"
+    "deploy:seed": "tsx prisma/seed.ts",
+    "deploy:setup": "prisma generate && prisma migrate deploy && tsx prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.5",
@@ -69,10 +69,11 @@
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "jest": {
     "moduleFileExtensions": [

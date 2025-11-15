@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { DebtForm } from '../../components/DebtForm';
 import { Modal } from '../../components/Modal';
+import { PayDebtModal } from '../../components/PayDebtModal';
+import { DebtPaymentHistory } from '../../components/DebtPaymentHistory';
 import { useDebts } from '../../hooks/useDebts';
-import { DebtStatus } from '../../types/debts.types';
+import { DebtStatus, type Debt } from '../../types/debts.types';
 
 /**
  * Debts Page - Debt Management
@@ -18,6 +20,9 @@ import { DebtStatus } from '../../types/debts.types';
  */
 export const DebtsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
+  const [expandedDebtId, setExpandedDebtId] = useState<string | null>(null);
   const { data: debts, isLoading, error } = useDebts();
 
   const handleSuccess = () => {
@@ -26,6 +31,20 @@ export const DebtsPage = () => {
 
   const handleCancel = () => {
     setIsModalOpen(false);
+  };
+
+  const handlePayDebt = (debt: Debt) => {
+    setSelectedDebt(debt);
+    setIsPayModalOpen(true);
+  };
+
+  const handleClosePayModal = () => {
+    setIsPayModalOpen(false);
+    setSelectedDebt(null);
+  };
+
+  const toggleExpandDebt = (debtId: string) => {
+    setExpandedDebtId(expandedDebtId === debtId ? null : debtId);
   };
 
   const formatStatus = (status: DebtStatus) => {
@@ -95,6 +114,13 @@ export const DebtsPage = () => {
       >
         <DebtForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </Modal>
+
+      {/* Pay Debt Modal */}
+      <PayDebtModal
+        isOpen={isPayModalOpen}
+        onClose={handleClosePayModal}
+        debt={selectedDebt}
+      />
 
       {/* Loading State */}
       {isLoading && (
@@ -185,6 +211,9 @@ export const DebtsPage = () => {
                   المبلغ الأصلي
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  المبلغ المدفوع
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   المبلغ المتبقي
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -200,70 +229,138 @@ export const DebtsPage = () => {
                   الفرع
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  ملاحظات
+                  الإجراءات
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {debts.map((debt) => {
                 const overdueFlag = isOverdue(debt.dueDate, debt.status);
+                const isExpanded = expandedDebtId === debt.id;
+                const paidAmount = debt.originalAmount - debt.remainingAmount;
+                const hasPayments = debt.payments && debt.payments.length > 0;
+
                 return (
-                  <tr
-                    key={debt.id}
-                    className={`hover:bg-gray-50 transition-colors ${
-                      overdueFlag ? 'bg-red-50' : ''
-                    }`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {debt.creditorName}
-                      {overdueFlag && (
-                        <span className="mr-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                          متأخر
+                  <>
+                    <tr
+                      key={debt.id}
+                      className={`hover:bg-gray-50 transition-colors ${
+                        overdueFlag ? 'bg-red-50' : ''
+                      }`}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <div className="flex items-center gap-2">
+                          {hasPayments && (
+                            <button
+                              onClick={() => toggleExpandDebt(debt.id)}
+                              className="text-gray-400 hover:text-gray-600 transition-colors"
+                              aria-label={isExpanded ? 'إخفاء السجل' : 'عرض السجل'}
+                            >
+                              <svg
+                                className={`w-5 h-5 transition-transform ${
+                                  isExpanded ? 'rotate-90' : ''
+                                }`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                          <span>{debt.creditorName}</span>
+                          {overdueFlag && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                              متأخر
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" dir="ltr">
+                        ${debt.originalAmount.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600" dir="ltr">
+                        ${paidAmount.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600" dir="ltr">
+                        ${debt.remainingAmount.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(debt.date).toLocaleDateString('ar-IQ', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(debt.dueDate).toLocaleDateString('ar-IQ', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            debt.status
+                          )}`}
+                        >
+                          {formatStatus(debt.status)}
                         </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" dir="ltr">
-                      ${debt.originalAmount.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600" dir="ltr">
-                      ${debt.remainingAmount.toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(debt.date).toLocaleDateString('ar-IQ', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(debt.dueDate).toLocaleDateString('ar-IQ', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          debt.status
-                        )}`}
-                      >
-                        {formatStatus(debt.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {debt.branch?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                      {debt.notes || '-'}
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {debt.branch?.name || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="flex items-center gap-2">
+                          {debt.status !== DebtStatus.PAID && (
+                            <button
+                              onClick={() => handlePayDebt(debt)}
+                              className="inline-flex items-center px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
+                            >
+                              <svg
+                                className="w-4 h-4 ml-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                              </svg>
+                              دفع
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Expanded Row - Payment History */}
+                    {isExpanded && hasPayments && (
+                      <tr key={`${debt.id}-expanded`}>
+                        <td colSpan={9} className="px-6 py-4 bg-gray-50">
+                          <DebtPaymentHistory payments={debt.payments || []} />
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 );
               })}
             </tbody>

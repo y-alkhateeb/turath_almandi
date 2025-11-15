@@ -1,5 +1,5 @@
 import api from './axios';
-import type { Debt, CreateDebtInput } from '../types/debts.types';
+import type { Debt, CreateDebtInput, PayDebtInput } from '../types/debts.types';
 
 /**
  * Debts Service
@@ -23,6 +23,17 @@ export const debtsService = {
    */
   create: async (data: CreateDebtInput): Promise<Debt> => {
     const response = await api.post<Debt>('/debts', data);
+    return response.data;
+  },
+
+  /**
+   * Pay a debt
+   * Creates a payment record and updates debt remaining_amount and status
+   * Backend validates: amount_paid <= remaining_amount
+   * Auto-updates status: PAID if remaining = 0, PARTIAL if 0 < remaining < original
+   */
+  payDebt: async (debtId: string, data: PayDebtInput): Promise<Debt> => {
+    const response = await api.post<Debt>(`/debts/${debtId}/payments`, data);
     return response.data;
   },
 };

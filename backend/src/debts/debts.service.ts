@@ -1,6 +1,7 @@
-import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
+import { PayDebtDto } from './dto/pay-debt.dto';
 import { UserRole, DebtStatus } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 
@@ -131,5 +132,137 @@ export class DebtsService {
     });
 
     return debts;
+  }
+
+  /**
+   * Pay debt (create payment and update debt)
+   * Uses transaction to ensure atomicity
+   * Validates: amount_paid <= remaining_amount
+   * Updates: remaining_amount = remaining_amount - amount_paid
+   * Auto-updates status: PAID if remaining = 0, PARTIAL if 0 < remaining < original
+   */
+  async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser) {
+    // Validate user has a branch assigned
+    if (!user.branchId) {
+      throw new ForbiddenException('User must be assigned to a branch to pay debts');
+    }
+
+    // Validate amount is positive
+    if (payDebtDto.amountPaid <= 0) {
+      throw new BadRequestException('Payment amount must be greater than 0');
+    }
+
+    // Use Prisma transaction to ensure atomicity
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Get the debt
+      const debt = await tx.debt.findUnique({
+        where: { id: debtId },
+        include: {
+          branch: {
+            select: {
+              id: true,
+              name: true,
+              location: true,
+            },
+          },
+          creator: {
+            select: {
+              id: true,
+              username: true,
+              role: true,
+            },
+          },
+        },
+      });
+
+      if (!debt) {
+        throw new NotFoundException('Debt not found');
+      }
+
+      // Role-based access control
+      if (user.role === UserRole.ACCOUNTANT && debt.branchId !== user.branchId) {
+        throw new ForbiddenException('You can only pay debts from your branch');
+      }
+
+      // Validate payment amount doesn't exceed remaining amount
+      const remainingAmount = Number(debt.remainingAmount);
+      if (payDebtDto.amountPaid > remainingAmount) {
+        throw new BadRequestException(
+          `Payment amount (${payDebtDto.amountPaid}) cannot exceed remaining amount (${remainingAmount})`,
+        );
+      }
+
+      // Calculate new remaining amount
+      const newRemainingAmount = remainingAmount - payDebtDto.amountPaid;
+
+      // Determine new status
+      let newStatus: DebtStatus;
+      if (newRemainingAmount === 0) {
+        newStatus = DebtStatus.PAID;
+      } else if (newRemainingAmount > 0 && newRemainingAmount < Number(debt.originalAmount)) {
+        newStatus = DebtStatus.PARTIAL;
+      } else {
+        newStatus = debt.status; // Keep current status
+      }
+
+      // Create payment record
+      const payment = await tx.debtPayment.create({
+        data: {
+          debtId: debtId,
+          amountPaid: payDebtDto.amountPaid,
+          paymentDate: new Date(payDebtDto.paymentDate),
+          notes: payDebtDto.notes || null,
+          recordedBy: user.id,
+        },
+      });
+
+      // Update debt
+      const updatedDebt = await tx.debt.update({
+        where: { id: debtId },
+        data: {
+          remainingAmount: newRemainingAmount,
+          status: newStatus,
+        },
+        include: {
+          branch: {
+            select: {
+              id: true,
+              name: true,
+              location: true,
+            },
+          },
+          creator: {
+            select: {
+              id: true,
+              username: true,
+              role: true,
+            },
+          },
+          payments: {
+            orderBy: { paymentDate: 'desc' },
+          },
+        },
+      });
+
+      return { payment, debt: updatedDebt };
+    });
+
+    // Log the payment in audit log
+    await this.auditLogService.logCreate(
+      user.id,
+      AuditEntityType.DEBT_PAYMENT,
+      result.payment.id,
+      result.payment,
+    );
+
+    // Log the debt update in audit log
+    await this.auditLogService.logUpdate(
+      user.id,
+      AuditEntityType.DEBT,
+      debtId,
+      { remainingAmount: result.debt.remainingAmount, status: result.debt.status },
+    );
+
+    return result.debt;
   }
 }

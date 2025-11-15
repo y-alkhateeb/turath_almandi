@@ -13,6 +13,7 @@ export enum AuditEntityType {
   BRANCH = 'BRANCH',
   USER = 'USER',
   INVENTORY = 'INVENTORY',
+  DEBT = 'DEBT',
 }
 
 interface AuditLogData {

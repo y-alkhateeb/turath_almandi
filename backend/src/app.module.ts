@@ -8,6 +8,8 @@ import { BranchesModule } from './branches/branches.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
 import { DebtsModule } from './debts/debts.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { DebtsModule } from './debts/debts.module';
     TransactionsModule,
     UsersModule,
     DebtsModule,
+    NotificationsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

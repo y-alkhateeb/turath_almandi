@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Modal from './Modal';
+import { Modal } from './Modal';
 import type { Transaction, TransactionType, PaymentMethod } from '../types/transactions.types';
 import { useUpdateTransaction } from '../hooks/useTransactions';
 

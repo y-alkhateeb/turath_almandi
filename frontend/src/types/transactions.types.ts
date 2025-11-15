@@ -73,6 +73,13 @@ export interface IncomeFormData {
   notes: string;
 }
 
+export interface SalaryExpenseFormData {
+  date: Date;
+  amount: string; // String for form input, converted to number on submit
+  employee_name: string;
+  notes: string;
+}
+
 export interface TransactionFilters {
   branchId?: string;
   type?: TransactionType;

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { debtsService } from '../services/debts.service';
 import { toast } from '../utils/toast';
-import type { Debt, CreateDebtInput } from '../types/debts.types';
+import type { Debt, CreateDebtInput, PayDebtInput } from '../types/debts.types';
 
 /**
  * Query Keys for Debts
@@ -80,6 +80,37 @@ export const useCreateDebt = () => {
     onSuccess: () => {
       // Show success message
       toast.success('تم إضافة الدين بنجاح');
+    },
+
+    onSettled: () => {
+      // Refetch to ensure data is in sync with backend
+      queryClient.invalidateQueries({ queryKey: debtsKeys.lists() });
+    },
+  });
+};
+
+/**
+ * Hook to pay a debt
+ * Creates a payment record and updates debt remaining_amount and status
+ * Includes cache invalidation
+ */
+export const usePayDebt = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ debtId, data }: { debtId: string; data: PayDebtInput }) =>
+      debtsService.payDebt(debtId, data),
+
+    onError: (error: any) => {
+      // Show error message
+      const errorMessage =
+        error?.response?.data?.message || 'حدث خطأ أثناء دفع الدين';
+      toast.error(errorMessage, 4000);
+    },
+
+    onSuccess: () => {
+      // Show success message
+      toast.success('تم دفع الدين بنجاح');
     },
 
     onSettled: () => {

@@ -60,3 +60,15 @@ export interface DebtFormData {
   dueDate: Date;
   notes: string;
 }
+
+export interface PayDebtInput {
+  amountPaid: number;
+  paymentDate: string; // ISO date string
+  notes?: string;
+}
+
+export interface PayDebtFormData {
+  amountPaid: string; // String for form input, converted to number on submit
+  paymentDate: Date;
+  notes: string;
+}

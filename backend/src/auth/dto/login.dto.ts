@@ -1,4 +1,4 @@
-import { IsString, MinLength, MaxLength } from 'class-validator';
+import { IsString, MinLength, MaxLength, IsBoolean, IsOptional } from 'class-validator';
 
 export class LoginDto {
   @IsString()
@@ -9,4 +9,8 @@ export class LoginDto {
   @IsString()
   @MinLength(6, { message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' })
   password: string;
+
+  @IsBoolean()
+  @IsOptional()
+  rememberMe?: boolean;
 }

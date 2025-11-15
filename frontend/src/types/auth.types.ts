@@ -4,6 +4,11 @@ export interface User {
   role: 'ADMIN' | 'ACCOUNTANT';
   branchId: string | null;
   isActive: boolean;
+  branch?: {
+    id: string;
+    name: string;
+    location?: string;
+  } | null;
 }
 
 export interface LoginCredentials {

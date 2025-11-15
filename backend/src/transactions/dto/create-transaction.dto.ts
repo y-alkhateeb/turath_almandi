@@ -1,25 +1,42 @@
-import { IsString, IsNotEmpty, IsEnum, IsNumber, IsUUID, IsOptional } from 'class-validator';
-import { TransactionType, PaymentMethod, Currency } from '@prisma/client';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsDateString,
+  Min,
+  ValidateIf
+} from 'class-validator';
+import { TransactionType, PaymentMethod } from '@prisma/client';
+import { Transform } from 'class-transformer';
 
 export class CreateTransactionDto {
-  @IsString()
-  @IsNotEmpty()
-  description: string;
-
-  @IsNumber()
-  amount: number;
-
   @IsEnum(TransactionType)
+  @IsNotEmpty()
   type: TransactionType;
 
+  @IsNumber()
+  @Min(0.01, { message: 'Amount must be greater than 0' })
+  @Transform(({ value }) => parseFloat(value))
+  amount: number;
+
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  @IsOptional()
+  @ValidateIf((o) => o.type === TransactionType.INCOME)
+  paymentMethod?: PaymentMethod;
 
-  @IsEnum(Currency)
-  currency: Currency;
+  @IsString()
+  @IsOptional()
+  category?: string;
 
-  @IsUUID()
-  branchId: string;
+  @IsDateString()
+  @IsNotEmpty()
+  date: string;
+
+  @IsString()
+  @IsOptional()
+  employeeVendorName?: string;
 
   @IsString()
   @IsOptional()

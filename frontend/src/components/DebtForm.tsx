@@ -4,6 +4,11 @@ import { z } from 'zod';
 import { useCreateDebt } from '../hooks/useDebts';
 import type { DebtFormData } from '../types/debts.types';
 import { useAuth } from '../hooks/useAuth';
+import { FormInput } from '@/components/form/FormInput';
+import { FormDatePicker } from '@/components/form/FormDatePicker';
+import { FormTextarea } from '@/components/form/FormTextarea';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Alert } from '@/components/ui/Alert';
 
 /**
  * Zod Validation Schema for Debt Form
@@ -119,55 +124,30 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         </div>
       )}
 
-      {/* Creditor Name Input */}
-      <div>
-        <label htmlFor="creditorName" className="block text-sm font-medium text-gray-700 mb-2">
-          اسم الدائن <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="creditorName"
-          placeholder="أدخل اسم الدائن"
-          {...register('creditorName')}
-          className={`w-full px-4 py-3 border ${
-            errors.creditorName ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-          disabled={isSubmitting}
-        />
-        {errors.creditorName && (
-          <p className="mt-1 text-sm text-red-600">{errors.creditorName.message}</p>
-        )}
-      </div>
+      <FormInput
+        name="creditorName"
+        label="اسم الدائن"
+        register={register}
+        error={errors.creditorName}
+        required
+        disabled={isSubmitting}
+        placeholder="أدخل اسم الدائن"
+      />
 
-      {/* Amount Input */}
-      <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-          المبلغ <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type="number"
-            id="amount"
-            step="0.01"
-            min="0"
-            placeholder="0.00"
-            {...register('amount')}
-            className={`w-full px-4 py-3 border ${
-              errors.amount ? 'border-red-500' : 'border-gray-300'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-            disabled={isSubmitting}
-            dir="ltr"
-          />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-            USD
-          </div>
-        </div>
-        {errors.amount && (
-          <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
-        )}
-      </div>
+      <FormInput
+        name="amount"
+        label="المبلغ"
+        type="number"
+        register={register}
+        error={errors.amount}
+        required
+        disabled={isSubmitting}
+        placeholder="0.00"
+        step="0.01"
+        min="0"
+      />
 
-      {/* Date Picker */}
+      {/* Date Picker - Note: Uses valueAsDate for Date object conversion */}
       <div>
         <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
           التاريخ <span className="text-red-500">*</span>
@@ -175,9 +155,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         <input
           type="date"
           id="date"
-          {...register('date', {
-            valueAsDate: true,
-          })}
+          {...register('date', { valueAsDate: true })}
           defaultValue={new Date().toISOString().split('T')[0]}
           className={`w-full px-4 py-3 border ${
             errors.date ? 'border-red-500' : 'border-gray-300'
@@ -185,11 +163,11 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
           disabled={isSubmitting}
         />
         {errors.date && (
-          <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
+          <p className="mt-2 text-sm text-red-600">{errors.date.message}</p>
         )}
       </div>
 
-      {/* Due Date Picker */}
+      {/* Due Date Picker - Note: Uses valueAsDate for Date object conversion */}
       <div>
         <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-2">
           تاريخ الاستحقاق <span className="text-red-500">*</span>
@@ -197,9 +175,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         <input
           type="date"
           id="dueDate"
-          {...register('dueDate', {
-            valueAsDate: true,
-          })}
+          {...register('dueDate', { valueAsDate: true })}
           defaultValue={new Date().toISOString().split('T')[0]}
           className={`w-full px-4 py-3 border ${
             errors.dueDate ? 'border-red-500' : 'border-gray-300'
@@ -207,67 +183,34 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
           disabled={isSubmitting}
         />
         {errors.dueDate && (
-          <p className="mt-1 text-sm text-red-600">{errors.dueDate.message}</p>
+          <p className="mt-2 text-sm text-red-600">{errors.dueDate.message}</p>
         )}
         <p className="mt-1 text-xs text-gray-500">
           تاريخ الاستحقاق يجب أن يكون أكبر من أو يساوي التاريخ
         </p>
       </div>
 
-      {/* Notes Textarea (Optional) */}
-      <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
-          ملاحظات
-        </label>
-        <textarea
-          id="notes"
-          rows={4}
-          placeholder="أضف أي ملاحظات إضافية هنا..."
-          {...register('notes')}
-          className={`w-full px-4 py-3 border ${
-            errors.notes ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none`}
-          disabled={isSubmitting}
-        />
-        {errors.notes && (
-          <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
-        )}
-      </div>
+      <FormTextarea
+        name="notes"
+        label="ملاحظات"
+        register={register}
+        error={errors.notes}
+        disabled={isSubmitting}
+        placeholder="أضف أي ملاحظات إضافية هنا..."
+        rows={4}
+      />
 
       {/* Form Actions */}
       <div className="flex gap-3 pt-4">
         <button
           type="submit"
           disabled={isSubmitting || createDebt.isPending}
-          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
         >
-          {isSubmitting || createDebt.isPending ? (
-            <span className="flex items-center justify-center">
-              <svg
-                className="animate-spin -ml-1 ml-3 h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              جاري الإضافة...
-            </span>
-          ) : (
-            'إضافة دين'
+          {(isSubmitting || createDebt.isPending) && (
+            <LoadingSpinner size="sm" color="white" />
           )}
+          {isSubmitting || createDebt.isPending ? 'جاري الإضافة...' : 'إضافة دين'}
         </button>
 
         {onCancel && (
@@ -282,24 +225,9 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         )}
       </div>
 
-      {/* Success Message (shown via toast in mutation) */}
+      {/* Success Message */}
       {createDebt.isSuccess && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-green-600 ml-3"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className="text-green-800 font-medium">تم إضافة الدين بنجاح</p>
-          </div>
-        </div>
+        <Alert variant="success">تم إضافة الدين بنجاح</Alert>
       )}
     </form>
   );

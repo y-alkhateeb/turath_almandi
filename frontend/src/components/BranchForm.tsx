@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { FormInput } from '@/components/form/FormInput';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import type { Branch, BranchFormData } from '@/types';
 
 // Zod schema with Arabic validation messages
@@ -70,119 +72,57 @@ export const BranchForm: React.FC<BranchFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
-      {/* Branch Name */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          اسم الفرع <span className="text-red-500">*</span>
-        </label>
-        <input
-          {...register('name')}
-          type="text"
-          disabled={isLoading}
-          className={`w-full px-4 py-3 border ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
-          placeholder="أدخل اسم الفرع"
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-        )}
-      </div>
+      <FormInput
+        name="name"
+        label="اسم الفرع"
+        register={register}
+        error={errors.name}
+        required
+        disabled={isLoading}
+        placeholder="أدخل اسم الفرع"
+      />
 
-      {/* Location */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          الموقع <span className="text-red-500">*</span>
-        </label>
-        <input
-          {...register('location')}
-          type="text"
-          disabled={isLoading}
-          className={`w-full px-4 py-3 border ${
-            errors.location ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
-          placeholder="أدخل موقع الفرع"
-        />
-        {errors.location && (
-          <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>
-        )}
-      </div>
+      <FormInput
+        name="location"
+        label="الموقع"
+        register={register}
+        error={errors.location}
+        required
+        disabled={isLoading}
+        placeholder="أدخل موقع الفرع"
+      />
 
-      {/* Manager Name */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          اسم المدير <span className="text-red-500">*</span>
-        </label>
-        <input
-          {...register('managerName')}
-          type="text"
-          disabled={isLoading}
-          className={`w-full px-4 py-3 border ${
-            errors.managerName ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
-          placeholder="أدخل اسم مدير الفرع"
-        />
-        {errors.managerName && (
-          <p className="mt-1 text-sm text-red-600">{errors.managerName.message}</p>
-        )}
-      </div>
+      <FormInput
+        name="managerName"
+        label="اسم المدير"
+        register={register}
+        error={errors.managerName}
+        required
+        disabled={isLoading}
+        placeholder="أدخل اسم مدير الفرع"
+      />
 
-      {/* Phone */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          رقم الهاتف <span className="text-red-500">*</span>
-        </label>
-        <input
-          {...register('phone')}
-          type="tel"
-          disabled={isLoading}
-          className={`w-full px-4 py-3 border ${
-            errors.phone ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
-          placeholder="أدخل رقم الهاتف"
-          dir="ltr"
-        />
-        {errors.phone && (
-          <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-        )}
-      </div>
+      <FormInput
+        name="phone"
+        label="رقم الهاتف"
+        type="tel"
+        register={register}
+        error={errors.phone}
+        required
+        disabled={isLoading}
+        placeholder="أدخل رقم الهاتف"
+        autoComplete="tel"
+      />
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
         >
-          {isLoading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              جاري الحفظ...
-            </span>
-          ) : initialData ? (
-            'تحديث'
-          ) : (
-            'إضافة'
-          )}
+          {isLoading && <LoadingSpinner size="sm" color="white" />}
+          {isLoading ? 'جاري الحفظ...' : initialData ? 'تحديث' : 'إضافة'}
         </button>
         <button
           type="button"

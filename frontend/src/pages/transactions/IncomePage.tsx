@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { IncomeForm } from '../../components/IncomeForm';
 import { Modal } from '../../components/Modal';
 import { useTransactions } from '../../hooks/useTransactions';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Alert } from '@/components/ui/Alert';
 import { TransactionType } from '../../types/transactions.types';
 
 /**
@@ -76,76 +79,43 @@ export const IncomePage = () => {
       {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center py-20">
-          <svg
-            className="animate-spin h-10 w-10 text-primary-600 ml-3"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          <p className="text-gray-600">جاري التحميل...</p>
+          <LoadingSpinner size="lg" text="جاري التحميل..." />
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-red-600 ml-3"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className="text-red-800">حدث خطأ أثناء تحميل البيانات</p>
-          </div>
-        </div>
+        <Alert variant="danger" title="خطأ">
+          حدث خطأ أثناء تحميل البيانات
+        </Alert>
       )}
 
       {/* Empty State */}
       {!isLoading && !error && transactions && transactions.length === 0 && (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <div className="text-gray-400 mb-4">
-            <svg
-              className="w-16 h-16 mx-auto"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد إيرادات</h3>
-          <p className="text-gray-600 mb-6">ابدأ بإضافة أول إيراد</p>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-          >
-            إضافة إيراد جديد
-          </button>
+        <div className="bg-white rounded-lg shadow p-12">
+          <EmptyState
+            icon={
+              <svg
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                className="w-full h-full"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            }
+            title="لا توجد إيرادات"
+            description="ابدأ بإضافة أول إيراد"
+            action={{
+              label: 'إضافة إيراد جديد',
+              onClick: () => setIsModalOpen(true),
+            }}
+          />
         </div>
       )}
 

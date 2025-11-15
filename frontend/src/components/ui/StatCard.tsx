@@ -1,78 +1,73 @@
 import React from 'react';
+import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface StatCardProps {
   title: string;
   value: string | number;
-  icon?: React.ReactNode;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
+  icon: LucideIcon;
+  change?: number;
   description?: string;
-  color?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
+  color?: 'blue' | 'green' | 'red' | 'purple' | 'amber';
   className?: string;
 }
 
 const colorClasses = {
-  primary: {
-    bg: 'bg-sky-50',
-    icon: 'text-sky-600',
-    trend: 'text-sky-600',
+  blue: {
+    bg: 'bg-blue-50',
+    icon: 'text-blue-600',
   },
-  success: {
+  green: {
     bg: 'bg-green-50',
     icon: 'text-green-600',
-    trend: 'text-green-600',
   },
-  warning: {
-    bg: 'bg-amber-50',
-    icon: 'text-amber-600',
-    trend: 'text-amber-600',
-  },
-  danger: {
+  red: {
     bg: 'bg-red-50',
     icon: 'text-red-600',
-    trend: 'text-red-600',
   },
-  neutral: {
-    bg: 'bg-gray-50',
-    icon: 'text-gray-600',
-    trend: 'text-gray-600',
+  purple: {
+    bg: 'bg-purple-50',
+    icon: 'text-purple-600',
+  },
+  amber: {
+    bg: 'bg-amber-50',
+    icon: 'text-amber-600',
   },
 };
 
-export function StatCard({
+export const StatCard = React.memo(function StatCard({
   title,
   value,
-  icon,
-  trend,
+  icon: Icon,
+  change,
   description,
-  color = 'primary',
-  className = '',
+  color = 'blue',
+  className,
 }: StatCardProps) {
   const colors = colorClasses[color];
 
   return (
     <div
-      className={`
-        bg-white rounded-lg border border-gray-200 p-6
-        shadow-md hover:shadow-lg transition-shadow duration-200
-        ${className}
-      `}
+      className={cn(
+        'bg-white rounded-lg border border-gray-200 p-6',
+        'shadow-md hover:shadow-lg transition-shadow duration-200',
+        className
+      )}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          <p className="text-sm text-gray-600">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
 
-          {trend && (
+          {change !== undefined && (
             <div className="flex items-center mt-2">
               <span
-                className={`text-sm font-medium ${
-                  trend.isPositive ? 'text-green-600' : 'text-red-600'
-                }`}
+                className={cn(
+                  'text-sm font-medium',
+                  change >= 0 ? 'text-green-600' : 'text-red-600'
+                )}
               >
-                {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+                {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
               </span>
               {description && (
                 <span className="text-sm text-gray-500 mr-2">
@@ -82,17 +77,15 @@ export function StatCard({
             </div>
           )}
 
-          {!trend && description && (
+          {change === undefined && description && (
             <p className="text-sm text-gray-500 mt-2">{description}</p>
           )}
         </div>
 
-        {icon && (
-          <div className={`p-3 rounded-lg ${colors.bg}`}>
-            <div className={`w-6 h-6 ${colors.icon}`}>{icon}</div>
-          </div>
-        )}
+        <div className={cn('p-3 rounded-lg', colors.bg)}>
+          <Icon className={cn('w-6 h-6', colors.icon)} />
+        </div>
       </div>
     </div>
   );
-}
+});

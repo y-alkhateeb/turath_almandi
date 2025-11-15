@@ -90,3 +90,6 @@ export const Modal: React.FC<ModalProps> = ({
     </div>
   );
 };
+
+// Default export for backward compatibility
+export default Modal;

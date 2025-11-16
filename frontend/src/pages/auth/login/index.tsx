@@ -8,7 +8,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Logo } from '@/components/logo';
 import { Button } from '@/ui/button';
 import { Input } from '@/ui/input';
 import { Checkbox } from '@/ui/checkbox';
@@ -62,6 +61,7 @@ export default function LoginPage() {
       const response = await loginApi({
         username: data.username,
         password: data.password,
+        rememberMe: data.rememberMe,
       });
 
       console.log('=== LOGIN DEBUG ===');
@@ -108,11 +108,8 @@ export default function LoginPage() {
       {/* Left Side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
         <div className="w-full max-w-md animate-fadeIn">
-          {/* Logo and Title */}
+          {/* Title */}
           <div className="mb-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-500 rounded-2xl mb-4 text-white text-3xl font-bold shadow-lg">
-              ت
-            </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً بعودتك</h1>
             <p className="text-gray-600">سجل دخولك لمتابعة العمل</p>
           </div>

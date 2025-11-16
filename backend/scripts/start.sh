@@ -34,48 +34,21 @@ else
   exit 1
 fi
 
-# Function to wait for database to be ready
-wait_for_db() {
-  echo "⏳ Waiting for database to be ready..."
-  echo "   This may take up to 2 minutes on first deployment..."
-  local max_attempts=60  # Increased from 30 to 60
-  local attempt=1
-  local wait_time=2
-
-  while [ $attempt -le $max_attempts ]; do
-    echo "🔍 Attempt $attempt/$max_attempts: Checking database connection..."
-
-    # Test database connection
-    if echo "SELECT 1;" | npx prisma db execute --stdin 2>/dev/null; then
-      echo "✅ Database is ready!"
-      return 0
-    fi
-
-    echo "⏸️  Database not ready yet, waiting ${wait_time}s..."
-    sleep $wait_time
-    attempt=$((attempt + 1))
-
-    # Show helpful message at certain milestones
-    if [ $attempt -eq 15 ]; then
-      echo "ℹ️  Still waiting... Database might still be provisioning"
-    elif [ $attempt -eq 30 ]; then
-      echo "⚠️  Taking longer than expected. Checking connection..."
-    elif [ $attempt -eq 45 ]; then
-      echo "⚠️  If this persists, check Render Dashboard for database status"
-    fi
-  done
-
-  echo "❌ Database failed to become ready after $max_attempts attempts ($(($max_attempts * $wait_time)) seconds)"
-  echo "🔍 Troubleshooting steps:"
-  echo "   1. Verify database service is 'Available' in Render Dashboard"
-  echo "   2. Check DATABASE_URL is set correctly in backend environment variables"
-  echo "   3. Ensure database and backend are in the same region"
-  echo "   4. Try using the Internal Database URL (not External)"
-  return 1
-}
-
-# Wait for database to be ready
-wait_for_db
+# Test database connection once - show actual error if it fails
+echo "🔍 Testing database connection..."
+echo ""
+if echo "SELECT 1;" | npx prisma db execute --stdin 2>&1; then
+  echo ""
+  echo "✅ Database connection successful!"
+else
+  echo ""
+  echo "❌ Database connection failed!"
+  echo "🔍 Check Render Dashboard:"
+  echo "   1. Database service status should be 'Available'"
+  echo "   2. Database and backend must be in same region"
+  echo "   3. DATABASE_URL must be correct"
+  exit 1
+fi
 
 # Generate Prisma Client
 echo "📦 Generating Prisma Client..."

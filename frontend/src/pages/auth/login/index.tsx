@@ -64,18 +64,8 @@ export default function LoginPage() {
         password: data.password,
       });
 
-      console.log('=== LOGIN DEBUG ===');
-      console.log('Raw response:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response keys:', response ? Object.keys(response) : 'null/undefined');
-      console.log('access_token:', response?.access_token);
-      console.log('refresh_token:', response?.refresh_token);
-      console.log('user:', response?.user);
-      console.log('==================');
-
       // Validate response has required data
       if (!response?.access_token || !response?.refresh_token || !response?.user) {
-        console.error('❌ Invalid response: Missing required fields');
         setError('خطأ في الاستجابة من الخادم. البيانات غير كاملة.');
         toast.error('خطأ في الاستجابة من الخادم. يرجى المحاولة مرة أخرى.');
         return;

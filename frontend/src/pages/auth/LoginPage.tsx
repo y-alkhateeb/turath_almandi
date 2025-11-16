@@ -6,7 +6,8 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { Alert } from '@/ui/alert';
 import { Button } from '@/ui/button';
-import { Card } from '@/ui/card';
+import { FormInput } from '@/components/form/FormInput';
+import { FormCheckbox } from '@/components/form/FormCheckbox';
 
 // Validation schema
 const loginSchema = z.object({
@@ -64,79 +65,41 @@ const LoginPage = () => {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Username Input */}
-            <div>
-              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
-                اسم المستخدم
-              </label>
-              <input
-                type="text"
-                id="username"
-                {...register('username')}
-                className={`w-full px-4 py-3 rounded-lg border ${
-                  errors.username
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
-                } focus:ring-2 focus:ring-opacity-20 outline-none transition-colors`}
-                placeholder="أدخل اسم المستخدم"
-                disabled={isLoading}
-              />
-              {errors.username && (
-                <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
+            <FormInput
+              name="username"
+              label="اسم المستخدم"
+              type="text"
+              placeholder="أدخل اسم المستخدم"
+              register={register}
+              error={errors.username}
+              disabled={isLoading}
+              className="mb-4"
+            />
 
-            {/* Password Input */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                كلمة المرور
-              </label>
-              <input
-                type="password"
-                id="password"
-                {...register('password')}
-                className={`w-full px-4 py-3 rounded-lg border ${
-                  errors.password
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
-                } focus:ring-2 focus:ring-opacity-20 outline-none transition-colors`}
-                placeholder="••••••••"
-                disabled={isLoading}
-                dir="ltr"
-              />
-              {errors.password && (
-                <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+            <FormInput
+              name="password"
+              label="كلمة المرور"
+              type="password"
+              placeholder="••••••••"
+              register={register}
+              error={errors.password}
+              disabled={isLoading}
+              className="mb-4"
+            />
 
-            {/* Remember Me Checkbox */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                {...register('rememberMe')}
-                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
-                disabled={isLoading}
-              />
-              <label htmlFor="rememberMe" className="text-sm text-gray-700 cursor-pointer select-none">
-                تذكرني لمدة 30 يومًا
-              </label>
-            </div>
+            <FormCheckbox
+              name="rememberMe"
+              label="تذكرني لمدة 30 يومًا"
+              register={register}
+              error={errors.rememberMe}
+              disabled={isLoading}
+              className="mb-4"
+            />
 
             {/* Error Message */}
             {error && (
-              <Alert variant="destructive" className="animate-slide-in-right">
+              <Alert variant="destructive" className="animate-slide-in-right mb-4">
                 {error}
               </Alert>
             )}

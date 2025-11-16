@@ -27,9 +27,12 @@ import { login as loginApi } from '@/api/services/userService';
 import { Icon } from '@/components/icon';
 import GLOBAL_CONFIG from '@/global-config';
 
-// Validation schema
+// Validation schema - matches backend validation rules
 const loginSchema = z.object({
-  username: z.string().min(3, { message: 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل' }),
+  username: z
+    .string()
+    .min(3, { message: 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل' })
+    .max(100, { message: 'اسم المستخدم يجب ألا يتجاوز 100 حرف' }),
   password: z.string().min(6, { message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' }),
   rememberMe: z.boolean().default(false),
 });

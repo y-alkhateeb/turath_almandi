@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 /**
  * Zod Validation Schema for Salary Expense Form
  * All validation messages in Arabic
+ * Matches backend validation rules: amount must be >= 0.01
  */
 const salaryExpenseSchema = z.object({
   date: z.date({ message: 'التاريخ مطلوب' }),
@@ -18,9 +19,9 @@ const salaryExpenseSchema = z.object({
     .refine(
       (val) => {
         const num = parseFloat(val);
-        return !isNaN(num) && num > 0;
+        return !isNaN(num) && num >= 0.01;
       },
-      { message: 'المبلغ يجب أن يكون رقم أكبر من صفر' }
+      { message: 'المبلغ يجب أن يكون 0.01 على الأقل' }
     ),
   employee_name: z
     .string()

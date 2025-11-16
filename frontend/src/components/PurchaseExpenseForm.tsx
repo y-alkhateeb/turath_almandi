@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 /**
  * Zod Validation Schema for Purchase Expense Form
  * All validation messages in Arabic
+ * Matches backend validation rules: amount >= 0.01, quantity >= 0.01 when addToInventory
  */
 const purchaseExpenseSchema = z.object({
   date: z.date({ message: 'التاريخ مطلوب' }),
@@ -18,9 +19,9 @@ const purchaseExpenseSchema = z.object({
     .refine(
       (val) => {
         const num = parseFloat(val);
-        return !isNaN(num) && num > 0;
+        return !isNaN(num) && num >= 0.01;
       },
-      { message: 'المبلغ يجب أن يكون رقم أكبر من صفر' }
+      { message: 'المبلغ يجب أن يكون 0.01 على الأقل' }
     ),
   vendorName: z
     .string()
@@ -34,12 +35,13 @@ const purchaseExpenseSchema = z.object({
 }).refine(
   (data) => {
     // If addToInventory is true, itemName, quantity, and unit are required
+    // Backend requires: itemName min 2 chars, quantity >= 0.01
     if (data.addToInventory) {
       return (
         data.itemName &&
         data.itemName.length >= 2 &&
         data.quantity &&
-        parseFloat(data.quantity) > 0 &&
+        parseFloat(data.quantity) >= 0.01 &&
         data.unit
       );
     }

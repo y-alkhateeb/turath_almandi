@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Plus, Edit, Trash2, Building2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   useBranches,
@@ -9,12 +10,20 @@ import {
 import { Modal } from '@/components/Modal';
 import { BranchForm } from '@/components/BranchForm';
 import { ConditionalRender } from '@/components/ConditionalRender';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Alert } from '@/components/ui/Alert';
+import {
+  LoadingSpinner,
+  EmptyState,
+  Alert,
+  PageHeader,
+  Button,
+  Table,
+  Badge,
+  ConfirmModal,
+} from '@/components/ui';
 import type { Branch, BranchFormData } from '@/types';
+import type { Column } from '@/components/ui/Table';
 
-export const BranchesPage: React.FC = () => {
+export const BranchesPage = () => {
   const { isAdmin } = useAuth();
   const { data: branches = [], isLoading, error } = useBranches();
   const createBranch = useCreateBranch();
@@ -37,8 +46,9 @@ export const BranchesPage: React.FC = () => {
     setEditingBranch(null);
   };
 
-  const handleDelete = async (id: string) => {
-    await deleteBranch.mutateAsync(id);
+  const handleDelete = async () => {
+    if (!deletingBranchId) return;
+    await deleteBranch.mutateAsync(deletingBranchId);
     setDeletingBranchId(null);
   };
 
@@ -49,285 +59,175 @@ export const BranchesPage: React.FC = () => {
     });
   };
 
-  return (
-    <div dir="rtl" className="w-full">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">إدارة الفروع</h1>
-            <p className="text-gray-600">
-              {isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
-            </p>
-          </div>
-
-          {/* Add Branch Button - Admin Only */}
-          <ConditionalRender roles={['ADMIN']}>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 font-medium shadow-sm"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              إضافة فرع جديد
-            </button>
-          </ConditionalRender>
+  // Table columns configuration
+  const columns: Column<Branch>[] = [
+    {
+      key: 'name',
+      header: 'اسم الفرع',
+      render: (branch) => (
+        <div className="font-medium text-gray-900">{branch.name}</div>
+      ),
+    },
+    {
+      key: 'location',
+      header: 'الموقع',
+      render: (branch) => <div className="text-gray-700">{branch.location}</div>,
+    },
+    {
+      key: 'managerName',
+      header: 'المدير',
+      render: (branch) => (
+        <div className="text-gray-700">{branch.managerName}</div>
+      ),
+    },
+    {
+      key: 'phone',
+      header: 'الهاتف',
+      render: (branch) => (
+        <div className="text-gray-700" dir="ltr">
+          {branch.phone}
         </div>
-      </div>
+      ),
+    },
+    {
+      key: 'isActive',
+      header: 'الحالة',
+      render: (branch) => (
+        <Button
+          variant={branch.isActive ? 'success' : 'danger'}
+          size="sm"
+          onClick={() => isAdmin() && handleToggleStatus(branch)}
+          disabled={!isAdmin() || updateBranch.isPending}
+        >
+          <Badge variant={branch.isActive ? 'success' : 'danger'}>
+            {branch.isActive ? 'نشط' : 'غير نشط'}
+          </Badge>
+        </Button>
+      ),
+    },
+  ];
 
-      {/* Content */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <LoadingSpinner size="lg" text="جاري تحميل الفروع..." />
-          </div>
-        )}
+  // Add actions column if user is admin
+  if (isAdmin()) {
+    columns.push({
+      key: 'actions',
+      header: 'الإجراءات',
+      render: (branch) => (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setEditingBranch(branch)}
+            leftIcon={<Edit className="w-4 h-4" />}
+          >
+            تعديل
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeletingBranchId(branch.id)}
+            leftIcon={<Trash2 className="w-4 h-4" />}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            حذف
+          </Button>
+        </div>
+      ),
+    });
+  }
 
-        {/* Error State */}
-        {error && (
-          <div className="p-6">
-            <Alert variant="danger" title="خطأ">
-              حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى.
-            </Alert>
-          </div>
-        )}
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <PageHeader
+        title="إدارة الفروع"
+        description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
+        actions={
+          isAdmin() ? (
+            <Button
+              variant="primary"
+              onClick={() => setIsCreateModalOpen(true)}
+              leftIcon={<Plus className="w-5 h-5" />}
+            >
+              إضافة فرع جديد
+            </Button>
+          ) : undefined
+        }
+      />
 
-        {/* Empty State */}
-        {!isLoading && !error && branches.length === 0 && (
-          <div className="p-12">
-            <EmptyState
-              icon={
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  className="w-full h-full"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
-                </svg>
-              }
-              title="لا توجد فروع"
-              description={
-                isAdmin()
-                  ? 'لم يتم إضافة أي فرع بعد. ابدأ بإضافة فرع جديد.'
-                  : 'لم يتم تعيين فرع لك بعد.'
-              }
-              action={
-                isAdmin()
-                  ? {
-                      label: 'إضافة فرع جديد',
-                      onClick: () => setIsCreateModalOpen(true),
-                    }
-                  : undefined
-              }
-            />
-          </div>
-        )}
+      {/* Error State */}
+      {error && (
+        <Alert variant="danger" title="خطأ">
+          حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى.
+        </Alert>
+      )}
 
-        {/* Branches Table */}
-        {!isLoading && !error && branches.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    اسم الفرع
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    الموقع
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    المدير
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    الهاتف
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    الحالة
-                  </th>
-                  <ConditionalRender roles={['ADMIN']}>
-                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      الإجراءات
-                    </th>
-                  </ConditionalRender>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {branches.map((branch) => (
-                  <tr
-                    key={branch.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {branch.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-700">
-                        {branch.location}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-700">
-                        {branch.managerName}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap" dir="ltr">
-                      <div className="text-sm text-gray-700 text-right">
-                        {branch.phone}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => isAdmin() && handleToggleStatus(branch)}
-                        disabled={!isAdmin() || updateBranch.isPending}
-                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                          branch.isActive
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                            : 'bg-red-100 text-red-800 hover:bg-red-200'
-                        } ${
-                          !isAdmin() || updateBranch.isPending
-                            ? 'cursor-not-allowed'
-                            : 'cursor-pointer'
-                        }`}
-                      >
-                        {branch.isActive ? 'نشط' : 'غير نشط'}
-                      </button>
-                    </td>
-                    <ConditionalRender roles={['ADMIN']}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          {/* Edit Button */}
-                          <button
-                            onClick={() => setEditingBranch(branch)}
-                            className="text-primary-600 hover:text-primary-800 transition-colors p-2 rounded-lg hover:bg-primary-50"
-                            title="تعديل"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
-                          </button>
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <LoadingSpinner size="lg" text="جاري تحميل الفروع..." />
+        </div>
+      ) : branches.length === 0 ? (
+        /* Empty State */
+        <EmptyState
+          icon={<Building2 className="w-full h-full" />}
+          title="لا توجد فروع"
+          description={
+            isAdmin()
+              ? 'لم يتم إضافة أي فرع بعد. ابدأ بإضافة فرع جديد.'
+              : 'لم يتم تعيين فرع لك بعد.'
+          }
+          action={
+            isAdmin()
+              ? {
+                  label: 'إضافة فرع جديد',
+                  onClick: () => setIsCreateModalOpen(true),
+                }
+              : undefined
+          }
+        />
+      ) : (
+        /* Branches Table */
+        <Table columns={columns} data={branches} />
+      )}
 
-                          {/* Delete Button */}
-                          <button
-                            onClick={() => setDeletingBranchId(branch.id)}
-                            className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-lg hover:bg-red-50"
-                            title="حذف"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </ConditionalRender>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Create Branch Modal */}
+      {/* Create Modal */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="إضافة فرع جديد"
-        size="lg"
       >
         <BranchForm
           onSubmit={handleCreate}
           onCancel={() => setIsCreateModalOpen(false)}
-          isLoading={createBranch.isPending}
         />
       </Modal>
 
-      {/* Edit Branch Modal */}
+      {/* Edit Modal */}
       <Modal
         isOpen={!!editingBranch}
         onClose={() => setEditingBranch(null)}
         title="تعديل الفرع"
-        size="lg"
       >
         <BranchForm
           onSubmit={handleUpdate}
           onCancel={() => setEditingBranch(null)}
-          initialData={editingBranch}
-          isLoading={updateBranch.isPending}
+          initialData={editingBranch || undefined}
         />
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal
+      <ConfirmModal
         isOpen={!!deletingBranchId}
         onClose={() => setDeletingBranchId(null)}
+        onConfirm={handleDelete}
         title="تأكيد الحذف"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-gray-700">
-            هل أنت متأكد من حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => deletingBranchId && handleDelete(deletingBranchId)}
-              disabled={deleteBranch.isPending}
-              className="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
-            >
-              {deleteBranch.isPending && (
-                <LoadingSpinner size="sm" color="white" />
-              )}
-              {deleteBranch.isPending ? 'جاري الحذف...' : 'حذف'}
-            </button>
-            <button
-              onClick={() => setDeletingBranchId(null)}
-              disabled={deleteBranch.isPending}
-              className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              إلغاء
-            </button>
-          </div>
-        </div>
-      </Modal>
+        message="هل أنت متأكد من حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء."
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+        isLoading={deleteBranch.isPending}
+      />
     </div>
   );
 };

@@ -63,7 +63,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-    const { username, password } = loginDto;
+    const { username, password, rememberMe } = loginDto;
 
     // Find user with branch relation
     const user = await this.prisma.user.findUnique({
@@ -96,7 +96,7 @@ export class AuthService {
 
     // Generate tokens
     const access_token = await this.generateToken(user.id, user.username, user.role, user.branchId);
-    const refresh_token = await this.generateRefreshToken(user.id);
+    const refresh_token = await this.generateRefreshToken(user.id, rememberMe);
 
     const response = {
       user: {
@@ -154,10 +154,12 @@ export class AuthService {
     }
   }
 
-  async generateRefreshToken(userId: string): Promise<string> {
+  async generateRefreshToken(userId: string, rememberMe?: boolean): Promise<string> {
     const token = crypto.randomBytes(64).toString('hex');
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+    // Set expiration based on rememberMe: 30 days if true, 7 days if false
+    const daysToAdd = rememberMe ? 30 : 7;
+    expiresAt.setDate(expiresAt.getDate() + daysToAdd);
 
     // Clean up old expired tokens
     await this.prisma.refreshToken.deleteMany({

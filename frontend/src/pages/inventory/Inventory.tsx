@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { useInventory, useDeleteInventory } from '../../hooks/useInventory';
-import { useAuth } from '../../hooks/useAuth';
-import InventoryTable from '../../components/InventoryTable';
-import { InventoryForm } from '../../components/InventoryForm';
-import Modal from '../../components/Modal';
-import { Alert } from '@/components/ui/Alert';
-import type { InventoryItem, InventoryFilters } from '../../types/inventory.types';
+import { Plus } from 'lucide-react';
+import { useInventory, useDeleteInventory } from '@/hooks/useInventory';
+import { useAuth } from '@/hooks/useAuth';
+import InventoryTable from '@/components/InventoryTable';
+import { InventoryForm } from '@/components/InventoryForm';
+import Modal from '@/components/Modal';
+import { ConfirmModal } from '@/components/ui';
+import { Button } from '@/ui/button';
+import { Alert } from '@/ui/alert';
+import type { InventoryItem, InventoryFilters } from '@/types/inventory.types';
 
 export default function InventoryPage() {
   const { isAdmin } = useAuth();
@@ -22,7 +25,7 @@ export default function InventoryPage() {
     item: InventoryItem | null;
   }>({ isOpen: false, item: null });
 
-  const { data, isLoading, error } = useInventory(filters);
+  const { data, isLoading } = useInventory(filters);
   const deleteInventory = useDeleteInventory();
 
   const handleEdit = (item: InventoryItem) => {
@@ -91,22 +94,11 @@ export default function InventoryPage() {
             عرض وإدارة جميع أصناف المخزون
           </p>
         </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
-          + إضافة صنف جديد
-        </button>
+        <Button onClick={() => setIsAddModalOpen(true)}>
+          <Plus className="w-5 h-5" />
+          إضافة صنف جديد
+        </Button>
       </div>
-
-      {/* Error State */}
-      {error && (
-        <div className="mb-6">
-          <Alert variant="danger" title="خطأ في تحميل البيانات">
-            {(error as any)?.response?.data?.message || 'حدث خطأ غير متوقع'}
-          </Alert>
-        </div>
-      )}
 
       {/* Table */}
       <InventoryTable
@@ -150,84 +142,22 @@ export default function InventoryPage() {
         )}
       </Modal>
 
-      {/* Delete Confirmation Dialog */}
-      {deleteConfirmation.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" dir="rtl">
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center ml-4">
-                <svg
-                  className="w-6 h-6 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">تأكيد الحذف</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  هل أنت متأكد من حذف هذا الصنف؟
-                </p>
-              </div>
-            </div>
-
-            {deleteConfirmation.item && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
-                <div className="text-sm text-gray-700">
-                  <p>
-                    <span className="font-medium">الاسم:</span>{' '}
-                    {deleteConfirmation.item.name}
-                  </p>
-                  <p className="mt-1">
-                    <span className="font-medium">الكمية:</span>{' '}
-                    {deleteConfirmation.item.quantity.toLocaleString('ar-IQ')}{' '}
-                    {getUnitLabel(deleteConfirmation.item.unit)}
-                  </p>
-                  <p className="mt-1">
-                    <span className="font-medium">سعر الوحدة:</span>{' '}
-                    {deleteConfirmation.item.costPerUnit.toLocaleString('ar-IQ')} $
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <p className="text-sm text-gray-600 mb-6">
-              هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الصنف نهائياً من النظام.
-            </p>
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={cancelDelete}
-                disabled={deleteInventory.isPending}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
-              >
-                إلغاء
-              </button>
-              <button
-                onClick={confirmDelete}
-                disabled={deleteInventory.isPending}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
-              >
-                {deleteInventory.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>جاري الحذف...</span>
-                  </>
-                ) : (
-                  'حذف'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirmation.isOpen}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title="تأكيد الحذف"
+        message={
+          deleteConfirmation.item
+            ? `هل أنت متأكد من حذف "${deleteConfirmation.item.name}"؟ هذا الإجراء لا يمكن التراجع عنه.`
+            : 'هل أنت متأكد من حذف هذا الصنف؟'
+        }
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+        isLoading={deleteInventory.isPending}
+      />
     </div>
   );
 }

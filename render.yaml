@@ -37,8 +37,6 @@ services:
         value: true  # Set to "false" after first deployment to skip seeding
     plan: free
     healthCheckPath: /api/v1/health
-    # Ensure backend starts after database is ready
-    startCommand: ./scripts/start.sh
 
 databases:
   # PostgreSQL Database

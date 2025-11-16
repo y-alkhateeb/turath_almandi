@@ -106,6 +106,13 @@ axiosInstance.interceptors.request.use(
 // Response interceptor: Handle responses and errors
 axiosInstance.interceptors.response.use(
   (response) => {
+    console.log('=== AXIOS INTERCEPTOR DEBUG ===');
+    console.log('Response status:', response.status);
+    console.log('Response statusText:', response.statusText);
+    console.log('Response data:', response.data);
+    console.log('Response data type:', typeof response.data);
+    console.log('==============================');
+
     // If the API wraps responses in a Result object, unwrap it
     const { data } = response;
 
@@ -114,6 +121,7 @@ axiosInstance.interceptors.response.use(
       const result = data as Result;
 
       if (result.status === ResultStatus.SUCCESS) {
+        console.log('Unwrapping Result.data:', result.data);
         return result.data;
       }
 
@@ -124,6 +132,7 @@ axiosInstance.interceptors.response.use(
     }
 
     // Return data as is if not wrapped
+    console.log('Returning data as-is (not wrapped):', data);
     return data;
   },
   async (error: AxiosError<Result>) => {

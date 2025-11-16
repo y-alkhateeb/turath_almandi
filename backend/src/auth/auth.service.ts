@@ -98,7 +98,7 @@ export class AuthService {
     const access_token = await this.generateToken(user.id, user.username, user.role, user.branchId);
     const refresh_token = await this.generateRefreshToken(user.id);
 
-    return {
+    const response = {
       user: {
         id: user.id,
         username: user.username,
@@ -109,6 +109,12 @@ export class AuthService {
       access_token,
       refresh_token,
     };
+
+    console.log('=== AUTH SERVICE LOGIN DEBUG ===');
+    console.log('Returning response:', JSON.stringify(response, null, 2));
+    console.log('================================');
+
+    return response;
   }
 
   async validateUser(username: string, password: string) {

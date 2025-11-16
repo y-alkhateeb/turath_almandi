@@ -45,18 +45,10 @@ wait_for_db() {
   while [ $attempt -le $max_attempts ]; do
     echo "🔍 Attempt $attempt/$max_attempts: Checking database connection..."
 
-    # Capture error output for debugging
-    if ERROR_OUTPUT=$(npx prisma db execute --stdin 2>&1 <<EOF
-SELECT 1;
-EOF
-    ); then
+    # Test database connection
+    if echo "SELECT 1;" | npx prisma db execute --stdin 2>/dev/null; then
       echo "✅ Database is ready!"
       return 0
-    else
-      # Show error details on first few attempts
-      if [ $attempt -le 3 ]; then
-        echo "   ⚠️  Connection error: $(echo "$ERROR_OUTPUT" | head -n 1)"
-      fi
     fi
 
     echo "⏸️  Database not ready yet, waiting ${wait_time}s..."

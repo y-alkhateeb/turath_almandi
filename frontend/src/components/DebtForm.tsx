@@ -13,6 +13,7 @@ import { Alert } from '@/components/ui/Alert';
 /**
  * Zod Validation Schema for Debt Form
  * All validation messages in Arabic
+ * Matches backend validation rules: amount >= 0.01, dueDate >= date
  */
 const debtSchema = z
   .object({
@@ -23,9 +24,9 @@ const debtSchema = z
       .refine(
         (val) => {
           const num = parseFloat(val);
-          return !isNaN(num) && num > 0;
+          return !isNaN(num) && num >= 0.01;
         },
-        { message: 'المبلغ يجب أن يكون رقم أكبر من صفر' }
+        { message: 'المبلغ يجب أن يكون 0.01 على الأقل' }
       ),
     date: z.date({ message: 'التاريخ مطلوب' }),
     dueDate: z.date({ message: 'تاريخ الاستحقاق مطلوب' }),

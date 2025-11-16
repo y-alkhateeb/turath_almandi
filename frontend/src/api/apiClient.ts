@@ -81,7 +81,7 @@ const clearAuthData = () => {
 // Create axios instance
 const axiosInstance = axios.create({
   baseURL: GLOBAL_CONFIG.apiBaseUrl,
-  timeout: 50000,
+  timeout: 120000, // 120 seconds to handle Render cold starts
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
   },

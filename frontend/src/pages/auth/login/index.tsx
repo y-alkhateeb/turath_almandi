@@ -199,16 +199,13 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Image/Gradient */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 relative overflow-hidden">
         {/* Background Image or Gradient */}
         {!GLOBAL_CONFIG.useFallbackGradient ? (
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${GLOBAL_CONFIG.loginBackgroundImage})` }}
-          >
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60"></div>
-          </div>
+          />
         ) : (
           <>
             {/* Gradient Background (Fallback) */}
@@ -220,49 +217,6 @@ export default function LoginPage() {
             </div>
           </>
         )}
-
-        {/* Content */}
-        <div className="relative z-10 text-white text-center max-w-lg">
-          <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl mb-6 text-white text-5xl font-bold">
-              ت
-            </div>
-            <h2 className="text-4xl font-bold mb-4">{GLOBAL_CONFIG.appName}</h2>
-            <p className="text-xl text-white/90 mb-8">{GLOBAL_CONFIG.appDescription}</p>
-          </div>
-
-          <div className="space-y-4 text-right">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                <Icon icon="solar:buildings-2-bold-duotone" className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1">إدارة شاملة</h3>
-                <p className="text-white/80">إدارة الفروع والموظفين والمخزون بكفاءة عالية</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                <Icon icon="solar:chart-2-bold-duotone" className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1">تقارير دقيقة</h3>
-                <p className="text-white/80">تحليلات مالية ومحاسبية شاملة ودقيقة</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                <Icon icon="solar:shield-check-bold-duotone" className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1">أمان عالي</h3>
-                <p className="text-white/80">حماية بياناتك بأحدث معايير الأمان</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

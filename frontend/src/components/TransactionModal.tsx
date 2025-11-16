@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Modal } from './Modal';
-import type { Transaction, TransactionType, PaymentMethod } from '../types/transactions.types';
+import { TransactionType, PaymentMethod, type Transaction } from '../types/transactions.types';
 import { useUpdateTransaction } from '../hooks/useTransactions';
 
 interface TransactionModalProps {
@@ -15,9 +15,9 @@ interface TransactionModalProps {
 
 // Validation schema for edit mode
 const editTransactionSchema = z.object({
-  type: z.enum(['INCOME', 'EXPENSE']),
+  type: z.nativeEnum(TransactionType),
   amount: z.string().min(1, 'المبلغ مطلوب'),
-  paymentMethod: z.enum(['CASH', 'MASTER']).optional(),
+  paymentMethod: z.nativeEnum(PaymentMethod).nullable().optional(),
   category: z.string().optional(),
   date: z.date(),
   employeeVendorName: z.string().optional(),

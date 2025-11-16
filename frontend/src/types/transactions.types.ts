@@ -3,6 +3,8 @@
  * Based on backend Prisma schema and DTOs
  */
 
+import { InventoryUnit } from './inventory.types';
+
 export enum TransactionType {
   INCOME = 'INCOME',
   EXPENSE = 'EXPENSE',
@@ -11,13 +13,6 @@ export enum TransactionType {
 export enum PaymentMethod {
   CASH = 'CASH',
   MASTER = 'MASTER',
-}
-
-export enum InventoryUnit {
-  KG = 'KG',
-  PIECE = 'PIECE',
-  LITER = 'LITER',
-  OTHER = 'OTHER',
 }
 
 export interface InventoryItem {

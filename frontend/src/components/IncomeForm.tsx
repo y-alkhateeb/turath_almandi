@@ -25,7 +25,7 @@ const incomeSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod, { message: 'طريقة الدفع مطلوبة' }),
   category: z.string(),
   notes: z.string(),
-});
+}) satisfies z.ZodType<IncomeFormData>;
 
 interface IncomeFormProps {
   onSuccess?: () => void;

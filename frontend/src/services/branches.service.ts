@@ -1,16 +1,5 @@
 import { api } from './axios';
-import type { CreateBranchInput, UpdateBranchInput } from '@/types/branches.types';
-
-export interface Branch {
-  id: string;
-  name: string;
-  location: string;
-  managerName: string;
-  phone: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Branch, CreateBranchInput, UpdateBranchInput } from '@/types/branches.types';
 
 export const branchesService = {
   getAll: async (): Promise<Branch[]> => {

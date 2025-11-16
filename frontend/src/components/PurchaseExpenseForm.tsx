@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreatePurchaseExpense } from '../hooks/useTransactions';
-import { InventoryUnit } from '../types/transactions.types';
+import { InventoryUnit } from '../types/inventory.types';
 import type { PurchaseExpenseFormData } from '../types/transactions.types';
 import { useAuth } from '../hooks/useAuth';
 
@@ -27,9 +27,9 @@ const purchaseExpenseSchema = z.object({
     .min(1, { message: 'اسم المورد مطلوب' })
     .min(2, { message: 'اسم المورد يجب أن يكون حرفين على الأقل' }),
   addToInventory: z.boolean(),
-  itemName: z.string().optional(),
-  quantity: z.string().optional(),
-  unit: z.enum(['KG', 'PIECE', 'LITER', 'OTHER']).optional(),
+  itemName: z.string(),
+  quantity: z.string(),
+  unit: z.nativeEnum(InventoryUnit),
   notes: z.string(),
 }).refine(
   (data) => {
@@ -49,7 +49,7 @@ const purchaseExpenseSchema = z.object({
     message: 'يجب ملء جميع حقول المخزون عند تفعيل خيار الإضافة للمخزون',
     path: ['itemName'], // Show error on itemName field
   }
-);
+) satisfies z.ZodType<PurchaseExpenseFormData>;
 
 interface PurchaseExpenseFormProps {
   onSuccess?: () => void;

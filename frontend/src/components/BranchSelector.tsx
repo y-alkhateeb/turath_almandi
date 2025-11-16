@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@hooks/useAuth';
-import { branchesService, Branch } from '@services/branches.service';
+import { branchesService } from '@services/branches.service';
+import type { Branch } from '@/types/branches.types';
 
 interface BranchSelectorProps {
   value?: string | null;

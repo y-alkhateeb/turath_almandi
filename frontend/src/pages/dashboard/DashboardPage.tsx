@@ -80,7 +80,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
             <p className="text-sm text-gray-600 mt-2">
-              مرحباً بك {user?.name || user?.username}
+              مرحباً بك {user?.username}
             </p>
           </div>
         </div>

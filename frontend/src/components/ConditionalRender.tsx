@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useAuth } from '@hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ConditionalRenderProps {
   roles?: ('ADMIN' | 'ACCOUNTANT')[];

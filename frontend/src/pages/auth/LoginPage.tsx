@@ -4,8 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@hooks/useAuth';
-import { Alert } from '@/components/ui/Alert';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Alert, Button } from '@/components/ui';
 
 // Validation schema
 const loginSchema = z.object({
@@ -140,14 +139,16 @@ const LoginPage = () => {
             )}
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              fullWidth
+              isLoading={isLoading}
               disabled={isLoading}
-              className="btn btn-primary w-full py-3.5 text-base font-semibold mt-2 flex items-center justify-center gap-3"
+              className="py-3.5 text-base font-semibold mt-2"
             >
-              {isLoading && <LoadingSpinner size="sm" color="white" />}
-              {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
-            </button>
+              تسجيل الدخول
+            </Button>
           </form>
         </div>
 

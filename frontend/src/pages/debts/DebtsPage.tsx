@@ -1,13 +1,21 @@
 import { useState } from 'react';
+import { Plus, DollarSign, ChevronRight } from 'lucide-react';
 import { DebtForm } from '../../components/DebtForm';
 import { Modal } from '../../components/Modal';
 import { PayDebtModal } from '../../components/PayDebtModal';
 import { DebtPaymentHistory } from '../../components/DebtPaymentHistory';
 import { useDebts } from '../../hooks/useDebts';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Alert } from '@/components/ui/Alert';
+import {
+  LoadingSpinner,
+  EmptyState,
+  Alert,
+  PageHeader,
+  Button,
+  Table,
+  Badge,
+} from '@/components/ui';
 import { DebtStatus, type Debt } from '../../types/debts.types';
+import type { Column } from '@/components/ui/Table';
 
 /**
  * Debts Page - Debt Management
@@ -19,6 +27,7 @@ import { DebtStatus, type Debt } from '../../types/debts.types';
  * - Loading and empty states
  * - Status badges (ACTIVE, PAID, PARTIAL)
  * - Overdue indicator
+ * - Payment history expansion
  * - Arabic interface
  */
 export const DebtsPage = () => {
@@ -59,13 +68,13 @@ export const DebtsPage = () => {
     return statusMap[status] || status;
   };
 
-  const getStatusColor = (status: DebtStatus) => {
-    const colorMap = {
-      ACTIVE: 'bg-yellow-100 text-yellow-800',
-      PAID: 'bg-green-100 text-green-800',
-      PARTIAL: 'bg-blue-100 text-blue-800',
+  const getStatusVariant = (status: DebtStatus) => {
+    const variantMap = {
+      ACTIVE: 'warning' as const,
+      PAID: 'success' as const,
+      PARTIAL: 'info' as const,
     };
-    return colorMap[status] || 'bg-gray-100 text-gray-800';
+    return variantMap[status] || ('default' as const);
   };
 
   const isOverdue = (dueDate: string, status: DebtStatus) => {
@@ -77,36 +86,180 @@ export const DebtsPage = () => {
     return due < today;
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Page Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">إدارة الديون</h1>
-            <p className="mt-2 text-gray-600">إدارة جميع الديون والذمم</p>
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('ar-IQ', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ar-IQ');
+  };
+
+  // Table columns configuration
+  const columns: Column<Debt>[] = [
+    {
+      key: 'creditorName',
+      header: 'اسم الدائن',
+      render: (debt) => {
+        const overdueFlag = isOverdue(debt.dueDate, debt.status);
+        const hasPayments = debt.payments && debt.payments.length > 0;
+        const isExpanded = expandedDebtId === debt.id;
+
+        return (
+          <div className="flex items-center gap-2">
+            {hasPayments && (
+              <button
+                onClick={() => toggleExpandDebt(debt.id)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label={isExpanded ? 'إخفاء السجل' : 'عرض السجل'}
+              >
+                <ChevronRight
+                  className={`w-5 h-5 transition-transform ${
+                    isExpanded ? 'rotate-90' : ''
+                  }`}
+                />
+              </button>
+            )}
+            <span className="font-medium text-gray-900">{debt.creditorName}</span>
+            {overdueFlag && (
+              <Badge variant="danger" size="sm">
+                متأخر
+              </Badge>
+            )}
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            إضافة دين
-          </button>
+        );
+      },
+    },
+    {
+      key: 'originalAmount',
+      header: 'المبلغ الأصلي',
+      render: (debt) => (
+        <div className="text-gray-900" dir="ltr">
+          {formatCurrency(debt.originalAmount)} IQD
         </div>
-      </div>
+      ),
+    },
+    {
+      key: 'paidAmount',
+      header: 'المبلغ المدفوع',
+      render: (debt) => {
+        const paidAmount = debt.originalAmount - debt.remainingAmount;
+        return (
+          <div className="text-green-600" dir="ltr">
+            {formatCurrency(paidAmount)} IQD
+          </div>
+        );
+      },
+    },
+    {
+      key: 'remainingAmount',
+      header: 'المبلغ المتبقي',
+      render: (debt) => (
+        <div className="text-red-600 font-medium" dir="ltr">
+          {formatCurrency(debt.remainingAmount)} IQD
+        </div>
+      ),
+    },
+    {
+      key: 'date',
+      header: 'التاريخ',
+      render: (debt) => <div className="text-gray-700">{formatDate(debt.date)}</div>,
+    },
+    {
+      key: 'dueDate',
+      header: 'تاريخ الاستحقاق',
+      render: (debt) => {
+        const overdueFlag = isOverdue(debt.dueDate, debt.status);
+        return (
+          <div className={overdueFlag ? 'text-red-600 font-medium' : 'text-gray-700'}>
+            {formatDate(debt.dueDate)}
+          </div>
+        );
+      },
+    },
+    {
+      key: 'status',
+      header: 'الحالة',
+      render: (debt) => (
+        <Badge variant={getStatusVariant(debt.status)}>
+          {formatStatus(debt.status)}
+        </Badge>
+      ),
+    },
+    {
+      key: 'branch',
+      header: 'الفرع',
+      render: (debt) => (
+        <div className="text-gray-700">{debt.branch?.name || '-'}</div>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'الإجراءات',
+      render: (debt) => (
+        <div className="flex items-center gap-2">
+          {debt.status !== DebtStatus.PAID && (
+            <Button
+              variant="success"
+              size="sm"
+              onClick={() => handlePayDebt(debt)}
+            >
+              دفع
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  // Custom row renderer to support expandable rows
+  const renderRow = (debt: Debt) => {
+    const isExpanded = expandedDebtId === debt.id;
+    const overdueFlag = isOverdue(debt.dueDate, debt.status);
+
+    return (
+      <>
+        <tr
+          key={debt.id}
+          className={`hover:bg-gray-50 transition-colors ${
+            overdueFlag ? 'bg-red-50' : ''
+          }`}
+        >
+          {columns.map((column) => (
+            <td key={column.key as string} className="px-6 py-4 whitespace-nowrap text-sm">
+              {column.render ? column.render(debt) : String(debt[column.key as keyof Debt])}
+            </td>
+          ))}
+        </tr>
+        {isExpanded && debt.payments && debt.payments.length > 0 && (
+          <tr>
+            <td colSpan={columns.length} className="px-6 py-4 bg-gray-50">
+              <DebtPaymentHistory payments={debt.payments} />
+            </td>
+          </tr>
+        )}
+      </>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <PageHeader
+        title="إدارة الديون"
+        description="إدارة جميع الديون والذمم"
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => setIsModalOpen(true)}
+            leftIcon={<Plus className="w-5 h-5" />}
+          >
+            إضافة دين
+          </Button>
+        }
+      />
 
       {/* Debt Form Modal */}
       <Modal
@@ -125,13 +278,6 @@ export const DebtsPage = () => {
         debt={selectedDebt}
       />
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-20">
-          <LoadingSpinner size="lg" text="جاري التحميل..." />
-        </div>
-      )}
-
       {/* Error State */}
       {error && (
         <Alert variant="danger" title="خطأ">
@@ -139,305 +285,46 @@ export const DebtsPage = () => {
         </Alert>
       )}
 
-      {/* Empty State */}
-      {!isLoading && !error && debts && debts.length === 0 && (
-        <div className="bg-white rounded-lg shadow p-12">
-          <EmptyState
-            icon={
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                className="w-full h-full"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            }
-            title="لا توجد ديون"
-            description="ابدأ بإضافة أول دين"
-            action={{
-              label: 'إضافة دين جديد',
-              onClick: () => setIsModalOpen(true),
-            }}
-          />
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <LoadingSpinner size="lg" text="جاري التحميل..." />
         </div>
-      )}
-
-      {/* Debts Table */}
-      {!isLoading && !error && debts && debts.length > 0 && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  اسم الدائن
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  المبلغ الأصلي
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  المبلغ المدفوع
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  المبلغ المتبقي
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  التاريخ
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  تاريخ الاستحقاق
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  الحالة
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  الفرع
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  الإجراءات
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {debts.map((debt) => {
-                const overdueFlag = isOverdue(debt.dueDate, debt.status);
-                const isExpanded = expandedDebtId === debt.id;
-                const paidAmount = debt.originalAmount - debt.remainingAmount;
-                const hasPayments = debt.payments && debt.payments.length > 0;
-
-                return (
-                  <>
-                    <tr
-                      key={debt.id}
-                      className={`hover:bg-gray-50 transition-colors ${
-                        overdueFlag ? 'bg-red-50' : ''
-                      }`}
+      ) : debts && debts.length === 0 ? (
+        /* Empty State */
+        <EmptyState
+          icon={<DollarSign className="w-full h-full" />}
+          title="لا توجد ديون"
+          description="ابدأ بإضافة أول دين"
+          action={{
+            label: 'إضافة دين جديد',
+            onClick: () => setIsModalOpen(true),
+          }}
+        />
+      ) : (
+        /* Debts Table with Custom Row Renderer */
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  {columns.map((column) => (
+                    <th
+                      key={column.key as string}
+                      className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        <div className="flex items-center gap-2">
-                          {hasPayments && (
-                            <button
-                              onClick={() => toggleExpandDebt(debt.id)}
-                              className="text-gray-400 hover:text-gray-600 transition-colors"
-                              aria-label={isExpanded ? 'إخفاء السجل' : 'عرض السجل'}
-                            >
-                              <svg
-                                className={`w-5 h-5 transition-transform ${
-                                  isExpanded ? 'rotate-90' : ''
-                                }`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5l7 7-7 7"
-                                />
-                              </svg>
-                            </button>
-                          )}
-                          <span>{debt.creditorName}</span>
-                          {overdueFlag && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                              متأخر
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" dir="ltr">
-                        ${debt.originalAmount.toLocaleString('en-US', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600" dir="ltr">
-                        ${paidAmount.toLocaleString('en-US', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600" dir="ltr">
-                        ${debt.remainingAmount.toLocaleString('en-US', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(debt.date).toLocaleDateString('ar-IQ', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(debt.dueDate).toLocaleDateString('ar-IQ', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            debt.status
-                          )}`}
-                        >
-                          {formatStatus(debt.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {debt.branch?.name || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex items-center gap-2">
-                          {debt.status !== DebtStatus.PAID && (
-                            <button
-                              onClick={() => handlePayDebt(debt)}
-                              className="inline-flex items-center px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors"
-                            >
-                              <svg
-                                className="w-4 h-4 ml-1"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                                />
-                              </svg>
-                              دفع
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Expanded Row - Payment History */}
-                    {isExpanded && hasPayments && (
-                      <tr key={`${debt.id}-expanded`}>
-                        <td colSpan={9} className="px-6 py-4 bg-gray-50">
-                          <DebtPaymentHistory payments={debt.payments || []} />
-                        </td>
-                      </tr>
-                    )}
-                  </>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Summary Cards */}
-      {!isLoading && !error && debts && debts.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Total Active Debts */}
-          <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-yellow-800">إجمالي الديون النشطة</p>
-                <p className="text-2xl font-bold text-yellow-900 mt-2" dir="ltr">
-                  $
-                  {debts
-                    .filter((d) => d.status === DebtStatus.ACTIVE)
-                    .reduce((sum, d) => sum + Number(d.remainingAmount), 0)
-                    .toLocaleString('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                </p>
-              </div>
-              <div className="bg-yellow-200 p-3 rounded-full">
-                <svg
-                  className="w-6 h-6 text-yellow-700"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Total Debts */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-800">إجمالي جميع الديون</p>
-                <p className="text-2xl font-bold text-blue-900 mt-2" dir="ltr">
-                  $
-                  {debts
-                    .reduce((sum, d) => sum + Number(d.remainingAmount), 0)
-                    .toLocaleString('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                </p>
-              </div>
-              <div className="bg-blue-200 p-3 rounded-full">
-                <svg
-                  className="w-6 h-6 text-blue-700"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Overdue Debts Count */}
-          <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-red-800">عدد الديون المتأخرة</p>
-                <p className="text-2xl font-bold text-red-900 mt-2">
-                  {debts.filter((d) => isOverdue(d.dueDate, d.status)).length}
-                </p>
-              </div>
-              <div className="bg-red-200 p-3 rounded-full">
-                <svg
-                  className="w-6 h-6 text-red-700"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-            </div>
+                      {column.header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {debts?.map((debt) => renderRow(debt))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
     </div>
   );
 };
-
-export default DebtsPage;

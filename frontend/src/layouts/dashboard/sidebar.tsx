@@ -33,17 +33,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 right-0 z-50 h-screen w-64 transform bg-white border-l border-gray-200 transition-transform duration-300 md:translate-x-0',
+          'fixed top-0 right-0 z-50 h-screen w-64 transform bg-brand-green-600 border-l border-brand-green-700 transition-transform duration-300 md:translate-x-0',
           isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'
         )}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-brand-green-700">
           <Logo />
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-brand-cream-100 hover:text-white hover:bg-brand-green-700"
             onClick={onClose}
           >
             <X className="h-5 w-5" />
@@ -96,18 +96,18 @@ function NavigationItemContent({ item, isActive, onClick }: NavigationItemProps)
         className={cn(
           'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
           isActive
-            ? 'bg-primary-50 text-primary-700'
-            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            ? 'bg-brand-gold-500 text-white'
+            : 'text-brand-cream-100 hover:bg-brand-green-700 hover:text-white'
         )}
       >
         {item.icon && (
-          <span className={cn(isActive ? 'text-primary-600' : 'text-gray-500')}>
+          <span className={cn(isActive ? 'text-white' : 'text-brand-cream-200')}>
             {item.icon}
           </span>
         )}
         <span>{item.title}</span>
         {item.info && (
-          <span className="mr-auto text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
+          <span className="mr-auto text-xs bg-brand-gold-400 text-white px-2 py-0.5 rounded-full">
             {item.info}
           </span>
         )}

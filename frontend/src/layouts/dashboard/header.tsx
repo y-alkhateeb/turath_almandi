@@ -35,7 +35,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 bg-white border-b border-gray-200">
+    <header className="fixed top-0 right-0 left-0 z-50 bg-brand-green-500 border-b border-brand-green-600">
       <div className="flex items-center justify-between h-16 px-4 md:px-6">
         {/* Right Side: Menu + Logo */}
         <div className="flex items-center gap-4">
@@ -43,7 +43,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-brand-cream-100 hover:text-white hover:bg-brand-green-600"
             onClick={onMenuClick}
           >
             <Menu className="h-5 w-5" />
@@ -59,6 +59,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Button
             variant="ghost"
             size="icon"
+            className="text-brand-cream-100 hover:text-white hover:bg-brand-green-600"
             onClick={toggleTheme}
             title={themeMode === ThemeMode.Light ? 'الوضع الداكن' : 'الوضع الفاتح'}
           >
@@ -72,15 +73,15 @@ export function Header({ onMenuClick }: HeaderProps) {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
+              <Button variant="ghost" className="gap-2 text-brand-cream-100 hover:text-white hover:bg-brand-green-600">
                 <div className="flex items-center gap-2">
                   <div className="hidden md:block text-right">
                     <div className="text-sm font-medium">{userInfo.username}</div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-brand-cream-200">
                       {userInfo.role === 'ADMIN' ? 'مدير' : 'محاسب'}
                     </div>
                   </div>
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-gold-500 text-white">
                     <UserIcon className="h-4 w-4" />
                   </div>
                 </div>

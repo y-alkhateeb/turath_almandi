@@ -32,7 +32,7 @@ export function Card({
   return (
     <div
       className={`
-        bg-white rounded-lg border border-gray-200
+        bg-brand-cream-50 rounded-lg border border-brand-gold-500
         ${paddingClasses[padding]}
         ${shadowClasses[shadow]}
         ${hover ? 'transition-shadow duration-200 hover:shadow-lg' : ''}
@@ -51,7 +51,7 @@ export interface CardHeaderProps {
 
 export function CardHeader({ children, className = '' }: CardHeaderProps) {
   return (
-    <div className={`border-b border-gray-200 pb-4 mb-4 ${className}`}>
+    <div className={`border-b border-brand-gold-500 pb-4 mb-4 ${className}`}>
       {children}
     </div>
   );
@@ -86,7 +86,7 @@ export interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
   return (
-    <div className={`border-t border-gray-200 pt-4 mt-4 ${className}`}>
+    <div className={`border-t border-brand-gold-500 pt-4 mt-4 ${className}`}>
       {children}
     </div>
   );

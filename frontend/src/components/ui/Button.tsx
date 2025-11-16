@@ -12,17 +12,17 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantClasses = {
   primary:
-    'bg-sky-600 text-white hover:bg-sky-700 focus:ring-sky-500 disabled:bg-sky-300',
+    'bg-brand-gold-500 text-white hover:bg-brand-gold-600 focus:ring-brand-gold-500 disabled:bg-brand-gold-300',
   secondary:
-    'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 disabled:bg-gray-300',
+    'bg-brand-green-500 text-white hover:bg-brand-green-600 focus:ring-brand-green-500 disabled:bg-brand-green-300',
   success:
     'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300',
   danger:
     'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
   outline:
-    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500 disabled:bg-gray-100',
+    'bg-white text-gray-700 border border-brand-gold-500 hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-gray-100',
   ghost:
-    'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500 disabled:bg-transparent disabled:text-gray-400',
+    'bg-transparent text-gray-700 hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-transparent disabled:text-gray-400',
 };
 
 const sizeClasses = {

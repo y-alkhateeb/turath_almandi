@@ -9,7 +9,7 @@ export interface BadgeProps {
 }
 
 const variantClasses = {
-  primary: 'bg-sky-100 text-sky-800 border-sky-200',
+  primary: 'bg-brand-gold-100 text-brand-gold-800 border-brand-gold-200',
   success: 'bg-green-100 text-green-800 border-green-200',
   warning: 'bg-amber-100 text-amber-800 border-amber-200',
   danger: 'bg-red-100 text-red-800 border-red-200',
@@ -24,7 +24,7 @@ const sizeClasses = {
 };
 
 const dotClasses = {
-  primary: 'bg-sky-600',
+  primary: 'bg-brand-gold-600',
   success: 'bg-green-600',
   warning: 'bg-amber-600',
   danger: 'bg-red-600',

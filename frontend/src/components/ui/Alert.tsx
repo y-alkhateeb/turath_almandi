@@ -11,10 +11,10 @@ export interface AlertProps {
 
 const variantClasses = {
   info: {
-    container: 'bg-blue-50 border-blue-200',
-    title: 'text-blue-800',
-    text: 'text-blue-700',
-    icon: 'text-blue-600',
+    container: 'bg-brand-gold-50 border-brand-gold-200',
+    title: 'text-brand-gold-800',
+    text: 'text-brand-gold-700',
+    icon: 'text-brand-gold-600',
   },
   success: {
     container: 'bg-green-50 border-green-200',

@@ -66,7 +66,7 @@ export function PageHeader({
 
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
+          <h1 className="text-2xl font-bold text-brand-gold-700 mb-2">{title}</h1>
           {description && (
             <p className="text-sm text-gray-600 max-w-3xl">{description}</p>
           )}

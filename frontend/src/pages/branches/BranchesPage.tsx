@@ -9,17 +9,11 @@ import {
 } from '@/hooks/useBranches';
 import { Modal } from '@/components/Modal';
 import { BranchForm } from '@/components/BranchForm';
-import { ConditionalRender } from '@/components/ConditionalRender';
-import {
-  LoadingSpinner,
-  EmptyState,
-  Alert,
-  PageHeader,
-  Button,
-  Table,
-  Badge,
-  ConfirmModal,
-} from '@/components/ui';
+import { PageLoading } from '@/components/loading';
+import { EmptyState, PageHeader, Table, ConfirmModal } from '@/components/ui';
+import { Button } from '@/ui/button';
+import { Badge } from '@/ui/badge';
+import { Alert } from '@/ui/alert';
 import type { Branch, BranchFormData } from '@/types';
 import type { Column } from '@/components/ui/Table';
 
@@ -94,12 +88,12 @@ export const BranchesPage = () => {
       header: 'الحالة',
       render: (branch) => (
         <Button
-          variant={branch.isActive ? 'success' : 'danger'}
+          variant={branch.isActive ? 'success' : 'destructive'}
           size="sm"
           onClick={() => isAdmin() && handleToggleStatus(branch)}
           disabled={!isAdmin() || updateBranch.isPending}
         >
-          <Badge variant={branch.isActive ? 'success' : 'danger'}>
+          <Badge variant={branch.isActive ? 'success' : 'destructive'}>
             {branch.isActive ? 'نشط' : 'غير نشط'}
           </Badge>
         </Button>
@@ -118,17 +112,17 @@ export const BranchesPage = () => {
             variant="ghost"
             size="sm"
             onClick={() => setEditingBranch(branch)}
-            leftIcon={<Edit className="w-4 h-4" />}
           >
+            <Edit className="w-4 h-4" />
             تعديل
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setDeletingBranchId(branch.id)}
-            leftIcon={<Trash2 className="w-4 h-4" />}
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
+            <Trash2 className="w-4 h-4" />
             حذف
           </Button>
         </div>
@@ -144,11 +138,8 @@ export const BranchesPage = () => {
         description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
         actions={
           isAdmin() ? (
-            <Button
-              variant="primary"
-              onClick={() => setIsCreateModalOpen(true)}
-              leftIcon={<Plus className="w-5 h-5" />}
-            >
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="w-5 h-5" />
               إضافة فرع جديد
             </Button>
           ) : undefined
@@ -157,16 +148,14 @@ export const BranchesPage = () => {
 
       {/* Error State */}
       {error && (
-        <Alert variant="danger" title="خطأ">
+        <Alert variant="destructive">
           حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى.
         </Alert>
       )}
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <LoadingSpinner size="lg" text="جاري تحميل الفروع..." />
-        </div>
+        <PageLoading message="جاري تحميل الفروع..." />
       ) : branches.length === 0 ? (
         /* Empty State */
         <EmptyState

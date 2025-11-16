@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { branchesService } from '@services/branches.service';
 import type { Branch } from '@/types/branches.types';
 

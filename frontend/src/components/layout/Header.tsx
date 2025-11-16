@@ -1,4 +1,4 @@
-import { useAuth } from '@hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { Menu, Bell, Settings, User } from 'lucide-react';
 
 interface HeaderProps {

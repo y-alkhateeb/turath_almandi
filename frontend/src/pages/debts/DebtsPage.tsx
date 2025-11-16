@@ -1,20 +1,16 @@
 import { useState } from 'react';
 import { Plus, DollarSign, ChevronRight } from 'lucide-react';
-import { DebtForm } from '../../components/DebtForm';
-import { Modal } from '../../components/Modal';
-import { PayDebtModal } from '../../components/PayDebtModal';
-import { DebtPaymentHistory } from '../../components/DebtPaymentHistory';
-import { useDebts } from '../../hooks/useDebts';
-import {
-  LoadingSpinner,
-  EmptyState,
-  Alert,
-  PageHeader,
-  Button,
-  Table,
-  Badge,
-} from '@/components/ui';
-import { DebtStatus, type Debt } from '../../types/debts.types';
+import { DebtForm } from '@/components/DebtForm';
+import { Modal } from '@/components/Modal';
+import { PayDebtModal } from '@/components/PayDebtModal';
+import { DebtPaymentHistory } from '@/components/DebtPaymentHistory';
+import { useDebts } from '@/hooks/useDebts';
+import { PageLoading } from '@/components/loading';
+import { EmptyState, PageHeader, Table } from '@/components/ui';
+import { Button } from '@/ui/button';
+import { Badge } from '@/ui/badge';
+import { Alert } from '@/ui/alert';
+import { DebtStatus, type Debt } from '@/types/debts.types';
 import type { Column } from '@/components/ui/Table';
 
 /**
@@ -252,10 +248,10 @@ export const DebtsPage = () => {
         description="إدارة جميع الديون والذمم"
         actions={
           <Button
-            variant="primary"
+            variant="default"
             onClick={() => setIsModalOpen(true)}
-            leftIcon={<Plus className="w-5 h-5" />}
           >
+            <Plus className="w-5 h-5" />
             إضافة دين
           </Button>
         }
@@ -280,16 +276,14 @@ export const DebtsPage = () => {
 
       {/* Error State */}
       {error && (
-        <Alert variant="danger" title="خطأ">
+        <Alert variant="destructive">
           حدث خطأ أثناء تحميل البيانات
         </Alert>
       )}
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <LoadingSpinner size="lg" text="جاري التحميل..." />
-        </div>
+        <PageLoading message="جاري تحميل الديون..." />
       ) : debts && debts.length === 0 ? (
         /* Empty State */
         <EmptyState

@@ -1,0 +1,362 @@
+@import 'tailwindcss';
+
+/* ============================================
+   THEME CONFIGURATION
+   تراث المندي - Modern Design System
+   ============================================ */
+
+@theme {
+  /* === BRAND COLORS === */
+  --color-brand-50: #fef3e7;
+  --color-brand-100: #fde6cf;
+  --color-brand-200: #fbcc9f;
+  --color-brand-300: #f8a35d;
+  --color-brand-400: #f68934;
+  --color-brand-500: #e47020;
+  --color-brand-600: #c45515;
+  --color-brand-700: #9d4312;
+  --color-brand-800: #7e3710;
+  --color-brand-900: #662e0e;
+
+  /* === PRIMARY COLORS === */
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+
+  /* === SUCCESS COLORS === */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #86efac;
+  --color-success-400: #4ade80;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+  --color-success-900: #14532d;
+
+  /* === DANGER COLORS === */
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
+  --color-danger-300: #fca5a5;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+  --color-danger-800: #991b1b;
+  --color-danger-900: #7f1d1d;
+
+  /* === WARNING COLORS === */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-200: #fde68a;
+  --color-warning-300: #fcd34d;
+  --color-warning-400: #fbbf24;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+  --color-warning-800: #92400e;
+  --color-warning-900: #78350f;
+
+  /* === NEUTRAL COLORS === */
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f5f5f4;
+  --color-gray-200: #e7e5e4;
+  --color-gray-300: #d6d3d1;
+  --color-gray-400: #a8a29e;
+  --color-gray-500: #78716c;
+  --color-gray-600: #57534e;
+  --color-gray-700: #44403c;
+  --color-gray-800: #292524;
+  --color-gray-900: #1c1917;
+
+  /* === BACKGROUND COLORS (Light Mode Default) === */
+  --color-background: 255, 255, 255;
+  --color-foreground: 28, 25, 23;
+  --color-card: 255, 255, 255;
+  --color-card-foreground: 28, 25, 23;
+  --color-popover: 255, 255, 255;
+  --color-popover-foreground: 28, 25, 23;
+  --color-muted: 245, 245, 244;
+  --color-muted-foreground: 87, 83, 78;
+  --color-accent: 245, 245, 244;
+  --color-accent-foreground: 28, 25, 23;
+  --color-destructive: 239, 68, 68;
+  --color-destructive-foreground: 255, 255, 255;
+  --color-border: 231, 229, 228;
+  --color-input: 231, 229, 228;
+  --color-ring: 14, 165, 233;
+}
+
+/* Dark mode theme variables */
+[data-theme-mode="dark"] {
+  --color-background: 10, 10, 10;
+  --color-foreground: 245, 245, 244;
+  --color-card: 28, 25, 23;
+  --color-card-foreground: 245, 245, 244;
+  --color-popover: 28, 25, 23;
+  --color-popover-foreground: 245, 245, 244;
+  --color-muted: 41, 37, 36;
+  --color-muted-foreground: 214, 211, 209;
+  --color-accent: 41, 37, 36;
+  --color-accent-foreground: 245, 245, 244;
+  --color-border: 41, 37, 36;
+  --color-input: 41, 37, 36;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   BASE LAYER - Global Overrides
+   ============================================ */
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+
+  body {
+    @apply bg-white text-gray-900;
+    font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  [data-theme-mode="dark"] body {
+    @apply bg-gray-950 text-gray-100;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+
+  [data-theme-mode="dark"] ::-webkit-scrollbar-thumb {
+    @apply bg-gray-700;
+  }
+
+  [data-theme-mode="dark"] ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-600;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-primary-200 text-primary-900;
+  }
+
+  [data-theme-mode="dark"] ::selection {
+    @apply bg-primary-800 text-primary-100;
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ============================================
+   COMPONENTS LAYER - Reusable Components
+   ============================================ */
+
+@layer components {
+  /* Card Component */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  [data-theme-mode="dark"] .card {
+    @apply bg-gray-900 border-gray-800;
+  }
+
+  .card:hover {
+    @apply shadow-lg;
+    transform: translateY(-2px);
+  }
+
+  /* Glass Effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    @apply border border-white/40;
+  }
+
+  [data-theme-mode="dark"] .glass {
+    background: rgba(28, 25, 23, 0.85);
+    @apply border-gray-700/40;
+  }
+}
+
+/* ============================================
+   UTILITIES LAYER - Custom Utilities
+   ============================================ */
+
+@layer utilities {
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Gradient Utilities */
+  .bg-gradient-brand {
+    background: linear-gradient(135deg, theme('colors.brand.500') 0%, theme('colors.brand.400') 100%);
+  }
+
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, theme('colors.primary.500') 0%, theme('colors.primary.400') 100%);
+  }
+
+  .bg-gradient-success {
+    background: linear-gradient(135deg, theme('colors.success.500') 0%, theme('colors.success.400') 100%);
+  }
+
+  /* Loading Skeleton */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      theme('colors.gray.100') 25%,
+      theme('colors.gray.200') 50%,
+      theme('colors.gray.100') 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    @apply rounded;
+  }
+
+  [data-theme-mode="dark"] .skeleton {
+    background: linear-gradient(
+      90deg,
+      theme('colors.gray.800') 25%,
+      theme('colors.gray.700') 50%,
+      theme('colors.gray.800') 75%
+    );
+    background-size: 200% 100%;
+  }
+
+  /* RTL Utilities */
+  [dir="rtl"] .rtl\:text-right {
+    text-align: right;
+  }
+
+  [dir="ltr"] .ltr\:text-left {
+    text-align: left;
+  }
+}

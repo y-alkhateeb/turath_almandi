@@ -9,16 +9,11 @@ import {
 } from '@/hooks/useUsers';
 import { Modal } from '@/components/Modal';
 import { UserForm } from '@/components/UserForm';
-import {
-  LoadingSpinner,
-  EmptyState,
-  Alert,
-  PageHeader,
-  Button,
-  Table,
-  Badge,
-  ConfirmModal,
-} from '@/components/ui';
+import { PageLoading } from '@/components/loading';
+import { EmptyState, PageHeader, Table, ConfirmModal } from '@/components/ui';
+import { Button } from '@/ui/button';
+import { Badge } from '@/ui/badge';
+import { Alert } from '@/ui/alert';
 import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
 import type { Column } from '@/components/ui/Table';
 
@@ -70,8 +65,8 @@ export const UsersPage = () => {
     return role === 'ADMIN' ? 'مدير' : 'محاسب';
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    return role === 'ADMIN' ? 'warning' : 'info';
+  const getRoleBadgeVariant = (role: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    return role === 'ADMIN' ? 'default' : 'secondary';
   };
 
   // Table columns configuration
@@ -129,7 +124,7 @@ export const UsersPage = () => {
           onClick={() => isAdmin() && handleToggleStatus(user)}
           disabled={!isAdmin() || updateUser.isPending}
         >
-          <Badge variant={user.isActive ? 'success' : 'danger'}>
+          <Badge variant={user.isActive ? 'default' : 'destructive'}>
             {user.isActive ? 'نشط' : 'معطل'}
           </Badge>
         </Button>
@@ -148,17 +143,17 @@ export const UsersPage = () => {
             variant="ghost"
             size="sm"
             onClick={() => setEditingUser(user)}
-            leftIcon={<Edit className="w-4 h-4" />}
           >
+            <Edit className="w-4 h-4" />
             تعديل
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setDeletingUserId(user.id)}
-            leftIcon={<UserX className="w-4 h-4" />}
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
           >
+            <UserX className="w-4 h-4" />
             حذف
           </Button>
         </div>
@@ -174,11 +169,8 @@ export const UsersPage = () => {
         description="إدارة المستخدمين وصلاحياتهم في النظام"
         actions={
           isAdmin() ? (
-            <Button
-              variant="primary"
-              onClick={() => setIsCreateModalOpen(true)}
-              leftIcon={<Plus className="w-5 h-5" />}
-            >
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="w-5 h-5" />
               إضافة مستخدم جديد
             </Button>
           ) : undefined
@@ -187,16 +179,14 @@ export const UsersPage = () => {
 
       {/* Error State */}
       {error && (
-        <Alert variant="danger" title="خطأ">
+        <Alert variant="destructive">
           حدث خطأ أثناء تحميل المستخدمين. يرجى المحاولة مرة أخرى.
         </Alert>
       )}
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <LoadingSpinner size="lg" text="جاري تحميل المستخدمين..." />
-        </div>
+        <PageLoading message="جاري تحميل المستخدمين..." />
       ) : users.length === 0 ? (
         /* Empty State */
         <EmptyState

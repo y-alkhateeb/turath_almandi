@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { StatCard, LoadingSpinner, Alert, PageHeader, Button, Card } from '@/components/ui';
+import { StatCard, PageHeader } from '@/components/ui';
+import { PageLoading } from '@/components/loading';
+import { Button } from '@/ui/button';
+import { Card } from '@/ui/card';
+import { Alert } from '@/ui/alert';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/utils/format';
 import { useAuth } from '@/hooks/useAuth';
 import { useBranches } from '@/hooks/useBranches';
 import {
@@ -51,16 +55,12 @@ export default function DashboardPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <PageLoading message="جاري تحميل لوحة التحكم..." />;
   }
 
   if (error) {
     return (
-      <Alert variant="danger" title="خطأ">
+      <Alert variant="destructive">
         حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.
       </Alert>
     );

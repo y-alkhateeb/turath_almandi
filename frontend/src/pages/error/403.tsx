@@ -1,0 +1,43 @@
+/**
+ * 403 Forbidden Page
+ * Displayed when user doesn't have permission to access a resource
+ */
+
+import { useRouter } from '@/routes/hooks';
+import { Button } from '@/ui/button';
+import { Icon } from '@/components/icon';
+
+export default function Page403() {
+  const router = useRouter();
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="text-center">
+        <div className="mb-8">
+          <Icon
+            icon="solar:lock-password-bold-duotone"
+            size={120}
+            className="text-danger-500 mx-auto"
+          />
+        </div>
+        <h1 className="text-6xl font-bold text-gray-900 mb-4">403</h1>
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          ممنوع الوصول
+        </h2>
+        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          عذراً، ليس لديك صلاحية الوصول إلى هذه الصفحة. يرجى التواصل مع المسؤول إذا كنت تعتقد أن هذا خطأ.
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Button onClick={() => router.back()}>
+            <Icon icon="solar:arrow-right-linear" className="ml-2" />
+            العودة
+          </Button>
+          <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            <Icon icon="solar:home-2-linear" className="ml-2" />
+            الصفحة الرئيسية
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

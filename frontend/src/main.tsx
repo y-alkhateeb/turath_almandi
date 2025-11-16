@@ -2,6 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router';
+import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/theme/theme-provider';
 import App from './App';
 import './index.css';
 
@@ -20,7 +22,16 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <App />
+        <ThemeProvider>
+          <App />
+          <Toaster
+            position="top-center"
+            dir="rtl"
+            richColors
+            closeButton
+            duration={4000}
+          />
+        </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>

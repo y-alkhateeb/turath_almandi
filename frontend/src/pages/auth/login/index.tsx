@@ -73,6 +73,14 @@ export default function LoginPage() {
       console.log('user:', response?.user);
       console.log('==================');
 
+      // Validate response has required data
+      if (!response?.access_token || !response?.refresh_token || !response?.user) {
+        console.error('❌ Invalid response: Missing required fields');
+        setError('خطأ في الاستجابة من الخادم. البيانات غير كاملة.');
+        toast.error('خطأ في الاستجابة من الخادم. يرجى المحاولة مرة أخرى.');
+        return;
+      }
+
       // Store user info and tokens
       setUserToken({
         accessToken: response.access_token,

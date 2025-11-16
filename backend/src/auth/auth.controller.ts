@@ -18,9 +18,17 @@ export class AuthController {
   }
 
   @Post('login')
-  @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
-    return this.authService.login(loginDto);
+    const result = await this.authService.login(loginDto);
+    console.log('=== BACKEND LOGIN CONTROLLER DEBUG ===');
+    console.log('Result:', JSON.stringify(result, null, 2));
+    console.log('Result type:', typeof result);
+    console.log('Result keys:', result ? Object.keys(result) : 'null/undefined');
+    console.log('access_token:', result?.access_token);
+    console.log('refresh_token:', result?.refresh_token);
+    console.log('user:', result?.user);
+    console.log('======================================');
+    return result;
   }
 
   @Post('refresh')

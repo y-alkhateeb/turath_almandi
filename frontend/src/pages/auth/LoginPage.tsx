@@ -4,7 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
-import { Alert, Button } from '@/components/ui';
+import { Alert } from '@/ui/alert';
+import { Button } from '@/ui/button';
+import { Card } from '@/ui/card';
 
 // Validation schema
 const loginSchema = z.object({
@@ -37,7 +39,10 @@ const LoginPage = () => {
     setError('');
     try {
       await login(data);
-      navigate('/dashboard');
+      // Small delay to ensure Zustand persist completes before navigation
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } catch (err: any) {
       const message = err.response?.data?.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
       setError(message);
@@ -45,44 +50,40 @@ const LoginPage = () => {
   };
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 flex items-center justify-center p-6"
-      dir="rtl"
-    >
-      <div className="w-full max-w-md animate-fade-in">
-        {/* Logo and Title */}
-        <div className="text-center mb-10 animate-scale-in">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-primary rounded-3xl mb-6 text-white text-5xl font-bold shadow-2xl shadow-sky-200">
-            ت
+    <div className="min-h-screen flex" dir="rtl">
+      {/* Left Side - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
+        <div className="w-full max-w-md animate-fade-in">
+          {/* Logo and Title */}
+          <div className="mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-500 rounded-2xl mb-4 text-white text-3xl font-bold shadow-lg">
+              ت
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً بعودتك</h1>
+            <p className="text-gray-600">سجل دخولك لمتابعة العمل</p>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">تراث المندي</h1>
-          <p className="text-lg text-gray-600">نظام المحاسبة للمطاعم</p>
-        </div>
 
-        {/* Login Form */}
-        <div className="card p-10 shadow-2xl shadow-gray-200/50">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            تسجيل الدخول
-          </h2>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Login Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Username Input */}
             <div>
-              <label htmlFor="username" className="block text-sm font-semibold text-gray-800 mb-2.5">
+              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
                 اسم المستخدم
               </label>
               <input
                 type="text"
                 id="username"
                 {...register('username')}
-                className={`input ${
-                  errors.username ? '!border-red-500' : ''
-                }`}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.username
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
+                } focus:ring-2 focus:ring-opacity-20 outline-none transition-colors`}
                 placeholder="أدخل اسم المستخدم"
                 disabled={isLoading}
               />
               {errors.username && (
-                <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
@@ -93,22 +94,24 @@ const LoginPage = () => {
 
             {/* Password Input */}
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-2.5">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                 كلمة المرور
               </label>
               <input
                 type="password"
                 id="password"
                 {...register('password')}
-                className={`input ${
-                  errors.password ? '!border-red-500' : ''
-                }`}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.password
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
+                } focus:ring-2 focus:ring-opacity-20 outline-none transition-colors`}
                 placeholder="••••••••"
                 disabled={isLoading}
                 dir="ltr"
               />
               {errors.password && (
-                <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
@@ -123,7 +126,7 @@ const LoginPage = () => {
                 type="checkbox"
                 id="rememberMe"
                 {...register('rememberMe')}
-                className="w-4.5 h-4.5 text-sky-600 border-gray-300 rounded focus:ring-sky-500 focus:ring-2"
+                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
                 disabled={isLoading}
               />
               <label htmlFor="rememberMe" className="text-sm text-gray-700 cursor-pointer select-none">
@@ -133,7 +136,7 @@ const LoginPage = () => {
 
             {/* Error Message */}
             {error && (
-              <Alert variant="danger" className="animate-slide-in-right">
+              <Alert variant="destructive" className="animate-slide-in-right">
                 {error}
               </Alert>
             )}
@@ -141,21 +144,77 @@ const LoginPage = () => {
             {/* Submit Button */}
             <Button
               type="submit"
-              variant="primary"
-              fullWidth
-              isLoading={isLoading}
+              variant="default"
+              className="w-full py-3 text-base font-semibold"
               disabled={isLoading}
-              className="py-3.5 text-base font-semibold mt-2"
             >
-              تسجيل الدخول
+              {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
             </Button>
           </form>
+
+          {/* Footer Note */}
+          <p className="text-center text-sm text-gray-500 mt-8">
+            جميع الحقوق محفوظة © 2025 تراث المندي
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Image/Gradient */}
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700 items-center justify-center p-12 relative overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
 
-        {/* Footer Note */}
-        <p className="text-center text-sm text-gray-500 mt-8 animate-fade-in">
-          جميع الحقوق محفوظة © 2025 تراث المندي
-        </p>
+        {/* Content */}
+        <div className="relative z-10 text-white text-center max-w-lg">
+          <div className="mb-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl mb-6 text-white text-5xl font-bold">
+              ت
+            </div>
+            <h2 className="text-4xl font-bold mb-4">تراث المندي</h2>
+            <p className="text-xl text-white/90 mb-8">نظام المحاسبة الشامل للمطاعم</p>
+          </div>
+
+          <div className="space-y-4 text-right">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">إدارة شاملة</h3>
+                <p className="text-white/80">إدارة الفروع والموظفين والمخزون بكفاءة عالية</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">تقارير دقيقة</h3>
+                <p className="text-white/80">تحليلات مالية ومحاسبية شاملة ودقيقة</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">أمان عالي</h3>
+                <p className="text-white/80">حماية بياناتك بأحدث معايير الأمان</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

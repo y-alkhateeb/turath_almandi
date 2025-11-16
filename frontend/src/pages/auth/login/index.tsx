@@ -66,8 +66,8 @@ export default function LoginPage() {
 
       // Store user info and tokens
       setUserToken({
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token,
       });
       setUserInfo(response.user);
 

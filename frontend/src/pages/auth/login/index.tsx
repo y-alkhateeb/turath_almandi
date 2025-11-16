@@ -199,12 +199,27 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Image/Gradient */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700 items-center justify-center p-12 relative overflow-hidden">
-        {/* Decorative Elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-        </div>
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden">
+        {/* Background Image or Gradient */}
+        {!GLOBAL_CONFIG.useFallbackGradient ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${GLOBAL_CONFIG.loginBackgroundImage})` }}
+          >
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60"></div>
+          </div>
+        ) : (
+          <>
+            {/* Gradient Background (Fallback) */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700"></div>
+            {/* Decorative Elements */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+              <div className="absolute bottom-20 left-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+            </div>
+          </>
+        )}
 
         {/* Content */}
         <div className="relative z-10 text-white text-center max-w-lg">

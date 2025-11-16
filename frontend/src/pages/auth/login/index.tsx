@@ -64,6 +64,15 @@ export default function LoginPage() {
         password: data.password,
       });
 
+      console.log('=== LOGIN DEBUG ===');
+      console.log('Raw response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', response ? Object.keys(response) : 'null/undefined');
+      console.log('access_token:', response?.access_token);
+      console.log('refresh_token:', response?.refresh_token);
+      console.log('user:', response?.user);
+      console.log('==================');
+
       // Store user info and tokens
       setUserToken({
         accessToken: response.access_token,

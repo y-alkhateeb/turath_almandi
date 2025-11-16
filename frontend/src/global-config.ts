@@ -12,6 +12,10 @@ const defaultRoute = '/dashboard';
 const appName = 'تراث المندي';
 const appDescription = 'نظام المحاسبة لمطاعم تراث المندي';
 
+// Branding assets
+const loginBackgroundImage = '/images/login-bg.jpg'; // Admin can change this from dashboard
+const useFallbackGradient = true; // Set to false once image is uploaded
+
 // Storage keys
 const storageKeys = {
   auth: 'auth-storage',
@@ -27,6 +31,8 @@ const GLOBAL_CONFIG = {
   defaultRoute,
   appName,
   appDescription,
+  loginBackgroundImage,
+  useFallbackGradient,
   storageKeys,
   routerMode,
 } as const;

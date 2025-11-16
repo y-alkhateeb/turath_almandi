@@ -70,8 +70,10 @@ export default function LoginPage() {
 
       toast.success('تم تسجيل الدخول بنجاح');
 
-      // Navigate to dashboard
-      router.replace(GLOBAL_CONFIG.defaultRoute);
+      // Small delay to ensure Zustand persist completes before navigation
+      setTimeout(() => {
+        router.replace(GLOBAL_CONFIG.defaultRoute);
+      }, 100);
     } catch (err: any) {
       const message = err.response?.data?.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
       setError(message);
@@ -82,33 +84,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 flex items-center justify-center p-6"
-      dir="rtl"
-    >
-      <div className="w-full max-w-md animate-fadeIn">
-        {/* Logo and Title */}
-        <div className="text-center mb-10 animate-scaleIn">
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-l from-brand-600 to-brand-500 rounded-3xl text-white text-5xl font-bold shadow-2xl shadow-sky-200">
+    <div className="min-h-screen flex" dir="rtl">
+      {/* Left Side - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
+        <div className="w-full max-w-md animate-fadeIn">
+          {/* Logo and Title */}
+          <div className="mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-500 rounded-2xl mb-4 text-white text-3xl font-bold shadow-lg">
               ت
             </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            {GLOBAL_CONFIG.appName}
-          </h1>
-          <p className="text-lg text-gray-600">{GLOBAL_CONFIG.appDescription}</p>
-        </div>
-
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl p-10 shadow-2xl shadow-gray-200/50">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Icon icon="solar:lock-password-bold-duotone" size={28} className="text-primary-600" />
-            <h2 className="text-2xl font-bold text-gray-900">تسجيل الدخول</h2>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً بعودتك</h1>
+            <p className="text-gray-600">سجل دخولك لمتابعة العمل</p>
           </div>
 
+          {/* Login Form */}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               {/* Username Input */}
               <FormField
                 control={form.control}
@@ -199,12 +190,79 @@ export default function LoginPage() {
               </Button>
             </form>
           </Form>
-        </div>
 
-        {/* Footer Note */}
-        <p className="text-center text-sm text-gray-500 mt-8 animate-fadeIn">
-          جميع الحقوق محفوظة © 2025 {GLOBAL_CONFIG.appName}
-        </p>
+          {/* Footer Note */}
+          <p className="text-center text-sm text-gray-500 mt-8">
+            جميع الحقوق محفوظة © 2025 {GLOBAL_CONFIG.appName}
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Image/Gradient */}
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden">
+        {/* Background Image or Gradient */}
+        {!GLOBAL_CONFIG.useFallbackGradient ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${GLOBAL_CONFIG.loginBackgroundImage})` }}
+          >
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60"></div>
+          </div>
+        ) : (
+          <>
+            {/* Gradient Background (Fallback) */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700"></div>
+            {/* Decorative Elements */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+              <div className="absolute bottom-20 left-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+            </div>
+          </>
+        )}
+
+        {/* Content */}
+        <div className="relative z-10 text-white text-center max-w-lg">
+          <div className="mb-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl mb-6 text-white text-5xl font-bold">
+              ت
+            </div>
+            <h2 className="text-4xl font-bold mb-4">{GLOBAL_CONFIG.appName}</h2>
+            <p className="text-xl text-white/90 mb-8">{GLOBAL_CONFIG.appDescription}</p>
+          </div>
+
+          <div className="space-y-4 text-right">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                <Icon icon="solar:buildings-2-bold-duotone" className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">إدارة شاملة</h3>
+                <p className="text-white/80">إدارة الفروع والموظفين والمخزون بكفاءة عالية</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                <Icon icon="solar:chart-2-bold-duotone" className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">تقارير دقيقة</h3>
+                <p className="text-white/80">تحليلات مالية ومحاسبية شاملة ودقيقة</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                <Icon icon="solar:shield-check-bold-duotone" className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-1">أمان عالي</h3>
+                <p className="text-white/80">حماية بياناتك بأحدث معايير الأمان</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

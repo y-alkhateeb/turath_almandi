@@ -1,7 +1,14 @@
-import { Branch } from '@/services/branches.service';
-
-// Re-export Branch interface from service
-export type { Branch };
+// Branch interface
+export interface Branch {
+  id: string;
+  name: string;
+  location: string;
+  managerName: string;
+  phone: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 // Input type for creating a new branch
 export interface CreateBranchInput {

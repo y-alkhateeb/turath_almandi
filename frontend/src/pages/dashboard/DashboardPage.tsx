@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { StatCard } from '@/components/ui/StatCard';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { Alert } from '@/components/ui/Alert';
+import { StatCard, LoadingSpinner, Alert, PageHeader, Button, Card } from '@/components/ui';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { CategoryChart } from '@/components/dashboard/CategoryChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
@@ -62,7 +60,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <Alert variant="error">
+      <Alert variant="danger" title="خطأ">
         حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.
       </Alert>
     );
@@ -75,54 +73,49 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
-            <p className="text-sm text-gray-600 mt-2">
-              مرحباً بك {user?.name || user?.username}
-            </p>
-          </div>
-        </div>
+      <PageHeader
+        title="لوحة التحكم"
+        description={`مرحباً بك ${user?.username}`}
+      />
 
-        {/* Filters Row */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Date Filter */}
-          <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-            <Calendar className="w-5 h-5 text-gray-500" />
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+      {/* Filters Row */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Date Filter */}
+        <Card className="flex items-center gap-2 p-3">
+          <Calendar className="w-5 h-5 text-gray-500" />
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="border-0 focus:ring-2 focus:ring-blue-500 rounded-lg text-sm bg-transparent"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleTodayClick}
+          >
+            اليوم
+          </Button>
+        </Card>
+
+        {/* Branch Filter - Admin Only */}
+        {isAdmin() && branches && branches.length > 0 && (
+          <Card className="flex items-center gap-3 p-3">
+            <Building className="w-5 h-5 text-gray-500" />
+            <select
+              value={selectedBranchId}
+              onChange={(e) => setSelectedBranchId(e.target.value)}
               className="border-0 focus:ring-2 focus:ring-blue-500 rounded-lg text-sm bg-transparent"
-            />
-            <button
-              onClick={handleTodayClick}
-              className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
             >
-              اليوم
-            </button>
-          </div>
-
-          {/* Branch Filter - Admin Only */}
-          {isAdmin() && branches && branches.length > 0 && (
-            <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-              <Building className="w-5 h-5 text-gray-500" />
-              <select
-                value={selectedBranchId}
-                onChange={(e) => setSelectedBranchId(e.target.value)}
-                className="border-0 focus:ring-2 focus:ring-blue-500 rounded-lg text-sm bg-transparent"
-              >
-                <option value="">جميع الفروع</option>
-                {branches.map((branch) => (
-                  <option key={branch.id} value={branch.id}>
-                    {branch.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
+              <option value="">جميع الفروع</option>
+              {branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+          </Card>
+        )}
       </div>
 
       {/* Stats Grid */}

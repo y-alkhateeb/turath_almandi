@@ -1,8 +1,4 @@
-export interface Branch {
-  id: string;
-  name: string;
-  location: string;
-}
+import type { Branch } from './branches.types';
 
 export interface UserWithBranch {
   id: string;

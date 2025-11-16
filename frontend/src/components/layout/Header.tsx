@@ -56,7 +56,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             {/* User Info */}
             <div className="flex items-center gap-3">
               <div className="hidden md:block text-right">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                <p className="text-sm font-medium text-gray-900">{user?.username}</p>
                 <p className="text-xs text-gray-500">{user?.role}</p>
               </div>
               <button

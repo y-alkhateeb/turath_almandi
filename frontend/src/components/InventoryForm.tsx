@@ -25,7 +25,7 @@ const inventorySchema = z.object({
       },
       { message: 'الكمية يجب أن تكون رقم أكبر من أو يساوي صفر' }
     ),
-  unit: z.enum(['KG', 'PIECE', 'LITER', 'OTHER'], {
+  unit: z.nativeEnum(InventoryUnit, {
     message: 'الوحدة مطلوبة',
   }),
   costPerUnit: z
@@ -39,7 +39,7 @@ const inventorySchema = z.object({
       { message: 'سعر الوحدة يجب أن يكون رقم أكبر من أو يساوي صفر' }
     ),
   notes: z.string(),
-});
+}) satisfies z.ZodType<InventoryFormData>;
 
 interface InventoryFormProps {
   item?: InventoryItem;

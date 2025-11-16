@@ -45,3 +45,7 @@ export type { PageHeaderProps } from './PageHeader';
 // Pagination component
 export { Pagination } from './Pagination';
 export type { PaginationProps } from './Pagination';
+
+// ConfirmModal component
+export { ConfirmModal } from './ConfirmModal';
+export type { ConfirmModalProps } from './ConfirmModal';

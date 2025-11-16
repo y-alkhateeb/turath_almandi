@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { usersService, User } from '@services/users.service';
-import { branchesService, Branch } from '@services/branches.service';
+import { usersService } from '@services/users.service';
+import { branchesService } from '@services/branches.service';
+import type { User } from '@/types/auth.types';
+import type { Branch } from '@/types/branches.types';
 import { ConditionalRender } from './ConditionalRender';
 
 export const UserBranchAssignment = () => {

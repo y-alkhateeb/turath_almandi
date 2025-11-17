@@ -33,7 +33,7 @@ export class DebtsService {
   async create(createDebtDto: CreateDebtDto, user: RequestUser) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('User must be assigned to a branch to create debts');
+      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء الديون');
     }
 
     // Validate amount is positive
@@ -144,7 +144,7 @@ export class DebtsService {
   async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('User must be assigned to a branch to pay debts');
+      throw new ForbiddenException('يجب تعيين فرع للمستخدم لسداد الديون');
     }
 
     // Validate amount is positive

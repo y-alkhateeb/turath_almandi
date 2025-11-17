@@ -44,7 +44,7 @@ export class TransactionsService {
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('User must be assigned to a branch to create transactions');
+      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء المعاملات');
     }
 
     // Validate amount is positive
@@ -456,7 +456,7 @@ export class TransactionsService {
   ) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('User must be assigned to a branch to create transactions');
+      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء المعاملات');
     }
 
     // Validate amount is positive

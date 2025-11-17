@@ -37,7 +37,7 @@ export class InventoryService {
   async create(createInventoryDto: CreateInventoryDto, user: RequestUser) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('User must be assigned to a branch to create inventory items');
+      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء عناصر المخزون');
     }
 
     // Validate quantity is non-negative

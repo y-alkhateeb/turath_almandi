@@ -96,12 +96,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex" dir="rtl">
       {/* Left Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-[var(--bg-secondary)]">
         <div className="w-full max-w-md animate-fadeIn">
           {/* Title */}
           <div className="mb-10">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً بعودتك</h1>
-            <p className="text-gray-600">سجل دخولك لمتابعة العمل</p>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">مرحباً بعودتك</h1>
+            <p className="text-[var(--text-secondary)]">سجل دخولك لمتابعة العمل</p>
           </div>
 
           {/* Login Form */}
@@ -199,7 +199,7 @@ export default function LoginPage() {
           </Form>
 
           {/* Footer Note */}
-          <p className="text-center text-sm text-gray-500 mt-8">
+          <p className="text-center text-sm text-[var(--text-secondary)] mt-8">
             جميع الحقوق محفوظة © 2025 {GLOBAL_CONFIG.appName}
           </p>
         </div>

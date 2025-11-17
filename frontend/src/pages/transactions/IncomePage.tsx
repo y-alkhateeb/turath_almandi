@@ -41,8 +41,8 @@ export const IncomePage = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">الإيرادات</h1>
-            <p className="mt-2 text-gray-600">إدارة جميع الإيرادات والدخل</p>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">الإيرادات</h1>
+            <p className="mt-2 text-[var(--text-secondary)]">إدارة جميع الإيرادات والدخل</p>
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -92,7 +92,7 @@ export const IncomePage = () => {
 
       {/* Empty State */}
       {!isLoading && !error && transactions && transactions.length === 0 && (
-        <div className="bg-white rounded-lg shadow p-12">
+        <div className="bg-[var(--bg-secondary)] rounded-lg shadow p-12">
           <EmptyState
             icon={
               <svg
@@ -121,37 +121,37 @@ export const IncomePage = () => {
 
       {/* Transactions Table */}
       {!isLoading && !error && transactions && transactions.length > 0 && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-[var(--bg-secondary)] rounded-lg shadow overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-[var(--bg-tertiary)] border-b">
               <tr>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   التاريخ
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   المبلغ
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   طريقة الدفع
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   الفئة
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   الفرع
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   ملاحظات
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-[var(--border-color)]">
               {transactions.map((transaction) => (
                 <tr
                   key={transaction.id}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="hover:bg-[var(--bg-tertiary)] transition-colors"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     {new Date(transaction.date).toLocaleDateString('ar-IQ', {
                       year: 'numeric',
                       month: 'long',
@@ -161,7 +161,7 @@ export const IncomePage = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600" dir="ltr">
                     {transaction.amount.toLocaleString('ar-IQ')} {transaction.currency}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     <span
                       className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                         transaction.paymentMethod === 'CASH'
@@ -172,13 +172,13 @@ export const IncomePage = () => {
                       {formatPaymentMethod(transaction.paymentMethod)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     {transaction.category || '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     {transaction.branch?.name || '-'}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                  <td className="px-6 py-4 text-sm text-[var(--text-secondary)] max-w-xs truncate">
                     {transaction.notes || '-'}
                   </td>
                 </tr>

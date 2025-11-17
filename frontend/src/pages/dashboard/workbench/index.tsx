@@ -115,10 +115,10 @@ function StatCard({ title, value, icon: Icon, description, color, trend }: StatC
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
+            <p className="text-sm font-medium text-[var(--text-secondary)]">{title}</p>
+            <p className="text-2xl font-bold text-[var(--text-primary)] mt-2">{value}</p>
             {description && (
-              <p className="text-sm text-gray-500 mt-1">{description}</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">{description}</p>
             )}
             {trend && (
               <div className="flex items-center gap-1 mt-2">
@@ -159,8 +159,8 @@ function RevenueChart({ data }: RevenueChartProps) {
   const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-          <p className="text-sm font-medium text-gray-900 mb-2">
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
+          <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
             {payload[0].payload.month}
           </p>
           {payload.map((entry, index) => (
@@ -196,7 +196,7 @@ function RevenueChart({ data }: RevenueChartProps) {
           <CardDescription>مقارنة شهرية للإيرادات والمصروفات</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-80 flex items-center justify-center text-gray-500">
+          <div className="h-80 flex items-center justify-center text-[var(--text-secondary)]">
             لا توجد بيانات
           </div>
         </CardContent>
@@ -272,11 +272,11 @@ function CategoryChart({ data }: CategoryChartProps) {
     if (active && payload && payload.length) {
       const item = payload[0];
       return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-          <p className="text-sm font-medium text-gray-900 mb-1">
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
+          <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
             {item.name}
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-[var(--text-secondary)]">
             {formatCurrency(item.value as number)}
           </p>
         </div>
@@ -329,7 +329,7 @@ function CategoryChart({ data }: CategoryChartProps) {
           <CardDescription>توزيع الإيرادات حسب الفئة</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-80 flex items-center justify-center text-gray-500">
+          <div className="h-80 flex items-center justify-center text-[var(--text-secondary)]">
             لا توجد بيانات
           </div>
         </CardContent>
@@ -404,7 +404,7 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-sm text-gray-500">لا توجد عمليات حتى الآن</p>
+            <p className="text-sm text-[var(--text-secondary)]">لا توجد عمليات حتى الآن</p>
           </div>
         </CardContent>
       </Card>
@@ -421,20 +421,20 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
         <div className="overflow-x-auto">
           <table className="w-full" dir="rtl">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-right text-sm font-medium text-gray-700 pb-3 pr-2">
+              <tr className="border-b border-[var(--border-color)]">
+                <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3 pr-2">
                   التاريخ
                 </th>
-                <th className="text-right text-sm font-medium text-gray-700 pb-3">
+                <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                   النوع
                 </th>
-                <th className="text-right text-sm font-medium text-gray-700 pb-3">
+                <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                   الفئة
                 </th>
-                <th className="text-right text-sm font-medium text-gray-700 pb-3">
+                <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                   المبلغ
                 </th>
-                <th className="text-right text-sm font-medium text-gray-700 pb-3 pl-2">
+                <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3 pl-2">
                   الحالة
                 </th>
               </tr>
@@ -443,9 +443,9 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
               {transactions.slice(0, 5).map((transaction) => (
                 <tr
                   key={transaction.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                  className="border-b border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] transition-colors duration-200"
                 >
-                  <td className="py-3 text-sm text-gray-600 pr-2">
+                  <td className="py-3 text-sm text-[var(--text-secondary)] pr-2">
                     {formatDateShort(transaction.date)}
                   </td>
                   <td className="py-3">
@@ -457,7 +457,7 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
                       {transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
                     </Badge>
                   </td>
-                  <td className="py-3 text-sm text-gray-900">
+                  <td className="py-3 text-sm text-[var(--text-primary)]">
                     {transaction.category}
                   </td>
                   <td className="py-3">
@@ -476,7 +476,7 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
                   <td className="py-3 pl-2">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-gray-600">مكتمل</span>
+                      <span className="text-sm text-[var(--text-secondary)]">مكتمل</span>
                     </div>
                   </td>
                 </tr>
@@ -590,8 +590,8 @@ export default function DashboardWorkbench() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+            <p className="text-[var(--text-secondary)] mt-1">
               مرحباً بك، {userInfo?.username || 'المستخدم'}
             </p>
           </div>
@@ -620,8 +620,8 @@ export default function DashboardWorkbench() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+          <p className="text-[var(--text-secondary)] mt-1">
             مرحباً بك، {userInfo.username || 'المستخدم'}
           </p>
         </div>
@@ -635,7 +635,7 @@ export default function DashboardWorkbench() {
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Date Filter */}
         <Card className="flex items-center gap-3 p-3 w-full sm:w-auto">
-          <Calendar className="w-5 h-5 text-gray-500" />
+          <Calendar className="w-5 h-5 text-[var(--text-secondary)]" />
           <Input
             type="date"
             value={selectedDate}
@@ -650,7 +650,7 @@ export default function DashboardWorkbench() {
         {/* Branch Filter - Admin Only */}
         {isAdmin && branches && branches.length > 0 && (
           <Card className="flex items-center gap-3 p-3 w-full sm:w-auto">
-            <Building className="w-5 h-5 text-gray-500" />
+            <Building className="w-5 h-5 text-[var(--text-secondary)]" />
             <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
               <SelectTrigger className="border-0 h-auto focus:ring-0 text-sm w-[200px]">
                 <SelectValue placeholder="جميع الفروع" />
@@ -716,7 +716,7 @@ export default function DashboardWorkbench() {
           <AlertDescription>
             <div className="flex flex-col gap-1">
               <span className="font-medium">لا توجد عمليات لهذا التاريخ</span>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-[var(--text-secondary)]">
                 لم يتم تسجيل أي عمليات مالية في التاريخ المحدد.
               </span>
             </div>

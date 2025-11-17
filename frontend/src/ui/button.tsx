@@ -11,9 +11,9 @@ const buttonVariants = cva(
         default: 'bg-primary-500 text-white shadow hover:bg-primary-600',
         destructive: 'bg-danger-500 text-white shadow-sm hover:bg-danger-600',
         outline:
-          'border border-gray-300 bg-white shadow-sm hover:bg-gray-100 hover:text-gray-900',
-        secondary: 'bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200',
-        ghost: 'hover:bg-gray-100 hover:text-gray-900',
+          'border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-sm hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]',
+        secondary: 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] shadow-sm hover:bg-[var(--bg-tertiary)]',
+        ghost: 'hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]',
         link: 'text-primary-500 underline-offset-4 hover:underline',
         brand: 'bg-brand-500 text-white shadow hover:bg-brand-600',
         success: 'bg-success-500 text-white shadow hover:bg-success-600',

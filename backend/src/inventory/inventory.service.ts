@@ -35,9 +35,23 @@ export class InventoryService {
    * Create a new inventory item (manual add)
    */
   async create(createInventoryDto: CreateInventoryDto, user: RequestUser) {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء عناصر المخزون');
+    // Determine branch ID
+    // - For accountants: Always use their assigned branch
+    // - For admins: Use provided branchId or require it
+    let branchId: string;
+
+    if (user.role === 'ACCOUNTANT') {
+      // Accountants must have a branch assigned and can only create for their branch
+      if (!user.branchId) {
+        throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء عناصر المخزون');
+      }
+      branchId = user.branchId;
+    } else {
+      // Admins must provide a branch ID
+      if (!createInventoryDto.branchId) {
+        throw new BadRequestException('يجب تحديد الفرع');
+      }
+      branchId = createInventoryDto.branchId;
     }
 
     // Validate quantity is non-negative
@@ -53,7 +67,7 @@ export class InventoryService {
     // Check if item with same name and unit already exists in this branch
     const existingItem = await this.prisma.inventoryItem.findFirst({
       where: {
-        branchId: user.branchId,
+        branchId: branchId,
         name: createInventoryDto.name,
         unit: createInventoryDto.unit,
       },
@@ -68,7 +82,7 @@ export class InventoryService {
     // Create the inventory item
     const inventoryItem = await this.prisma.inventoryItem.create({
       data: {
-        branchId: user.branchId,
+        branchId: branchId,
         name: createInventoryDto.name,
         quantity: createInventoryDto.quantity,
         unit: createInventoryDto.unit,

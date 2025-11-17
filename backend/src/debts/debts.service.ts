@@ -31,9 +31,23 @@ export class DebtsService {
    * Filters by branch: accountants can only create debts for their branch
    */
   async create(createDebtDto: CreateDebtDto, user: RequestUser) {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء الديون');
+    // Determine branch ID
+    // - For accountants: Always use their assigned branch
+    // - For admins: Use provided branchId or require it
+    let branchId: string;
+
+    if (user.role === 'ACCOUNTANT') {
+      // Accountants must have a branch assigned and can only create for their branch
+      if (!user.branchId) {
+        throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء الديون');
+      }
+      branchId = user.branchId;
+    } else {
+      // Admins must provide a branch ID
+      if (!createDebtDto.branchId) {
+        throw new BadRequestException('يجب تحديد الفرع');
+      }
+      branchId = createDebtDto.branchId;
     }
 
     // Validate amount is positive
@@ -58,7 +72,7 @@ export class DebtsService {
       dueDate: dueDate,
       status: DebtStatus.ACTIVE, // Auto-set to ACTIVE
       notes: createDebtDto.notes || null,
-      branchId: user.branchId, // Auto-fill from logged user's branch
+      branchId: branchId,
       createdBy: user.id,
     };
 

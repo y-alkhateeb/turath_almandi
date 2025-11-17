@@ -59,26 +59,26 @@ export const BranchesPage = () => {
       key: 'name',
       header: 'اسم الفرع',
       render: (branch) => (
-        <div className="font-medium text-gray-900">{branch.name}</div>
+        <div className="font-medium text-[var(--text-primary)]">{branch.name}</div>
       ),
     },
     {
       key: 'location',
       header: 'الموقع',
-      render: (branch) => <div className="text-gray-700">{branch.location}</div>,
+      render: (branch) => <div className="text-[var(--text-primary)]">{branch.location}</div>,
     },
     {
       key: 'managerName',
       header: 'المدير',
       render: (branch) => (
-        <div className="text-gray-700">{branch.managerName}</div>
+        <div className="text-[var(--text-primary)]">{branch.managerName}</div>
       ),
     },
     {
       key: 'phone',
       header: 'الهاتف',
       render: (branch) => (
-        <div className="text-gray-700" dir="ltr">
+        <div className="text-[var(--text-primary)]" dir="ltr">
           {branch.phone}
         </div>
       ),

@@ -22,11 +22,11 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-        <p className="text-sm font-medium text-gray-900 mb-1">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
+        <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
           {data.name}
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-[var(--text-secondary)]">
           {formatCurrency(data.value as number)}
         </p>
       </div>
@@ -74,11 +74,11 @@ const renderCustomizedLabel = ({
 export function CategoryChart({ data }: CategoryChartProps) {
   return (
     <Card className="p-6">
-      <div className="border-b border-gray-200 pb-5 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">
+      <div className="border-b border-[var(--border-color)] pb-5 mb-6">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">
           توزيع الإيرادات حسب الفئة
         </h3>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           نسبة الإيرادات من كل فئة
         </p>
       </div>

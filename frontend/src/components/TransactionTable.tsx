@@ -76,7 +76,7 @@ export default function TransactionTable({
   return (
     <div className="space-y-4">
       {/* Filters Section */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg shadow-sm border border-[var(--border-color)]">
         <h3 className="text-lg font-semibold mb-4">الفلاتر والبحث</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -89,7 +89,7 @@ export default function TransactionTable({
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="البحث في الاسم، الفئة، أو الملاحظات..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex-1 px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <button
                 type="submit"
@@ -104,7 +104,7 @@ export default function TransactionTable({
                     setSearchInput('');
                     onFiltersChange({ ...filters, search: undefined, page: 1 });
                   }}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--bg-tertiary)] transition-colors"
                 >
                   مسح
                 </button>
@@ -118,7 +118,7 @@ export default function TransactionTable({
             <select
               value={filters.type || ''}
               onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>
               <option value="INCOME">إيراد</option>
@@ -132,7 +132,7 @@ export default function TransactionTable({
             <select
               value={filters.paymentMethod || ''}
               onChange={(e) => handleFilterChange('paymentMethod', e.target.value || undefined)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>
               <option value="CASH">نقدي</option>
@@ -147,7 +147,7 @@ export default function TransactionTable({
               type="date"
               value={filters.startDate || ''}
               onChange={(e) => handleFilterChange('startDate', e.target.value || undefined)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function TransactionTable({
               type="date"
               value={filters.endDate || ''}
               onChange={(e) => handleFilterChange('endDate', e.target.value || undefined)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function TransactionTable({
               value={filters.category || ''}
               onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
               placeholder="الفئة..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
@@ -182,7 +182,7 @@ export default function TransactionTable({
                 setSearchInput('');
                 onFiltersChange({ page: 1, limit: filters.limit });
               }}
-              className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              className="w-full px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--bg-tertiary)] transition-colors"
             >
               مسح جميع الفلاتر
             </button>
@@ -191,43 +191,43 @@ export default function TransactionTable({
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-[var(--bg-secondary)] rounded-lg shadow-sm border border-[var(--border-color)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-[var(--bg-tertiary)] border-b border-[var(--border-color)]">
               <tr>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   التاريخ
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   النوع
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   المبلغ (IQD)
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   طريقة الدفع
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   الفئة
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   الاسم
                 </th>
                 {isAdmin && (
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     الفرع
                   </th>
                 )}
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   الإجراءات
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={isAdmin ? 8 : 7} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={isAdmin ? 8 : 7} className="px-6 py-12 text-center text-[var(--text-secondary)]">
                     <div className="flex justify-center items-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                       <span className="mr-3">جاري التحميل...</span>
@@ -236,37 +236,37 @@ export default function TransactionTable({
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 8 : 7} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={isAdmin ? 8 : 7} className="px-6 py-12 text-center text-[var(--text-secondary)]">
                     لا توجد عمليات
                   </td>
                 </tr>
               ) : (
                 transactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <tr key={transaction.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {formatDate(transaction.date)}
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getTypeColor(transaction.type)}`}>
                       {getTypeLabel(transaction.type)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)] font-semibold">
                       {formatAmount(transaction.amount)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {getPaymentMethodLabel(transaction.paymentMethod)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {transaction.category || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {transaction.employeeVendorName || '-'}
                     </td>
                     {isAdmin && (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                         {transaction.branch?.name || '-'}
                       </td>
                     )}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       <div className="flex gap-2">
                         <button
                           onClick={() => onView(transaction)}
@@ -300,8 +300,8 @@ export default function TransactionTable({
 
         {/* Pagination */}
         {!isLoading && transactions.length > 0 && (
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
+          <div className="px-6 py-4 bg-[var(--bg-tertiary)] border-t border-[var(--border-color)] flex items-center justify-between">
+            <div className="text-sm text-[var(--text-primary)]">
               عرض {(pagination.page - 1) * pagination.limit + 1} إلى{' '}
               {Math.min(pagination.page * pagination.limit, pagination.total)} من{' '}
               {pagination.total} عملية
@@ -310,7 +310,7 @@ export default function TransactionTable({
               <button
                 onClick={() => handlePageChange(pagination.page - 1)}
                 disabled={pagination.page === 1}
-                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 السابق
               </button>
@@ -334,7 +334,7 @@ export default function TransactionTable({
                       className={`px-3 py-1 rounded-md text-sm font-medium ${
                         pagination.page === pageNumber
                           ? 'bg-primary-600 text-white'
-                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                          : 'bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] hover:bg-[var(--bg-tertiary)]'
                       }`}
                     >
                       {pageNumber}
@@ -345,7 +345,7 @@ export default function TransactionTable({
               <button
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={pagination.page === pagination.totalPages}
-                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 التالي
               </button>

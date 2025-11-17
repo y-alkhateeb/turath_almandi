@@ -103,13 +103,13 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
       {/* Branch Display (Read-only) */}
       {user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             الفرع
           </label>
-          <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+          <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
             يتم تعبئة الفرع تلقائيًا من حسابك
           </p>
         </div>
@@ -117,7 +117,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
 
       {/* Date Picker */}
       <div>
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="date" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           التاريخ <span className="text-red-500">*</span>
         </label>
         <input
@@ -128,7 +128,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
           })}
           defaultValue={new Date().toISOString().split('T')[0]}
           className={`w-full px-4 py-3 border ${
-            errors.date ? 'border-red-500' : 'border-gray-300'
+            errors.date ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
@@ -139,7 +139,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
 
       {/* Amount Input */}
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="amount" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           المبلغ <span className="text-red-500">*</span>
         </label>
         <div className="relative">
@@ -151,12 +151,12 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
             placeholder="0.00"
             {...register('amount')}
             className={`w-full px-4 py-3 border ${
-              errors.amount ? 'border-red-500' : 'border-gray-300'
+              errors.amount ? 'border-red-500' : 'border-[var(--border-color)]'
             } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
             disabled={isSubmitting}
             dir="ltr"
           />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-sm">
             IQD
           </div>
         </div>
@@ -167,7 +167,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
 
       {/* Employee Name Input */}
       <div>
-        <label htmlFor="employee_name" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="employee_name" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           اسم الموظف <span className="text-red-500">*</span>
         </label>
         <input
@@ -176,7 +176,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
           placeholder="أدخل اسم الموظف"
           {...register('employee_name')}
           className={`w-full px-4 py-3 border ${
-            errors.employee_name ? 'border-red-500' : 'border-gray-300'
+            errors.employee_name ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
@@ -187,7 +187,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
 
       {/* Notes Textarea (Optional) */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           ملاحظات
         </label>
         <textarea
@@ -196,7 +196,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
           placeholder="أضف أي ملاحظات إضافية هنا..."
           {...register('notes')}
           className={`w-full px-4 py-3 border ${
-            errors.notes ? 'border-red-500' : 'border-gray-300'
+            errors.notes ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none`}
           disabled={isSubmitting}
         />
@@ -246,7 +246,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
             type="button"
             onClick={onCancel}
             disabled={isSubmitting || createTransaction.isPending}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 border border-[var(--border-color)] rounded-lg font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             إلغاء
           </button>

@@ -89,8 +89,8 @@ export default function InventoryPage() {
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">إدارة المخزون</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة المخزون</h1>
+          <p className="mt-2 text-[var(--text-secondary)]">
             عرض وإدارة جميع أصناف المخزون
           </p>
         </div>

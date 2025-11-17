@@ -85,7 +85,7 @@ export const UserForm: React.FC<UserFormProps> = ({
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
       {/* Username */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           اسم المستخدم <span className="text-red-500">*</span>
         </label>
         <input
@@ -93,22 +93,22 @@ export const UserForm: React.FC<UserFormProps> = ({
           type="text"
           disabled={isLoading || isEditMode}
           className={`w-full px-4 py-3 border ${
-            errors.username ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
+            errors.username ? 'border-red-500' : 'border-[var(--border-color)]'
+          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
           placeholder="أدخل اسم المستخدم"
         />
         {errors.username && (
           <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
         )}
         {isEditMode && (
-          <p className="mt-1 text-xs text-gray-500">لا يمكن تعديل اسم المستخدم</p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">لا يمكن تعديل اسم المستخدم</p>
         )}
       </div>
 
       {/* Password */}
       {!isEditMode && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             كلمة المرور <span className="text-red-500">*</span>
           </label>
           <input
@@ -116,8 +116,8 @@ export const UserForm: React.FC<UserFormProps> = ({
             type="password"
             disabled={isLoading}
             className={`w-full px-4 py-3 border ${
-              errors.password ? 'border-red-500' : 'border-gray-300'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
+              errors.password ? 'border-red-500' : 'border-[var(--border-color)]'
+            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
             placeholder="أدخل كلمة المرور"
             dir="ltr"
           />
@@ -129,15 +129,15 @@ export const UserForm: React.FC<UserFormProps> = ({
 
       {/* Role */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           الدور <span className="text-red-500">*</span>
         </label>
         <select
           {...register('role')}
           disabled={isLoading}
           className={`w-full px-4 py-3 border ${
-            errors.role ? 'border-red-500' : 'border-gray-300'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
+            errors.role ? 'border-red-500' : 'border-[var(--border-color)]'
+          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
         >
           <option value="ACCOUNTANT">محاسب</option>
           <option value="ADMIN">مدير</option>
@@ -150,15 +150,15 @@ export const UserForm: React.FC<UserFormProps> = ({
       {/* Branch - only for ACCOUNTANT role */}
       {selectedRole === 'ACCOUNTANT' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             الفرع
           </label>
           <select
             {...register('branchId')}
             disabled={isLoading || isBranchesLoading}
             className={`w-full px-4 py-3 border ${
-              errors.branchId ? 'border-red-500' : 'border-gray-300'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed`}
+              errors.branchId ? 'border-red-500' : 'border-[var(--border-color)]'
+            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
           >
             <option value="">بدون فرع</option>
             {branches
@@ -173,7 +173,7 @@ export const UserForm: React.FC<UserFormProps> = ({
             <p className="mt-1 text-sm text-red-600">{errors.branchId.message}</p>
           )}
           {isBranchesLoading && (
-            <p className="mt-1 text-xs text-gray-500">جاري تحميل الفروع...</p>
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">جاري تحميل الفروع...</p>
           )}
         </div>
       )}
@@ -219,7 +219,7 @@ export const UserForm: React.FC<UserFormProps> = ({
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex-1 bg-[var(--bg-tertiary)] text-[var(--text-primary)] px-6 py-3 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
           إلغاء
         </button>

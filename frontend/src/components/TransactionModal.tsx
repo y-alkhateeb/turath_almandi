@@ -122,10 +122,10 @@ export default function TransactionModal({
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 نوع العملية
               </label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 <span
                   className={`font-semibold ${
                     transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
@@ -137,59 +137,59 @@ export default function TransactionModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ</label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">المبلغ</label>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 <span className="font-semibold">{formatAmount(transaction.amount)} IQD</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">التاريخ</label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">التاريخ</label>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {formatDate(transaction.date)}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">طريقة الدفع</label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">طريقة الدفع</label>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {getPaymentMethodLabel(transaction.paymentMethod)}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">الفئة</label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفئة</label>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.category || '-'}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 {transaction.type === 'INCOME' ? 'اسم العميل' : 'اسم الموظف/المورد'}
               </label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.employeeVendorName || '-'}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">الفرع</label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفرع</label>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.branch?.name || '-'}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">أنشئ بواسطة</label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">أنشئ بواسطة</label>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.creator?.username || '-'}
               </div>
             </div>
 
             {transaction.inventoryItem && (
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                   مرتبط بالمخزون
                 </label>
                 <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md">
@@ -204,8 +204,8 @@ export default function TransactionModal({
 
           {transaction.notes && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md min-h-[80px]">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">ملاحظات</label>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md min-h-[80px]">
                 {transaction.notes}
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function TransactionModal({
           <div className="flex justify-end pt-4 border-t">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors font-medium"
+              className="px-6 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--bg-tertiary)] transition-colors font-medium"
             >
               إغلاق
             </button>
@@ -226,12 +226,12 @@ export default function TransactionModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Transaction Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 نوع العملية <span className="text-red-500">*</span>
               </label>
               <select
                 {...register('type')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="INCOME">إيراد</option>
                 <option value="EXPENSE">مصروف</option>
@@ -243,14 +243,14 @@ export default function TransactionModal({
 
             {/* Amount */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 المبلغ (IQD) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 step="0.01"
                 {...register('amount')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="0.00"
               />
               {errors.amount && (
@@ -260,13 +260,13 @@ export default function TransactionModal({
 
             {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 التاريخ <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
                 {...register('date', { valueAsDate: true })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               {errors.date && (
                 <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
@@ -276,7 +276,7 @@ export default function TransactionModal({
             {/* Payment Method - Only for INCOME */}
             {transactionType === 'INCOME' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                   طريقة الدفع
                 </label>
                 <div className="flex gap-4 pt-2">
@@ -307,24 +307,24 @@ export default function TransactionModal({
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">الفئة</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفئة</label>
               <input
                 type="text"
                 {...register('category')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="مثال: مبيعات، رواتب، إيجار..."
               />
             </div>
 
             {/* Employee/Vendor Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 {transactionType === 'INCOME' ? 'اسم العميل' : 'اسم الموظف/المورد'}
               </label>
               <input
                 type="text"
                 {...register('employeeVendorName')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="اسم..."
               />
             </div>
@@ -332,11 +332,11 @@ export default function TransactionModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">ملاحظات</label>
             <textarea
               {...register('notes')}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
               placeholder="ملاحظات إضافية..."
             />
           </div>
@@ -347,7 +347,7 @@ export default function TransactionModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+              className="px-6 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--bg-tertiary)] transition-colors font-medium disabled:opacity-50"
             >
               إلغاء
             </button>

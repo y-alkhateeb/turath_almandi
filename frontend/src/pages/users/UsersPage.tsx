@@ -82,7 +82,7 @@ export const UsersPage = () => {
             </span>
           </div>
           <div className="mr-4">
-            <div className="text-sm font-medium text-gray-900">
+            <div className="text-sm font-medium text-[var(--text-primary)]">
               {user.username}
             </div>
           </div>
@@ -102,14 +102,14 @@ export const UsersPage = () => {
       key: 'branch',
       header: 'الفرع',
       render: (user) => (
-        <div className="text-sm text-gray-700">
+        <div className="text-sm text-[var(--text-primary)]">
           {user.branch ? (
             <div>
               <div className="font-medium">{user.branch.name}</div>
-              <div className="text-xs text-gray-500">{user.branch.location}</div>
+              <div className="text-xs text-[var(--text-secondary)]">{user.branch.location}</div>
             </div>
           ) : (
-            <span className="text-gray-400">بدون فرع</span>
+            <span className="text-[var(--text-secondary)]">بدون فرع</span>
           )}
         </div>
       ),

@@ -66,7 +66,7 @@ export function ConfirmModal({
         </div>
 
         {/* Message */}
-        <p className="text-center text-gray-700 text-lg">{message}</p>
+        <p className="text-center text-[var(--text-primary)] text-lg">{message}</p>
 
         {/* Actions */}
         <div className="flex gap-3 justify-end">

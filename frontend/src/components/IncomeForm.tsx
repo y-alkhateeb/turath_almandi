@@ -106,13 +106,13 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
       {/* Branch Display (Read-only) */}
       {user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             الفرع
           </label>
-          <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+          <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
             يتم تعبئة الفرع تلقائيًا من حسابك
           </p>
         </div>
@@ -120,7 +120,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
 
       {/* Date Picker */}
       <div>
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="date" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           التاريخ <span className="text-red-500">*</span>
         </label>
         <input
@@ -131,7 +131,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
           })}
           defaultValue={new Date().toISOString().split('T')[0]}
           className={`w-full px-4 py-3 border ${
-            errors.date ? 'border-red-500' : 'border-gray-300'
+            errors.date ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
@@ -142,7 +142,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
 
       {/* Amount Input */}
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="amount" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           المبلغ <span className="text-red-500">*</span>
         </label>
         <div className="relative">
@@ -154,12 +154,12 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
             placeholder="0.00"
             {...register('amount')}
             className={`w-full px-4 py-3 border ${
-              errors.amount ? 'border-red-500' : 'border-gray-300'
+              errors.amount ? 'border-red-500' : 'border-[var(--border-color)]'
             } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
             disabled={isSubmitting}
             dir="ltr"
           />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-sm">
             IQD
           </div>
         </div>
@@ -170,7 +170,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
 
       {/* Payment Method Radio Buttons */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-3">
           طريقة الدفع <span className="text-red-500">*</span>
         </label>
         <div className="space-y-3">
@@ -178,7 +178,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
             className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
               selectedPaymentMethod === PaymentMethod.CASH
                 ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-300 hover:border-gray-400'
+                : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
             }`}
           >
             <input
@@ -188,14 +188,14 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
               className="w-5 h-5 text-primary-600 focus:ring-primary-500"
               disabled={isSubmitting}
             />
-            <span className="mr-3 text-gray-900 font-medium">نقدي</span>
+            <span className="mr-3 text-[var(--text-primary)] font-medium">نقدي</span>
           </label>
 
           <label
             className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
               selectedPaymentMethod === PaymentMethod.MASTER
                 ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-300 hover:border-gray-400'
+                : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
             }`}
           >
             <input
@@ -205,7 +205,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
               className="w-5 h-5 text-primary-600 focus:ring-primary-500"
               disabled={isSubmitting}
             />
-            <span className="mr-3 text-gray-900 font-medium">ماستر كارد</span>
+            <span className="mr-3 text-[var(--text-primary)] font-medium">ماستر كارد</span>
           </label>
         </div>
         {errors.paymentMethod && (
@@ -215,7 +215,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
 
       {/* Category Input (Optional) */}
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="category" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           الفئة
         </label>
         <input
@@ -224,7 +224,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
           placeholder="مثال: مبيعات، خدمات، إيجار..."
           {...register('category')}
           className={`w-full px-4 py-3 border ${
-            errors.category ? 'border-red-500' : 'border-gray-300'
+            errors.category ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
@@ -235,7 +235,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
 
       {/* Notes Textarea (Optional) */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           ملاحظات
         </label>
         <textarea
@@ -244,7 +244,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
           placeholder="أضف أي ملاحظات إضافية هنا..."
           {...register('notes')}
           className={`w-full px-4 py-3 border ${
-            errors.notes ? 'border-red-500' : 'border-gray-300'
+            errors.notes ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none`}
           disabled={isSubmitting}
         />
@@ -294,7 +294,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
             type="button"
             onClick={onCancel}
             disabled={isSubmitting || createTransaction.isPending}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 border border-[var(--border-color)] rounded-lg font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             إلغاء
           </button>

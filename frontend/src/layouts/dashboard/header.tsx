@@ -101,11 +101,11 @@ export function Header({ onMenuClick }: HeaderProps) {
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium">{userInfo?.username || 'المستخدم'}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[var(--text-secondary)]">
                   {userInfo?.role === 'ADMIN' ? 'مدير النظام' : 'محاسب'}
                 </p>
                 {userInfo?.branch && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
                     <Icon icon="solar:shop-2-linear" className="inline ml-1" size={12} />
                     {userInfo.branch.name}
                   </p>

@@ -24,7 +24,7 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
     return (
       <div className="text-center py-8">
         <svg
-          className="mx-auto h-12 w-12 text-gray-400"
+          className="mx-auto h-12 w-12 text-[var(--text-secondary)]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -36,21 +36,21 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           />
         </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">لا توجد سجلات دفع</h3>
-        <p className="mt-1 text-sm text-gray-500">لم يتم تسجيل أي دفعات لهذا الدين حتى الآن</p>
+        <h3 className="mt-2 text-sm font-medium text-[var(--text-primary)]">لا توجد سجلات دفع</h3>
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">لم يتم تسجيل أي دفعات لهذا الدين حتى الآن</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">سجل الدفعات</h3>
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">سجل الدفعات</h3>
 
       <div className="space-y-2">
         {sortedPayments.map((payment, index) => (
           <div
             key={payment.id}
-            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4 hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between">
               {/* Payment Info */}
@@ -63,7 +63,7 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
 
                   {/* Payment Amount */}
                   <div>
-                    <p className="text-sm font-medium text-gray-500">المبلغ المدفوع</p>
+                    <p className="text-sm font-medium text-[var(--text-secondary)]">المبلغ المدفوع</p>
                     <p className="text-lg font-bold text-green-600" dir="ltr">
                       ${payment.amountPaid.toLocaleString()}
                     </p>
@@ -72,8 +72,8 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
 
                 {/* Payment Date */}
                 <div className="mr-11">
-                  <p className="text-xs text-gray-500">تاريخ الدفع</p>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-xs text-[var(--text-secondary)]">تاريخ الدفع</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
                     {new Date(payment.paymentDate).toLocaleDateString('ar-SA', {
                       year: 'numeric',
                       month: 'long',
@@ -84,15 +84,15 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
 
                 {/* Notes */}
                 {payment.notes && (
-                  <div className="mr-11 mt-2 pt-2 border-t border-gray-100">
-                    <p className="text-xs text-gray-500">ملاحظات</p>
-                    <p className="text-sm text-gray-700 mt-1">{payment.notes}</p>
+                  <div className="mr-11 mt-2 pt-2 border-t border-[var(--border-color)]">
+                    <p className="text-xs text-[var(--text-secondary)]">ملاحظات</p>
+                    <p className="text-sm text-[var(--text-primary)] mt-1">{payment.notes}</p>
                   </div>
                 )}
 
                 {/* Created At */}
                 <div className="mr-11 mt-2">
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     تم التسجيل:{' '}
                     {new Date(payment.createdAt).toLocaleDateString('ar-SA', {
                       year: 'numeric',
@@ -125,13 +125,13 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
       </div>
 
       {/* Summary */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
+      <div className="mt-4 pt-4 border-t border-[var(--border-color)]">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600">إجمالي الدفعات:</span>
-          <span className="font-bold text-gray-900">{payments.length} دفعة</span>
+          <span className="text-[var(--text-secondary)]">إجمالي الدفعات:</span>
+          <span className="font-bold text-[var(--text-primary)]">{payments.length} دفعة</span>
         </div>
         <div className="flex items-center justify-between text-sm mt-2">
-          <span className="text-gray-600">إجمالي المبلغ المدفوع:</span>
+          <span className="text-[var(--text-secondary)]">إجمالي المبلغ المدفوع:</span>
           <span className="font-bold text-green-600" dir="ltr">
             ${payments.reduce((sum, p) => sum + p.amountPaid, 0).toLocaleString()}
           </span>

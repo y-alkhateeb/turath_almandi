@@ -63,13 +63,13 @@ export function BranchSelector<T extends FieldValues>({
   if (user?.branch) {
     return (
       <div className={`mb-4 ${className}`}>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           الفرع
         </label>
-        <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+        <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
           {user.branch.name}
         </div>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
           يتم تعبئة الفرع تلقائيًا من حسابك
         </p>
       </div>

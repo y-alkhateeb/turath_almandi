@@ -113,19 +113,19 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
     <Modal isOpen={isOpen} onClose={handleClose} title="دفع دين" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Debt Details Card */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">تفاصيل الدين</h3>
+        <div className="bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg p-4 space-y-2">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">تفاصيل الدين</h3>
 
           <div className="grid grid-cols-2 gap-3">
             {/* Creditor Name */}
             <div>
-              <p className="text-xs text-gray-500">اسم الدائن</p>
-              <p className="text-sm font-medium text-gray-900">{debt.creditorName}</p>
+              <p className="text-xs text-[var(--text-secondary)]">اسم الدائن</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">{debt.creditorName}</p>
             </div>
 
             {/* Status */}
             <div>
-              <p className="text-xs text-gray-500">الحالة</p>
+              <p className="text-xs text-[var(--text-secondary)]">الحالة</p>
               <span
                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                   debt.status === 'PAID'
@@ -145,15 +145,15 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
 
             {/* Original Amount */}
             <div>
-              <p className="text-xs text-gray-500">المبلغ الأصلي</p>
-              <p className="text-sm font-medium text-gray-900" dir="ltr">
+              <p className="text-xs text-[var(--text-secondary)]">المبلغ الأصلي</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]" dir="ltr">
                 ${debt.originalAmount.toLocaleString()}
               </p>
             </div>
 
             {/* Remaining Amount */}
             <div>
-              <p className="text-xs text-gray-500">المبلغ المتبقي</p>
+              <p className="text-xs text-[var(--text-secondary)]">المبلغ المتبقي</p>
               <p className="text-sm font-bold text-red-600" dir="ltr">
                 ${debt.remainingAmount.toLocaleString()}
               </p>
@@ -162,9 +162,9 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
 
           {/* Due Date */}
           {debt.dueDate && (
-            <div className="pt-2 border-t border-gray-200">
-              <p className="text-xs text-gray-500">تاريخ الاستحقاق</p>
-              <p className="text-sm font-medium text-gray-900">
+            <div className="pt-2 border-t border-[var(--border-color)]">
+              <p className="text-xs text-[var(--text-secondary)]">تاريخ الاستحقاق</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">
                 {new Date(debt.dueDate).toLocaleDateString('ar-SA')}
               </p>
             </div>
@@ -186,14 +186,14 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             min="0"
             max={debt.remainingAmount}
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
             الحد الأقصى: ${debt.remainingAmount.toLocaleString()}
           </p>
         </div>
 
         {/* Payment Date Picker */}
         <div>
-          <label htmlFor="paymentDate" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="paymentDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             تاريخ الدفع <span className="text-red-500">*</span>
           </label>
           <input
@@ -204,7 +204,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             })}
             defaultValue={new Date().toISOString().split('T')[0]}
             className={`w-full px-4 py-3 border ${
-              errors.paymentDate ? 'border-red-500' : 'border-gray-300'
+              errors.paymentDate ? 'border-red-500' : 'border-[var(--border-color)]'
             } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
             disabled={isSubmitting}
           />
@@ -240,7 +240,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             type="button"
             onClick={handleClose}
             disabled={isSubmitting || payDebt.isPending}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 border border-[var(--border-color)] rounded-lg font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             إلغاء
           </button>

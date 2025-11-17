@@ -42,6 +42,14 @@
   --color-brand-cream-800: #7a6d5a;
   --color-brand-cream-900: #5c5242;
 
+  /* === DARK MODE COLORS === */
+  --color-dark-primary: #0a0e0d;
+  --color-dark-secondary: #141a18;
+  --color-dark-tertiary: #1f2825;
+  --color-dark-text-primary: #f5f2eb;
+  --color-dark-text-secondary: #d4af77;
+  --color-dark-border: rgba(197, 165, 114, 0.3);
+
   /* === PRIMARY COLORS (Gold) === */
   --color-primary-50: #faf7f0;
   --color-primary-100: #f0e9d8;
@@ -137,6 +145,15 @@
   --color-gray-700: #44403c;
   --color-gray-800: #292524;
   --color-gray-900: #1c1917;
+
+  /* === SHADOW UTILITIES === */
+  --shadow-gold-sm: 0 2px 15px rgba(0, 0, 0, 0.5);
+  --shadow-gold-md: 0 4px 20px rgba(0, 0, 0, 0.7);
+  --shadow-gold-lg: 0 8px 30px rgba(197, 165, 114, 0.15);
+  --shadow-gold-glow: 0 0 30px rgba(197, 165, 114, 0.3);
+
+  /* === BACKDROP BLUR === */
+  --blur-glass: 20px;
 }
 
 /* ============================================
@@ -201,11 +218,24 @@
    ============================================ */
 
 @layer base {
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
   body {
     font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     direction: rtl;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: theme('colors.brand-cream.100');
+    color: theme('colors.brand-green.600');
+  }
+
+  .dark body {
+    background-color: var(--color-dark-primary);
+    color: var(--color-dark-text-primary);
   }
 
   #root {
@@ -231,12 +261,16 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: theme('colors.gray.300');
-    border-radius: 4px;
+    background: theme('colors.brand-gold.500');
+    border-radius: 9999px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, theme('colors.brand-gold.300'), theme('colors.brand-gold.500'));
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.gray.400');
+    background: theme('colors.brand-gold.600');
   }
 
   /* Selection */
@@ -338,5 +372,37 @@
 
   [dir="ltr"] .ltr\:text-left {
     text-align: left;
+  }
+
+  /* Rotation Utilities */
+  .rotate-15 {
+    transform: rotate(15deg);
+  }
+
+  .-rotate-15 {
+    transform: rotate(-15deg);
+  }
+
+  /* Glass Effect Enhanced */
+  .backdrop-blur-glass {
+    backdrop-filter: blur(var(--blur-glass));
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+  }
+
+  /* Shadow Utilities */
+  .shadow-gold-sm {
+    box-shadow: var(--shadow-gold-sm);
+  }
+
+  .shadow-gold-md {
+    box-shadow: var(--shadow-gold-md);
+  }
+
+  .shadow-gold-lg {
+    box-shadow: var(--shadow-gold-lg);
+  }
+
+  .shadow-gold-glow {
+    box-shadow: var(--shadow-gold-glow);
   }
 }

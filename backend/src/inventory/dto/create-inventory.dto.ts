@@ -33,4 +33,8 @@ export class CreateInventoryDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsString()
+  @IsOptional()
+  branchId?: string;
 }

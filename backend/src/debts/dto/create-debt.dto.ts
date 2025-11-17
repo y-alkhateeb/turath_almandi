@@ -56,4 +56,8 @@ export class CreateDebtDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsString()
+  @IsOptional()
+  branchId?: string;
 }

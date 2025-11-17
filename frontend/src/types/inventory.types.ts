@@ -61,6 +61,7 @@ export interface InventoryFormData {
   unit: InventoryUnit;
   costPerUnit: string;
   notes: string;
+  branchId?: string; // Optional - for admins to select branch, auto-filled for accountants
 }
 
 export interface InventoryFilters {

@@ -59,6 +59,7 @@ export interface DebtFormData {
   date: Date;
   dueDate: Date;
   notes: string;
+  branchId?: string; // Optional - for admins to select branch, auto-filled for accountants
 }
 
 export interface PayDebtInput {

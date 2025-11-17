@@ -5,8 +5,8 @@ import { useCreateDebt } from '../hooks/useDebts';
 import type { DebtFormData } from '../types/debts.types';
 import { useAuth } from '../hooks/useAuth';
 import { FormInput } from '@/components/form/FormInput';
-import { FormDatePicker } from '@/components/form/FormDatePicker';
 import { FormTextarea } from '@/components/form/FormTextarea';
+import { BranchSelector } from '@/components/form/BranchSelector';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Alert } from '@/components/ui/Alert';
 
@@ -31,6 +31,7 @@ const debtSchema = z
     date: z.date({ message: 'التاريخ مطلوب' }),
     dueDate: z.date({ message: 'تاريخ الاستحقاق مطلوب' }),
     notes: z.string(),
+    branchId: z.string().optional(),
   })
   .refine((data) => data.dueDate >= data.date, {
     message: 'تاريخ الاستحقاق يجب أن يكون أكبر من أو يساوي التاريخ',
@@ -59,7 +60,7 @@ interface DebtFormProps {
  * - Arabic interface
  */
 export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const createDebt = useCreateDebt();
 
   const {
@@ -75,6 +76,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
       date: new Date(),
       dueDate: new Date(),
       notes: '',
+      branchId: isAdmin() ? '' : user?.branchId,
     },
   });
 
@@ -87,6 +89,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         date: data.date.toISOString().split('T')[0], // Format: YYYY-MM-DD
         dueDate: data.dueDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
         notes: data.notes || undefined,
+        branchId: data.branchId,
       };
 
       await createDebt.mutateAsync(debtData);
@@ -98,6 +101,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         date: new Date(),
         dueDate: new Date(),
         notes: '',
+        branchId: isAdmin() ? '' : user?.branchId,
       });
 
       // Call success callback if provided
@@ -110,20 +114,13 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Branch Display (Read-only) */}
-      {user?.branch && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            الفرع
-          </label>
-          <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
-            {user.branch.name}
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            يتم تعبئة الفرع تلقائيًا من حسابك
-          </p>
-        </div>
-      )}
+      {/* Branch Selection using reusable BranchSelector component */}
+      <BranchSelector
+        name="branchId"
+        register={register}
+        error={errors.branchId}
+        required
+      />
 
       <FormInput
         name="creditorName"

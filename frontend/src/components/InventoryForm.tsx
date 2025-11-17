@@ -5,6 +5,7 @@ import { useCreateInventory, useUpdateInventory } from '../hooks/useInventory';
 import { InventoryUnit } from '../types/inventory.types';
 import type { InventoryFormData, InventoryItem } from '../types/inventory.types';
 import { useAuth } from '../hooks/useAuth';
+import { BranchSelector } from '@/components/form/BranchSelector';
 
 /**
  * Zod Validation Schema for Inventory Form
@@ -39,7 +40,8 @@ const inventorySchema = z.object({
       { message: 'سعر الوحدة يجب أن يكون رقم أكبر من أو يساوي صفر' }
     ),
   notes: z.string(),
-}) satisfies z.ZodType<InventoryFormData>;
+  branchId: z.string().optional(),
+});
 
 interface InventoryFormProps {
   item?: InventoryItem;
@@ -65,7 +67,7 @@ interface InventoryFormProps {
  * - Edit mode support
  */
 export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps) => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const createInventory = useCreateInventory();
   const updateInventory = useUpdateInventory();
 
@@ -84,6 +86,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
       unit: item?.unit || InventoryUnit.KG,
       costPerUnit: item?.costPerUnit?.toString() || '',
       notes: '',
+      branchId: isAdmin() ? '' : user?.branchId,
     },
   });
 
@@ -95,6 +98,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         unit: data.unit,
         costPerUnit: parseFloat(data.costPerUnit),
         notes: data.notes || undefined,
+        branchId: data.branchId,
       };
 
       if (isEditMode) {
@@ -112,6 +116,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           unit: InventoryUnit.KG,
           costPerUnit: '',
           notes: '',
+          branchId: isAdmin() ? '' : user?.branchId,
         });
       }
 
@@ -133,19 +138,14 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Branch Display (Read-only) */}
-      {user?.branch && !isEditMode && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            الفرع
-          </label>
-          <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
-            {user.branch.name}
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            سيتم إضافة الصنف لهذا الفرع
-          </p>
-        </div>
+      {/* Branch Selection - Only show in create mode */}
+      {!isEditMode && (
+        <BranchSelector
+          name="branchId"
+          register={register}
+          error={errors.branchId}
+          required
+        />
       )}
 
       {/* Item Name */}

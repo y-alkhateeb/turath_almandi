@@ -1,6 +1,4 @@
-import { useState } from 'react';
-import { IncomeForm } from '../../components/IncomeForm';
-import { Modal } from '../../components/Modal';
+import { useNavigate } from 'react-router-dom';
 import { useTransactions } from '../../hooks/useTransactions';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -17,18 +15,10 @@ import { TransactionType } from '../../types/transactions.types';
  * - Loading and empty states
  */
 export const IncomePage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const { data: transactions, isLoading, error } = useTransactions({
     type: TransactionType.INCOME,
   });
-
-  const handleSuccess = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
 
   const formatPaymentMethod = (method: string | null) => {
     if (!method) return '-';
@@ -45,7 +35,7 @@ export const IncomePage = () => {
             <p className="mt-2 text-[var(--text-secondary)]">إدارة جميع الإيرادات والدخل</p>
           </div>
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => navigate('/income/create')}
             className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
           >
             <svg
@@ -65,16 +55,6 @@ export const IncomePage = () => {
           </button>
         </div>
       </div>
-
-      {/* Income Form Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCancel}
-        title="إضافة إيراد جديد"
-        size="lg"
-      >
-        <IncomeForm onSuccess={handleSuccess} onCancel={handleCancel} />
-      </Modal>
 
       {/* Loading State */}
       {isLoading && (
@@ -113,7 +93,7 @@ export const IncomePage = () => {
             description="ابدأ بإضافة أول إيراد"
             action={{
               label: 'إضافة إيراد جديد',
-              onClick: () => setIsModalOpen(true),
+              onClick: () => navigate('/income/create'),
             }}
           />
         </div>

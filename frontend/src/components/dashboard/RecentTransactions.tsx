@@ -12,9 +12,9 @@ export function RecentTransactions({
 }: RecentTransactionsProps) {
   return (
     <Card className="p-6">
-      <div className="border-b border-gray-200 pb-5 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">آخر العمليات</h3>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="border-b border-[var(--border-color)] pb-5 mb-6">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">آخر العمليات</h3>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           آخر {transactions.length} عملية مالية
         </p>
       </div>
@@ -22,20 +22,20 @@ export function RecentTransactions({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-right text-sm font-medium text-gray-700 pb-3">
+            <tr className="border-b border-[var(--border-color)]">
+              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                 التاريخ
               </th>
-              <th className="text-right text-sm font-medium text-gray-700 pb-3">
+              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                 النوع
               </th>
-              <th className="text-right text-sm font-medium text-gray-700 pb-3">
+              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                 الفئة
               </th>
-              <th className="text-right text-sm font-medium text-gray-700 pb-3">
+              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                 المبلغ
               </th>
-              <th className="text-right text-sm font-medium text-gray-700 pb-3">
+              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                 الحالة
               </th>
             </tr>
@@ -44,9 +44,9 @@ export function RecentTransactions({
             {transactions.map((transaction) => (
               <tr
                 key={transaction.id}
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                className="border-b border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] transition-colors duration-200"
               >
-                <td className="py-3 text-sm text-gray-600">
+                <td className="py-3 text-sm text-[var(--text-secondary)]">
                   {formatDateShort(transaction.date)}
                 </td>
                 <td className="py-3">
@@ -58,7 +58,7 @@ export function RecentTransactions({
                     {transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
                   </Badge>
                 </td>
-                <td className="py-3 text-sm text-gray-900">
+                <td className="py-3 text-sm text-[var(--text-primary)]">
                   {transaction.category}
                 </td>
                 <td className="py-3">
@@ -77,7 +77,7 @@ export function RecentTransactions({
                 <td className="py-3">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">مكتمل</span>
+                    <span className="text-sm text-[var(--text-secondary)]">مكتمل</span>
                   </div>
                 </td>
               </tr>
@@ -88,7 +88,7 @@ export function RecentTransactions({
 
       {transactions.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-sm text-gray-500">لا توجد عمليات حتى الآن</p>
+          <p className="text-sm text-[var(--text-secondary)]">لا توجد عمليات حتى الآن</p>
         </div>
       )}
     </Card>

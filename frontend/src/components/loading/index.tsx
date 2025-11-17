@@ -20,7 +20,7 @@ const sizeClasses = {
 };
 
 const variantClasses = {
-  default: 'text-gray-500',
+  default: 'text-[var(--text-secondary)]',
   primary: 'text-primary-500',
   brand: 'text-brand-500',
 };
@@ -58,10 +58,10 @@ export function LoadingSpinner({
  */
 export function PageLoading({ message = 'جاري التحميل...' }: { message?: string }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg-tertiary)]">
       <LoadingSpinner size="xl" variant="primary" />
       {message && (
-        <p className="mt-4 text-sm text-gray-600">{message}</p>
+        <p className="mt-4 text-sm text-[var(--text-secondary)]">{message}</p>
       )}
     </div>
   );
@@ -79,7 +79,7 @@ export function CenteredLoading({ message }: { message?: string }) {
     <div className="flex flex-col items-center justify-center py-12">
       <LoadingSpinner size="lg" variant="primary" />
       {message && (
-        <p className="mt-4 text-sm text-gray-600">{message}</p>
+        <p className="mt-4 text-sm text-[var(--text-secondary)]">{message}</p>
       )}
     </div>
   );
@@ -109,7 +109,7 @@ export function InlineLoading({ className }: { className?: string }) {
  */
 export function OverlayLoading() {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--bg-secondary)]/80 backdrop-blur-sm">
       <LoadingSpinner size="lg" variant="primary" />
     </div>
   );

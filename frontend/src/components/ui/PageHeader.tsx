@@ -28,7 +28,7 @@ export function PageHeader({
               <li key={index} className="flex items-center">
                 {index > 0 && (
                   <svg
-                    className="w-4 h-4 text-gray-400 mx-2"
+                    className="w-4 h-4 text-[var(--text-secondary)] mx-2"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -42,19 +42,19 @@ export function PageHeader({
                 {breadcrumb.href ? (
                   <a
                     href={breadcrumb.href}
-                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     {breadcrumb.label}
                   </a>
                 ) : breadcrumb.onClick ? (
                   <button
                     onClick={breadcrumb.onClick}
-                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     {breadcrumb.label}
                   </button>
                 ) : (
-                  <span className="text-sm text-gray-900 font-medium">
+                  <span className="text-sm text-[var(--text-primary)] font-medium">
                     {breadcrumb.label}
                   </span>
                 )}
@@ -68,7 +68,7 @@ export function PageHeader({
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-brand-gold-700 mb-2">{title}</h1>
           {description && (
-            <p className="text-sm text-gray-600 max-w-3xl">{description}</p>
+            <p className="text-sm text-[var(--text-secondary)] max-w-3xl">{description}</p>
           )}
         </div>
 

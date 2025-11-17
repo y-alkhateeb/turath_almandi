@@ -150,7 +150,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
       {/* Item Name */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           اسم الصنف <span className="text-red-500">*</span>
         </label>
         <input
@@ -158,7 +158,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           type="text"
           {...register('name')}
           className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
+            errors.name ? 'border-red-500' : 'border-[var(--border-color)]'
           }`}
           placeholder="مثال: طحين، سكر، زيت"
         />
@@ -171,7 +171,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Quantity */}
         <div>
-          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="quantity" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             الكمية <span className="text-red-500">*</span>
           </label>
           <input
@@ -180,7 +180,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
             step="0.001"
             {...register('quantity')}
             className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.quantity ? 'border-red-500' : 'border-gray-300'
+              errors.quantity ? 'border-red-500' : 'border-[var(--border-color)]'
             }`}
             placeholder="0"
           />
@@ -191,14 +191,14 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
         {/* Unit */}
         <div>
-          <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="unit" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             الوحدة <span className="text-red-500">*</span>
           </label>
           <select
             id="unit"
             {...register('unit')}
             className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.unit ? 'border-red-500' : 'border-gray-300'
+              errors.unit ? 'border-red-500' : 'border-[var(--border-color)]'
             }`}
           >
             {Object.entries(unitLabels).map(([value, label]) => (
@@ -215,7 +215,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
       {/* Cost Per Unit */}
       <div>
-        <label htmlFor="costPerUnit" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="costPerUnit" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           سعر الوحدة <span className="text-red-500">*</span>
         </label>
         <input
@@ -224,7 +224,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           step="0.01"
           {...register('costPerUnit')}
           className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.costPerUnit ? 'border-red-500' : 'border-gray-300'
+            errors.costPerUnit ? 'border-red-500' : 'border-[var(--border-color)]'
           }`}
           placeholder="0.00"
         />
@@ -235,14 +235,14 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
       {/* Notes */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           ملاحظات
         </label>
         <textarea
           id="notes"
           {...register('notes')}
           rows={3}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="ملاحظات إضافية (اختياري)"
         />
       </div>
@@ -253,7 +253,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-6 py-3 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
           >
             إلغاء
           </button>

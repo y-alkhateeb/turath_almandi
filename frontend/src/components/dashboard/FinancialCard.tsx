@@ -68,17 +68,17 @@ export const FinancialCard = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-sm p-6">
         <div className="animate-pulse">
           <div className="flex justify-between items-start mb-4">
-            <div className="h-4 bg-gray-200 rounded w-24"></div>
-            <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
+            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24"></div>
+            <div className="h-12 w-12 bg-[var(--bg-tertiary)] rounded-lg"></div>
           </div>
-          <div className="h-8 bg-gray-200 rounded w-32 mb-4"></div>
+          <div className="h-8 bg-[var(--bg-tertiary)] rounded w-32 mb-4"></div>
           {breakdown && (
             <div className="space-y-2">
-              <div className="h-3 bg-gray-200 rounded w-full"></div>
-              <div className="h-3 bg-gray-200 rounded w-full"></div>
+              <div className="h-3 bg-[var(--bg-tertiary)] rounded w-full"></div>
+              <div className="h-3 bg-[var(--bg-tertiary)] rounded w-full"></div>
             </div>
           )}
         </div>
@@ -104,10 +104,10 @@ export const FinancialCard = ({
       </div>
 
       {breakdown && breakdown.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+        <div className="mt-4 pt-4 border-t border-[var(--border-color)] space-y-2">
           {breakdown.map((item, index) => (
             <div key={index} className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 font-arabic">{item.label}</span>
+              <span className="text-[var(--text-secondary)] font-arabic">{item.label}</span>
               <span className={`font-semibold ${config.text} font-arabic`}>
                 {formatCurrency(item.value)} د.ع
               </span>

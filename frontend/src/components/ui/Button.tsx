@@ -20,9 +20,9 @@ const variantClasses = {
   danger:
     'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
   outline:
-    'bg-white text-gray-700 border border-brand-gold-500 hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-gray-100',
+    'bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-brand-gold-500 hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-[var(--bg-tertiary)]',
   ghost:
-    'bg-transparent text-gray-700 hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-transparent disabled:text-gray-400',
+    'bg-transparent text-[var(--text-primary)] hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-transparent disabled:text-[var(--text-secondary)]',
 };
 
 const sizeClasses = {

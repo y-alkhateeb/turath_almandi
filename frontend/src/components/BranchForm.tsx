@@ -119,7 +119,7 @@ export const BranchForm: React.FC<BranchFormProps> = ({
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
+          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors disabled:bg-[var(--text-secondary)] disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
         >
           {isLoading && <LoadingSpinner size="sm" color="white" />}
           {isLoading ? 'جاري الحفظ...' : initialData ? 'تحديث' : 'إضافة'}
@@ -128,7 +128,7 @@ export const BranchForm: React.FC<BranchFormProps> = ({
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          className="flex-1 bg-[var(--bg-tertiary)] text-[var(--text-primary)] px-6 py-3 rounded-lg hover:bg-[var(--border-color)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
           إلغاء
         </button>

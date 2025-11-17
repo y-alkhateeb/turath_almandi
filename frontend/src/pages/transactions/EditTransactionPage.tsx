@@ -1,17 +1,20 @@
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Modal } from './Modal';
-import { TransactionType, PaymentMethod, type Transaction } from '../types/transactions.types';
-import { useUpdateTransaction } from '../hooks/useTransactions';
+import { ArrowRight } from 'lucide-react';
+import { useTransactions, useUpdateTransaction } from '@/hooks/useTransactions';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/ui/button';
+import { PageLoading } from '@/components/loading';
+import { Alert } from '@/ui/alert';
+import { TransactionType, PaymentMethod } from '@/types/transactions.types';
 
-interface TransactionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  transaction: Transaction | null;
-  mode: 'view' | 'edit';
-}
+/**
+ * Edit Transaction Page
+ * Full page for editing a transaction
+ */
 
 // Validation schema for edit mode
 const editTransactionSchema = z.object({
@@ -26,20 +29,20 @@ const editTransactionSchema = z.object({
 
 type EditTransactionFormData = z.infer<typeof editTransactionSchema>;
 
-export default function TransactionModal({
-  isOpen,
-  onClose,
-  transaction,
-  mode,
-}: TransactionModalProps) {
+export const EditTransactionPage = () => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { data: transactions = [], isLoading } = useTransactions();
   const updateTransaction = useUpdateTransaction();
+
+  // Find the transaction to edit
+  const transaction = transactions.find((t) => t.id === id);
 
   const {
     register,
     handleSubmit,
     watch,
     reset,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<EditTransactionFormData>({
     resolver: zodResolver(editTransactionSchema),
@@ -63,11 +66,11 @@ export default function TransactionModal({
   }, [transaction, reset]);
 
   const onSubmit = async (data: EditTransactionFormData) => {
-    if (!transaction || mode === 'view') return;
+    if (!transaction || !id) return;
 
     try {
       await updateTransaction.mutateAsync({
-        id: transaction.id,
+        id,
         data: {
           type: data.type,
           amount: parseFloat(data.amount),
@@ -78,150 +81,59 @@ export default function TransactionModal({
           notes: data.notes || undefined,
         },
       });
-      onClose();
+      navigate('/transactions');
     } catch (error) {
       // Error is handled in the hook
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-IQ', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  const handleCancel = () => {
+    navigate('/transactions');
   };
 
-  const formatAmount = (amount: number) => {
-    return amount.toLocaleString('ar-IQ', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-  };
+  if (isLoading) {
+    return <PageLoading message="جاري تحميل بيانات العملية..." />;
+  }
 
-  const getTypeLabel = (type: TransactionType) => {
-    return type === 'INCOME' ? 'إيراد' : 'مصروف';
-  };
-
-  const getPaymentMethodLabel = (method: PaymentMethod | null) => {
-    if (!method) return '-';
-    return method === 'CASH' ? 'نقدي' : 'ماستر کارد';
-  };
-
-  if (!transaction) return null;
+  if (!transaction) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          لم يتم العثور على العملية المطلوبة
+        </Alert>
+        <Button onClick={handleCancel}>
+          <ArrowRight className="w-4 h-4" />
+          العودة إلى العمليات
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={mode === 'view' ? 'تفاصيل العملية' : 'تعديل العملية'}
-      size="lg"
-    >
-      {mode === 'view' ? (
-        // View Mode - Read-only display
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                نوع العملية
-              </label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                <span
-                  className={`font-semibold ${
-                    transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {getTypeLabel(transaction.type)}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">المبلغ</label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                <span className="font-semibold">{formatAmount(transaction.amount)} IQD</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">التاريخ</label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {formatDate(transaction.date)}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">طريقة الدفع</label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {getPaymentMethodLabel(transaction.paymentMethod)}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفئة</label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.category || '-'}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                {transaction.type === 'INCOME' ? 'اسم العميل' : 'اسم الموظف/المورد'}
-              </label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.employeeVendorName || '-'}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفرع</label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.branch?.name || '-'}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">أنشئ بواسطة</label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.creator?.username || '-'}
-              </div>
-            </div>
-
-            {transaction.inventoryItem && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                  مرتبط بالمخزون
-                </label>
-                <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md">
-                  <span className="font-medium text-blue-900">
-                    {transaction.inventoryItem.name} ({transaction.inventoryItem.quantity}{' '}
-                    {transaction.inventoryItem.unit})
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {transaction.notes && (
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">ملاحظات</label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md min-h-[80px]">
-                {transaction.notes}
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-end pt-4 border-t">
-            <button
-              onClick={onClose}
-              className="px-6 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--bg-tertiary)] transition-colors font-medium"
-            >
-              إغلاق
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleCancel}
+          className="gap-2"
+        >
+          <ArrowRight className="w-4 h-4" />
+          رجوع
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+            تعديل العملية
+          </h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">
+            تعديل بيانات العملية المالية
+          </p>
         </div>
-      ) : (
-        // Edit Mode - Editable form
+      </div>
+
+      {/* Edit Form Card */}
+      <Card padding="lg">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Transaction Type */}
@@ -345,7 +257,7 @@ export default function TransactionModal({
           <div className="flex justify-end gap-3 pt-4 border-t">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCancel}
               disabled={isSubmitting}
               className="px-6 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--bg-tertiary)] transition-colors font-medium disabled:opacity-50"
             >
@@ -367,7 +279,9 @@ export default function TransactionModal({
             </button>
           </div>
         </form>
-      )}
-    </Modal>
+      </Card>
+    </div>
   );
-}
+};
+
+export default EditTransactionPage;

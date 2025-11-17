@@ -44,14 +44,14 @@ export const BranchSelector = ({
     const userBranch = branches.find((b) => b.id === user.branchId);
     return (
       <div className={className}>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
           Branch
         </label>
         <input
           type="text"
           value={userBranch?.name || 'Loading...'}
           disabled
-          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 cursor-not-allowed"
+          className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-tertiary)] text-[var(--text-primary)] cursor-not-allowed"
         />
       </div>
     );
@@ -60,7 +60,7 @@ export const BranchSelector = ({
   // Admin can select any branch
   return (
     <div className={className}>
-      <label htmlFor="branch-select" className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor="branch-select" className="block text-sm font-medium text-[var(--text-primary)] mb-1">
         Branch
       </label>
       <select
@@ -68,7 +68,7 @@ export const BranchSelector = ({
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
         disabled={disabled || loading}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
       >
         <option value="">All Branches</option>
         {branches

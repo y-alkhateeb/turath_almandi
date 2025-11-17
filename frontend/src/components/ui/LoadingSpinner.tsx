@@ -40,13 +40,13 @@ export function LoadingSpinner({
         role="status"
         aria-label="جاري التحميل"
       />
-      {text && <p className="mt-4 text-sm text-gray-600">{text}</p>}
+      {text && <p className="mt-4 text-sm text-[var(--text-secondary)]">{text}</p>}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-[var(--bg-primary)] bg-opacity-75 z-50">
         {spinner}
       </div>
     );
@@ -70,7 +70,7 @@ export function LoadingOverlay({
     <div className="relative">
       {children}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-primary)] bg-opacity-75 rounded-lg">
           <LoadingSpinner text={text} />
         </div>
       )}

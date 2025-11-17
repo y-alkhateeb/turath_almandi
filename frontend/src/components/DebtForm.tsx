@@ -147,7 +147,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
 
       {/* Date Picker - Note: Uses valueAsDate for Date object conversion */}
       <div>
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="date" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           التاريخ <span className="text-red-500">*</span>
         </label>
         <input
@@ -156,7 +156,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
           {...register('date', { valueAsDate: true })}
           defaultValue={new Date().toISOString().split('T')[0]}
           className={`w-full px-4 py-3 border ${
-            errors.date ? 'border-red-500' : 'border-gray-300'
+            errors.date ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
@@ -167,7 +167,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
 
       {/* Due Date Picker - Note: Uses valueAsDate for Date object conversion */}
       <div>
-        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="dueDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           تاريخ الاستحقاق <span className="text-red-500">*</span>
         </label>
         <input
@@ -176,14 +176,14 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
           {...register('dueDate', { valueAsDate: true })}
           defaultValue={new Date().toISOString().split('T')[0]}
           className={`w-full px-4 py-3 border ${
-            errors.dueDate ? 'border-red-500' : 'border-gray-300'
+            errors.dueDate ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
         {errors.dueDate && (
           <p className="mt-2 text-sm text-red-600">{errors.dueDate.message}</p>
         )}
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
           تاريخ الاستحقاق يجب أن يكون أكبر من أو يساوي التاريخ
         </p>
       </div>
@@ -203,7 +203,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         <button
           type="submit"
           disabled={isSubmitting || createDebt.isPending}
-          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:bg-[var(--text-secondary)] disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
         >
           {(isSubmitting || createDebt.isPending) && (
             <LoadingSpinner size="sm" color="white" />
@@ -216,7 +216,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
             type="button"
             onClick={onCancel}
             disabled={isSubmitting || createDebt.isPending}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 border border-[var(--border-color)] rounded-lg font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             إلغاء
           </button>

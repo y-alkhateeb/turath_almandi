@@ -143,13 +143,13 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
       {/* Branch Display (Read-only) */}
       {user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             الفرع
           </label>
-          <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+          <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
             يتم تعبئة الفرع تلقائيًا من حسابك
           </p>
         </div>
@@ -157,7 +157,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
 
       {/* Date Picker */}
       <div>
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="date" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           التاريخ <span className="text-red-500">*</span>
         </label>
         <input
@@ -168,7 +168,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
           })}
           defaultValue={new Date().toISOString().split('T')[0]}
           className={`w-full px-4 py-3 border ${
-            errors.date ? 'border-red-500' : 'border-gray-300'
+            errors.date ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
@@ -179,7 +179,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
 
       {/* Amount Input */}
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="amount" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           المبلغ <span className="text-red-500">*</span>
         </label>
         <div className="relative">
@@ -191,12 +191,12 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
             placeholder="0.00"
             {...register('amount')}
             className={`w-full px-4 py-3 border ${
-              errors.amount ? 'border-red-500' : 'border-gray-300'
+              errors.amount ? 'border-red-500' : 'border-[var(--border-color)]'
             } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
             disabled={isSubmitting}
             dir="ltr"
           />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-sm">
             IQD
           </div>
         </div>
@@ -207,7 +207,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
 
       {/* Vendor Name Input */}
       <div>
-        <label htmlFor="vendorName" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="vendorName" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           اسم المورد <span className="text-red-500">*</span>
         </label>
         <input
@@ -216,7 +216,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
           placeholder="أدخل اسم المورد"
           {...register('vendorName')}
           className={`w-full px-4 py-3 border ${
-            errors.vendorName ? 'border-red-500' : 'border-gray-300'
+            errors.vendorName ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
@@ -231,22 +231,22 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
           type="checkbox"
           id="addToInventory"
           {...register('addToInventory')}
-          className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500"
+          className="w-5 h-5 text-primary-600 border-[var(--border-color)] rounded focus:ring-2 focus:ring-primary-500"
           disabled={isSubmitting}
         />
-        <label htmlFor="addToInventory" className="mr-3 text-sm font-medium text-gray-700">
+        <label htmlFor="addToInventory" className="mr-3 text-sm font-medium text-[var(--text-primary)]">
           إضافة للمخزون
         </label>
       </div>
 
       {/* Conditional Inventory Fields */}
       {addToInventory && (
-        <div className="space-y-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">معلومات المخزون</h3>
+        <div className="space-y-4 p-4 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">معلومات المخزون</h3>
 
           {/* Item Name */}
           <div>
-            <label htmlFor="itemName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="itemName" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
               اسم الصنف <span className="text-red-500">*</span>
             </label>
             <input
@@ -255,7 +255,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
               placeholder="أدخل اسم الصنف"
               {...register('itemName')}
               className={`w-full px-4 py-3 border ${
-                errors.itemName ? 'border-red-500' : 'border-gray-300'
+                errors.itemName ? 'border-red-500' : 'border-[var(--border-color)]'
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
               disabled={isSubmitting}
             />
@@ -266,7 +266,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
 
           {/* Quantity */}
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="quantity" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
               الكمية <span className="text-red-500">*</span>
             </label>
             <input
@@ -277,7 +277,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
               placeholder="0.000"
               {...register('quantity')}
               className={`w-full px-4 py-3 border ${
-                errors.quantity ? 'border-red-500' : 'border-gray-300'
+                errors.quantity ? 'border-red-500' : 'border-[var(--border-color)]'
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
               disabled={isSubmitting}
               dir="ltr"
@@ -289,14 +289,14 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
 
           {/* Unit Dropdown */}
           <div>
-            <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="unit" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
               الوحدة <span className="text-red-500">*</span>
             </label>
             <select
               id="unit"
               {...register('unit')}
               className={`w-full px-4 py-3 border ${
-                errors.unit ? 'border-red-500' : 'border-gray-300'
+                errors.unit ? 'border-red-500' : 'border-[var(--border-color)]'
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
               disabled={isSubmitting}
             >
@@ -314,7 +314,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
 
       {/* Notes Textarea (Optional) */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           ملاحظات
         </label>
         <textarea
@@ -323,7 +323,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
           placeholder="أضف أي ملاحظات إضافية هنا..."
           {...register('notes')}
           className={`w-full px-4 py-3 border ${
-            errors.notes ? 'border-red-500' : 'border-gray-300'
+            errors.notes ? 'border-red-500' : 'border-[var(--border-color)]'
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none`}
           disabled={isSubmitting}
         />
@@ -373,7 +373,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
             type="button"
             onClick={onCancel}
             disabled={isSubmitting || createPurchaseExpense.isPending}
-            className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 border border-[var(--border-color)] rounded-lg font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             إلغاء
           </button>

@@ -132,7 +132,7 @@ export function EmptyState({
       {/* Title */}
       <h3
         className={cn(
-          'font-semibold text-gray-900 mb-2',
+          'font-semibold text-[var(--text-primary)] mb-2',
           sizes.title
         )}
       >
@@ -142,7 +142,7 @@ export function EmptyState({
       {/* Description */}
       <p
         className={cn(
-          'text-gray-600 max-w-md mb-8 leading-relaxed',
+          'text-[var(--text-secondary)] max-w-md mb-8 leading-relaxed',
           sizes.desc
         )}
       >

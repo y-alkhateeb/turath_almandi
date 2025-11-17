@@ -29,7 +29,7 @@ export function FormTextarea<T extends FieldValues>({
     <div className={`mb-4 ${className}`}>
       <label
         htmlFor={name}
-        className="block text-sm font-medium text-gray-700 mb-2"
+        className="block text-sm font-medium text-[var(--text-primary)] mb-2"
       >
         {label}
         {required && <span className="text-red-500 mr-1">*</span>}
@@ -44,10 +44,10 @@ export function FormTextarea<T extends FieldValues>({
         className={`
           w-full px-4 py-3 border rounded-lg
           focus:ring-2 focus:ring-primary-500 focus:border-transparent
-          disabled:bg-gray-100 disabled:cursor-not-allowed
+          disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
           transition-colors duration-200
           resize-vertical
-          ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
+          ${error ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'}
         `}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${name}-error` : undefined}

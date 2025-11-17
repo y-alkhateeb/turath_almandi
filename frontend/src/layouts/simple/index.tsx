@@ -21,7 +21,7 @@ export function SimpleLayout() {
 
       {/* Footer */}
       <div className="absolute bottom-4 left-0 right-0 text-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-[var(--text-secondary)]">
           © 2025 تراث المندي. جميع الحقوق محفوظة.
         </p>
       </div>

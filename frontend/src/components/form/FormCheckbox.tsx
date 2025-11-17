@@ -31,10 +31,10 @@ export function FormCheckbox<T extends FieldValues>({
             className={`
               w-5 h-5 border rounded
               text-primary-600 focus:ring-2 focus:ring-primary-500
-              disabled:bg-gray-100 disabled:cursor-not-allowed
+              disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
               transition-colors duration-200
               cursor-pointer
-              ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
+              ${error ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'}
             `}
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={
@@ -50,7 +50,7 @@ export function FormCheckbox<T extends FieldValues>({
           <label
             htmlFor={name}
             className={`text-sm font-medium ${
-              disabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 cursor-pointer'
+              disabled ? 'text-[var(--text-secondary)] cursor-not-allowed' : 'text-[var(--text-primary)] cursor-pointer'
             }`}
           >
             {label}
@@ -58,7 +58,7 @@ export function FormCheckbox<T extends FieldValues>({
           {description && (
             <p
               id={`${name}-description`}
-              className="text-sm text-gray-500 mt-1"
+              className="text-sm text-[var(--text-secondary)] mt-1"
             >
               {description}
             </p>

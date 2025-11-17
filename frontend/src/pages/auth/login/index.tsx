@@ -219,8 +219,8 @@ export default function LoginPage() {
             <div className="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700"></div>
             {/* Decorative Elements */}
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-20 right-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-              <div className="absolute bottom-20 left-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+              <div className="absolute top-20 right-20 w-72 h-72 bg-[var(--bg-secondary)] rounded-full blur-3xl"></div>
+              <div className="absolute bottom-20 left-20 w-96 h-96 bg-[var(--bg-secondary)] rounded-full blur-3xl"></div>
             </div>
           </>
         )}

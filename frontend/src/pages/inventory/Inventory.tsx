@@ -1,25 +1,22 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useInventory, useDeleteInventory } from '@/hooks/useInventory';
 import { useAuth } from '@/hooks/useAuth';
 import InventoryTable from '@/components/InventoryTable';
-import { InventoryForm } from '@/components/InventoryForm';
-import Modal from '@/components/Modal';
 import { ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
 import { Alert } from '@/ui/alert';
 import type { InventoryItem, InventoryFilters } from '@/types/inventory.types';
 
 export default function InventoryPage() {
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [filters, setFilters] = useState<InventoryFilters>({
     page: 1,
     limit: 20,
   });
 
-  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     isOpen: boolean;
     item: InventoryItem | null;
@@ -29,8 +26,7 @@ export default function InventoryPage() {
   const deleteInventory = useDeleteInventory();
 
   const handleEdit = (item: InventoryItem) => {
-    setSelectedItem(item);
-    setIsEditModalOpen(true);
+    navigate(`/inventory/edit/${item.id}`);
   };
 
   const handleDelete = (item: InventoryItem) => {
@@ -56,45 +52,17 @@ export default function InventoryPage() {
     setFilters(newFilters);
   };
 
-  const handleAddModalClose = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const handleEditModalClose = () => {
-    setIsEditModalOpen(false);
-    setSelectedItem(null);
-  };
-
-  const handleAddSuccess = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const handleEditSuccess = () => {
-    setIsEditModalOpen(false);
-    setSelectedItem(null);
-  };
-
-  const getUnitLabel = (unit: string) => {
-    const labels: Record<string, string> = {
-      KG: 'كيلو',
-      PIECE: 'قطعة',
-      LITER: 'لتر',
-      OTHER: 'أخرى',
-    };
-    return labels[unit] || unit;
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">إدارة المخزون</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة المخزون</h1>
+          <p className="mt-2 text-[var(--text-secondary)]">
             عرض وإدارة جميع أصناف المخزون
           </p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)}>
+        <Button onClick={() => navigate('/inventory/create')}>
           <Plus className="w-5 h-5" />
           إضافة صنف جديد
         </Button>
@@ -117,30 +85,6 @@ export default function InventoryPage() {
         onDelete={handleDelete}
         isLoading={isLoading}
       />
-
-      {/* Add Item Modal */}
-      <Modal
-        isOpen={isAddModalOpen}
-        onClose={handleAddModalClose}
-        title="إضافة صنف جديد"
-      >
-        <InventoryForm onSuccess={handleAddSuccess} onCancel={handleAddModalClose} />
-      </Modal>
-
-      {/* Edit Item Modal */}
-      <Modal
-        isOpen={isEditModalOpen}
-        onClose={handleEditModalClose}
-        title="تعديل الصنف"
-      >
-        {selectedItem && (
-          <InventoryForm
-            item={selectedItem}
-            onSuccess={handleEditSuccess}
-            onCancel={handleEditModalClose}
-          />
-        )}
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

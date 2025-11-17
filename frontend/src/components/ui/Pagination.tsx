@@ -76,9 +76,9 @@ export function Pagination({
         <button
           onClick={() => onPageChange(1)}
           className="
-            px-3 py-2 rounded-lg border border-gray-300
-            text-sm font-medium text-gray-700
-            hover:bg-gray-50 transition-colors duration-200
+            px-3 py-2 rounded-lg border border-[var(--border-color)]
+            text-sm font-medium text-[var(--text-primary)]
+            hover:bg-[var(--bg-tertiary)] transition-colors duration-200
             disabled:opacity-50 disabled:cursor-not-allowed
           "
           aria-label="الصفحة الأولى"
@@ -92,9 +92,9 @@ export function Pagination({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="
-          px-3 py-2 rounded-lg border border-gray-300
-          text-sm font-medium text-gray-700
-          hover:bg-gray-50 transition-colors duration-200
+          px-3 py-2 rounded-lg border border-[var(--border-color)]
+          text-sm font-medium text-[var(--text-primary)]
+          hover:bg-[var(--bg-tertiary)] transition-colors duration-200
           disabled:opacity-50 disabled:cursor-not-allowed
         "
         aria-label="الصفحة السابقة"
@@ -108,7 +108,7 @@ export function Pagination({
           return (
             <span
               key={`ellipsis-${index}`}
-              className="px-3 py-2 text-gray-500"
+              className="px-3 py-2 text-[var(--text-secondary)]"
             >
               ...
             </span>
@@ -128,7 +128,7 @@ export function Pagination({
               ${
                 isActive
                   ? 'bg-sky-600 text-white border-sky-600'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  : 'border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]'
               }
             `}
             aria-label={`الصفحة ${pageNumber}`}
@@ -144,9 +144,9 @@ export function Pagination({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="
-          px-3 py-2 rounded-lg border border-gray-300
-          text-sm font-medium text-gray-700
-          hover:bg-gray-50 transition-colors duration-200
+          px-3 py-2 rounded-lg border border-[var(--border-color)]
+          text-sm font-medium text-[var(--text-primary)]
+          hover:bg-[var(--bg-tertiary)] transition-colors duration-200
           disabled:opacity-50 disabled:cursor-not-allowed
         "
         aria-label="الصفحة التالية"
@@ -159,9 +159,9 @@ export function Pagination({
         <button
           onClick={() => onPageChange(totalPages)}
           className="
-            px-3 py-2 rounded-lg border border-gray-300
-            text-sm font-medium text-gray-700
-            hover:bg-gray-50 transition-colors duration-200
+            px-3 py-2 rounded-lg border border-[var(--border-color)]
+            text-sm font-medium text-[var(--text-primary)]
+            hover:bg-[var(--bg-tertiary)] transition-colors duration-200
             disabled:opacity-50 disabled:cursor-not-allowed
           "
           aria-label="الصفحة الأخيرة"

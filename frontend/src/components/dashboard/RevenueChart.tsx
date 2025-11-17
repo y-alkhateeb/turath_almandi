@@ -23,8 +23,8 @@ const CustomTooltip = ({
 }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-        <p className="text-sm font-medium text-gray-900 mb-2">
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
+        <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
           {payload[0].payload.month}
         </p>
         {payload.map((entry, index) => (
@@ -50,11 +50,11 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
   return (
     <Card className="p-6">
-      <div className="border-b border-gray-200 pb-5 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">
+      <div className="border-b border-[var(--border-color)] pb-5 mb-6">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">
           الإيرادات والمصروفات
         </h3>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           مقارنة شهرية للإيرادات والمصروفات
         </p>
       </div>

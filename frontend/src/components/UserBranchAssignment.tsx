@@ -52,7 +52,7 @@ export const UserBranchAssignment = () => {
   if (loading) {
     return (
       <div className="p-4 text-center">
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-[var(--text-secondary)]">Loading...</p>
       </div>
     );
   }
@@ -73,36 +73,36 @@ export const UserBranchAssignment = () => {
 
   return (
     <ConditionalRender roles={['ADMIN']}>
-      <div className="p-6 bg-white rounded-lg shadow">
+      <div className="p-6 bg-[var(--bg-secondary)] rounded-lg shadow">
         <h2 className="text-2xl font-bold mb-4">User Branch Assignment</h2>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-[var(--border-color)]">
+            <thead className="bg-[var(--bg-tertiary)]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   Username
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   Current Branch
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   Assign Branch
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
               {users.map((user) => (
                 <tr key={user.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--text-primary)]">
                     {user.username}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                     <span
                       className={`px-2 py-1 rounded ${
                         user.role === 'ADMIN'
@@ -113,17 +113,17 @@ export const UserBranchAssignment = () => {
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                     {user.branch?.name || 'None'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                     <select
                       value={user.branchId || ''}
                       onChange={(e) =>
                         handleAssignBranch(user.id, e.target.value || null)
                       }
                       disabled={saving === user.id}
-                      className="px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                      className="px-3 py-1 border border-[var(--border-color)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)]"
                     >
                       <option value="">No Branch</option>
                       {branches
@@ -135,7 +135,7 @@ export const UserBranchAssignment = () => {
                         ))}
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                     {saving === user.id ? (
                       <span className="text-blue-600">Saving...</span>
                     ) : (

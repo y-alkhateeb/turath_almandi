@@ -496,6 +496,7 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
 export default function DashboardWorkbench() {
   const userInfo = useUserInfo();
   const isAdmin = useIsAdmin();
+  const router = useRouter();
   const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
@@ -581,8 +582,6 @@ export default function DashboardWorkbench() {
     stats.totalExpenses === 0 &&
     stats.recentTransactions.length === 0 &&
     stats.todayTransactions === 0;
-
-  const router = useRouter();
 
   // Show comprehensive empty state if no transactions exist
   if (hasNoTransactionsEver) {

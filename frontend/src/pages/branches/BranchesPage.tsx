@@ -181,7 +181,7 @@ export const BranchesPage = () => {
         />
       ) : (
         /* Branches Table */
-        <Table columns={columns} data={branches} />
+        <Table columns={columns} data={branches} keyExtractor={(branch) => branch.id} />
       )}
 
       {/* Create Modal */}

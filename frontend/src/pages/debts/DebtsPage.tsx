@@ -4,12 +4,13 @@ import { Plus, DollarSign, ChevronRight } from 'lucide-react';
 import { DebtPaymentHistory } from '@/components/DebtPaymentHistory';
 import { useDebts } from '@/hooks/useDebts';
 import { PageLoading } from '@/components/loading';
-import { EmptyState, PageHeader, Table } from '@/components/ui';
+import { PageLayout } from '@/components/layouts';
+import { EmptyState } from '@/components/ui';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
-import { Alert } from '@/ui/alert';
 import { DebtStatus, type Debt } from '@/types/debts.types';
 import type { Column } from '@/components/ui/Table';
+import { formatCurrency, formatDateShort } from '@/utils/formatters';
 
 /**
  * Debts Page - Debt Management
@@ -58,17 +59,6 @@ export const DebtsPage = () => {
     const due = new Date(dueDate);
     due.setHours(0, 0, 0, 0);
     return due < today;
-  };
-
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('ar-IQ', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-IQ');
   };
 
   // Table columns configuration
@@ -139,7 +129,7 @@ export const DebtsPage = () => {
     {
       key: 'date',
       header: 'التاريخ',
-      render: (debt) => <div className="text-[var(--text-primary)]">{formatDate(debt.date)}</div>,
+      render: (debt) => <div className="text-[var(--text-primary)]">{formatDateShort(debt.date)}</div>,
     },
     {
       key: 'dueDate',
@@ -148,7 +138,7 @@ export const DebtsPage = () => {
         const overdueFlag = isOverdue(debt.dueDate, debt.status);
         return (
           <div className={overdueFlag ? 'text-red-600 font-medium' : 'text-[var(--text-primary)]'}>
-            {formatDate(debt.dueDate)}
+            {formatDateShort(debt.dueDate)}
           </div>
         );
       },
@@ -219,28 +209,18 @@ export const DebtsPage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <PageHeader
-        title="إدارة الديون"
-        description="إدارة جميع الديون والذمم"
-        actions={
-          <Button
-            variant="default"
-            onClick={() => navigate('/debts/create')}
-          >
-            <Plus className="w-5 h-5" />
-            إضافة دين
-          </Button>
-        }
-      />
-
-      {/* Error State */}
-      {error && (
-        <Alert variant="destructive">
-          حدث خطأ أثناء تحميل البيانات
-        </Alert>
-      )}
+    <PageLayout
+      title="إدارة الديون"
+      description="إدارة جميع الديون والذمم"
+      error={error}
+      errorMessage="حدث خطأ أثناء تحميل البيانات"
+      actions={
+        <Button variant="default" onClick={() => navigate('/debts/create')}>
+          <Plus className="w-5 h-5" />
+          إضافة دين
+        </Button>
+      }
+    >
 
       {/* Loading State */}
       {isLoading ? (
@@ -284,7 +264,7 @@ export const DebtsPage = () => {
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };
 

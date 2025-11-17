@@ -11,7 +11,7 @@ import { PageLoading } from '@/components/loading';
 import type { RouteObject } from 'react-router-dom';
 
 // Lazy load dashboard pages
-const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
+const DashboardPage = lazy(() => import('@/pages/dashboard/workbench'));
 const TransactionsPage = lazy(() => import('@/pages/transactions/TransactionsPage'));
 const IncomePage = lazy(() => import('@/pages/transactions/IncomePage'));
 const DebtsPage = lazy(() => import('@/pages/debts/DebtsPage'));

@@ -182,6 +182,7 @@ The JWT token contains the following payload:
 
 ```typescript
 import { UseGuards } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -193,14 +194,14 @@ export class TransactionsController {
 
   // Only ADMIN can access
   @Get('all')
-  @Roles('ADMIN')
+  @Roles([UserRole.ADMIN])
   getAllTransactions() {
     // Implementation
   }
 
   // Both ADMIN and ACCOUNTANT can access
   @Get('branch/:branchId')
-  @Roles('ADMIN', 'ACCOUNTANT')
+  @Roles([UserRole.ADMIN, UserRole.ACCOUNTANT])
   getBranchTransactions(
     @Param('branchId') branchId: string,
     @CurrentUser() user: any,

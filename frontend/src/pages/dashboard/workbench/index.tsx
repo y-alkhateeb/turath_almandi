@@ -546,39 +546,35 @@ export default function DashboardWorkbench() {
   // Error state
   if (error) {
     return (
-      <div className="p-6" dir="rtl">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRetry}
-              className="mr-4"
-            >
-              <RefreshCw className="w-4 h-4 ml-2" />
-              إعادة المحاولة
-            </Button>
-          </AlertDescription>
-        </Alert>
-      </div>
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="flex items-center justify-between">
+          <span>حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRetry}
+            className="mr-4"
+          >
+            <RefreshCw className="w-4 h-4 ml-2" />
+            إعادة المحاولة
+          </Button>
+        </AlertDescription>
+      </Alert>
     );
   }
 
   // No data state
   if (!stats) {
     return (
-      <div className="p-6" dir="rtl">
-        <Alert>
-          <AlertDescription>لا توجد بيانات متاحة</AlertDescription>
-        </Alert>
-      </div>
+      <Alert>
+        <AlertDescription>لا توجد بيانات متاحة</AlertDescription>
+      </Alert>
     );
   }
 
   return (
-    <div className="space-y-6 p-6" dir="rtl">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>

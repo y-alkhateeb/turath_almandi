@@ -36,7 +36,7 @@ export class DebtsService {
     // - For admins: Use provided branchId or require it
     let branchId: string;
 
-    if (user.role === 'ACCOUNTANT') {
+    if (user.role === UserRole.ACCOUNTANT) {
       // Accountants must have a branch assigned and can only create for their branch
       if (!user.branchId) {
         throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء الديون');

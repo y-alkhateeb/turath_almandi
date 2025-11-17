@@ -501,7 +501,7 @@ export default function DashboardWorkbench() {
 
   // Determine effective branch ID (accountants can only see their branch)
   const effectiveBranchId =
-    userInfo.role === 'ACCOUNTANT' ? userInfo.branchId : selectedBranchId;
+    userInfo?.role === 'ACCOUNTANT' ? userInfo?.branchId : selectedBranchId;
 
   // Fetch branches for admin users
   const { data: branches } = useQuery({

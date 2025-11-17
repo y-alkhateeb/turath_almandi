@@ -76,9 +76,9 @@ export function Header({ onMenuClick }: HeaderProps) {
               <Button variant="ghost" className="gap-2 text-brand-cream-100 hover:text-white hover:bg-brand-green-600">
                 <div className="flex items-center gap-2">
                   <div className="hidden md:block text-right">
-                    <div className="text-sm font-medium">{userInfo.username}</div>
+                    <div className="text-sm font-medium">{userInfo?.username || 'المستخدم'}</div>
                     <div className="text-xs text-brand-cream-200">
-                      {userInfo.role === 'ADMIN' ? 'مدير' : 'محاسب'}
+                      {userInfo?.role === 'ADMIN' ? 'مدير' : 'محاسب'}
                     </div>
                   </div>
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-gold-500 text-white">
@@ -89,11 +89,11 @@ export function Header({ onMenuClick }: HeaderProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{userInfo.username}</p>
+                <p className="text-sm font-medium">{userInfo?.username || 'المستخدم'}</p>
                 <p className="text-xs text-gray-500">
-                  {userInfo.role === 'ADMIN' ? 'مدير النظام' : 'محاسب'}
+                  {userInfo?.role === 'ADMIN' ? 'مدير النظام' : 'محاسب'}
                 </p>
-                {userInfo.branch && (
+                {userInfo?.branch && (
                   <p className="text-xs text-gray-500 mt-1">
                     <Icon icon="solar:shop-2-linear" className="inline ml-1" size={12} />
                     {userInfo.branch.name}

@@ -190,17 +190,21 @@ export const UsersPage = () => {
       ) : users.length === 0 ? (
         /* Empty State */
         <EmptyState
+          variant="default"
           icon={<Users className="w-full h-full" />}
           title="لا يوجد مستخدمون"
-          description="لم يتم إضافة أي مستخدم بعد. ابدأ بإضافة مستخدم جديد."
-          action={
+          description="أضف مستخدمين جدد (مدراء أو محاسبين) لتمكينهم من استخدام النظام وإدارة العمليات المالية."
+          actions={
             isAdmin()
               ? {
-                  label: 'إضافة مستخدم جديد',
-                  onClick: () => setIsCreateModalOpen(true),
+                  primary: {
+                    label: 'إضافة مستخدم جديد',
+                    onClick: () => setIsCreateModalOpen(true),
+                  },
                 }
               : undefined
           }
+          size="lg"
         />
       ) : (
         /* Users Table */

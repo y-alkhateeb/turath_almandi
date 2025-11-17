@@ -287,13 +287,17 @@ export const DebtsPage = () => {
       ) : debts && debts.length === 0 ? (
         /* Empty State */
         <EmptyState
+          variant="default"
           icon={<DollarSign className="w-full h-full" />}
           title="لا توجد ديون"
-          description="ابدأ بإضافة أول دين"
-          action={{
-            label: 'إضافة دين جديد',
-            onClick: () => setIsModalOpen(true),
+          description="تتبع الديون المستحقة وسددها بسهولة. ابدأ بإضافة أول دين لمتابعة المدفوعات والمستحقات."
+          actions={{
+            primary: {
+              label: 'إضافة دين جديد',
+              onClick: () => setIsModalOpen(true),
+            },
           }}
+          size="lg"
         />
       ) : (
         /* Debts Table with Custom Row Renderer */

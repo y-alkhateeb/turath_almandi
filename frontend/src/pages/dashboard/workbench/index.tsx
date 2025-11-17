@@ -54,7 +54,9 @@ import {
 import { Input } from '@/ui/input';
 import { Badge } from '@/ui/badge';
 import { PageLoading } from '@/components/loading';
+import { EmptyState } from '@/components/ui';
 import { useUserInfo, useIsAdmin } from '@/store/userStore';
+import { useRouter } from '@/routes/hooks';
 import { getDashboardStats } from '@/api/services/dashboardService';
 import { getAll as getAllBranches } from '@/api/services/branchService';
 import { formatCurrency, formatDateShort } from '@/utils/format';
@@ -570,6 +572,47 @@ export default function DashboardWorkbench() {
       <Alert>
         <AlertDescription>لا توجد بيانات متاحة</AlertDescription>
       </Alert>
+    );
+  }
+
+  // Check if there are NO transactions EVER (not just filtered)
+  const hasNoTransactionsEver =
+    stats.totalRevenue === 0 &&
+    stats.totalExpenses === 0 &&
+    stats.recentTransactions.length === 0 &&
+    stats.todayTransactions === 0;
+
+  const router = useRouter();
+
+  // Show comprehensive empty state if no transactions exist
+  if (hasNoTransactionsEver) {
+    return (
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
+            <p className="text-gray-600 mt-1">
+              مرحباً بك، {userInfo?.username || 'المستخدم'}
+            </p>
+          </div>
+        </div>
+
+        {/* Empty State */}
+        <EmptyState
+          variant="default"
+          icon={<Activity className="w-full h-full" />}
+          title="ابدأ رحلتك المالية"
+          description="لم يتم تسجيل أي عمليات مالية بعد. ابدأ بإضافة أول إيراد أو مصروف لتتبع أموالك وإدارتها بشكل احترافي."
+          actions={{
+            primary: {
+              label: 'إضافة عملية جديدة',
+              onClick: () => router.push('/transactions'),
+            },
+          }}
+          size="lg"
+        />
+      </div>
     );
   }
 

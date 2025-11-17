@@ -322,3 +322,5 @@ export const DebtsPage = () => {
     </div>
   );
 };
+
+export default DebtsPage;

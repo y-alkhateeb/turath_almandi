@@ -12,7 +12,7 @@ export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-brand-cream-100 dark:bg-dark-primary transition-colors" dir="rtl">
+    <div className="flex min-h-screen bg-[var(--bg-primary)] transition-colors" dir="rtl">
       {/* Backdrop for mobile sidebar */}
       {sidebarOpen && (
         <div

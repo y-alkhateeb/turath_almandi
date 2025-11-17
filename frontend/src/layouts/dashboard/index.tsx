@@ -7,30 +7,34 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from './header';
 import { Sidebar } from './sidebar';
-import { cn } from '@/utils';
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
-      {/* Header */}
-      <Header onMenuClick={() => setSidebarOpen(true)} />
+    <div className="flex min-h-screen bg-brand-cream-100 dark:bg-dark-primary transition-colors" dir="rtl">
+      {/* Backdrop for mobile sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[999] lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main Content */}
-      <main
-        className={cn(
-          'transition-all duration-300 pt-16',
-          'md:pr-64' // Sidebar width on desktop (RTL: pr instead of pl)
-        )}
-      >
-        <div className="container mx-auto p-4 md:p-6">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col mr-0 lg:mr-[280px] transition-all">
+        {/* Header */}
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
           <Outlet />
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

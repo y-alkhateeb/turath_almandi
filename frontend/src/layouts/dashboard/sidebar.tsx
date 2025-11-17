@@ -6,7 +6,6 @@
 import { X } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Logo } from '@/components/logo';
-import { Button } from '@/ui/button';
 import { cn } from '@/utils';
 import { navData } from './nav/nav-data/nav-data-frontend';
 import { AuthGuard } from '@/components/auth/auth-guard';
@@ -21,50 +20,36 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
 
   return (
-    <>
-      {/* Mobile Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 md:hidden"
-          onClick={onClose}
-        />
+    <aside
+      className={cn(
+        'fixed right-0 top-0 h-screen w-[280px] bg-gradient-to-b from-brand-green-500 to-brand-green-700 dark:from-dark-secondary dark:to-dark-primary border-l border-brand-gold-500/20 dark:border-dark-border shadow-2xl dark:shadow-gold-md z-[1000] overflow-y-auto transition-transform',
+        isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
       )}
+    >
+      {/* Logo Section */}
+      <div className="p-8 border-b border-brand-gold-500/20 dark:border-dark-border">
+        <h1 className="text-2xl font-bold text-center bg-gradient-to-r from-brand-cream-100 to-brand-gold-300 bg-clip-text text-transparent">
+          تراث المندي
+        </h1>
+        <p className="text-xs text-brand-gold-300 text-center mt-1 tracking-widest">
+          TURATH RESTAURANTS
+        </p>
+      </div>
 
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          'fixed top-0 right-0 z-50 h-screen w-64 transform bg-brand-green-600 border-l border-brand-green-700 transition-transform duration-300 md:translate-x-0',
-          isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'
-        )}
-      >
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-brand-green-700">
-          <Logo />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden text-brand-cream-100 hover:text-white hover:bg-brand-green-700"
-            onClick={onClose}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-
-        {/* Navigation Menu */}
-        <nav className="flex-1 overflow-y-auto p-4">
-          <ul className="space-y-1">
-            {navData.map((item) => (
-              <NavigationItem
-                key={item.path}
-                item={item}
-                isActive={location.pathname === item.path}
-                onClick={onClose}
-              />
-            ))}
-          </ul>
-        </nav>
-      </aside>
-    </>
+      {/* Navigation Menu */}
+      <nav className="p-6">
+        <ul className="space-y-1">
+          {navData.map((item) => (
+            <NavigationItem
+              key={item.path}
+              item={item}
+              isActive={location.pathname === item.path}
+              onClick={onClose}
+            />
+          ))}
+        </ul>
+      </nav>
+    </aside>
   );
 }
 
@@ -94,20 +79,23 @@ function NavigationItemContent({ item, isActive, onClick }: NavigationItemProps)
         to={item.path!}
         onClick={onClick}
         className={cn(
-          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+          'flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all relative overflow-hidden group',
           isActive
-            ? 'bg-brand-gold-500 text-white'
-            : 'text-brand-cream-100 hover:bg-brand-green-700 hover:text-white'
+            ? 'bg-gradient-to-r from-brand-gold-500/30 to-brand-gold-500/15 text-brand-cream-100 border-r-4 border-brand-gold-500 dark:border-brand-gold-300 shadow-lg dark:shadow-gold-glow font-semibold'
+            : 'text-brand-cream-100 hover:bg-brand-gold-500/15 hover:translate-x-[-5px] hover:pr-5'
         )}
       >
         {item.icon && (
-          <span className={cn(isActive ? 'text-white' : 'text-brand-cream-200')}>
+          <span className={cn(
+            'shrink-0 group-hover:scale-110 transition-transform',
+            isActive ? 'text-brand-cream-100' : 'text-brand-cream-200'
+          )}>
             {item.icon}
           </span>
         )}
-        <span>{item.title}</span>
+        <span className="flex-1 font-medium">{item.title}</span>
         {item.info && (
-          <span className="mr-auto text-xs bg-brand-gold-400 text-white px-2 py-0.5 rounded-full">
+          <span className="bg-gradient-to-br from-brand-gold-500 to-brand-gold-700 dark:from-brand-gold-300 dark:to-brand-gold-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md">
             {item.info}
           </span>
         )}

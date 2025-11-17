@@ -1,89 +1,69 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface StatCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  change?: number;
+  change?: string;
+  trend?: 'up' | 'down';
   description?: string;
-  color?: 'blue' | 'green' | 'red' | 'purple' | 'amber';
   className?: string;
 }
-
-const colorClasses = {
-  blue: {
-    bg: 'bg-blue-50',
-    icon: 'text-blue-600',
-  },
-  green: {
-    bg: 'bg-green-50',
-    icon: 'text-green-600',
-  },
-  red: {
-    bg: 'bg-red-50',
-    icon: 'text-red-600',
-  },
-  purple: {
-    bg: 'bg-purple-50',
-    icon: 'text-purple-600',
-  },
-  amber: {
-    bg: 'bg-amber-50',
-    icon: 'text-amber-600',
-  },
-};
 
 export const StatCard = React.memo(function StatCard({
   title,
   value,
   icon: Icon,
   change,
+  trend = 'up',
   description,
-  color = 'blue',
   className,
 }: StatCardProps) {
-  const colors = colorClasses[color];
-
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-200 p-6',
-        'shadow-md hover:shadow-lg transition-shadow duration-200',
+        'group relative bg-white dark:bg-dark-secondary/60 p-6 rounded-2xl border-2 border-brand-gold-500/30 dark:border-dark-border shadow-sm dark:shadow-gold-sm hover:shadow-lg dark:hover:shadow-gold-lg hover:-translate-y-2 transition-all overflow-hidden',
         className
       )}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-brand-gold-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-          {change !== undefined && (
-            <div className="flex items-center mt-2">
-              <span
-                className={cn(
-                  'text-sm font-medium',
-                  change >= 0 ? 'text-green-600' : 'text-red-600'
-                )}
-              >
-                {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
-              </span>
-              {description && (
-                <span className="text-sm text-gray-500 mr-2">
-                  {description}
-                </span>
+      <div className="relative flex justify-between items-start mb-4">
+        <div>
+          <p className="text-sm text-brand-green-400 dark:text-dark-text-secondary font-semibold mb-2">
+            {title}
+          </p>
+          <h3 className="text-3xl font-bold text-brand-green-600 dark:bg-gradient-to-r dark:from-dark-text-primary dark:to-brand-gold-300 dark:bg-clip-text dark:text-transparent">
+            {value}
+          </h3>
+          {change && (
+            <div
+              className={cn(
+                'flex items-center gap-1 text-sm font-semibold mt-2',
+                trend === 'up'
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400'
               )}
+            >
+              {trend === 'up' ? (
+                <TrendingUp className="w-4 h-4" />
+              ) : (
+                <TrendingDown className="w-4 h-4" />
+              )}
+              <span>{change}</span>
             </div>
           )}
-
-          {change === undefined && description && (
-            <p className="text-sm text-gray-500 mt-2">{description}</p>
+          {description && !change && (
+            <p className="text-sm text-brand-green-400 dark:text-dark-text-secondary mt-2">
+              {description}
+            </p>
           )}
         </div>
-
-        <div className={cn('p-3 rounded-lg', colors.bg)}>
-          <Icon className={cn('w-6 h-6', colors.icon)} />
+        <div className="w-14 h-14 rounded-xl bg-brand-cream-200 dark:bg-dark-tertiary/80 flex items-center justify-center shadow-md group-hover:scale-110 group-hover:-rotate-[5deg] group-hover:bg-gradient-to-br group-hover:from-brand-gold-300 group-hover:to-brand-gold-500 transition-all">
+          <Icon className="w-7 h-7 text-brand-gold-500 dark:text-brand-gold-300 group-hover:text-white" />
         </div>
       </div>
     </div>

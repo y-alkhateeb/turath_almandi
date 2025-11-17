@@ -3,7 +3,7 @@
  * Top navigation bar with logo, user menu, and controls
  */
 
-import { Menu, LogOut, User as UserIcon, Moon, Sun } from 'lucide-react';
+import { Menu, LogOut, Bell, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/logo';
 import { Button } from '@/ui/button';
@@ -35,57 +35,68 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 bg-brand-green-500 border-b border-brand-green-600">
-      <div className="flex items-center justify-between h-16 px-4 md:px-6">
-        {/* Right Side: Menu + Logo */}
-        <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-[100] bg-white/95 dark:bg-dark-secondary/85 backdrop-blur-glass border-b-2 border-brand-gold-500 dark:border-dark-border shadow-sm dark:shadow-gold-sm transition-all">
+      <div className="flex justify-between items-center px-4 md:px-6 lg:px-8 py-4">
+        {/* Right Side: Mobile Menu + Title */}
+        <div className="flex items-center gap-4 md:gap-6">
           {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden text-brand-cream-100 hover:text-white hover:bg-brand-green-600"
+          <button
             onClick={onMenuClick}
+            className="lg:hidden p-2 rounded-xl bg-brand-cream-200 dark:bg-dark-tertiary hover:bg-brand-gold-500 hover:text-white transition-all"
+            aria-label="فتح القائمة"
           >
-            <Menu className="h-5 w-5" />
-          </Button>
+            <Menu className="w-6 h-6" />
+          </button>
 
-          {/* Logo (hidden on mobile when sidebar is visible) */}
-          <Logo className="hidden md:flex" linkTo="/dashboard" />
+          {/* Title */}
+          <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-brand-green-700 to-brand-green-500 dark:from-brand-gold-500 dark:to-brand-gold-300 bg-clip-text text-transparent">
+            لوحة التحكم
+          </h1>
         </div>
 
-        {/* Left Side: Theme Toggle + User Menu */}
-        <div className="flex items-center gap-2">
+        {/* Left Side: Theme Toggle + Notifications + User Menu */}
+        <div className="flex items-center gap-2 md:gap-3">
           {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-brand-cream-100 hover:text-white hover:bg-brand-green-600"
+          <button
             onClick={toggleTheme}
+            className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-gold-500 to-brand-gold-700 text-white hover:scale-110 hover:rotate-15 transition-all shadow-md hover:shadow-gold-glow flex items-center justify-center"
             title={themeMode === ThemeMode.Light ? 'الوضع الداكن' : 'الوضع الفاتح'}
+            aria-label={themeMode === ThemeMode.Light ? 'الوضع الداكن' : 'الوضع الفاتح'}
           >
             {themeMode === ThemeMode.Light ? (
-              <Moon className="h-5 w-5" />
+              <Moon className="w-5 h-5" />
             ) : (
-              <Sun className="h-5 w-5" />
+              <Sun className="w-5 h-5" />
             )}
-          </Button>
+          </button>
+
+          {/* Notifications */}
+          <button
+            className="relative w-11 h-11 rounded-xl bg-brand-cream-200 dark:bg-dark-tertiary border border-transparent dark:border-dark-border hover:bg-brand-gold-500 hover:text-white hover:scale-105 transition-all flex items-center justify-center"
+            aria-label="الإشعارات"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute -top-1 -left-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg">
+              5
+            </span>
+          </button>
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 text-brand-cream-100 hover:text-white hover:bg-brand-green-600">
-                <div className="flex items-center gap-2">
-                  <div className="hidden md:block text-right">
-                    <div className="text-sm font-medium">{userInfo?.username || 'المستخدم'}</div>
-                    <div className="text-xs text-brand-cream-200">
-                      {userInfo?.role === 'ADMIN' ? 'مدير' : 'محاسب'}
-                    </div>
+              <button className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 pr-2 bg-brand-cream-200 dark:bg-dark-tertiary/60 rounded-xl border-2 border-transparent hover:border-brand-gold-500 cursor-pointer transition-all hover:shadow-md dark:hover:shadow-gold-glow">
+                <div className="hidden md:flex flex-col items-start">
+                  <div className="text-sm font-bold text-brand-green-600 dark:text-dark-text-primary">
+                    {userInfo?.username || 'المستخدم'}
                   </div>
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-gold-500 text-white">
-                    <UserIcon className="h-4 w-4" />
+                  <div className="text-xs text-brand-green-400 dark:text-dark-text-secondary">
+                    {userInfo?.role === 'ADMIN' ? 'مدير النظام' : 'محاسب'}
                   </div>
                 </div>
-              </Button>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gold-500 to-brand-gold-300 text-white font-bold flex items-center justify-center shadow-lg">
+                  {(userInfo?.username || 'م').charAt(0)}
+                </div>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">

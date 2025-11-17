@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { useSettingActions, useSettings } from '@/store/settingStore';
-import { HtmlDataAttribute } from './type';
+import { HtmlDataAttribute, ThemeMode } from './type';
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -10,9 +10,21 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const settings = useSettings();
   const { setSettings } = useSettingActions();
 
-  // Apply theme mode to HTML element
+  // Apply theme mode to HTML element with class-based dark mode
   useEffect(() => {
     const root = document.documentElement;
+
+    // Remove both classes first
+    root.classList.remove('light', 'dark');
+
+    // Add the appropriate class based on theme mode
+    if (settings.themeMode === ThemeMode.Dark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.add('light');
+    }
+
+    // Also set data attribute for backward compatibility
     root.setAttribute(HtmlDataAttribute.ThemeMode, settings.themeMode);
   }, [settings.themeMode]);
 
@@ -42,7 +54,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     if (!localStorage.getItem('settings')) {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (prefersDark) {
-        setSettings({ themeMode: 'dark' as any });
+        setSettings({ themeMode: ThemeMode.Dark });
       }
     }
   }, [setSettings]);

@@ -494,14 +494,14 @@ function RecentTransactions({ transactions }: RecentTransactionsProps) {
 export default function DashboardWorkbench() {
   const userInfo = useUserInfo();
   const isAdmin = useIsAdmin();
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
 
   // Determine effective branch ID (accountants can only see their branch)
   const effectiveBranchId =
-    userInfo?.role === 'ACCOUNTANT' ? userInfo?.branchId : selectedBranchId;
+    userInfo?.role === 'ACCOUNTANT' ? userInfo?.branchId : selectedBranchId === 'ALL' ? undefined : selectedBranchId;
 
   // Fetch branches for admin users
   const { data: branches } = useQuery({
@@ -614,7 +614,7 @@ export default function DashboardWorkbench() {
                 <SelectValue placeholder="جميع الفروع" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الفروع</SelectItem>
+                <SelectItem value="ALL">جميع الفروع</SelectItem>
                 {branches.map((branch) => (
                   <SelectItem key={branch.id} value={branch.id}>
                     {branch.name}

@@ -208,7 +208,7 @@ export const UsersPage = () => {
         />
       ) : (
         /* Users Table */
-        <Table columns={columns} data={users} />
+        <Table columns={columns} data={users} keyExtractor={(user) => user.id} />
       )}
 
       {/* Create User Modal */}

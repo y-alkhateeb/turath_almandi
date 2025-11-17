@@ -159,21 +159,25 @@ export const BranchesPage = () => {
       ) : branches.length === 0 ? (
         /* Empty State */
         <EmptyState
+          variant="default"
           icon={<Building2 className="w-full h-full" />}
           title="لا توجد فروع"
           description={
             isAdmin()
-              ? 'لم يتم إضافة أي فرع بعد. ابدأ بإضافة فرع جديد.'
-              : 'لم يتم تعيين فرع لك بعد.'
+              ? 'أنشئ أول فرع لبدء إدارة عملك عبر مواقع متعددة. يمكنك تعيين مدير ورقم هاتف لكل فرع.'
+              : 'لم يتم تعيين فرع لك بعد. تواصل مع المدير لتعيين فرع لك.'
           }
-          action={
+          actions={
             isAdmin()
               ? {
-                  label: 'إضافة فرع جديد',
-                  onClick: () => setIsCreateModalOpen(true),
+                  primary: {
+                    label: 'إضافة فرع جديد',
+                    onClick: () => setIsCreateModalOpen(true),
+                  },
                 }
               : undefined
           }
+          size="lg"
         />
       ) : (
         /* Branches Table */
@@ -220,3 +224,5 @@ export const BranchesPage = () => {
     </div>
   );
 };
+
+export default BranchesPage;

@@ -47,7 +47,7 @@ export function Table<T>({
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-[var(--text-secondary)]">
         <p>{emptyMessage}</p>
       </div>
     );
@@ -55,15 +55,15 @@ export function Table<T>({
 
   return (
     <div className={`overflow-x-auto ${className}`}>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <table className="min-w-full divide-y divide-[var(--border-color)]">
+        <thead className="bg-[var(--bg-tertiary)]">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
                 scope="col"
                 className={`
-                  px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider
+                  px-6 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider
                   ${alignClasses[column.align || 'left']}
                 `}
                 style={{ width: column.width }}
@@ -73,14 +73,14 @@ export function Table<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
           {data.map((item, index) => (
             <tr
               key={keyExtractor(item)}
               onClick={() => onRowClick?.(item)}
               className={`
-                ${striped && index % 2 === 1 ? 'bg-gray-50' : ''}
-                ${hoverable ? 'hover:bg-gray-100' : ''}
+                ${striped && index % 2 === 1 ? 'bg-[var(--bg-tertiary)]' : ''}
+                ${hoverable ? 'hover:bg-[var(--bg-tertiary)]' : ''}
                 ${onRowClick ? 'cursor-pointer' : ''}
                 transition-colors duration-150
               `}
@@ -89,7 +89,7 @@ export function Table<T>({
                 <td
                   key={column.key}
                   className={`
-                    px-6 py-4 whitespace-nowrap text-sm text-gray-900
+                    px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]
                     ${alignClasses[column.align || 'left']}
                   `}
                 >

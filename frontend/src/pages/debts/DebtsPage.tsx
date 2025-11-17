@@ -108,7 +108,7 @@ export const DebtsPage = () => {
             {hasPayments && (
               <button
                 onClick={() => toggleExpandDebt(debt.id)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                 aria-label={isExpanded ? 'إخفاء السجل' : 'عرض السجل'}
               >
                 <ChevronRight
@@ -118,7 +118,7 @@ export const DebtsPage = () => {
                 />
               </button>
             )}
-            <span className="font-medium text-gray-900">{debt.creditorName}</span>
+            <span className="font-medium text-[var(--text-primary)]">{debt.creditorName}</span>
             {overdueFlag && (
               <Badge variant="danger" size="sm">
                 متأخر
@@ -132,7 +132,7 @@ export const DebtsPage = () => {
       key: 'originalAmount',
       header: 'المبلغ الأصلي',
       render: (debt) => (
-        <div className="text-gray-900" dir="ltr">
+        <div className="text-[var(--text-primary)]" dir="ltr">
           {formatCurrency(debt.originalAmount)} IQD
         </div>
       ),
@@ -161,7 +161,7 @@ export const DebtsPage = () => {
     {
       key: 'date',
       header: 'التاريخ',
-      render: (debt) => <div className="text-gray-700">{formatDate(debt.date)}</div>,
+      render: (debt) => <div className="text-[var(--text-primary)]">{formatDate(debt.date)}</div>,
     },
     {
       key: 'dueDate',
@@ -169,7 +169,7 @@ export const DebtsPage = () => {
       render: (debt) => {
         const overdueFlag = isOverdue(debt.dueDate, debt.status);
         return (
-          <div className={overdueFlag ? 'text-red-600 font-medium' : 'text-gray-700'}>
+          <div className={overdueFlag ? 'text-red-600 font-medium' : 'text-[var(--text-primary)]'}>
             {formatDate(debt.dueDate)}
           </div>
         );
@@ -188,7 +188,7 @@ export const DebtsPage = () => {
       key: 'branch',
       header: 'الفرع',
       render: (debt) => (
-        <div className="text-gray-700">{debt.branch?.name || '-'}</div>
+        <div className="text-[var(--text-primary)]">{debt.branch?.name || '-'}</div>
       ),
     },
     {
@@ -219,7 +219,7 @@ export const DebtsPage = () => {
       <>
         <tr
           key={debt.id}
-          className={`hover:bg-gray-50 transition-colors ${
+          className={`hover:bg-[var(--bg-tertiary)] transition-colors ${
             overdueFlag ? 'bg-red-50' : ''
           }`}
         >
@@ -231,7 +231,7 @@ export const DebtsPage = () => {
         </tr>
         {isExpanded && debt.payments && debt.payments.length > 0 && (
           <tr>
-            <td colSpan={columns.length} className="px-6 py-4 bg-gray-50">
+            <td colSpan={columns.length} className="px-6 py-4 bg-[var(--bg-tertiary)]">
               <DebtPaymentHistory payments={debt.payments} />
             </td>
           </tr>
@@ -301,22 +301,22 @@ export const DebtsPage = () => {
         />
       ) : (
         /* Debts Table with Custom Row Renderer */
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-[var(--bg-tertiary)] border-b border-[var(--border-color)]">
                 <tr>
                   {columns.map((column) => (
                     <th
                       key={column.key as string}
-                      className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                      className="px-6 py-4 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider"
                     >
                       {column.header}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-[var(--border-color)]">
                 {debts?.map((debt) => renderRow(debt))}
               </tbody>
             </table>

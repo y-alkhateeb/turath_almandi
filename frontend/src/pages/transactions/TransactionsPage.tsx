@@ -66,8 +66,8 @@ export default function TransactionsPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">إدارة العمليات المالية</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة العمليات المالية</h1>
+        <p className="mt-2 text-[var(--text-secondary)]">
           عرض وإدارة جميع الإيرادات والمصروفات
         </p>
       </div>
@@ -114,7 +114,7 @@ export default function TransactionsPage() {
       {/* Delete Confirmation Dialog */}
       {deleteConfirmation.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" dir="rtl">
+          <div className="bg-[var(--bg-secondary)] rounded-lg p-6 max-w-md w-full mx-4" dir="rtl">
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center ml-4">
                 <svg
@@ -132,16 +132,16 @@ export default function TransactionsPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">تأكيد الحذف</h3>
-                <p className="mt-1 text-sm text-gray-600">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">تأكيد الحذف</h3>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
                   هل أنت متأكد من حذف هذه العملية؟
                 </p>
               </div>
             </div>
 
             {deleteConfirmation.transaction && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
-                <div className="text-sm text-gray-700">
+              <div className="mb-4 p-3 bg-[var(--bg-tertiary)] rounded-md border border-[var(--border-color)]">
+                <div className="text-sm text-[var(--text-primary)]">
                   <p>
                     <span className="font-medium">النوع:</span>{' '}
                     <span
@@ -166,7 +166,7 @@ export default function TransactionsPage() {
               </div>
             )}
 
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-[var(--text-secondary)] mb-6">
               هذا الإجراء لا يمكن التراجع عنه. سيتم حذف العملية نهائياً من النظام.
             </p>
 
@@ -174,7 +174,7 @@ export default function TransactionsPage() {
               <button
                 onClick={cancelDelete}
                 disabled={deleteTransaction.isPending}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+                className="px-4 py-2 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded-md hover:bg-[var(--bg-tertiary)] transition-colors font-medium disabled:opacity-50"
               >
                 إلغاء
               </button>

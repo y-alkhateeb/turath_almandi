@@ -22,22 +22,24 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed right-0 top-0 h-screen w-[280px] bg-gradient-to-b from-brand-green-500 to-brand-green-700 border-l border-[var(--border-color)] shadow-2xl z-[1000] overflow-y-auto transition-transform',
+        'fixed right-0 top-0 h-screen w-[280px] bg-gradient-to-b from-brand-green-500 to-brand-green-700 dark:from-[#1a2d28] dark:to-[#0f1a16] border-l border-brand-gold-500/20 dark:border-brand-gold-400/30 shadow-2xl z-[1000] overflow-y-auto transition-all duration-300',
         isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
       )}
     >
-      {/* Logo Section */}
-      <div className="p-8 border-b border-[var(--border-color)]">
-        <h1 className="text-2xl font-bold text-center bg-gradient-to-r from-brand-cream-100 to-brand-gold-300 bg-clip-text text-transparent">
-          تراث المندي
-        </h1>
-        <p className="text-xs text-brand-gold-300 text-center mt-1 tracking-widest">
-          TURATH RESTAURANTS
-        </p>
+      {/* Logo Section - Integrates with Header */}
+      <div className="h-[76px] flex items-center justify-center px-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-cream-100 to-brand-gold-300 bg-clip-text text-transparent">
+            تراث المندي
+          </h1>
+          <p className="text-xs text-brand-gold-300 mt-1 tracking-widest">
+            TURATH RESTAURANTS
+          </p>
+        </div>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="p-6">
+      <nav className="p-6 border-t border-brand-gold-500/20 dark:border-brand-gold-400/30">
         <ul className="space-y-1">
           {navData.map((item) => (
             <NavigationItem

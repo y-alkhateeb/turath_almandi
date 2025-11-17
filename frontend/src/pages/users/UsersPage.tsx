@@ -1,51 +1,28 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, UserX, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   useUsers,
-  useCreateUser,
   useUpdateUser,
   useDeleteUser,
 } from '@/hooks/useUsers';
-import { Modal } from '@/components/Modal';
-import { UserForm } from '@/components/UserForm';
 import { PageLoading } from '@/components/loading';
 import { EmptyState, PageHeader, Table, ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
 import { Alert } from '@/ui/alert';
-import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
+import type { UserWithBranch, UpdateUserDto } from '@/types';
 import type { Column } from '@/components/ui/Table';
 
 export const UsersPage = () => {
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { data: users = [], isLoading, error } = useUsers();
-  const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserWithBranch | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
-
-  // Handlers
-  const handleCreate = async (data: CreateUserDto) => {
-    await createUser.mutateAsync(data);
-    setIsCreateModalOpen(false);
-  };
-
-  const handleUpdate = async (data: CreateUserDto) => {
-    if (!editingUser) return;
-
-    // Convert CreateUserDto to UpdateUserDto
-    const updateData: UpdateUserDto = {
-      role: data.role,
-      branchId: data.branchId,
-    };
-
-    await updateUser.mutateAsync({ id: editingUser.id, data: updateData });
-    setEditingUser(null);
-  };
 
   const handleDelete = async () => {
     if (!deletingUserId) return;
@@ -142,7 +119,7 @@ export const UsersPage = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setEditingUser(user)}
+            onClick={() => navigate(`/users/edit/${user.id}`)}
           >
             <Edit className="w-4 h-4" />
             تعديل
@@ -169,7 +146,7 @@ export const UsersPage = () => {
         description="إدارة المستخدمين وصلاحياتهم في النظام"
         actions={
           isAdmin() ? (
-            <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Button onClick={() => navigate('/users/create')}>
               <Plus className="w-5 h-5" />
               إضافة مستخدم جديد
             </Button>
@@ -199,7 +176,7 @@ export const UsersPage = () => {
               ? {
                   primary: {
                     label: 'إضافة مستخدم جديد',
-                    onClick: () => setIsCreateModalOpen(true),
+                    onClick: () => navigate('/users/create'),
                   },
                 }
               : undefined
@@ -210,31 +187,6 @@ export const UsersPage = () => {
         /* Users Table */
         <Table columns={columns} data={users} keyExtractor={(user) => user.id} />
       )}
-
-      {/* Create User Modal */}
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="إضافة مستخدم جديد"
-      >
-        <UserForm
-          onSubmit={handleCreate}
-          onCancel={() => setIsCreateModalOpen(false)}
-        />
-      </Modal>
-
-      {/* Edit User Modal */}
-      <Modal
-        isOpen={!!editingUser}
-        onClose={() => setEditingUser(null)}
-        title="تعديل المستخدم"
-      >
-        <UserForm
-          onSubmit={handleUpdate}
-          onCancel={() => setEditingUser(null)}
-          initialData={editingUser || undefined}
-        />
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

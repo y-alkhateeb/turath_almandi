@@ -1,8 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, DollarSign, ChevronRight } from 'lucide-react';
-import { DebtForm } from '@/components/DebtForm';
-import { Modal } from '@/components/Modal';
-import { PayDebtModal } from '@/components/PayDebtModal';
 import { DebtPaymentHistory } from '@/components/DebtPaymentHistory';
 import { useDebts } from '@/hooks/useDebts';
 import { PageLoading } from '@/components/loading';
@@ -18,7 +16,7 @@ import type { Column } from '@/components/ui/Table';
  *
  * Features:
  * - List of all debts
- * - Add debt button with modal
+ * - Add debt button navigating to create page
  * - Integration with useDebts hook
  * - Loading and empty states
  * - Status badges (ACTIVE, PAID, PARTIAL)
@@ -27,29 +25,9 @@ import type { Column } from '@/components/ui/Table';
  * - Arabic interface
  */
 export const DebtsPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
-  const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
+  const navigate = useNavigate();
   const [expandedDebtId, setExpandedDebtId] = useState<string | null>(null);
   const { data: debts, isLoading, error } = useDebts();
-
-  const handleSuccess = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const handlePayDebt = (debt: Debt) => {
-    setSelectedDebt(debt);
-    setIsPayModalOpen(true);
-  };
-
-  const handleClosePayModal = () => {
-    setIsPayModalOpen(false);
-    setSelectedDebt(null);
-  };
 
   const toggleExpandDebt = (debtId: string) => {
     setExpandedDebtId(expandedDebtId === debtId ? null : debtId);
@@ -200,7 +178,7 @@ export const DebtsPage = () => {
             <Button
               variant="success"
               size="sm"
-              onClick={() => handlePayDebt(debt)}
+              onClick={() => navigate(`/debts/pay/${debt.id}`)}
             >
               دفع
             </Button>
@@ -249,29 +227,12 @@ export const DebtsPage = () => {
         actions={
           <Button
             variant="default"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => navigate('/debts/create')}
           >
             <Plus className="w-5 h-5" />
             إضافة دين
           </Button>
         }
-      />
-
-      {/* Debt Form Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCancel}
-        title="إضافة دين جديد"
-        size="lg"
-      >
-        <DebtForm onSuccess={handleSuccess} onCancel={handleCancel} />
-      </Modal>
-
-      {/* Pay Debt Modal */}
-      <PayDebtModal
-        isOpen={isPayModalOpen}
-        onClose={handleClosePayModal}
-        debt={selectedDebt}
       />
 
       {/* Error State */}
@@ -294,7 +255,7 @@ export const DebtsPage = () => {
           actions={{
             primary: {
               label: 'إضافة دين جديد',
-              onClick: () => setIsModalOpen(true),
+              onClick: () => navigate('/debts/create'),
             },
           }}
           size="lg"

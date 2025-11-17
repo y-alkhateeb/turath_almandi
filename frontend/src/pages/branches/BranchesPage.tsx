@@ -1,45 +1,30 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Building2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   useBranches,
-  useCreateBranch,
   useUpdateBranch,
   useDeleteBranch,
 } from '@/hooks/useBranches';
-import { Modal } from '@/components/Modal';
-import { BranchForm } from '@/components/BranchForm';
 import { PageLoading } from '@/components/loading';
 import { EmptyState, PageHeader, Table, ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
 import { Alert } from '@/ui/alert';
-import type { Branch, BranchFormData } from '@/types';
+import type { Branch } from '@/types';
 import type { Column } from '@/components/ui/Table';
 
 export const BranchesPage = () => {
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { data: branches = [], isLoading, error } = useBranches();
-  const createBranch = useCreateBranch();
   const updateBranch = useUpdateBranch();
   const deleteBranch = useDeleteBranch();
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [deletingBranchId, setDeletingBranchId] = useState<string | null>(null);
 
   // Handlers
-  const handleCreate = async (data: BranchFormData) => {
-    await createBranch.mutateAsync(data);
-    setIsCreateModalOpen(false);
-  };
-
-  const handleUpdate = async (data: BranchFormData) => {
-    if (!editingBranch) return;
-    await updateBranch.mutateAsync({ id: editingBranch.id, data });
-    setEditingBranch(null);
-  };
-
   const handleDelete = async () => {
     if (!deletingBranchId) return;
     await deleteBranch.mutateAsync(deletingBranchId);
@@ -111,7 +96,7 @@ export const BranchesPage = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setEditingBranch(branch)}
+            onClick={() => navigate(`/branches/edit/${branch.id}`)}
           >
             <Edit className="w-4 h-4" />
             تعديل
@@ -138,7 +123,7 @@ export const BranchesPage = () => {
         description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
         actions={
           isAdmin() ? (
-            <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Button onClick={() => navigate('/branches/create')}>
               <Plus className="w-5 h-5" />
               إضافة فرع جديد
             </Button>
@@ -172,7 +157,7 @@ export const BranchesPage = () => {
               ? {
                   primary: {
                     label: 'إضافة فرع جديد',
-                    onClick: () => setIsCreateModalOpen(true),
+                    onClick: () => navigate('/branches/create'),
                   },
                 }
               : undefined
@@ -183,31 +168,6 @@ export const BranchesPage = () => {
         /* Branches Table */
         <Table columns={columns} data={branches} keyExtractor={(branch) => branch.id} />
       )}
-
-      {/* Create Modal */}
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="إضافة فرع جديد"
-      >
-        <BranchForm
-          onSubmit={handleCreate}
-          onCancel={() => setIsCreateModalOpen(false)}
-        />
-      </Modal>
-
-      {/* Edit Modal */}
-      <Modal
-        isOpen={!!editingBranch}
-        onClose={() => setEditingBranch(null)}
-        title="تعديل الفرع"
-      >
-        <BranchForm
-          onSubmit={handleUpdate}
-          onCancel={() => setEditingBranch(null)}
-          initialData={editingBranch || undefined}
-        />
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

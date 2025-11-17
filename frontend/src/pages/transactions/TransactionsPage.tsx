@@ -1,19 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTransactions, useDeleteTransaction } from '@/hooks/useTransactions';
 import TransactionTable from '@/components/TransactionTable';
-import TransactionModal from '@/components/TransactionModal';
 import { Alert } from '@/ui/alert';
 import type { Transaction, TransactionFilters } from '@/types/transactions.types';
 
 export default function TransactionsPage() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<TransactionFilters>({
     page: 1,
     limit: 20,
   });
 
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     isOpen: boolean;
     transaction: Transaction | null;
@@ -23,15 +21,11 @@ export default function TransactionsPage() {
   const deleteTransaction = useDeleteTransaction();
 
   const handleView = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setModalMode('view');
-    setIsModalOpen(true);
+    navigate(`/transactions/view/${transaction.id}`);
   };
 
   const handleEdit = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setModalMode('edit');
-    setIsModalOpen(true);
+    navigate(`/transactions/edit/${transaction.id}`);
   };
 
   const handleDelete = (transaction: Transaction) => {
@@ -55,11 +49,6 @@ export default function TransactionsPage() {
 
   const handleFiltersChange = (newFilters: TransactionFilters) => {
     setFilters(newFilters);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedTransaction(null);
   };
 
   return (
@@ -101,14 +90,6 @@ export default function TransactionsPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         isLoading={isLoading}
-      />
-
-      {/* Transaction Modal (View/Edit) */}
-      <TransactionModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        transaction={selectedTransaction}
-        mode={modalMode}
       />
 
       {/* Delete Confirmation Dialog */}

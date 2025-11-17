@@ -2,10 +2,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateInventory, useUpdateInventory } from '../hooks/useInventory';
-import { useBranches } from '../hooks/useBranches';
 import { InventoryUnit } from '../types/inventory.types';
 import type { InventoryFormData, InventoryItem } from '../types/inventory.types';
 import { useAuth } from '../hooks/useAuth';
+import { BranchSelector } from '@/components/form/BranchSelector';
 
 /**
  * Zod Validation Schema for Inventory Form
@@ -70,7 +70,6 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
   const { user, isAdmin } = useAuth();
   const createInventory = useCreateInventory();
   const updateInventory = useUpdateInventory();
-  const { data: branches = [], isLoading: branchesLoading } = useBranches();
 
   const isEditMode = !!item;
 
@@ -139,47 +138,14 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Branch Selection - Admin: Dropdown, Accountant: Read-only (only for create mode) */}
+      {/* Branch Selection - Only show in create mode */}
       {!isEditMode && (
-        <>
-          {isAdmin() ? (
-            <div>
-              <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 mb-2">
-                الفرع <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="branchId"
-                {...register('branchId')}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.branchId ? 'border-red-500' : 'border-gray-300'
-                }`}
-                disabled={branchesLoading}
-              >
-                <option value="">اختر الفرع</option>
-                {branches.map((branch) => (
-                  <option key={branch.id} value={branch.id}>
-                    {branch.name}
-                  </option>
-                ))}
-              </select>
-              {errors.branchId && (
-                <p className="mt-1 text-sm text-red-500">{errors.branchId.message}</p>
-              )}
-            </div>
-          ) : user?.branch ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                الفرع
-              </label>
-              <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
-                {user.branch.name}
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                سيتم إضافة الصنف لهذا الفرع
-              </p>
-            </div>
-          ) : null}
-        </>
+        <BranchSelector
+          name="branchId"
+          register={register}
+          error={errors.branchId}
+          required
+        />
       )}
 
       {/* Item Name */}

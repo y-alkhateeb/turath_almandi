@@ -2,12 +2,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateDebt } from '../hooks/useDebts';
-import { useBranches } from '../hooks/useBranches';
 import type { DebtFormData } from '../types/debts.types';
 import { useAuth } from '../hooks/useAuth';
 import { FormInput } from '@/components/form/FormInput';
-import { FormDatePicker } from '@/components/form/FormDatePicker';
 import { FormTextarea } from '@/components/form/FormTextarea';
+import { BranchSelector } from '@/components/form/BranchSelector';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Alert } from '@/components/ui/Alert';
 
@@ -63,7 +62,6 @@ interface DebtFormProps {
 export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
   const { user, isAdmin } = useAuth();
   const createDebt = useCreateDebt();
-  const { data: branches = [], isLoading: branchesLoading } = useBranches();
 
   const {
     register,
@@ -116,44 +114,13 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Branch Selection - Admin: Dropdown, Accountant: Read-only */}
-      {isAdmin() ? (
-        <div>
-          <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 mb-2">
-            الفرع <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="branchId"
-            {...register('branchId')}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-              errors.branchId ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={branchesLoading}
-          >
-            <option value="">اختر الفرع</option>
-            {branches.map((branch) => (
-              <option key={branch.id} value={branch.id}>
-                {branch.name}
-              </option>
-            ))}
-          </select>
-          {errors.branchId && (
-            <p className="mt-1 text-sm text-red-500">{errors.branchId.message}</p>
-          )}
-        </div>
-      ) : user?.branch ? (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            الفرع
-          </label>
-          <div className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
-            {user.branch.name}
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            يتم تعبئة الفرع تلقائيًا من حسابك
-          </p>
-        </div>
-      ) : null}
+      {/* Branch Selection using reusable BranchSelector component */}
+      <BranchSelector
+        name="branchId"
+        register={register}
+        error={errors.branchId}
+        required
+      />
 
       <FormInput
         name="creditorName"

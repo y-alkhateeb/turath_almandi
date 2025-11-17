@@ -16,3 +16,6 @@ export type { FormCheckboxProps } from './FormCheckbox';
 
 export { FormRadioGroup } from './FormRadioGroup';
 export type { FormRadioGroupProps, RadioOption } from './FormRadioGroup';
+
+export { BranchSelector } from './BranchSelector';
+export type { BranchSelectorProps } from './BranchSelector';

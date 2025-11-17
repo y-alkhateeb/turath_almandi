@@ -22,12 +22,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed right-0 top-0 h-screen w-[280px] bg-gradient-to-b from-brand-green-500 to-brand-green-700 dark:from-dark-secondary dark:to-dark-primary border-l border-brand-gold-500/20 dark:border-dark-border shadow-2xl dark:shadow-gold-md z-[1000] overflow-y-auto transition-transform',
+        'fixed right-0 top-0 h-screen w-[280px] bg-gradient-to-b from-brand-green-500 to-brand-green-700 border-l border-[var(--border-color)] shadow-2xl z-[1000] overflow-y-auto transition-transform',
         isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
       )}
     >
       {/* Logo Section */}
-      <div className="p-8 border-b border-brand-gold-500/20 dark:border-dark-border">
+      <div className="p-8 border-b border-[var(--border-color)]">
         <h1 className="text-2xl font-bold text-center bg-gradient-to-r from-brand-cream-100 to-brand-gold-300 bg-clip-text text-transparent">
           تراث المندي
         </h1>

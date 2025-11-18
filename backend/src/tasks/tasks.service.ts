@@ -3,7 +3,9 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { DebtStatus } from '@prisma/client';
+import { DebtStatus, UserRole } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class TasksService {
@@ -27,20 +29,50 @@ export class TasksService {
   /**
    * Initialize system user for creating notifications
    * This method should be called after the service is instantiated
+   * Creates a SYSTEM user if it doesn't exist for automated tasks (CRON jobs, notifications)
    */
   async onModuleInit() {
     try {
       // Find or create a system user for automated tasks
-      const systemUser = await this.prisma.user.findFirst({
+      let systemUser = await this.prisma.user.findFirst({
         where: { username: 'system' },
         select: { id: true },
       });
 
       if (systemUser) {
         this.systemUserId = systemUser.id;
-        this.logger.log(`Using existing system user: ${this.systemUserId}`);
+        this.logger.log(`Using existing SYSTEM user: ${this.systemUserId}`);
       } else {
-        // If no system user exists, use the first admin user
+        // Create SYSTEM user if it doesn't exist
+        this.logger.log('SYSTEM user not found. Creating SYSTEM user for automated tasks...');
+
+        // Generate a secure, random password that cannot be guessed
+        // This user is for automated tasks only and should not be used for login
+        const randomPassword = randomUUID();
+        const passwordHash = await bcrypt.hash(randomPassword, 10);
+
+        systemUser = await this.prisma.user.create({
+          data: {
+            username: 'system',
+            passwordHash: passwordHash,
+            role: UserRole.ADMIN, // Admin role for necessary permissions
+            isActive: true,
+          },
+          select: { id: true },
+        });
+
+        this.systemUserId = systemUser.id;
+        this.logger.log(`SYSTEM user created successfully: ${this.systemUserId}`);
+        this.logger.log(
+          'SYSTEM user is used for automated CRON jobs and notifications. It cannot be used for login.',
+        );
+      }
+    } catch (error) {
+      this.logger.error(`Failed to initialize SYSTEM user: ${error.message}`, error.stack);
+
+      // Fallback: If SYSTEM user creation fails, try to use an existing admin user
+      this.logger.warn('Attempting to use existing admin user as fallback...');
+      try {
         const adminUser = await this.prisma.user.findFirst({
           where: { role: 'ADMIN', isActive: true },
           select: { id: true },
@@ -48,21 +80,16 @@ export class TasksService {
 
         if (adminUser) {
           this.systemUserId = adminUser.id;
-          this.logger.log(`Using first admin user as system user: ${this.systemUserId}`);
+          this.logger.log(`Using first admin user as fallback system user: ${this.systemUserId}`);
         } else {
-          this.logger.warn(
-            'No system user or admin user found. Notifications will use the first available user.',
-          );
-          const firstUser = await this.prisma.user.findFirst({
-            select: { id: true },
-          });
-          if (firstUser) {
-            this.systemUserId = firstUser.id;
-          }
+          this.logger.error('No admin users found. Automated notifications may fail.');
         }
+      } catch (fallbackError) {
+        this.logger.error(
+          `Failed to find fallback admin user: ${fallbackError.message}`,
+          fallbackError.stack,
+        );
       }
-    } catch (error) {
-      this.logger.error(`Failed to initialize system user: ${error.message}`, error.stack);
     }
   }
 

@@ -199,6 +199,46 @@ CORS_ORIGIN=http://localhost:3000
 
 ---
 
+## 🔐 مستخدم النظام / SYSTEM User
+
+### Overview / نظرة عامة
+
+مستخدم النظام (SYSTEM) هو حساب تلقائي يتم إنشاؤه عند بدء تشغيل التطبيق لأول مرة.
+The SYSTEM user is an automated account created automatically when the application starts for the first time.
+
+### Purpose / الغرض
+
+- **المهام الآلية / Automated Tasks**: يُستخدم لتنفيذ مهام CRON المجدولة / Used for executing scheduled CRON jobs
+- **الإشعارات / Notifications**: إنشاء الإشعارات الآلية للديون المتأخرة / Creating automated overdue debt notifications
+- **السجلات / Audit Logs**: تتبع العمليات الآلية في سجل التدقيق / Tracking automated operations in audit logs
+
+### Technical Details / التفاصيل التقنية
+
+- **Username**: `system`
+- **Role**: `ADMIN` (للحصول على الصلاحيات اللازمة / For necessary permissions)
+- **Authentication**: لا يمكن استخدامه لتسجيل الدخول (كلمة مرور عشوائية غير قابلة للتخمين) / Cannot be used for login (random unguessable password)
+- **Auto-Creation**: يتم إنشاؤه تلقائياً في `onModuleInit()` إذا لم يكن موجوداً / Created automatically in `onModuleInit()` if it doesn't exist
+- **Location**: `backend/src/tasks/tasks.service.ts`
+
+### Security / الأمان
+
+- ✅ كلمة المرور مشفرة باستخدام bcrypt / Password encrypted using bcrypt
+- ✅ كلمة المرور عبارة عن UUID عشوائي غير قابل للتخمين / Password is a random UUID that cannot be guessed
+- ✅ لا يمكن استخدامه لتسجيل الدخول اليدوي / Cannot be used for manual login
+- ✅ يُستخدم فقط للعمليات الآلية الداخلية / Used only for internal automated operations
+
+### Used By / يُستخدم من قِبل
+
+- **Overdue Debt Check**: مهمة CRON يومية للتحقق من الديون المتأخرة (9 صباحاً) / Daily CRON job to check overdue debts (9 AM)
+- **Notifications Service**: خدمة الإشعارات للديون المتأخرة / Notifications service for overdue debts
+
+### Fallback Behavior / السلوك الاحتياطي
+
+في حالة فشل إنشاء مستخدم النظام، سيستخدم النظام أول مستخدم ADMIN نشط كبديل.
+If SYSTEM user creation fails, the system will fallback to using the first active ADMIN user.
+
+---
+
 ## 🤝 المساهمة / Contributing
 
 هذا المشروع قيد التطوير النشط. للمساهمة:

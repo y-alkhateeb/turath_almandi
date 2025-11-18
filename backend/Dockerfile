@@ -18,13 +18,30 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install ALL dependencies (needed for build)
+# Prisma will download engines during this step
 RUN npm ci
 
-# Copy Prisma schema and generate client
+# Copy Prisma schema
 COPY prisma ./prisma
-# Bypass checksum verification for CDN issues (Prisma binaries CDN returning 500 errors)
-ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-RUN npx prisma generate
+
+# Generate Prisma Client with retry logic and error handling
+# Set environment variables to handle CDN issues
+ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1 \
+    PRISMA_HIDE_UPDATE_MESSAGE=1 \
+    PRISMA_TELEMETRY_DISABLED=1
+
+# Generate with retry logic (3 attempts with 5 second delay)
+RUN for i in 1 2 3; do \
+      echo "Attempt $i: Generating Prisma Client..."; \
+      npx prisma generate && break || \
+      if [ $i -lt 3 ]; then \
+        echo "Generation failed, retrying in 5 seconds..."; \
+        sleep 5; \
+      else \
+        echo "All attempts failed"; \
+        exit 1; \
+      fi; \
+    done
 
 # Copy application source
 COPY . .

@@ -12,6 +12,7 @@ export class UsersService {
     // Check if username already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { username: createUserDto.username },
+      select: { id: true },
     });
 
     if (existingUser) {

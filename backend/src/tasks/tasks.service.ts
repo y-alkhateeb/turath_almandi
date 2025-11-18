@@ -33,6 +33,7 @@ export class TasksService {
       // Find or create a system user for automated tasks
       const systemUser = await this.prisma.user.findFirst({
         where: { username: 'system' },
+        select: { id: true },
       });
 
       if (systemUser) {
@@ -42,6 +43,7 @@ export class TasksService {
         // If no system user exists, use the first admin user
         const adminUser = await this.prisma.user.findFirst({
           where: { role: 'ADMIN', isActive: true },
+          select: { id: true },
         });
 
         if (adminUser) {
@@ -51,7 +53,9 @@ export class TasksService {
           this.logger.warn(
             'No system user or admin user found. Notifications will use the first available user.',
           );
-          const firstUser = await this.prisma.user.findFirst();
+          const firstUser = await this.prisma.user.findFirst({
+            select: { id: true },
+          });
           if (firstUser) {
             this.systemUserId = firstUser.id;
           }

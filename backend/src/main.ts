@@ -1,15 +1,21 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { PrismaService } from './prisma/prisma.service';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
   const configService = app.get(ConfigService);
+  const prismaService = app.get(PrismaService);
+
+  // Enable graceful shutdown hooks
+  app.enableShutdownHooks();
 
   // Security Headers with Helmet
   app.use(
@@ -80,7 +86,54 @@ async function bootstrap() {
   const port = configService.get('PORT') || 3000;
   await app.listen(port);
 
-  console.log(`🚀 Application is running on: http://localhost:${port}/api/v1`);
+  logger.log(`🚀 Application is running on: http://localhost:${port}/api/v1`);
+  logger.log(`📊 Health check available at: http://localhost:${port}/api/v1/health`);
+  logger.log(`🔒 Environment: ${configService.get('NODE_ENV') || 'development'}`);
+
+  // Graceful shutdown handlers
+  const gracefulShutdown = async (signal: string) => {
+    logger.warn(`Received ${signal} signal. Starting graceful shutdown...`);
+
+    try {
+      // Close database connections
+      logger.log('Disconnecting from database...');
+      await prismaService.$disconnect();
+      logger.log('✅ Database connections closed successfully');
+
+      // Close the NestJS application
+      logger.log('Closing application...');
+      await app.close();
+      logger.log('✅ Application closed successfully');
+
+      logger.log(`Graceful shutdown completed for ${signal}`);
+      process.exit(0);
+    } catch (error) {
+      logger.error(`Error during graceful shutdown: ${error.message}`, error.stack);
+      process.exit(1);
+    }
+  };
+
+  // Handle SIGTERM (e.g., from Docker, Kubernetes, or cloud platforms)
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+  // Handle SIGINT (e.g., Ctrl+C in terminal)
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception:', error);
+    gracefulShutdown('UNCAUGHT_EXCEPTION');
+  });
+
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    gracefulShutdown('UNHANDLED_REJECTION');
+  });
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  const logger = new Logger('Bootstrap');
+  logger.error('Failed to start application:', error);
+  process.exit(1);
+});

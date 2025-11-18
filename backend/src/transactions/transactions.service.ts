@@ -12,6 +12,7 @@ import { TransactionType, Currency, UserRole, Prisma, PaymentMethod } from '@pri
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { WebSocketGatewayService } from '../websocket/websocket.gateway';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {
   BRANCH_SELECT,
@@ -108,6 +109,7 @@ export class TransactionsService {
     private readonly auditLogService: AuditLogService,
     private readonly inventoryService: InventoryService,
     private readonly notificationsService: NotificationsService,
+    private readonly websocketGateway: WebSocketGatewayService,
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
@@ -178,6 +180,9 @@ export class TransactionsService {
         // Log error but don't fail the transaction
         console.error('Failed to create transaction notification:', error);
       });
+
+    // Emit WebSocket event for real-time updates
+    this.websocketGateway.emitNewTransaction(transaction);
 
     return transaction;
   }

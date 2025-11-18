@@ -14,6 +14,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { TasksModule } from './tasks/tasks.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { WebSocketModule } from './websocket/websocket.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
@@ -38,6 +39,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     TasksModule,
     InventoryModule,
     DashboardModule,
+    WebSocketModule,
   ],
   controllers: [AppController],
   providers: [

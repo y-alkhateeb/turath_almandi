@@ -9,6 +9,7 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
 import { UserRole, DebtStatus, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { WebSocketGatewayService } from '../websocket/websocket.gateway';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB } from '../common/utils/date.utils';
@@ -56,6 +57,7 @@ export class DebtsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
+    private readonly websocketGateway: WebSocketGatewayService,
   ) {}
 
   /**
@@ -124,6 +126,9 @@ export class DebtsService {
 
     // Log the creation in audit log
     await this.auditLogService.logCreate(user.id, AuditEntityType.DEBT, debt.id, debt);
+
+    // Emit WebSocket event for real-time updates
+    this.websocketGateway.emitNewDebt(debt);
 
     return debt;
   }
@@ -298,6 +303,10 @@ export class DebtsService {
       result.oldDebtData,
       { remainingAmount: result.debt.remainingAmount, status: result.debt.status },
     );
+
+    // Emit WebSocket events for real-time updates
+    this.websocketGateway.emitDebtPayment(result.payment);
+    this.websocketGateway.emitDebtUpdate(result.debt);
 
     return result.debt;
   }

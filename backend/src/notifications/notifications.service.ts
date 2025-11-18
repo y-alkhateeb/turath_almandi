@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationSeverity, UserRole, Prisma, Notification, TransactionType } from '@prisma/client';
+import { WebSocketGatewayService } from '../websocket/websocket.gateway';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { getCurrentTimestamp } from '../common/utils/date.utils';
 
@@ -48,7 +49,10 @@ interface AdminUserSelect {
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly websocketGateway: WebSocketGatewayService,
+  ) {}
 
   /**
    * Create a notification in the database
@@ -86,6 +90,9 @@ export class NotificationsService {
       this.logger.log(
         `Notification created successfully: id=${notification.id}, type=${notification.type}`,
       );
+
+      // Emit WebSocket event for real-time updates
+      this.websocketGateway.emitNewNotification(notification);
 
       return notification;
     } catch (error: unknown) {

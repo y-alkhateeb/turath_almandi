@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DebtsService } from './debts.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/audit-log/audit-log.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
@@ -21,6 +22,7 @@ describe('DebtsService', () => {
   let service: DebtsService;
   let prismaService: PrismaService;
   let auditLogService: AuditLogService;
+  let notificationsService: NotificationsService;
   let websocketGateway: WebSocketGatewayService;
 
   const mockPrismaService = {
@@ -42,6 +44,11 @@ describe('DebtsService', () => {
     logUpdate: jest.fn(),
   };
 
+  const mockNotificationsService = {
+    notifyNewDebt: jest.fn().mockResolvedValue(null),
+    notifyDebtPayment: jest.fn().mockResolvedValue(null),
+  };
+
   const mockWebSocketGateway = {
     emitNewDebt: jest.fn(),
     emitDebtUpdate: jest.fn(),
@@ -61,6 +68,10 @@ describe('DebtsService', () => {
           useValue: mockAuditLogService,
         },
         {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
+        },
+        {
           provide: WebSocketGatewayService,
           useValue: mockWebSocketGateway,
         },
@@ -70,6 +81,7 @@ describe('DebtsService', () => {
     service = module.get<DebtsService>(DebtsService);
     prismaService = module.get<PrismaService>(PrismaService);
     auditLogService = module.get<AuditLogService>(AuditLogService);
+    notificationsService = module.get<NotificationsService>(NotificationsService);
     websocketGateway = module.get<WebSocketGatewayService>(WebSocketGatewayService);
   });
 
@@ -140,6 +152,14 @@ describe('DebtsService', () => {
         mockDebt,
       );
       expect(mockWebSocketGateway.emitNewDebt).toHaveBeenCalledWith(mockDebt);
+      expect(mockNotificationsService.notifyNewDebt).toHaveBeenCalledWith(
+        'debt-1',
+        'Test Creditor',
+        1000,
+        mockDebt.dueDate,
+        'branch-1',
+        'user-1',
+      );
     });
 
     it('should throw ForbiddenException if accountant has no branch', async () => {
@@ -406,6 +426,15 @@ describe('DebtsService', () => {
       expect(mockAuditLogService.logUpdate).toHaveBeenCalled();
       expect(mockWebSocketGateway.emitDebtPayment).toHaveBeenCalledWith(mockPayment);
       expect(mockWebSocketGateway.emitDebtUpdate).toHaveBeenCalledWith(mockUpdatedDebt);
+      expect(mockNotificationsService.notifyDebtPayment).toHaveBeenCalledWith(
+        'debt-1',
+        'payment-1',
+        'Test Creditor',
+        500,
+        500,
+        'branch-1',
+        'user-1',
+      );
     });
 
     it('should pay debt fully and update status to PAID', async () => {
@@ -422,6 +451,8 @@ describe('DebtsService', () => {
         payments: [{ ...mockPayment, amountPaid: 1000 }],
       };
 
+      const fullPayment = { ...mockPayment, amountPaid: 1000 };
+
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         const tx = {
           debt: {
@@ -429,7 +460,7 @@ describe('DebtsService', () => {
             update: jest.fn().mockResolvedValue(paidDebt),
           },
           debtPayment: {
-            create: jest.fn().mockResolvedValue({ ...mockPayment, amountPaid: 1000 }),
+            create: jest.fn().mockResolvedValue(fullPayment),
           },
         };
 
@@ -440,6 +471,15 @@ describe('DebtsService', () => {
 
       expect(result.status).toBe(DebtStatus.PAID);
       expect(result.remainingAmount).toBe(0);
+      expect(mockNotificationsService.notifyDebtPayment).toHaveBeenCalledWith(
+        'debt-1',
+        'payment-1',
+        'Test Creditor',
+        1000,
+        0,
+        'branch-1',
+        'user-1',
+      );
     });
 
     it('should throw ForbiddenException if user has no branch', async () => {

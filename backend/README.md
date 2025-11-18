@@ -75,12 +75,28 @@ curl http://localhost:3000/api/v1/health
 ```env
 NODE_ENV=development
 PORT=3000
-DATABASE_URL="postgresql://postgres:password@localhost:5432/turath_almandi?schema=public"
+
+# Database with connection pool settings
+# connection_limit: Maximum number of connections in the pool (default: 10)
+# pool_timeout: Maximum time (in seconds) to wait for a connection (default: 20)
+DATABASE_URL="postgresql://postgres:password@localhost:5432/turath_almandi?schema=public&connection_limit=10&pool_timeout=20"
+
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRATION=7d
-CORS_ORIGIN=http://localhost:3000
+JWT_ACCESS_TOKEN_EXPIRATION=7d
+JWT_REFRESH_TOKEN_EXPIRATION=7
+JWT_REFRESH_TOKEN_EXPIRATION_REMEMBER_ME=30
+FRONTEND_URL=http://localhost:5173
 BCRYPT_SALT_ROUNDS=10
 ```
+
+### Database Connection Pool
+
+The `DATABASE_URL` includes connection pool parameters to optimize database performance:
+
+- **`connection_limit=10`**: Limits the maximum number of concurrent database connections to 10. This prevents database overload and ensures efficient resource usage.
+- **`pool_timeout=20`**: Sets the maximum wait time (in seconds) for acquiring a connection from the pool before timing out. This prevents indefinite waiting when the pool is exhausted.
+
+These settings help maintain stable database performance under load and prevent connection exhaustion.
 
 ---
 

@@ -61,6 +61,13 @@ interface BranchPerformance {
   netProfit: number;
 }
 
+interface PaymentMethodBreakdown {
+  cash: number;
+  mastercard: number;
+  cashPercentage: number;
+  mastercardPercentage: number;
+}
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -331,6 +338,56 @@ export class DashboardService {
     branchPerformances.sort((a, b) => b.netProfit - a.netProfit);
 
     return branchPerformances;
+  }
+
+  /**
+   * Get payment method breakdown showing cash vs mastercard amounts and percentages
+   * Useful for understanding payment preferences and cash flow
+   */
+  async getPaymentMethodBreakdown(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+  ): Promise<PaymentMethodBreakdown> {
+    // Build where clause with filters
+    const baseWhere = this.buildWhereClause(user, dateRange, branchId);
+
+    // Get cash transactions total
+    const cashResult = await this.prisma.transaction.aggregate({
+      where: {
+        ...baseWhere,
+        paymentMethod: 'CASH',
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    // Get mastercard transactions total
+    const mastercardResult = await this.prisma.transaction.aggregate({
+      where: {
+        ...baseWhere,
+        paymentMethod: 'MASTER',
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    const cash = Number(cashResult._sum.amount || 0);
+    const mastercard = Number(mastercardResult._sum.amount || 0);
+    const total = cash + mastercard;
+
+    // Calculate percentages (avoid division by zero)
+    const cashPercentage = total > 0 ? (cash / total) * 100 : 0;
+    const mastercardPercentage = total > 0 ? (mastercard / total) * 100 : 0;
+
+    return {
+      cash,
+      mastercard,
+      cashPercentage: Math.round(cashPercentage * 100) / 100, // Round to 2 decimal places
+      mastercardPercentage: Math.round(mastercardPercentage * 100) / 100,
+    };
   }
 
   /**

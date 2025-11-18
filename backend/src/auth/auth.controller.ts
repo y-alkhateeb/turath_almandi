@@ -1,10 +1,12 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Get, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LoginThrottleGuard } from './guards/login-throttle.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 
@@ -17,7 +19,10 @@ interface RequestUser {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly loginThrottleGuard: LoginThrottleGuard,
+  ) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -26,8 +31,9 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
-    return this.authService.login(loginDto);
+  @UseGuards(LoginThrottleGuard)
+  async login(@Body() loginDto: LoginDto, @Req() request: Request): Promise<LoginResponseDto> {
+    return this.authService.login(loginDto, request);
   }
 
   @Post('refresh')
@@ -45,7 +51,11 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(@CurrentUser() user: RequestUser) {
-    return this.authService.logout(user.id);
+  async logout(@CurrentUser() user: RequestUser, @Req() request: Request) {
+    // Extract the access token from the Authorization header
+    const authHeader = request.headers.authorization;
+    const accessToken = authHeader ? authHeader.replace('Bearer ', '') : '';
+
+    return this.authService.logout(user.id, accessToken);
   }
 }

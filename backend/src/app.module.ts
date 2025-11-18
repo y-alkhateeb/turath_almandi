@@ -15,6 +15,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
+import { ReportsModule } from './reports/reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
@@ -40,6 +41,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     InventoryModule,
     DashboardModule,
     WebSocketModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -145,7 +145,6 @@ export class AuthService {
       return this.jwtService.verify(token);
     } catch (error: unknown) {
       // Type guard: check if error is an Error instance
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new UnauthorizedException('الرمز غير صالح');
     }
   }

@@ -8,11 +8,11 @@ import {
   useDeleteUser,
 } from '@/hooks/useUsers';
 import { PageLoading } from '@/components/loading';
-import { EmptyState, PageHeader, Table, ConfirmModal } from '@/components/ui';
+import { PageLayout } from '@/components/layouts';
+import { EmptyState, Table, ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
-import { Alert } from '@/ui/alert';
-import type { UserWithBranch, UpdateUserDto } from '@/types';
+import type { UserWithBranch } from '@/types';
 import type { Column } from '@/components/ui/Table';
 
 export const UsersPage = () => {
@@ -139,27 +139,20 @@ export const UsersPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <PageHeader
-        title="إدارة المستخدمين"
-        description="إدارة المستخدمين وصلاحياتهم في النظام"
-        actions={
-          isAdmin() ? (
-            <Button onClick={() => navigate('/users/create')}>
-              <Plus className="w-5 h-5" />
-              إضافة مستخدم جديد
-            </Button>
-          ) : undefined
-        }
-      />
-
-      {/* Error State */}
-      {error && (
-        <Alert variant="destructive">
-          حدث خطأ أثناء تحميل المستخدمين. يرجى المحاولة مرة أخرى.
-        </Alert>
-      )}
+    <PageLayout
+      title="إدارة المستخدمين"
+      description="إدارة المستخدمين وصلاحياتهم في النظام"
+      error={error}
+      errorMessage="حدث خطأ أثناء تحميل المستخدمين. يرجى المحاولة مرة أخرى."
+      actions={
+        isAdmin() ? (
+          <Button onClick={() => navigate('/users/create')}>
+            <Plus className="w-5 h-5" />
+            إضافة مستخدم جديد
+          </Button>
+        ) : undefined
+      }
+    >
 
       {/* Loading State */}
       {isLoading ? (
@@ -200,7 +193,7 @@ export const UsersPage = () => {
         variant="danger"
         isLoading={deleteUser.isPending}
       />
-    </div>
+    </PageLayout>
   );
 };
 

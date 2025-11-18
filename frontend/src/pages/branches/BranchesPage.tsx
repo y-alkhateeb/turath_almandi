@@ -8,10 +8,10 @@ import {
   useDeleteBranch,
 } from '@/hooks/useBranches';
 import { PageLoading } from '@/components/loading';
-import { EmptyState, PageHeader, Table, ConfirmModal } from '@/components/ui';
+import { PageLayout } from '@/components/layouts';
+import { EmptyState, Table, ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
-import { Alert } from '@/ui/alert';
 import type { Branch } from '@/types';
 import type { Column } from '@/components/ui/Table';
 
@@ -116,27 +116,20 @@ export const BranchesPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <PageHeader
-        title="إدارة الفروع"
-        description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
-        actions={
-          isAdmin() ? (
-            <Button onClick={() => navigate('/branches/create')}>
-              <Plus className="w-5 h-5" />
-              إضافة فرع جديد
-            </Button>
-          ) : undefined
-        }
-      />
-
-      {/* Error State */}
-      {error && (
-        <Alert variant="destructive">
-          حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى.
-        </Alert>
-      )}
+    <PageLayout
+      title="إدارة الفروع"
+      description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
+      error={error}
+      errorMessage="حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى."
+      actions={
+        isAdmin() ? (
+          <Button onClick={() => navigate('/branches/create')}>
+            <Plus className="w-5 h-5" />
+            إضافة فرع جديد
+          </Button>
+        ) : undefined
+      }
+    >
 
       {/* Loading State */}
       {isLoading ? (
@@ -181,7 +174,7 @@ export const BranchesPage = () => {
         variant="danger"
         isLoading={deleteBranch.isPending}
       />
-    </div>
+    </PageLayout>
   );
 };
 

@@ -9,6 +9,7 @@ import {
   Matches,
 } from 'class-validator';
 import { UserRole } from '@prisma/client';
+import { ValidateBranchByRole } from '../../common/decorators/validate-branch-by-role.decorator';
 
 export class CreateUserDto {
   @IsString()
@@ -32,5 +33,6 @@ export class CreateUserDto {
 
   @IsUUID()
   @IsOptional()
+  @ValidateBranchByRole()
   branchId?: string | null;
 }

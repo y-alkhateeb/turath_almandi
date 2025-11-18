@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotificationSeverity, UserRole, Prisma, Notification } from '@prisma/client';
+import { NotificationSeverity, UserRole, Prisma, Notification, TransactionType } from '@prisma/client';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { getCurrentTimestamp } from '../common/utils/date.utils';
 
@@ -191,5 +191,65 @@ export class NotificationsService {
         readAt: getCurrentTimestamp(),
       },
     });
+  }
+
+  /**
+   * Notify about a new transaction
+   * Creates notifications for large transactions or specific transaction types
+   *
+   * @param transactionId - Transaction ID
+   * @param transactionType - Type of transaction (INCOME/EXPENSE)
+   * @param amount - Transaction amount
+   * @param category - Transaction category
+   * @param branchId - Branch ID where transaction occurred
+   * @param createdBy - User ID who created the transaction
+   * @param threshold - Optional amount threshold for notifications (default: 10000)
+   * @returns Created notification or null if no notification needed
+   */
+  async notifyNewTransaction(
+    transactionId: string,
+    transactionType: TransactionType,
+    amount: number,
+    category: string,
+    branchId: string,
+    createdBy: string,
+    threshold: number = 10000,
+  ): Promise<NotificationWithRelations | null> {
+    // Only notify for large transactions or specific categories
+    const shouldNotify =
+      amount >= threshold ||
+      category === 'Purchase' ||
+      (transactionType === TransactionType.EXPENSE && amount >= 5000);
+
+    if (!shouldNotify) {
+      this.logger.debug(`Transaction ${transactionId} does not meet notification criteria`);
+      return null;
+    }
+
+    // Determine notification severity
+    let severity: NotificationSeverity = NotificationSeverity.INFO;
+    if (amount >= threshold * 2) {
+      severity = NotificationSeverity.WARNING;
+    } else if (amount >= threshold * 5) {
+      severity = NotificationSeverity.CRITICAL;
+    }
+
+    // Create notification
+    const notification = await this.createNotification({
+      type: 'large_transaction',
+      title: `معاملة ${transactionType === TransactionType.INCOME ? 'دخل' : 'مصروف'} كبيرة`,
+      message: `تم إنشاء معاملة ${category} بقيمة ${amount.toFixed(2)} دولار`,
+      severity,
+      relatedId: transactionId,
+      relatedType: 'TRANSACTION',
+      branchId,
+      createdBy,
+    });
+
+    this.logger.debug(
+      `Created notification for transaction ${transactionId} with severity ${severity}`,
+    );
+
+    return notification;
   }
 }

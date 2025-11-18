@@ -7,7 +7,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
-import { UserRole, Prisma } from '@prisma/client';
+import { UserRole, Prisma, InventoryUnit } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {
   BRANCH_SELECT,
@@ -336,5 +337,74 @@ export class InventoryService {
     });
 
     return { message: 'Inventory item deleted successfully', id };
+  }
+
+  /**
+   * Update inventory from a purchase transaction
+   * Creates or updates an inventory item based on purchase details
+   * Uses weighted average cost calculation
+   *
+   * @param branchId - Branch ID where purchase was made
+   * @param itemName - Name of the inventory item
+   * @param quantity - Quantity purchased
+   * @param unit - Unit of measurement
+   * @param totalAmount - Total purchase amount
+   * @param prismaClient - Optional Prisma client for transaction support
+   * @returns ID of created or updated inventory item
+   */
+  async updateFromPurchase(
+    branchId: string,
+    itemName: string,
+    quantity: number,
+    unit: InventoryUnit,
+    totalAmount: number,
+    prismaClient?: Prisma.TransactionClient,
+  ): Promise<string> {
+    const prisma = prismaClient || this.prisma;
+
+    // Calculate cost per unit
+    const costPerUnit = totalAmount / quantity;
+
+    // Try to find existing inventory item with same name and unit
+    const existingItem = await prisma.inventoryItem.findFirst({
+      where: {
+        branchId,
+        name: itemName,
+        unit,
+      },
+    });
+
+    if (existingItem) {
+      // Update existing item: add quantity and recalculate weighted average cost
+      const currentValue = new Decimal(existingItem.costPerUnit).mul(existingItem.quantity);
+      const newValue = new Decimal(costPerUnit).mul(quantity);
+      const totalQuantity = new Decimal(existingItem.quantity).add(quantity);
+      const newCostPerUnit = currentValue.add(newValue).div(totalQuantity);
+
+      const updatedItem = await prisma.inventoryItem.update({
+        where: { id: existingItem.id },
+        data: {
+          quantity: totalQuantity,
+          costPerUnit: newCostPerUnit,
+          lastUpdated: getCurrentTimestamp(),
+        },
+      });
+
+      return updatedItem.id;
+    } else {
+      // Create new inventory item
+      const newItem = await prisma.inventoryItem.create({
+        data: {
+          branchId,
+          name: itemName,
+          quantity,
+          unit,
+          costPerUnit,
+          lastUpdated: getCurrentTimestamp(),
+        },
+      });
+
+      return newItem.id;
+    }
   }
 }

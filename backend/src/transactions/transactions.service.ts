@@ -9,8 +9,9 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
 import { TransactionType, Currency, UserRole, Prisma } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { InventoryService } from '../inventory/inventory.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {
   BRANCH_SELECT,
@@ -105,6 +106,8 @@ export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
+    private readonly inventoryService: InventoryService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
@@ -159,6 +162,21 @@ export class TransactionsService {
       transaction.id,
       transaction,
     );
+
+    // Notify about the transaction (async, don't wait)
+    this.notificationsService
+      .notifyNewTransaction(
+        transaction.id,
+        transaction.type,
+        Number(transaction.amount),
+        transaction.category,
+        transaction.branchId,
+        user.id,
+      )
+      .catch((error) => {
+        // Log error but don't fail the transaction
+        console.error('Failed to create transaction notification:', error);
+      });
 
     return transaction;
   }
@@ -495,52 +513,16 @@ export class TransactionsService {
     return this.prisma.$transaction(async (prisma) => {
       let inventoryItemId: string | null = null;
 
-      // If addToInventory is true, create or update inventory item
+      // If addToInventory is true, update inventory using InventoryService
       if (createPurchaseDto.addToInventory && createPurchaseDto.itemName) {
-        // Calculate cost per unit
-        const costPerUnit = createPurchaseDto.amount / createPurchaseDto.quantity!;
-
-        // Try to find existing inventory item with same name and unit
-        const existingItem = await prisma.inventoryItem.findFirst({
-          where: {
-            branchId: user.branchId!,
-            name: createPurchaseDto.itemName,
-            unit: createPurchaseDto.unit!,
-          },
-        });
-
-        if (existingItem) {
-          // Update existing item: add quantity and recalculate weighted average cost
-          const currentValue = new Decimal(existingItem.costPerUnit).mul(existingItem.quantity);
-          const newValue = new Decimal(costPerUnit).mul(createPurchaseDto.quantity!);
-          const totalQuantity = new Decimal(existingItem.quantity).add(createPurchaseDto.quantity!);
-          const newCostPerUnit = currentValue.add(newValue).div(totalQuantity);
-
-          const updatedItem = await prisma.inventoryItem.update({
-            where: { id: existingItem.id },
-            data: {
-              quantity: totalQuantity,
-              costPerUnit: newCostPerUnit,
-              lastUpdated: getCurrentTimestamp(),
-            },
-          });
-
-          inventoryItemId = updatedItem.id;
-        } else {
-          // Create new inventory item
-          const newItem = await prisma.inventoryItem.create({
-            data: {
-              branchId: user.branchId!,
-              name: createPurchaseDto.itemName,
-              quantity: createPurchaseDto.quantity!,
-              unit: createPurchaseDto.unit!,
-              costPerUnit: costPerUnit,
-              lastUpdated: getCurrentTimestamp(),
-            },
-          });
-
-          inventoryItemId = newItem.id;
-        }
+        inventoryItemId = await this.inventoryService.updateFromPurchase(
+          user.branchId!,
+          createPurchaseDto.itemName,
+          createPurchaseDto.quantity!,
+          createPurchaseDto.unit!,
+          createPurchaseDto.amount,
+          prisma,
+        );
       }
 
       // Create the expense transaction
@@ -573,6 +555,21 @@ export class TransactionsService {
         transaction.id,
         transaction,
       );
+
+      // Notify about the transaction (async, don't wait)
+      this.notificationsService
+        .notifyNewTransaction(
+          transaction.id,
+          transaction.type,
+          Number(transaction.amount),
+          transaction.category,
+          transaction.branchId,
+          user.id,
+        )
+        .catch((error) => {
+          // Log error but don't fail the transaction
+          console.error('Failed to create transaction notification:', error);
+        });
 
       return transaction;
     });

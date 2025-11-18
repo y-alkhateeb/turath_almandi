@@ -17,6 +17,11 @@ interface RequestUser {
   branchId: string | null;
 }
 
+interface DateRangeFilter {
+  startDate?: string;
+  endDate?: string;
+}
+
 interface MonthlyData {
   month: string;
   revenue: number;
@@ -53,34 +58,101 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Get comprehensive dashboard statistics
-   * Optimized to minimize database queries
+   * Get total revenue with optional date range and branch filtering
    */
-  async getDashboardStats(date?: string, branchId?: string, user?: RequestUser): Promise<DashboardStats> {
-    // Determine the target date (default to today)
-    const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
+  async getTotalRevenue(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+  ): Promise<number> {
+    const where = this.buildWhereClause(user, dateRange, branchId, TransactionType.INCOME);
 
-    // Set to start and end of day for today's summary
-    const startOfDay = getStartOfDay(targetDate);
-    const endOfDay = getEndOfDay(targetDate);
+    const result = await this.prisma.transaction.aggregate({
+      where,
+      _sum: {
+        amount: true,
+      },
+    });
 
-    // Determine which branch to filter by
-    let filterBranchId: string | undefined = undefined;
+    return Number(result._sum.amount || 0);
+  }
 
-    if (user) {
-      if (user.role === UserRole.ACCOUNTANT) {
-        // Accountants can only see their assigned branch
-        if (!user.branchId) {
-          throw new ForbiddenException('Accountant must be assigned to a branch');
-        }
-        filterBranchId = user.branchId;
-      } else if (user.role === UserRole.ADMIN) {
-        // Admins can filter by any branch, or see all branches if not specified
-        filterBranchId = branchId;
-      }
-    } else {
-      filterBranchId = branchId;
-    }
+  /**
+   * Get total expenses with optional date range and branch filtering
+   */
+  async getTotalExpenses(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+  ): Promise<number> {
+    const where = this.buildWhereClause(user, dateRange, branchId, TransactionType.EXPENSE);
+
+    const result = await this.prisma.transaction.aggregate({
+      where,
+      _sum: {
+        amount: true,
+      },
+    });
+
+    return Number(result._sum.amount || 0);
+  }
+
+  /**
+   * Get net profit (revenue - expenses) with optional date range and branch filtering
+   */
+  async getNetProfit(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+  ): Promise<number> {
+    const [revenue, expenses] = await Promise.all([
+      this.getTotalRevenue(user, dateRange, branchId),
+      this.getTotalExpenses(user, dateRange, branchId),
+    ]);
+
+    return revenue - expenses;
+  }
+
+  /**
+   * Get today's transaction count with optional branch filtering
+   */
+  async getTodayTransactions(user: RequestUser, branchId?: string): Promise<number> {
+    const today = getCurrentTimestamp();
+    const startOfDay = getStartOfDay(today);
+    const endOfDay = getEndOfDay(today);
+
+    const where = this.buildWhereClause(
+      user,
+      { startDate: startOfDay.toISOString(), endDate: endOfDay.toISOString() },
+      branchId,
+    );
+
+    return await this.prisma.transaction.count({ where });
+  }
+
+  /**
+   * Get revenue data for the last 6 months with optional branch filtering
+   */
+  async getRevenueData(user: RequestUser, branchId?: string, months: number = 6): Promise<MonthlyData[]> {
+    const filterBranchId = this.determineBranchId(user, branchId);
+
+    const monthNames = [
+      'كانون الثاني',
+      'شباط',
+      'آذار',
+      'نيسان',
+      'أيار',
+      'حزيران',
+      'تموز',
+      'آب',
+      'أيلول',
+      'تشرين الأول',
+      'تشرين الثاني',
+      'كانون الأول',
+    ];
+
+    const monthlyData: MonthlyData[] = [];
+    const currentDate = getCurrentTimestamp();
 
     // Build base where clause
     const baseWhere: Prisma.TransactionWhereInput = {};
@@ -88,128 +160,8 @@ export class DashboardService {
       baseWhere.branchId = filterBranchId;
     }
 
-    // Build where clause for today's transactions
-    const todayWhere: Prisma.TransactionWhereInput = {
-      ...baseWhere,
-      date: {
-        gte: startOfDay,
-        lte: endOfDay,
-      },
-    };
-
-    // Execute all queries in parallel for best performance
-    const [
-      todayIncomeAggregate,
-      todayExpensesAggregate,
-      todayIncomeTransactions,
-      todayTransactionCount,
-      recentTransactions,
-      monthlyData,
-    ] = await Promise.all([
-      // Aggregate today's income
-      this.prisma.transaction.aggregate({
-        where: {
-          ...todayWhere,
-          type: TransactionType.INCOME,
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-
-      // Aggregate today's expenses
-      this.prisma.transaction.aggregate({
-        where: {
-          ...todayWhere,
-          type: TransactionType.EXPENSE,
-        },
-        _sum: {
-          amount: true,
-        },
-      }),
-
-      // Get today's income transactions for category breakdown
-      this.prisma.transaction.findMany({
-        where: {
-          ...todayWhere,
-          type: TransactionType.INCOME,
-        },
-      }),
-
-      // Today's transaction count
-      this.prisma.transaction.count({
-        where: todayWhere,
-      }),
-
-      // Recent transactions (last 5)
-      this.prisma.transaction.findMany({
-        where: baseWhere,
-        orderBy: {
-          date: 'desc',
-        },
-        take: 5,
-        include: {
-          branch: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      }),
-
-      // Last 6 months of data for charts
-      this.getMonthlyData(filterBranchId),
-    ]);
-
-    // Extract aggregated values
-    const totalRevenue = Number(todayIncomeAggregate._sum.amount || 0);
-    const totalExpenses = Number(todayExpensesAggregate._sum.amount || 0);
-    const netProfit = totalRevenue - totalExpenses;
-
-    // Get category breakdown from today's income
-    const categoryData = this.getCategoryBreakdown(todayIncomeTransactions);
-
-    // Format recent transactions
-    const formattedTransactions: RecentTransaction[] = recentTransactions.map((t) => ({
-      id: t.id,
-      date: t.date.toISOString(),
-      type: t.type,
-      category: t.category,
-      amount: Number(t.amount),
-      status: 'completed',
-    }));
-
-    return {
-      totalRevenue,
-      totalExpenses,
-      netProfit,
-      todayTransactions: todayTransactionCount,
-      revenueData: monthlyData,
-      categoryData,
-      recentTransactions: formattedTransactions,
-    };
-  }
-
-  /**
-   * Get monthly revenue and expense data for the last 6 months
-   */
-  private async getMonthlyData(branchId?: string): Promise<MonthlyData[]> {
-    const monthNames = [
-      'كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران',
-      'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول',
-    ];
-
-    const months: MonthlyData[] = [];
-    const currentDate = getCurrentTimestamp();
-
-    // Build base where clause
-    const baseWhere: Prisma.TransactionWhereInput = {};
-    if (branchId) {
-      baseWhere.branchId = branchId;
-    }
-
-    // Get last 6 months
-    for (let i = 5; i >= 0; i--) {
+    // Get last N months
+    for (let i = months - 1; i >= 0; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       const startOfMonth = getStartOfMonth(date);
       const endOfMonth = getEndOfMonth(date);
@@ -245,22 +197,190 @@ export class DashboardService {
       ]);
 
       const revenue = Number(incomeAggregate._sum.amount || 0);
-      const expenseTotal = Number(expensesAggregate._sum.amount || 0);
+      const expenses = Number(expensesAggregate._sum.amount || 0);
 
-      months.push({
+      monthlyData.push({
         month: monthNames[date.getMonth()],
         revenue,
-        expenses: expenseTotal,
+        expenses,
       });
     }
 
-    return months;
+    return monthlyData;
   }
 
   /**
-   * Get category breakdown from income transactions
+   * Get category data breakdown with optional date range and branch filtering
    */
-  private getCategoryBreakdown(transactions: Transaction[]): CategoryData[] {
+  async getCategoryData(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+  ): Promise<CategoryData[]> {
+    const where = this.buildWhereClause(user, dateRange, branchId, TransactionType.INCOME);
+
+    const transactions = await this.prisma.transaction.findMany({
+      where,
+      select: {
+        category: true,
+        amount: true,
+      },
+    });
+
+    return this.calculateCategoryBreakdown(transactions);
+  }
+
+  /**
+   * Get comprehensive dashboard statistics (legacy method for backward compatibility)
+   * Optimized to minimize database queries
+   */
+  async getDashboardStats(date?: string, branchId?: string, user?: RequestUser): Promise<DashboardStats> {
+    if (!user) {
+      throw new ForbiddenException('User authentication required');
+    }
+
+    // Determine the target date (default to today)
+    const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
+
+    // Set to start and end of day for today's summary
+    const startOfDay = getStartOfDay(targetDate);
+    const endOfDay = getEndOfDay(targetDate);
+
+    const dateRange = {
+      startDate: startOfDay.toISOString(),
+      endDate: endOfDay.toISOString(),
+    };
+
+    // Execute all queries in parallel for best performance
+    const [
+      totalRevenue,
+      totalExpenses,
+      netProfit,
+      todayTransactions,
+      revenueData,
+      categoryData,
+      recentTransactions,
+    ] = await Promise.all([
+      this.getTotalRevenue(user, dateRange, branchId),
+      this.getTotalExpenses(user, dateRange, branchId),
+      this.getNetProfit(user, dateRange, branchId),
+      this.getTodayTransactions(user, branchId),
+      this.getRevenueData(user, branchId, 6),
+      this.getCategoryData(user, dateRange, branchId),
+      this.getRecentTransactions(user, branchId, 5),
+    ]);
+
+    return {
+      totalRevenue,
+      totalExpenses,
+      netProfit,
+      todayTransactions,
+      revenueData,
+      categoryData,
+      recentTransactions,
+    };
+  }
+
+  /**
+   * Get recent transactions with optional branch filtering
+   */
+  private async getRecentTransactions(
+    user: RequestUser,
+    branchId?: string,
+    limit: number = 5,
+  ): Promise<RecentTransaction[]> {
+    const filterBranchId = this.determineBranchId(user, branchId);
+
+    const baseWhere: Prisma.TransactionWhereInput = {};
+    if (filterBranchId) {
+      baseWhere.branchId = filterBranchId;
+    }
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: baseWhere,
+      orderBy: {
+        date: 'desc',
+      },
+      take: limit,
+      include: {
+        branch: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return transactions.map((t) => ({
+      id: t.id,
+      date: t.date.toISOString(),
+      type: t.type,
+      category: t.category,
+      amount: Number(t.amount),
+      status: 'completed',
+    }));
+  }
+
+  /**
+   * Build where clause based on user role, date range, branch, and transaction type
+   */
+  private buildWhereClause(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+    transactionType?: TransactionType,
+  ): Prisma.TransactionWhereInput {
+    const where: Prisma.TransactionWhereInput = {};
+
+    // Apply branch filtering based on user role
+    const filterBranchId = this.determineBranchId(user, branchId);
+    if (filterBranchId) {
+      where.branchId = filterBranchId;
+    }
+
+    // Apply date range filter
+    if (dateRange) {
+      where.date = {};
+      if (dateRange.startDate) {
+        where.date.gte = formatDateForDB(dateRange.startDate);
+      }
+      if (dateRange.endDate) {
+        where.date.lte = formatDateForDB(dateRange.endDate);
+      }
+    }
+
+    // Apply transaction type filter
+    if (transactionType) {
+      where.type = transactionType;
+    }
+
+    return where;
+  }
+
+  /**
+   * Determine which branch ID to filter by based on user role
+   */
+  private determineBranchId(user: RequestUser, requestedBranchId?: string): string | undefined {
+    if (user.role === UserRole.ACCOUNTANT) {
+      // Accountants can only see their assigned branch
+      if (!user.branchId) {
+        throw new ForbiddenException('accountantMustBeAssignedToBranch');
+      }
+      return user.branchId;
+    } else if (user.role === UserRole.ADMIN) {
+      // Admins can filter by any branch, or see all branches if not specified
+      return requestedBranchId;
+    }
+
+    return requestedBranchId;
+  }
+
+  /**
+   * Calculate category breakdown from transactions
+   */
+  private calculateCategoryBreakdown(
+    transactions: Array<{ category: string; amount: Prisma.Decimal }>,
+  ): CategoryData[] {
     const colors = ['#0ea5e9', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444'];
 
     // Group by category
@@ -272,13 +392,11 @@ export class DashboardService {
     });
 
     // Convert to array and assign colors
-    const categoryData: CategoryData[] = Array.from(categoryMap.entries()).map(
-      ([name, value], index) => ({
-        name,
-        value,
-        color: colors[index % colors.length],
-      }),
-    );
+    const categoryData: CategoryData[] = Array.from(categoryMap.entries()).map(([name, value], index) => ({
+      name,
+      value,
+      color: colors[index % colors.length],
+    }));
 
     // Sort by value descending
     categoryData.sort((a, b) => b.value - a.value);

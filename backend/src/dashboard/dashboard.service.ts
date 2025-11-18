@@ -53,6 +53,14 @@ interface DashboardStats {
   recentTransactions: RecentTransaction[];
 }
 
+interface BranchPerformance {
+  branchId: string;
+  branchName: string;
+  revenue: number;
+  expenses: number;
+  netProfit: number;
+}
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -228,6 +236,101 @@ export class DashboardService {
     });
 
     return this.calculateCategoryBreakdown(transactions);
+  }
+
+  /**
+   * Compare performance across all branches
+   * Returns array sorted by net profit (descending)
+   * Accountants can only see their own branch
+   */
+  async compareBranches(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+  ): Promise<BranchPerformance[]> {
+    // Determine which branches the user can access
+    let branchFilter: Prisma.BranchWhereInput = {};
+
+    if (user.role === UserRole.ACCOUNTANT) {
+      // Accountants can only see their assigned branch
+      if (!user.branchId) {
+        throw new ForbiddenException('accountantMustBeAssignedToBranch');
+      }
+      branchFilter = { id: user.branchId };
+    }
+    // Admins can see all branches (no filter needed)
+
+    // Get all branches
+    const branches = await this.prisma.branch.findMany({
+      where: branchFilter,
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    // Build date range filter for transactions
+    const dateFilter: Prisma.TransactionWhereInput = {};
+    if (dateRange) {
+      dateFilter.date = {};
+      if (dateRange.startDate) {
+        dateFilter.date.gte = formatDateForDB(dateRange.startDate);
+      }
+      if (dateRange.endDate) {
+        dateFilter.date.lte = formatDateForDB(dateRange.endDate);
+      }
+    }
+
+    // Get performance data for each branch in parallel
+    const branchPerformancePromises = branches.map(async (branch) => {
+      const branchWhere: Prisma.TransactionWhereInput = {
+        ...dateFilter,
+        branchId: branch.id,
+      };
+
+      // Get revenue and expenses in parallel
+      const [revenueResult, expensesResult] = await Promise.all([
+        this.prisma.transaction.aggregate({
+          where: {
+            ...branchWhere,
+            type: TransactionType.INCOME,
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
+        this.prisma.transaction.aggregate({
+          where: {
+            ...branchWhere,
+            type: TransactionType.EXPENSE,
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
+      ]);
+
+      const revenue = Number(revenueResult._sum.amount || 0);
+      const expenses = Number(expensesResult._sum.amount || 0);
+      const netProfit = revenue - expenses;
+
+      return {
+        branchId: branch.id,
+        branchName: branch.name,
+        revenue,
+        expenses,
+        netProfit,
+      };
+    });
+
+    const branchPerformances = await Promise.all(branchPerformancePromises);
+
+    // Sort by net profit descending (best performing first)
+    branchPerformances.sort((a, b) => b.netProfit - a.netProfit);
+
+    return branchPerformances;
   }
 
   /**

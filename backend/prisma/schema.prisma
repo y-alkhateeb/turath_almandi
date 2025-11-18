@@ -37,10 +37,7 @@ enum PaymentMethod {
 
 enum Currency {
   USD
-  EUR
   IQD
-  SAR
-  AED
 
   @@map("currency")
 }

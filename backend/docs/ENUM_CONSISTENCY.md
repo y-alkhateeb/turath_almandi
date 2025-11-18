@@ -90,15 +90,12 @@ enum PaymentMethod {
 
 ### 4. Currency
 
-**Location:** `prisma/schema.prisma` (line 38-46)
+**Location:** `prisma/schema.prisma` (line 38-43)
 
 ```prisma
 enum Currency {
   USD
-  EUR
   IQD
-  SAR
-  AED
 
   @@map("currency")
 }
@@ -106,10 +103,7 @@ enum Currency {
 
 **Values:**
 - `USD` - US Dollar (default)
-- `EUR` - Euro
 - `IQD` - Iraqi Dinar
-- `SAR` - Saudi Riyal
-- `AED` - UAE Dirham
 
 **Usage:**
 - Backend: `import { Currency } from '@prisma/client'`
@@ -120,7 +114,7 @@ enum Currency {
 - `Debt.currency` (default: USD)
 - `DebtPayment.currency` (default: USD)
 
-**Note:** Currently, the system enforces USD-only via the `@IsAllowedCurrency()` decorator. Other currencies are defined for future multi-currency support.
+**Note:** The system supports USD and IQD currencies. USD is enforced as the default via the `@IsAllowedCurrency()` decorator (configurable).
 
 ---
 
@@ -285,7 +279,7 @@ enum DisplayMethod {
 | `PaymentMethod` | CASH, MASTER | ✅ Matches Prisma |
 | `DebtStatus` | ACTIVE, PAID, PARTIAL | ✅ Matches Prisma |
 | `InventoryUnit` | KG, PIECE, LITER, OTHER | ✅ Matches Prisma |
-| `Currency` | USD, EUR, IQD, SAR, AED | ✅ Added (was missing) |
+| `Currency` | USD, IQD | ✅ Matches Prisma |
 | `NotificationSeverity` | INFO, WARNING, ERROR, CRITICAL | ✅ Added (was missing) |
 | `DisplayMethod` | POPUP, TOAST, EMAIL, SMS | ✅ Added (was missing) |
 

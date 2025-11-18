@@ -51,10 +51,7 @@ export enum InventoryUnit {
 // Currency types
 export enum Currency {
   USD = 'USD',
-  EUR = 'EUR',
   IQD = 'IQD',
-  SAR = 'SAR',
-  AED = 'AED',
 }
 
 // Notification severity levels

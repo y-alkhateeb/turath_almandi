@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
-import { UserRole } from '@prisma/client';
+import { UserRole, Prisma } from '@prisma/client';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {
   BRANCH_SELECT,
@@ -35,6 +35,36 @@ interface InventoryFilters {
   unit?: string;
 }
 
+// Type for inventory item with branch and minimal transactions
+type InventoryItemWithMinimalTransactions = Prisma.InventoryItemGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    transactions: {
+      select: typeof TRANSACTION_SELECT_MINIMAL;
+    };
+  };
+}>;
+
+// Type for inventory item with branch and full transactions
+type InventoryItemWithTransactions = Prisma.InventoryItemGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    transactions: {
+      select: typeof TRANSACTION_SELECT_FOR_INVENTORY;
+    };
+  };
+}>;
+
+// Type for inventory item with metadata
+interface InventoryItemWithMetadata extends InventoryItemWithTransactions {
+  isAutoAdded: boolean;
+  relatedPurchases: any[];
+}
+
 @Injectable()
 export class InventoryService {
   constructor(private readonly prisma: PrismaService) {}
@@ -42,7 +72,7 @@ export class InventoryService {
   /**
    * Create a new inventory item (manual add)
    */
-  async create(createInventoryDto: CreateInventoryDto, user: RequestUser) {
+  async create(createInventoryDto: CreateInventoryDto, user: RequestUser): Promise<InventoryItemWithMinimalTransactions> {
     // Determine branch ID
     // - For accountants: Always use their assigned branch
     // - For admins: Use provided branchId or require it
@@ -119,7 +149,7 @@ export class InventoryService {
     user: RequestUser,
     pagination: PaginationParams = {},
     filters: InventoryFilters = {},
-  ) {
+  ): Promise<{ data: InventoryItemWithMetadata[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
     const { page = 1, limit = 20 } = pagination;
     const skip = (page - 1) * limit;
 
@@ -183,7 +213,7 @@ export class InventoryService {
   /**
    * Find one inventory item by ID
    */
-  async findOne(id: string, user?: RequestUser) {
+  async findOne(id: string, user?: RequestUser): Promise<InventoryItemWithMetadata> {
     const item = await this.prisma.inventoryItem.findUnique({
       where: { id },
       include: {
@@ -227,7 +257,7 @@ export class InventoryService {
   /**
    * Update an inventory item
    */
-  async update(id: string, updateInventoryDto: UpdateInventoryDto, user: RequestUser) {
+  async update(id: string, updateInventoryDto: UpdateInventoryDto, user: RequestUser): Promise<InventoryItemWithMetadata> {
     // First, find the existing item
     const existingItem = await this.findOne(id, user);
 
@@ -282,7 +312,7 @@ export class InventoryService {
   /**
    * Delete an inventory item
    */
-  async remove(id: string, user: RequestUser) {
+  async remove(id: string, user: RequestUser): Promise<{ message: string; id: string }> {
     // First, find the existing item to ensure it exists and user has access
     const item = await this.findOne(id, user);
 

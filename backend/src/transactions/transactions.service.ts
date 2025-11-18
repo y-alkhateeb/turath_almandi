@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
-import { TransactionType, Currency, UserRole } from '@prisma/client';
+import { TransactionType, Currency, UserRole, Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
@@ -49,6 +49,57 @@ interface TransactionFilters {
   search?: string;
 }
 
+// Type for transaction with branch (true) and creator select
+type TransactionWithBranchAndCreator = Prisma.TransactionGetPayload<{
+  include: {
+    branch: true;
+    creator: {
+      select: typeof USER_SELECT;
+    };
+  };
+}>;
+
+// Type for transaction with branch, creator, and inventory item selects
+type TransactionWithAllRelations = Prisma.TransactionGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    inventoryItem: {
+      select: typeof INVENTORY_ITEM_SELECT;
+    };
+  };
+}>;
+
+// Type for transaction with extended inventory item
+type TransactionWithExtendedInventory = Prisma.TransactionGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    inventoryItem: {
+      select: typeof INVENTORY_ITEM_EXTENDED_SELECT;
+    };
+  };
+}>;
+
+// Type for transaction with full inventory item
+type TransactionWithFullInventory = Prisma.TransactionGetPayload<{
+  include: {
+    branch: true;
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    inventoryItem: true;
+  };
+}>;
+
 @Injectable()
 export class TransactionsService {
   constructor(
@@ -56,7 +107,7 @@ export class TransactionsService {
     private readonly auditLogService: AuditLogService,
   ) {}
 
-  async create(createTransactionDto: CreateTransactionDto, user: RequestUser) {
+  async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
     // Validate user has a branch assigned
     if (!user.branchId) {
       throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.BRANCH_REQUIRED);
@@ -119,7 +170,7 @@ export class TransactionsService {
     user: RequestUser,
     pagination: PaginationParams = {},
     filters: TransactionFilters = {},
-  ) {
+  ): Promise<{ data: TransactionWithAllRelations[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
     const { page = 1, limit = 20 } = pagination;
     const skip = (page - 1) * limit;
 
@@ -195,7 +246,7 @@ export class TransactionsService {
     };
   }
 
-  async findOne(id: string, user?: RequestUser) {
+  async findOne(id: string, user?: RequestUser): Promise<TransactionWithExtendedInventory> {
     const transaction = await this.prisma.transaction.findUnique({
       where: { id },
       include: {
@@ -231,7 +282,7 @@ export class TransactionsService {
   /**
    * Update a transaction
    */
-  async update(id: string, updateTransactionDto: UpdateTransactionDto, user: RequestUser) {
+  async update(id: string, updateTransactionDto: UpdateTransactionDto, user: RequestUser): Promise<TransactionWithAllRelations> {
     // First, find the existing transaction
     const existingTransaction = await this.findOne(id, user);
 
@@ -297,7 +348,7 @@ export class TransactionsService {
    * Delete a transaction (soft delete by setting a flag or hard delete)
    * Using hard delete for now
    */
-  async remove(id: string, user: RequestUser) {
+  async remove(id: string, user: RequestUser): Promise<{ message: string; id: string }> {
     // First, find the existing transaction to ensure it exists and user has access
     const transaction = await this.findOne(id, user);
 
@@ -319,7 +370,15 @@ export class TransactionsService {
    * @param user - Current user (used to enforce branch access for accountants)
    * @returns Financial summary with income breakdown, expenses, and net profit
    */
-  async getSummary(date?: string, branchId?: string, user?: RequestUser) {
+  async getSummary(date?: string, branchId?: string, user?: RequestUser): Promise<{
+    date: string;
+    branchId: string | null;
+    income_cash: number;
+    income_master: number;
+    total_income: number;
+    total_expense: number;
+    net: number;
+  }> {
     // Determine the target date (default to today)
     const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
 
@@ -408,7 +467,7 @@ export class TransactionsService {
   async createPurchaseWithInventory(
     createPurchaseDto: CreatePurchaseExpenseDto,
     user: RequestUser,
-  ) {
+  ): Promise<TransactionWithFullInventory> {
     // Validate user has a branch assigned
     if (!user.branchId) {
       throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.BRANCH_REQUIRED);

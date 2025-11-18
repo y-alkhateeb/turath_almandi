@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
-import { UserRole, DebtStatus } from '@prisma/client';
+import { UserRole, DebtStatus, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
@@ -20,6 +20,31 @@ interface RequestUser {
   role: UserRole;
   branchId: string | null;
 }
+
+// Type for debt with branch and creator relations
+type DebtWithRelations = Prisma.DebtGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+  };
+}>;
+
+// Type for debt with branch, creator, and payments
+type DebtWithAllRelations = Prisma.DebtGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    payments: true;
+  };
+}>;
 
 @Injectable()
 export class DebtsService {
@@ -34,7 +59,7 @@ export class DebtsService {
    * Validates: due_date >= date
    * Filters by branch: accountants can only create debts for their branch
    */
-  async create(createDebtDto: CreateDebtDto, user: RequestUser) {
+  async create(createDebtDto: CreateDebtDto, user: RequestUser): Promise<DebtWithRelations> {
     // Determine branch ID
     // - For accountants: Always use their assigned branch
     // - For admins: Use provided branchId or require it
@@ -103,7 +128,7 @@ export class DebtsService {
    * Accountants can only see debts from their branch
    * Admins can see all debts
    */
-  async findAll(user: RequestUser) {
+  async findAll(user: RequestUser): Promise<DebtWithAllRelations[]> {
     // Build where clause based on user role
     let where: any = {};
 
@@ -137,7 +162,7 @@ export class DebtsService {
    * Updates: remaining_amount = remaining_amount - amount_paid
    * Auto-updates status: PAID if remaining = 0, PARTIAL if 0 < remaining < original
    */
-  async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser) {
+  async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser): Promise<DebtWithAllRelations> {
     // Validate user has a branch assigned
     if (!user.branchId) {
       throw new ForbiddenException(ERROR_MESSAGES.DEBT.BRANCH_REQUIRED_PAY);

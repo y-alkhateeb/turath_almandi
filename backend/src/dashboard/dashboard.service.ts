@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TransactionType, UserRole } from '@prisma/client';
+import { TransactionType, UserRole, Transaction } from '@prisma/client';
 import {
   formatDateForDB,
   getCurrentTimestamp,
@@ -38,6 +38,16 @@ interface RecentTransaction {
   status: string;
 }
 
+interface DashboardStats {
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  todayTransactions: number;
+  revenueData: MonthlyData[];
+  categoryData: CategoryData[];
+  recentTransactions: RecentTransaction[];
+}
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -46,7 +56,7 @@ export class DashboardService {
    * Get comprehensive dashboard statistics
    * Optimized to minimize database queries
    */
-  async getDashboardStats(date?: string, branchId?: string, user?: RequestUser) {
+  async getDashboardStats(date?: string, branchId?: string, user?: RequestUser): Promise<DashboardStats> {
     // Determine the target date (default to today)
     const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
 
@@ -234,7 +244,7 @@ export class DashboardService {
   /**
    * Get category breakdown from income transactions
    */
-  private getCategoryBreakdown(transactions: any[]): CategoryData[] {
+  private getCategoryBreakdown(transactions: Transaction[]): CategoryData[] {
     const colors = ['#0ea5e9', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444'];
 
     // Group by category

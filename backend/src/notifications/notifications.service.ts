@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotificationSeverity, UserRole } from '@prisma/client';
+import { NotificationSeverity, UserRole, Prisma, Notification } from '@prisma/client';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { getCurrentTimestamp } from '../common/utils/date.utils';
 
@@ -15,6 +15,35 @@ export interface CreateNotificationDto {
   createdBy: string;
 }
 
+// Type for notification with branch and creator relations
+type NotificationWithRelations = Prisma.NotificationGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+  };
+}>;
+
+// Type for notification with only branch relation
+type NotificationWithBranch = Prisma.NotificationGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+  };
+}>;
+
+// Type for admin user select
+interface AdminUserSelect {
+  id: string;
+  username: string;
+  role: UserRole;
+  branchId: string | null;
+}
+
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
@@ -26,7 +55,7 @@ export class NotificationsService {
    * @param dto - Notification data
    * @returns Created notification
    */
-  async createNotification(dto: CreateNotificationDto) {
+  async createNotification(dto: CreateNotificationDto): Promise<NotificationWithRelations> {
     try {
       this.logger.debug(
         `Creating notification: type=${dto.type}, severity=${dto.severity}, relatedId=${dto.relatedId}`,
@@ -85,7 +114,7 @@ export class NotificationsService {
     dueDate: Date,
     branchId: string,
     systemUserId: string,
-  ) {
+  ): Promise<NotificationWithRelations> {
     const daysPastDue = Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
 
     const notification = await this.createNotification({
@@ -110,7 +139,7 @@ export class NotificationsService {
    * Get all admin users who should receive notifications
    * @returns Array of admin users
    */
-  async getAdminUsers() {
+  async getAdminUsers(): Promise<AdminUserSelect[]> {
     const adminUsers = await this.prisma.user.findMany({
       where: {
         role: UserRole.ADMIN,
@@ -133,7 +162,7 @@ export class NotificationsService {
    * @param userId - User ID
    * @returns Array of unread notifications
    */
-  async getUnreadNotifications(userId: string) {
+  async getUnreadNotifications(userId: string): Promise<NotificationWithBranch[]> {
     return this.prisma.notification.findMany({
       where: {
         isRead: false,
@@ -154,7 +183,7 @@ export class NotificationsService {
    * @param notificationId - Notification ID
    * @returns Updated notification
    */
-  async markAsRead(notificationId: string) {
+  async markAsRead(notificationId: string): Promise<Notification> {
     return this.prisma.notification.update({
       where: { id: notificationId },
       data: {

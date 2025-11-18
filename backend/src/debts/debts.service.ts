@@ -12,6 +12,7 @@ import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB } from '../common/utils/date.utils';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
 
 interface RequestUser {
   id: string;
@@ -42,20 +43,20 @@ export class DebtsService {
     if (user.role === UserRole.ACCOUNTANT) {
       // Accountants must have a branch assigned and can only create for their branch
       if (!user.branchId) {
-        throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء الديون');
+        throw new ForbiddenException(ERROR_MESSAGES.DEBT.BRANCH_REQUIRED_CREATE);
       }
       branchId = user.branchId;
     } else {
       // Admins must provide a branch ID
       if (!createDebtDto.branchId) {
-        throw new BadRequestException('يجب تحديد الفرع');
+        throw new BadRequestException(ERROR_MESSAGES.BRANCH.REQUIRED);
       }
       branchId = createDebtDto.branchId;
     }
 
     // Validate amount is positive
     if (createDebtDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate due_date >= date
@@ -63,7 +64,7 @@ export class DebtsService {
     const dueDate = formatDateForDB(createDebtDto.dueDate);
 
     if (dueDate < date) {
-      throw new BadRequestException('Due date must be greater than or equal to date');
+      throw new BadRequestException(ERROR_MESSAGES.DEBT.DUE_DATE_INVALID);
     }
 
     // Build debt data
@@ -139,12 +140,12 @@ export class DebtsService {
   async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لسداد الديون');
+      throw new ForbiddenException(ERROR_MESSAGES.DEBT.BRANCH_REQUIRED_PAY);
     }
 
     // Validate amount is positive
     if (payDebtDto.amountPaid <= 0) {
-      throw new BadRequestException('Payment amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.PAYMENT_POSITIVE);
     }
 
     // Use Prisma transaction to ensure atomicity
@@ -163,7 +164,7 @@ export class DebtsService {
       });
 
       if (!debt) {
-        throw new NotFoundException('Debt not found');
+        throw new NotFoundException(ERROR_MESSAGES.DEBT.NOT_FOUND);
       }
 
       // Capture old debt data for audit log
@@ -174,14 +175,14 @@ export class DebtsService {
 
       // Role-based access control
       if (user.role === UserRole.ACCOUNTANT && debt.branchId !== user.branchId) {
-        throw new ForbiddenException('You can only pay debts from your branch');
+        throw new ForbiddenException(ERROR_MESSAGES.DEBT.ONLY_PAY_OWN_BRANCH);
       }
 
       // Validate payment amount doesn't exceed remaining amount
       const remainingAmount = Number(debt.remainingAmount);
       if (payDebtDto.amountPaid > remainingAmount) {
         throw new BadRequestException(
-          `Payment amount (${payDebtDto.amountPaid}) cannot exceed remaining amount (${remainingAmount})`,
+          ERROR_MESSAGES.DEBT.PAYMENT_EXCEEDS_REMAINING(payDebtDto.amountPaid, remainingAmount),
         );
       }
 

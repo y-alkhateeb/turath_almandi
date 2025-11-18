@@ -1,5 +1,6 @@
 import { UserRole } from '@prisma/client';
 import { ForbiddenException } from '@nestjs/common';
+import { ERROR_MESSAGES } from '../constants/error-messages';
 
 interface RequestUser {
   id: string;
@@ -28,7 +29,7 @@ export function applyBranchFilter(
   if (user.role === UserRole.ACCOUNTANT) {
     // Accountants can only see records from their branch
     if (!user.branchId) {
-      throw new ForbiddenException('Accountant must be assigned to a branch');
+      throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
     }
     where.branchId = user.branchId;
   } else if (user.role === UserRole.ADMIN && filterBranchId) {

@@ -25,6 +25,7 @@ import {
   getEndOfDay,
   formatToISODate,
 } from '../common/utils/date.utils';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
 
 interface RequestUser {
   id: string;
@@ -58,12 +59,12 @@ export class TransactionsService {
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء المعاملات');
+      throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.BRANCH_REQUIRED);
     }
 
     // Validate amount is positive
     if (createTransactionDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate payment method for income transactions
@@ -72,9 +73,7 @@ export class TransactionsService {
         createTransactionDto.paymentMethod &&
         !['CASH', 'MASTER'].includes(createTransactionDto.paymentMethod)
       ) {
-        throw new BadRequestException(
-          'Payment method must be either CASH or MASTER for income transactions',
-        );
+        throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
       }
     }
 
@@ -213,16 +212,16 @@ export class TransactionsService {
     });
 
     if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${id} not found`);
+      throw new NotFoundException(ERROR_MESSAGES.TRANSACTION.NOT_FOUND(id));
     }
 
     // Role-based access control
     if (user && user.role === UserRole.ACCOUNTANT) {
       if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
       }
       if (transaction.branchId !== user.branchId) {
-        throw new ForbiddenException('You do not have access to this transaction');
+        throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.NO_ACCESS);
       }
     }
 
@@ -238,7 +237,7 @@ export class TransactionsService {
 
     // Validate amount if provided
     if (updateTransactionDto.amount !== undefined && updateTransactionDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate payment method for income transactions
@@ -248,9 +247,7 @@ export class TransactionsService {
       updateTransactionDto.paymentMethod &&
       !['CASH', 'MASTER'].includes(updateTransactionDto.paymentMethod)
     ) {
-      throw new BadRequestException(
-        'Payment method must be either CASH or MASTER for income transactions',
-      );
+      throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
     }
 
     // Build update data
@@ -337,7 +334,7 @@ export class TransactionsService {
       if (user.role === UserRole.ACCOUNTANT) {
         // Accountants can only see their assigned branch
         if (!user.branchId) {
-          throw new ForbiddenException('Accountant must be assigned to a branch');
+          throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
         }
         filterBranchId = user.branchId;
       } else if (user.role === UserRole.ADMIN) {
@@ -414,24 +411,24 @@ export class TransactionsService {
   ) {
     // Validate user has a branch assigned
     if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء المعاملات');
+      throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.BRANCH_REQUIRED);
     }
 
     // Validate amount is positive
     if (createPurchaseDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate inventory fields if addToInventory is true
     if (createPurchaseDto.addToInventory) {
       if (!createPurchaseDto.itemName) {
-        throw new BadRequestException('Item name is required when adding to inventory');
+        throw new BadRequestException(ERROR_MESSAGES.INVENTORY.ITEM_NAME_REQUIRED);
       }
       if (!createPurchaseDto.quantity || createPurchaseDto.quantity <= 0) {
-        throw new BadRequestException('Quantity must be greater than 0 when adding to inventory');
+        throw new BadRequestException(ERROR_MESSAGES.VALIDATION.QUANTITY_POSITIVE);
       }
       if (!createPurchaseDto.unit) {
-        throw new BadRequestException('Unit is required when adding to inventory');
+        throw new BadRequestException(ERROR_MESSAGES.INVENTORY.UNIT_REQUIRED);
       }
     }
 

@@ -15,6 +15,7 @@ import {
   TRANSACTION_SELECT_MINIMAL,
 } from '../common/constants/prisma-includes';
 import { getCurrentTimestamp } from '../common/utils/date.utils';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
 
 interface RequestUser {
   id: string;
@@ -50,25 +51,25 @@ export class InventoryService {
     if (user.role === UserRole.ACCOUNTANT) {
       // Accountants must have a branch assigned and can only create for their branch
       if (!user.branchId) {
-        throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء عناصر المخزون');
+        throw new ForbiddenException(ERROR_MESSAGES.INVENTORY.BRANCH_REQUIRED);
       }
       branchId = user.branchId;
     } else {
       // Admins must provide a branch ID
       if (!createInventoryDto.branchId) {
-        throw new BadRequestException('يجب تحديد الفرع');
+        throw new BadRequestException(ERROR_MESSAGES.BRANCH.REQUIRED);
       }
       branchId = createInventoryDto.branchId;
     }
 
     // Validate quantity is non-negative
     if (createInventoryDto.quantity < 0) {
-      throw new BadRequestException('Quantity must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.QUANTITY_NON_NEGATIVE);
     }
 
     // Validate cost per unit is non-negative
     if (createInventoryDto.costPerUnit < 0) {
-      throw new BadRequestException('Cost per unit must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.COST_NON_NEGATIVE);
     }
 
     // Check if item with same name and unit already exists in this branch
@@ -81,9 +82,7 @@ export class InventoryService {
     });
 
     if (existingItem) {
-      throw new BadRequestException(
-        'An inventory item with the same name and unit already exists in this branch',
-      );
+      throw new BadRequestException(ERROR_MESSAGES.INVENTORY.DUPLICATE_ITEM);
     }
 
     // Create the inventory item
@@ -204,16 +203,16 @@ export class InventoryService {
     });
 
     if (!item) {
-      throw new NotFoundException(`Inventory item with ID ${id} not found`);
+      throw new NotFoundException(ERROR_MESSAGES.INVENTORY.NOT_FOUND(id));
     }
 
     // Role-based access control
     if (user && user.role === UserRole.ACCOUNTANT) {
       if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
       }
       if (item.branchId !== user.branchId) {
-        throw new ForbiddenException('You do not have access to this inventory item');
+        throw new ForbiddenException(ERROR_MESSAGES.INVENTORY.NO_ACCESS);
       }
     }
 
@@ -234,12 +233,12 @@ export class InventoryService {
 
     // Validate quantity if provided
     if (updateInventoryDto.quantity !== undefined && updateInventoryDto.quantity < 0) {
-      throw new BadRequestException('Quantity must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.QUANTITY_NON_NEGATIVE);
     }
 
     // Validate cost per unit if provided
     if (updateInventoryDto.costPerUnit !== undefined && updateInventoryDto.costPerUnit < 0) {
-      throw new BadRequestException('Cost per unit must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.COST_NON_NEGATIVE);
     }
 
     // Build update data
@@ -293,9 +292,7 @@ export class InventoryService {
     });
 
     if (linkedTransactions > 0) {
-      throw new BadRequestException(
-        'Cannot delete inventory item with linked transactions. Unlink transactions first or set quantity to 0.',
-      );
+      throw new BadRequestException(ERROR_MESSAGES.INVENTORY.LINKED_TRANSACTIONS);
     }
 
     // Delete the item

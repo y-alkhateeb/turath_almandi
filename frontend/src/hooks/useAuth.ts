@@ -174,18 +174,8 @@ export const useAuth = (): UseAuthReturn => {
       toast.success('تم تسجيل الدخول بنجاح');
     },
 
-    onError: (error) => {
-      // Handle specific error codes
-      if (error.statusCode === 401) {
-        toast.error('اسم المستخدم أو كلمة المرور غير صحيحة');
-      } else if (error.statusCode === 400) {
-        toast.error('الرجاء إدخال اسم المستخدم وكلمة المرور');
-      } else if (error.statusCode === 429) {
-        toast.error('تم تجاوز عدد المحاولات المسموح بها. الرجاء المحاولة لاحقاً');
-      } else {
-        toast.error('حدث خطأ أثناء تسجيل الدخول. الرجاء المحاولة مرة أخرى');
-      }
-    },
+    // onError removed - global API interceptor handles error toasts
+  },
   });
 
   // ============================================
@@ -210,17 +200,14 @@ export const useAuth = (): UseAuthReturn => {
       toast.success('تم تسجيل الخروج بنجاح');
     },
 
-    onError: (error) => {
+    onError: () => {
       // Even if logout fails on server, clear local state
       clearUserInfoAndToken();
       queryClient.clear();
 
-      if (error.statusCode !== 401) {
-        // Only show error if it's not 401 (already logged out)
-        toast.error('حدث خطأ أثناء تسجيل الخروج، لكن تم مسح البيانات المحلية');
-      } else {
-        toast.success('تم تسجيل الخروج بنجاح');
-      }
+      // Note: Error toast shown by global API interceptor
+      // Still show success since we cleared local data
+      toast.success('تم تسجيل الخروج بنجاح');
     },
   });
 

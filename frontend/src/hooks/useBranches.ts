@@ -183,7 +183,7 @@ export const useCreateBranch = () => {
       return { previousBranches };
     },
 
-    onError: (error, _newBranch, context) => {
+    onError: (_error, _newBranch, context) => {
       // Rollback on error
       if (context?.previousBranches) {
         context.previousBranches.forEach(([queryKey, data]) => {
@@ -191,16 +191,7 @@ export const useCreateBranch = () => {
         });
       }
 
-      // Show error toast
-      if (error.statusCode === 409) {
-        toast.error('اسم الفرع موجود بالفعل');
-      } else if (error.statusCode === 400) {
-        toast.error('الرجاء التحقق من البيانات المدخلة');
-      } else if (error.statusCode === 403) {
-        toast.error('ليس لديك صلاحية لإنشاء فروع');
-      } else {
-        toast.error('حدث خطأ أثناء إضافة الفرع');
-      }
+      // Note: Error toast shown by global API interceptor
     },
 
     onSuccess: (newBranch) => {
@@ -292,16 +283,7 @@ export const useUpdateBranch = () => {
         });
       }
 
-      // Show error toast
-      if (error.statusCode === 404) {
-        toast.error('الفرع غير موجود');
-      } else if (error.statusCode === 400) {
-        toast.error('الرجاء التحقق من البيانات المدخلة');
-      } else if (error.statusCode === 403) {
-        toast.error('ليس لديك صلاحية لتعديل الفروع');
-      } else {
-        toast.error('حدث خطأ أثناء تحديث الفرع');
-      }
+      // Note: Error toast shown by global API interceptor
     },
 
     onSuccess: (updatedBranch) => {
@@ -375,16 +357,7 @@ export const useDeleteBranch = () => {
         });
       }
 
-      // Show error toast
-      if (error.statusCode === 404) {
-        toast.error('الفرع غير موجود');
-      } else if (error.statusCode === 409) {
-        toast.error('لا يمكن حذف الفرع لأنه مرتبط بسجلات أخرى');
-      } else if (error.statusCode === 403) {
-        toast.error('ليس لديك صلاحية لحذف الفروع');
-      } else {
-        toast.error('حدث خطأ أثناء حذف الفرع');
-      }
+      // Note: Error toast shown by global API interceptor
     },
 
     onSuccess: () => {

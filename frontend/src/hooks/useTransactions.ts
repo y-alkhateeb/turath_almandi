@@ -213,7 +213,7 @@ export const useCreateTransaction = () => {
       return { previousTransactions };
     },
 
-    onError: (error, _newTransaction, context) => {
+    onError: (_error, _newTransaction, context) => {
       // Rollback on error
       if (context?.previousTransactions) {
         context.previousTransactions.forEach(([queryKey, data]) => {
@@ -221,14 +221,7 @@ export const useCreateTransaction = () => {
         });
       }
 
-      // Show error toast
-      if (error.statusCode === 400) {
-        toast.error('الرجاء التحقق من البيانات المدخلة');
-      } else if (error.statusCode === 403) {
-        toast.error('ليس لديك صلاحية لإضافة عمليات');
-      } else {
-        toast.error('حدث خطأ أثناء إضافة العملية');
-      }
+      // Note: Error toast shown by global API interceptor
     },
 
     onSuccess: (_data, variables) => {
@@ -336,16 +329,7 @@ export const useUpdateTransaction = () => {
         });
       }
 
-      // Show error toast
-      if (error.statusCode === 404) {
-        toast.error('العملية غير موجودة');
-      } else if (error.statusCode === 400) {
-        toast.error('الرجاء التحقق من البيانات المدخلة');
-      } else if (error.statusCode === 403) {
-        toast.error('ليس لديك صلاحية لتعديل العمليات');
-      } else {
-        toast.error('حدث خطأ أثناء تحديث العملية');
-      }
+      // Note: Error toast shown by global API interceptor
     },
 
     onSuccess: (updatedTransaction) => {
@@ -430,16 +414,7 @@ export const useDeleteTransaction = () => {
         });
       }
 
-      // Show error toast
-      if (error.statusCode === 404) {
-        toast.error('العملية غير موجودة');
-      } else if (error.statusCode === 409) {
-        toast.error('لا يمكن حذف العملية لأنها مرتبطة بسجلات أخرى');
-      } else if (error.statusCode === 403) {
-        toast.error('ليس لديك صلاحية لحذف العمليات');
-      } else {
-        toast.error('حدث خطأ أثناء حذف العملية');
-      }
+      // Note: Error toast shown by global API interceptor
     },
 
     onSuccess: () => {

@@ -22,7 +22,7 @@ RUN npm ci
 
 # Copy Prisma schema and generate client
 COPY prisma ./prisma
-# Set environment variable to bypass checksum verification for offline/CDN issues
+# Bypass checksum verification for CDN issues (Prisma binaries CDN returning 500 errors)
 ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
 RUN npx prisma generate
 

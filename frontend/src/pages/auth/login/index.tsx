@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
 import { Button } from '@/ui/button';
 import { Input } from '@/ui/input';
 import { Checkbox } from '@/ui/checkbox';
@@ -21,8 +20,7 @@ import {
   FormMessage,
 } from '@/ui/form';
 import { useRouter } from '@/routes/hooks';
-import { useUserActions } from '@/store/userStore';
-import { login as loginApi } from '@/api/services/userService';
+import { useAuth } from '@/hooks/useAuth';
 import { Icon } from '@/components/icon';
 import GLOBAL_CONFIG from '@/global-config';
 
@@ -39,10 +37,9 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { setUserInfo, setUserToken } = useUserActions();
+  const { login, isLoggingIn } = useAuth();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -55,41 +52,21 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setError('');
-    setIsLoading(true);
 
     try {
-      const response = await loginApi({
+      await login({
         username: data.username,
         password: data.password,
-        rememberMe: data.rememberMe,
       });
-
-      // Validate response has required data
-      if (!response?.access_token || !response?.refresh_token || !response?.user) {
-        setError('خطأ في الاستجابة من الخادم. البيانات غير كاملة.');
-        toast.error('خطأ في الاستجابة من الخادم. يرجى المحاولة مرة أخرى.');
-        return;
-      }
-
-      // Store user info and tokens
-      setUserToken({
-        accessToken: response.access_token,
-        refreshToken: response.refresh_token,
-      });
-      setUserInfo(response.user);
-
-      toast.success('تم تسجيل الدخول بنجاح');
 
       // Small delay to ensure Zustand persist completes before navigation
       setTimeout(() => {
         router.replace(GLOBAL_CONFIG.defaultRoute);
       }, 100);
     } catch (err: any) {
-      const message = err.response?.data?.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
+      // Error toast already shown by API interceptor or hook
+      const message = err.message || 'حدث خطأ أثناء تسجيل الدخول';
       setError(message);
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -118,7 +95,7 @@ export default function LoginPage() {
                       <Input
                         {...field}
                         placeholder="أدخل اسم المستخدم"
-                        disabled={isLoading}
+                        disabled={isLoggingIn}
                         autoComplete="username"
                       />
                     </FormControl>
@@ -139,7 +116,7 @@ export default function LoginPage() {
                         {...field}
                         type="password"
                         placeholder="••••••••"
-                        disabled={isLoading}
+                        disabled={isLoggingIn}
                         autoComplete="current-password"
                         dir="ltr"
                       />
@@ -159,7 +136,7 @@ export default function LoginPage() {
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        disabled={isLoading}
+                        disabled={isLoggingIn}
                       />
                     </FormControl>
                     <FormLabel className="text-sm font-normal cursor-pointer">
@@ -181,9 +158,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full py-3.5 text-base font-semibold"
-                disabled={isLoading}
+                disabled={isLoggingIn}
               >
-                {isLoading ? (
+                {isLoggingIn ? (
                   <>
                     <Icon icon="svg-spinners:ring-resize" className="ml-2" />
                     جاري تسجيل الدخول...

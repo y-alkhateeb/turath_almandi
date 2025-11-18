@@ -94,6 +94,16 @@ export class AuthService {
       throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
 
+    // Check if account is locked
+    const now = new Date();
+    if (user.lockedUntil && user.lockedUntil > now) {
+      const remainingMinutes = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / (1000 * 60));
+      await this.loginThrottleGuard.recordFailedAttempt(ip);
+      throw new UnauthorizedException(
+        `تم قفل حسابك بسبب محاولات تسجيل دخول فاشلة متعددة. يرجى المحاولة مرة أخرى بعد ${remainingMinutes} دقيقة`,
+      );
+    }
+
     // Check if user is active
     if (!user.isActive) {
       // Record failed attempt for inactive user
@@ -105,12 +115,56 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      // Record failed attempt for wrong password
+      // Increment failed login attempts
+      const failedAttempts = user.failedLoginAttempts + 1;
+      const maxAttempts = 5;
+
+      // Lock account if max attempts reached
+      if (failedAttempts >= maxAttempts) {
+        const lockDuration = 30 * 60 * 1000; // 30 minutes in milliseconds
+        const lockedUntil = new Date(Date.now() + lockDuration);
+
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: {
+            failedLoginAttempts: failedAttempts,
+            lockedUntil: lockedUntil,
+          },
+        });
+
+        await this.loginThrottleGuard.recordFailedAttempt(ip);
+        throw new UnauthorizedException(
+          `تم قفل حسابك بسبب ${maxAttempts} محاولات تسجيل دخول فاشلة. يرجى المحاولة مرة أخرى بعد 30 دقيقة`,
+        );
+      }
+
+      // Update failed attempts
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: failedAttempts,
+        },
+      });
+
+      const remainingAttempts = maxAttempts - failedAttempts;
       await this.loginThrottleGuard.recordFailedAttempt(ip);
-      throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
+      throw new UnauthorizedException(
+        `اسم المستخدم أو كلمة المرور غير صحيحة. تبقى ${remainingAttempts} محاولة قبل قفل الحساب`,
+      );
     }
 
-    // Successful login - reset throttle attempts
+    // Successful login - reset account lockout
+    if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
+      });
+    }
+
+    // Reset IP-based throttle attempts
     await this.loginThrottleGuard.resetAttempts(ip);
 
     // Generate tokens

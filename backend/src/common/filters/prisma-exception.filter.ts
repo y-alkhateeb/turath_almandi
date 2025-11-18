@@ -35,6 +35,12 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         messageKey = this.handleP2002(exception);
         break;
 
+      case 'P2003':
+        // Foreign key constraint violation
+        status = HttpStatus.BAD_REQUEST;
+        messageKey = this.handleP2003(exception);
+        break;
+
       case 'P2025':
         // Record not found
         status = HttpStatus.NOT_FOUND;
@@ -80,8 +86,37 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     return ERROR_MESSAGES.HTTP.CONFLICT;
   }
 
+  private handleP2003(
+    exception: Prisma.PrismaClientKnownRequestError,
+  ): string {
+    const meta = exception.meta as { field_name?: string };
+    const fieldName = meta?.field_name;
+
+    // Check for specific foreign key constraint violations
+    if (fieldName?.includes('branch_id') || fieldName?.includes('branchId')) {
+      return ERROR_MESSAGES.DATABASE.INVALID_BRANCH_REFERENCE;
+    }
+
+    if (fieldName?.includes('user_id') || fieldName?.includes('userId') || fieldName?.includes('created_by') || fieldName?.includes('recorded_by')) {
+      return ERROR_MESSAGES.DATABASE.INVALID_USER_REFERENCE;
+    }
+
+    if (fieldName?.includes('inventory_item_id') || fieldName?.includes('inventoryItemId')) {
+      return ERROR_MESSAGES.DATABASE.INVALID_INVENTORY_REFERENCE;
+    }
+
+    if (fieldName?.includes('debt_id') || fieldName?.includes('debtId')) {
+      return ERROR_MESSAGES.DATABASE.INVALID_DEBT_REFERENCE;
+    }
+
+    // Generic foreign key constraint violation
+    return ERROR_MESSAGES.DATABASE.FOREIGN_KEY_CONSTRAINT;
+  }
+
   private getErrorKey(status: HttpStatus): string {
     switch (status) {
+      case HttpStatus.BAD_REQUEST:
+        return ERROR_MESSAGES.HTTP.BAD_REQUEST;
       case HttpStatus.CONFLICT:
         return ERROR_MESSAGES.HTTP.CONFLICT;
       case HttpStatus.NOT_FOUND:

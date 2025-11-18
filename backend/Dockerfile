@@ -1,53 +1,94 @@
-# Stage 1: Build
-FROM node:20-alpine AS builder
+# ============================================
+# Multi-Stage Build for NestJS Application
+# Node 22 Alpine, Production-Only Dependencies, Non-Root User
+# ============================================
 
+# ============================================
+# Stage 1: Builder - Install dependencies and build
+# ============================================
+FROM node:22-alpine AS builder
+
+# Install build dependencies for native modules (bcrypt, etc.)
+RUN apk add --no-cache python3 make g++
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+# Copy dependency manifests
+COPY package.json package-lock.json ./
 
-# Install dependencies
+# Install ALL dependencies (needed for build)
 RUN npm ci
 
-# Copy source code
-COPY . .
-
-# Generate Prisma Client
+# Copy Prisma schema and generate client
+COPY prisma ./prisma
 RUN npx prisma generate
+
+# Copy application source
+COPY . .
 
 # Build the application
 RUN npm run build
 
-# Stage 2: Production
-FROM node:20-alpine
+# Remove development dependencies for smaller final image
+RUN npm prune --production
 
+# ============================================
+# Stage 2: Production - Minimal runtime image
+# ============================================
+FROM node:22-alpine AS production
+
+# Install runtime dependencies
+# - dumb-init: Proper signal handling for graceful shutdown
+# - openssl: Required by Prisma
+RUN apk add --no-cache dumb-init openssl
+
+# Create non-root user and group
+# - UID/GID 1001 to avoid conflicts
+# - No login shell for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001 -G nodejs
+
+# Set working directory
 WORKDIR /app
 
-# Install required packages for Prisma
-RUN apk add --no-cache openssl
+# Copy production node_modules from builder
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+# Copy Prisma generated client
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 
-# Install production dependencies + devDependencies (needed for ts-node in seed)
-RUN npm ci
+# Copy built application
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 
-# Copy Prisma generated files from builder
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-
-# Copy built application from builder
-COPY --from=builder /app/dist ./dist
+# Copy Prisma schema (needed for migrations)
+COPY --chown=nestjs:nodejs prisma ./prisma
 
 # Copy startup script
-COPY scripts/start.sh ./scripts/start.sh
+COPY --chown=nestjs:nodejs scripts/start.sh ./scripts/start.sh
+
+# Copy package.json (metadata and version info)
+COPY --chown=nestjs:nodejs package.json ./
 
 # Make startup script executable
 RUN chmod +x ./scripts/start.sh
 
-# Expose the application port
+# Switch to non-root user
+USER nestjs
+
+# Expose application port
 EXPOSE 3000
 
-# Use startup script to run migrations and start
+# Environment variables (defaults, can be overridden)
+ENV NODE_ENV=production \
+    PORT=3000
+
+# Health check - verify application is responding
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Use dumb-init for proper signal handling (SIGTERM, SIGINT)
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start application via startup script
 CMD ["./scripts/start.sh"]

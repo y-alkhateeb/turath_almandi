@@ -214,4 +214,75 @@ export class TasksService {
     this.logger.log('Manual overdue debt check triggered');
     return this.checkOverdueDebts();
   }
+
+  /**
+   * CRON job to remind admins to backup the database
+   * Runs weekly on Sunday at 8 AM UTC
+   *
+   * Purpose:
+   * - Sends weekly notification to all admin users
+   * - Reminds them to backup the database
+   * - Critical for data protection and disaster recovery
+   *
+   * Schedule: Every Sunday at 8:00 AM UTC
+   * CRON Expression: 0 8 * * 0 (minute hour day month day-of-week)
+   */
+  @Cron(CronExpression.EVERY_WEEK, {
+    name: 'remindBackup',
+    timeZone: 'UTC',
+  })
+  async remindBackup() {
+    this.logger.log('Starting weekly backup reminder...');
+
+    try {
+      // Get all admin users
+      const adminUsers = await this.notificationsService.getAdminUsers();
+
+      if (adminUsers.length === 0) {
+        this.logger.warn('No admin users found to receive backup reminder');
+        return;
+      }
+
+      this.logger.log(`Creating backup reminders for ${adminUsers.length} admin user(s)...`);
+
+      // Create notification for each admin
+      let notificationCount = 0;
+      for (const admin of adminUsers) {
+        try {
+          await this.prisma.notification.create({
+            data: {
+              type: 'backup_reminder',
+              title: 'تذكير: نسخ احتياطي للبيانات',
+              message: 'حان الوقت لإجراء نسخة احتياطية من قاعدة البيانات. يرجى التأكد من نسخ جميع البيانات الهامة والاحتفاظ بها في مكان آمن.',
+              severity: 'WARNING',
+              createdBy: this.systemUserId,
+            },
+          });
+
+          notificationCount++;
+          this.logger.debug(`Backup reminder created for admin: ${admin.username}`);
+        } catch (error) {
+          this.logger.error(
+            `Failed to create backup reminder for admin ${admin.id}: ${error.message}`,
+            error.stack,
+          );
+          // Continue with other admins even if one fails
+        }
+      }
+
+      this.logger.log(
+        `Weekly backup reminder completed. Created ${notificationCount} notification(s) for ${adminUsers.length} admin user(s).`,
+      );
+    } catch (error) {
+      this.logger.error(`Error during backup reminder: ${error.message}`, error.stack);
+    }
+  }
+
+  /**
+   * Manual trigger for backup reminder (for testing)
+   */
+  async manualRemindBackup() {
+    this.logger.log('Manual backup reminder triggered');
+    return this.remindBackup();
+  }
 }

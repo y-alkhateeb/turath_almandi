@@ -63,6 +63,13 @@ export const ARABIC_ERRORS: Record<string, string> = {
   recordWithThisUsernameAlreadyExists: 'يوجد بالفعل مستخدم بنفس اسم المستخدم',
   recordWithThisEmailAlreadyExists: 'يوجد بالفعل مستخدم بنفس البريد الإلكتروني',
 
+  // Foreign Key Constraint Violations
+  foreignKeyConstraintViolation: 'خطأ في ارتباط البيانات - المرجع المحدد غير موجود',
+  invalidBranchReference: 'معرف الفرع المحدد غير موجود أو غير صالح',
+  invalidUserReference: 'معرف المستخدم المحدد غير موجود أو غير صالح',
+  invalidInventoryItemReference: 'معرف عنصر المخزون المحدد غير موجود أو غير صالح',
+  invalidDebtReference: 'معرف الدين المحدد غير موجود أو غير صالح',
+
   // Currency Errors
   onlyUSDCurrencyIsAllowed: 'العملة المسموح بها فقط هي الدولار الأمريكي',
   invalidCurrency: 'عملة غير صالحة',

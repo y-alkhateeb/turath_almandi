@@ -164,7 +164,9 @@ export class InventoryService {
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    let where: Prisma.InventoryItemWhereInput = {};
+    let where: Prisma.InventoryItemWhereInput = {
+      deletedAt: null, // Exclude soft-deleted inventory items
+    };
 
     // Apply role-based branch filtering
     where = applyBranchFilter(user, where, filters.branchId);
@@ -242,7 +244,7 @@ export class InventoryService {
       },
     });
 
-    if (!item) {
+    if (!item || item.deletedAt) {
       throw new NotFoundException(ERROR_MESSAGES.INVENTORY.NOT_FOUND(id));
     }
 
@@ -329,7 +331,8 @@ export class InventoryService {
   }
 
   /**
-   * Delete an inventory item
+   * Delete an inventory item (soft delete by setting deletedAt timestamp)
+   * Soft delete preserves data for audit trail and potential recovery
    */
   async remove(id: string, user: RequestUser): Promise<{ message: string; id: string }> {
     // First, find the existing item to ensure it exists and user has access
@@ -337,16 +340,19 @@ export class InventoryService {
 
     // Check if there are any transactions linked to this item
     const linkedTransactions = await this.prisma.transaction.count({
-      where: { inventoryItemId: id },
+      where: { inventoryItemId: id, deletedAt: null },
     });
 
     if (linkedTransactions > 0) {
       throw new BadRequestException(ERROR_MESSAGES.INVENTORY.LINKED_TRANSACTIONS);
     }
 
-    // Delete the item
-    await this.prisma.inventoryItem.delete({
+    // Soft delete: Set deletedAt timestamp
+    await this.prisma.inventoryItem.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
     });
 
     // Log the deletion in audit log
@@ -502,7 +508,9 @@ export class InventoryService {
     branchId?: string,
   ): Promise<number> {
     // Build where clause with role-based filtering
-    let where: Prisma.InventoryItemWhereInput = {};
+    let where: Prisma.InventoryItemWhereInput = {
+      deletedAt: null, // Exclude soft-deleted inventory items
+    };
 
     // Apply branch filtering based on user role
     if (user.role === UserRole.ACCOUNTANT) {

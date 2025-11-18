@@ -179,7 +179,9 @@ export class DebtsService {
     const skip = (page - 1) * limit;
 
     // Build where clause based on user role
-    let where: Prisma.DebtWhereInput = {};
+    let where: Prisma.DebtWhereInput = {
+      deletedAt: null, // Exclude soft-deleted debts
+    };
 
     // Apply role-based branch filtering
     where = applyBranchFilter(user, where);
@@ -371,7 +373,9 @@ export class DebtsService {
     branchId?: string,
   ): Promise<DebtsSummary> {
     // Build base where clause with role-based filtering
-    let where: Prisma.DebtWhereInput = {};
+    let where: Prisma.DebtWhereInput = {
+      deletedAt: null, // Exclude soft-deleted debts
+    };
 
     // Apply branch filtering based on user role
     if (user.role === UserRole.ACCOUNTANT) {

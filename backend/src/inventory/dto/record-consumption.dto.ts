@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsString, IsNumber, IsOptional, IsDateString, IsEnum, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, IsDateString, IsEnum, IsUUID, Min } from 'class-validator';
 import { InventoryUnit } from '@prisma/client';
 
 export class RecordConsumptionDto {
   @IsNotEmpty()
-  @IsString()
+  @IsUUID('4', { message: 'معرف العنصر يجب أن يكون UUID صالح' })
   inventoryItemId: string;
 
   @IsNotEmpty()

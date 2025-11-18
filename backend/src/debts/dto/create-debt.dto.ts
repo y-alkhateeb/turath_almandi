@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsDateString,
   IsEnum,
+  IsUUID,
   Validate,
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -66,7 +67,7 @@ export class CreateDebtDto {
   @IsOptional()
   notes?: string;
 
-  @IsString()
+  @IsUUID('4', { message: 'معرف الفرع يجب أن يكون UUID صالح' })
   @IsOptional()
   branchId?: string;
 }

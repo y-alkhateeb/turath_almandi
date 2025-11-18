@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { ExcelExportService } from './excel-export.service';
+import { PdfExportService } from './pdf-export.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
@@ -15,7 +16,10 @@ interface RequestUser {
 @Controller('reports')
 @UseGuards(JwtAuthGuard)
 export class ReportsController {
-  constructor(private readonly excelExportService: ExcelExportService) {}
+  constructor(
+    private readonly excelExportService: ExcelExportService,
+    private readonly pdfExportService: PdfExportService,
+  ) {}
 
   /**
    * Export transactions to Excel
@@ -96,6 +100,66 @@ export class ReportsController {
 
     // Set headers for file download
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+
+    // Send buffer
+    res.send(buffer);
+  }
+
+  /**
+   * Generate financial report as PDF
+   * GET /reports/financial/pdf?branchId=xxx&startDate=2024-01-01&endDate=2024-12-31
+   */
+  @Get('financial/pdf')
+  async generateFinancialReport(
+    @CurrentUser() user: RequestUser,
+    @Query('branchId') branchId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Res() res?: Response,
+  ): Promise<void> {
+    const buffer = await this.pdfExportService.generateFinancialReport(user, {
+      branchId,
+      startDate,
+      endDate,
+    });
+
+    // Generate filename with current date
+    const filename = `financial_report_${new Date().toISOString().split('T')[0]}.pdf`;
+
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length);
+
+    // Send buffer
+    res.send(buffer);
+  }
+
+  /**
+   * Generate debt report as PDF
+   * GET /reports/debts/pdf?branchId=xxx&startDate=2024-01-01&endDate=2024-12-31
+   */
+  @Get('debts/pdf')
+  async generateDebtReport(
+    @CurrentUser() user: RequestUser,
+    @Query('branchId') branchId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Res() res?: Response,
+  ): Promise<void> {
+    const buffer = await this.pdfExportService.generateDebtReport(user, {
+      branchId,
+      startDate,
+      endDate,
+    });
+
+    // Generate filename with current date
+    const filename = `debt_report_${new Date().toISOString().split('T')[0]}.pdf`;
+
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', buffer.length);
 

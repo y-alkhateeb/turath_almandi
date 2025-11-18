@@ -7,10 +7,15 @@ import {
 } from 'class-validator';
 import { UserRole } from '@prisma/client';
 
+interface UserWithRole {
+  role: UserRole;
+  branchId?: string | null;
+}
+
 @ValidatorConstraint({ name: 'validateBranchByRole', async: false })
 export class ValidateBranchByRoleConstraint implements ValidatorConstraintInterface {
-  validate(branchId: any, args: ValidationArguments): boolean {
-    const object = args.object as any;
+  validate(branchId: string | null | undefined, args: ValidationArguments): boolean {
+    const object = args.object as UserWithRole;
     const role = object.role;
 
     // If role is ACCOUNTANT, branchId is required
@@ -27,7 +32,7 @@ export class ValidateBranchByRoleConstraint implements ValidatorConstraintInterf
   }
 
   defaultMessage(args: ValidationArguments): string {
-    const object = args.object as any;
+    const object = args.object as UserWithRole;
     const role = object.role;
 
     if (role === UserRole.ACCOUNTANT) {

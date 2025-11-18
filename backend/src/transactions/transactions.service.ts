@@ -175,7 +175,7 @@ export class TransactionsService {
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    let where: any = {};
+    let where: Prisma.TransactionWhereInput = {};
 
     // Apply role-based branch filtering
     where = applyBranchFilter(user, where, filters.branchId);
@@ -302,7 +302,7 @@ export class TransactionsService {
     }
 
     // Build update data
-    const updateData: any = {};
+    const updateData: Prisma.TransactionUpdateInput = {};
     if (updateTransactionDto.type !== undefined) updateData.type = updateTransactionDto.type;
     if (updateTransactionDto.amount !== undefined) updateData.amount = updateTransactionDto.amount;
     if (updateTransactionDto.paymentMethod !== undefined)
@@ -406,7 +406,7 @@ export class TransactionsService {
     }
 
     // Build where clause for date and branch filtering
-    const where: any = {
+    const where: Prisma.TransactionWhereInput = {
       date: {
         gte: startOfDay,
         lte: endOfDay,

@@ -20,11 +20,11 @@ interface RequestUser {
  * @returns Updated where clause with branch filtering applied
  * @throws ForbiddenException if accountant has no assigned branch
  */
-export function applyBranchFilter(
+export function applyBranchFilter<T extends Record<string, unknown>>(
   user: RequestUser,
-  where: any = {},
+  where: T = {} as T,
   filterBranchId?: string,
-): any {
+): T {
   // Role-based access control
   if (user.role === UserRole.ACCOUNTANT) {
     // Accountants can only see records from their branch

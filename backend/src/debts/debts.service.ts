@@ -130,7 +130,7 @@ export class DebtsService {
    */
   async findAll(user: RequestUser): Promise<DebtWithAllRelations[]> {
     // Build where clause based on user role
-    let where: any = {};
+    let where: Prisma.DebtWhereInput = {};
 
     // Apply role-based branch filtering
     where = applyBranchFilter(user, where);

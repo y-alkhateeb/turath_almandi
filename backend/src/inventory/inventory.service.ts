@@ -59,10 +59,15 @@ type InventoryItemWithTransactions = Prisma.InventoryItemGetPayload<{
   };
 }>;
 
+// Type for transaction in inventory context
+type TransactionForInventory = Prisma.TransactionGetPayload<{
+  select: typeof TRANSACTION_SELECT_FOR_INVENTORY;
+}>;
+
 // Type for inventory item with metadata
 interface InventoryItemWithMetadata extends InventoryItemWithTransactions {
   isAutoAdded: boolean;
-  relatedPurchases: any[];
+  relatedPurchases: TransactionForInventory[];
 }
 
 @Injectable()
@@ -154,7 +159,7 @@ export class InventoryService {
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    let where: any = {};
+    let where: Prisma.InventoryItemWhereInput = {};
 
     // Apply role-based branch filtering
     where = applyBranchFilter(user, where, filters.branchId);
@@ -272,7 +277,7 @@ export class InventoryService {
     }
 
     // Build update data
-    const updateData: any = {
+    const updateData: Prisma.InventoryItemUpdateInput = {
       lastUpdated: getCurrentTimestamp(),
     };
 

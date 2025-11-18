@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TransactionType, UserRole, Transaction } from '@prisma/client';
+import { TransactionType, UserRole, Transaction, Prisma } from '@prisma/client';
 import {
   formatDateForDB,
   getCurrentTimestamp,
@@ -83,7 +83,7 @@ export class DashboardService {
     }
 
     // Build base where clause
-    const baseWhere: any = {};
+    const baseWhere: Prisma.TransactionWhereInput = {};
     if (filterBranchId) {
       baseWhere.branchId = filterBranchId;
     }
@@ -193,7 +193,7 @@ export class DashboardService {
     const currentDate = getCurrentTimestamp();
 
     // Build base where clause
-    const baseWhere: any = {};
+    const baseWhere: Prisma.TransactionWhereInput = {};
     if (branchId) {
       baseWhere.branchId = branchId;
     }

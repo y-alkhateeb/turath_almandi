@@ -8,6 +8,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { TokenBlacklistService } from './services/token-blacklist.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private tokenBlacklistService: TokenBlacklistService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -184,8 +186,14 @@ export class AuthService {
     return token;
   }
 
-  async refreshAccessToken(refreshTokenDto: RefreshTokenDto): Promise<{ access_token: string }> {
+  async refreshAccessToken(refreshTokenDto: RefreshTokenDto): Promise<{ access_token: string; refresh_token: string }> {
     const { refresh_token } = refreshTokenDto;
+
+    // Check if the refresh token is blacklisted
+    const isBlacklisted = await this.tokenBlacklistService.isBlacklisted(refresh_token);
+    if (isBlacklisted) {
+      throw new UnauthorizedException('رمز التحديث تم إبطاله');
+    }
 
     // Find token in database
     const tokenRecord = await this.prisma.refreshToken.findUnique({
@@ -199,9 +207,11 @@ export class AuthService {
 
     // Check if expired
     if (tokenRecord.expiresAt < new Date()) {
+      // Delete expired token and add to blacklist
       await this.prisma.refreshToken.delete({
         where: { token: refresh_token },
       });
+      await this.tokenBlacklistService.addToBlacklist(refresh_token, 60 * 60); // 1 hour TTL for expired tokens
       throw new UnauthorizedException('رمز التحديث منتهي الصلاحية');
     }
 
@@ -209,6 +219,20 @@ export class AuthService {
     if (!tokenRecord.user.isActive) {
       throw new UnauthorizedException('الحساب معطل');
     }
+
+    // Add old refresh token to blacklist
+    // Calculate TTL based on remaining time until expiration
+    const now = new Date();
+    const expiresAt = new Date(tokenRecord.expiresAt);
+    const ttlMs = expiresAt.getTime() - now.getTime();
+    const ttlSeconds = Math.max(Math.floor(ttlMs / 1000), 60); // Minimum 60 seconds
+
+    await this.tokenBlacklistService.addToBlacklist(refresh_token, ttlSeconds);
+
+    // Delete old refresh token from database
+    await this.prisma.refreshToken.delete({
+      where: { token: refresh_token },
+    });
 
     // Generate new access token
     const access_token = await this.generateToken(
@@ -218,7 +242,13 @@ export class AuthService {
       tokenRecord.user.branchId,
     );
 
-    return { access_token };
+    // Generate new refresh token
+    const new_refresh_token = await this.generateRefreshToken(tokenRecord.user.id);
+
+    return {
+      access_token,
+      refresh_token: new_refresh_token,
+    };
   }
 
   async revokeRefreshToken(token: string): Promise<void> {
@@ -227,8 +257,35 @@ export class AuthService {
     });
   }
 
-  async logout(userId: string): Promise<{ message: string }> {
-    // Revoke all refresh tokens for this user
+  async logout(userId: string, accessToken: string): Promise<{ message: string }> {
+    // Get all refresh tokens for this user before deleting
+    const refreshTokens = await this.prisma.refreshToken.findMany({
+      where: { userId },
+      select: { token: true },
+    });
+
+    // Add access token to blacklist
+    // Calculate remaining TTL from token expiration
+    try {
+      const decoded = this.jwtService.decode(accessToken) as { exp?: number };
+      const now = Math.floor(Date.now() / 1000);
+      const ttl = decoded?.exp ? decoded.exp - now : 7 * 24 * 60 * 60; // Default to 7 days if no exp
+
+      if (ttl > 0) {
+        await this.tokenBlacklistService.addToBlacklist(accessToken, ttl);
+      }
+    } catch (error) {
+      // If token decode fails, add with default TTL
+      await this.tokenBlacklistService.addToBlacklist(accessToken);
+    }
+
+    // Add all refresh tokens to blacklist
+    const refreshTokenStrings = refreshTokens.map(rt => rt.token);
+    if (refreshTokenStrings.length > 0) {
+      await this.tokenBlacklistService.blacklistUserTokens(userId, refreshTokenStrings);
+    }
+
+    // Delete all refresh tokens from database
     await this.prisma.refreshToken.deleteMany({
       where: { userId },
     });

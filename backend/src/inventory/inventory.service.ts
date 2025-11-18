@@ -155,8 +155,8 @@ export class InventoryService {
     user: RequestUser,
     pagination: PaginationParams = {},
     filters: InventoryFilters = {},
-  ): Promise<{ data: InventoryItemWithMetadata[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
-    const { page = 1, limit = 20 } = pagination;
+  ): Promise<{ data: InventoryItemWithMetadata[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
+    const { page = 1, limit = 50 } = pagination;
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
@@ -207,7 +207,7 @@ export class InventoryService {
 
     return {
       data: itemsWithMetadata,
-      pagination: {
+      meta: {
         page,
         limit,
         total,

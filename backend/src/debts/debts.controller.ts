@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Param, Query } from '@nestjs/common';
 import { DebtsService } from './debts.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
@@ -24,8 +24,12 @@ export class DebtsController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: RequestUser) {
-    return this.debtsService.findAll(user);
+  findAll(
+    @CurrentUser() user: RequestUser,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.debtsService.findAll(user, { page, limit });
   }
 
   @Post(':id/payments')

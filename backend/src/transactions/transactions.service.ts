@@ -189,8 +189,8 @@ export class TransactionsService {
     user: RequestUser,
     pagination: PaginationParams = {},
     filters: TransactionFilters = {},
-  ): Promise<{ data: TransactionWithAllRelations[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
-    const { page = 1, limit = 20 } = pagination;
+  ): Promise<{ data: TransactionWithAllRelations[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
+    const { page = 1, limit = 50 } = pagination;
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
@@ -256,7 +256,7 @@ export class TransactionsService {
 
     return {
       data: transactions,
-      pagination: {
+      meta: {
         page,
         limit,
         total,

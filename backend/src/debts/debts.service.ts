@@ -21,6 +21,11 @@ interface RequestUser {
   branchId: string | null;
 }
 
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
 // Type for debt with branch and creator relations
 type DebtWithRelations = Prisma.DebtGetPayload<{
   include: {
@@ -124,21 +129,32 @@ export class DebtsService {
   }
 
   /**
-   * Find all debts with filtering by branch
+   * Find all debts with filtering by branch and pagination
    * Accountants can only see debts from their branch
    * Admins can see all debts
    */
-  async findAll(user: RequestUser): Promise<DebtWithAllRelations[]> {
+  async findAll(
+    user: RequestUser,
+    pagination: PaginationParams = {},
+  ): Promise<{ data: DebtWithAllRelations[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
+    const { page = 1, limit = 50 } = pagination;
+    const skip = (page - 1) * limit;
+
     // Build where clause based on user role
     let where: Prisma.DebtWhereInput = {};
 
     // Apply role-based branch filtering
     where = applyBranchFilter(user, where);
 
+    // Get total count for pagination
+    const total = await this.prisma.debt.count({ where });
+
     // Get debts
     const debts = await this.prisma.debt.findMany({
       where,
       orderBy: { dueDate: 'asc' },
+      skip,
+      take: limit,
       include: {
         branch: {
           select: BRANCH_SELECT,
@@ -152,7 +168,15 @@ export class DebtsService {
       },
     });
 
-    return debts;
+    return {
+      data: debts,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**

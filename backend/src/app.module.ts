@@ -18,6 +18,7 @@ import { WebSocketModule } from './websocket/websocket.module';
 import { ReportsModule } from './reports/reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
 
 @Module({
   imports: [
@@ -58,7 +59,10 @@ export class AppModule implements NestModule {
     // Apply RequestIdMiddleware first to generate request ID
     consumer.apply(RequestIdMiddleware).forRoutes('*');
 
-    // Apply LoggerMiddleware after RequestIdMiddleware
+    // Apply ResponseTimeMiddleware to track request duration
+    consumer.apply(ResponseTimeMiddleware).forRoutes('*');
+
+    // Apply LoggerMiddleware after RequestIdMiddleware and ResponseTimeMiddleware
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

@@ -11,9 +11,10 @@ interface RequestUser {
 
 /**
  * Interface for Prisma where clauses that support branch filtering
+ * Supports both direct string assignment and Prisma filter objects (UuidFilter)
  */
 interface BranchFilterable {
-  branchId?: string;
+  branchId?: string | { [key: string]: unknown };
 }
 
 /**

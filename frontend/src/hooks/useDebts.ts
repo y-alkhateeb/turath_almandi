@@ -238,7 +238,7 @@ export const useCreateDebt = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
 
       // Show success toast
-      toast.success(`*E %6'A) /JF "${variables.creditorName}" (F,'-`);
+      toast.success(`تم إضافة دين "${variables.creditorName}" بنجاح`);
     },
   });
 };
@@ -330,7 +330,7 @@ export const useUpdateDebt = () => {
       });
 
       // Show success toast
-      toast.success('*E *-/J+ 'D/JF (F,'-');
+      toast.success('تم تحديث الدين بنجاح');
     },
   });
 };
@@ -409,7 +409,7 @@ export const useDeleteDebt = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.debts.all });
 
       // Show success toast
-      toast.success('*E -0A 'D/JF (F,'-');
+      toast.success('تم حذف الدين بنجاح');
     },
   });
 };
@@ -557,9 +557,9 @@ export const usePayDebt = () => {
       }).format(variables.data.amountPaid);
 
       if (updatedDebt.status === 'PAID') {
-        toast.success(` *E /A9 'D/JF ('DC'ED!`);
+        toast.success(`✅ تم دفع الدين بالكامل!`);
       } else {
-        toast.success(`*E *3,JD /A9) ${formattedAmount}`);
+        toast.success(`تم تسجيل دفعة ${formattedAmount}`);
       }
     },
   });

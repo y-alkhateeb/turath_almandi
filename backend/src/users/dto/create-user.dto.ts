@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsOptional,
   IsUUID,
+  Matches,
 } from 'class-validator';
 import { UserRole } from '@prisma/client';
 
@@ -16,10 +17,13 @@ export class CreateUserDto {
   @MaxLength(50)
   username: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(6)
-  @MaxLength(100)
+  @IsString({ message: 'كلمة المرور يجب أن تكون نصاً' })
+  @IsNotEmpty({ message: 'كلمة المرور مطلوبة' })
+  @MinLength(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
+  @MaxLength(100, { message: 'كلمة المرور يجب ألا تتجاوز 100 حرف' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص (@$!%*?&)',
+  })
   password: string;
 
   @IsEnum(UserRole)

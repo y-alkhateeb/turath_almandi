@@ -1,4 +1,4 @@
-import { IsString, MinLength, MaxLength, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { IsString, MinLength, MaxLength, IsEnum, IsOptional, IsUUID, Matches } from 'class-validator';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -11,8 +11,12 @@ export class RegisterDto {
   @MaxLength(100, { message: 'اسم المستخدم يجب ألا يتجاوز 100 حرف' })
   username: string;
 
-  @IsString()
-  @MinLength(6, { message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' })
+  @IsString({ message: 'كلمة المرور يجب أن تكون نصاً' })
+  @MinLength(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
+  @MaxLength(100, { message: 'كلمة المرور يجب ألا تتجاوز 100 حرف' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص (@$!%*?&)',
+  })
   password: string;
 
   @IsOptional()

@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
-import { UserRole } from '@prisma/client';
+import { UserRole, Prisma } from '@prisma/client';
 
 interface RequestUser {
   id: string;
@@ -49,7 +49,7 @@ export class BranchesService {
    */
   async findAll(user?: RequestUser, branchId?: string, includeInactive: boolean = false) {
     // Build where clause
-    const where: any = {};
+    const where: Prisma.BranchWhereInput = {};
 
     // Filter by specific branch if provided
     if (branchId) {

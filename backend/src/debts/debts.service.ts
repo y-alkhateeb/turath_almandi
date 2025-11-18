@@ -29,6 +29,20 @@ interface PaginationParams {
   limit?: number;
 }
 
+interface DateRangeFilter {
+  startDate?: string;
+  endDate?: string;
+}
+
+interface DebtsSummary {
+  totalDebts: number;
+  activeDebts: number;
+  paidDebts: number;
+  partialDebts: number;
+  totalOwed: number;
+  overdueDebts: number;
+}
+
 // Type for debt with branch and creator relations
 type DebtWithRelations = Prisma.DebtGetPayload<{
   include: {
@@ -345,5 +359,103 @@ export class DebtsService {
       });
 
     return result.debt;
+  }
+
+  /**
+   * Get comprehensive debts summary with statistics
+   * Useful for dashboard and reporting
+   */
+  async getDebtsSummary(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+  ): Promise<DebtsSummary> {
+    // Build base where clause with role-based filtering
+    let where: Prisma.DebtWhereInput = {};
+
+    // Apply branch filtering based on user role
+    if (user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && branchId) {
+      where.branchId = branchId;
+    }
+
+    // Apply date range filter if provided
+    if (dateRange) {
+      where.date = {};
+      if (dateRange.startDate) {
+        where.date.gte = formatDateForDB(dateRange.startDate);
+      }
+      if (dateRange.endDate) {
+        where.date.lte = formatDateForDB(dateRange.endDate);
+      }
+    }
+
+    // Get today's date for overdue calculation
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Execute all queries in parallel for best performance
+    const [
+      totalDebts,
+      activeDebts,
+      paidDebts,
+      partialDebts,
+      totalOwedResult,
+      overdueDebts,
+    ] = await Promise.all([
+      // Total count of all debts
+      this.prisma.debt.count({ where }),
+
+      // Count of active debts
+      this.prisma.debt.count({
+        where: { ...where, status: DebtStatus.ACTIVE },
+      }),
+
+      // Count of paid debts
+      this.prisma.debt.count({
+        where: { ...where, status: DebtStatus.PAID },
+      }),
+
+      // Count of partial debts
+      this.prisma.debt.count({
+        where: { ...where, status: DebtStatus.PARTIAL },
+      }),
+
+      // Sum of all remaining amounts
+      this.prisma.debt.aggregate({
+        where,
+        _sum: {
+          remainingAmount: true,
+        },
+      }),
+
+      // Count of overdue debts (past due date and not fully paid)
+      this.prisma.debt.count({
+        where: {
+          ...where,
+          dueDate: {
+            lt: today,
+          },
+          status: {
+            not: DebtStatus.PAID,
+          },
+        },
+      }),
+    ]);
+
+    const totalOwed = Number(totalOwedResult._sum.remainingAmount || 0);
+
+    return {
+      totalDebts,
+      activeDebts,
+      paidDebts,
+      partialDebts,
+      totalOwed,
+      overdueDebts,
+    };
   }
 }

@@ -395,7 +395,7 @@ export class NotificationsService {
     // Determine notification severity
     let severity: NotificationSeverity = NotificationSeverity.INFO;
     if (isFullyPaid) {
-      severity = NotificationSeverity.SUCCESS;
+      severity = NotificationSeverity.INFO;
     } else if (amountPaid >= threshold * 2) {
       severity = NotificationSeverity.WARNING;
     }

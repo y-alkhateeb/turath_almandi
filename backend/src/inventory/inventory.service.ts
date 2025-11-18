@@ -173,7 +173,7 @@ export class InventoryService {
 
     // Apply filters
     if (filters.unit) {
-      where.unit = filters.unit;
+      where.unit = filters.unit as InventoryUnit;
     }
 
     // Search filter (searches in name)
@@ -356,11 +356,12 @@ export class InventoryService {
     });
 
     // Log the deletion in audit log
+    // Serialize the item to JSON-compatible format (handles Decimal and Date types)
     await this.auditLogService.logDelete(
       user.id,
       AuditEntityType.INVENTORY_ITEM,
       id,
-      item,
+      JSON.parse(JSON.stringify(item)) as Prisma.InputJsonValue,
     );
 
     return { message: 'Inventory item deleted successfully', id };

@@ -121,7 +121,7 @@ export class ExcelExportService {
     // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer();
     this.logger.log(`Exported ${transactions.length} transactions to Excel`);
-    return buffer as Buffer;
+    return buffer as unknown as Buffer;
   }
 
   /**
@@ -229,7 +229,7 @@ export class ExcelExportService {
     // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer();
     this.logger.log(`Exported ${debts.length} debts to Excel`);
-    return buffer as Buffer;
+    return buffer as unknown as Buffer;
   }
 
   /**

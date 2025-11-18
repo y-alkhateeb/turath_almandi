@@ -6,6 +6,7 @@ import {
   IsDateString,
   ValidateIf,
 } from 'class-validator';
+import { Trim, Escape } from 'class-sanitizer';
 import { TransactionType, PaymentMethod, Currency } from '@prisma/client';
 import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 import { IsAllowedCurrency } from '../../common/decorators/is-allowed-currency.decorator';
@@ -30,6 +31,7 @@ export class CreateTransactionDto {
   @ValidateIf((o) => o.type === TransactionType.INCOME)
   paymentMethod?: PaymentMethod;
 
+  @Trim()
   @IsString()
   @IsOptional()
   @IsValidCategory()
@@ -40,10 +42,14 @@ export class CreateTransactionDto {
   @IsNotFutureDate()
   date: string;
 
+  @Trim()
+  @Escape()
   @IsString()
   @IsOptional()
   employeeVendorName?: string;
 
+  @Trim()
+  @Escape()
   @IsString()
   @IsOptional()
   notes?: string;

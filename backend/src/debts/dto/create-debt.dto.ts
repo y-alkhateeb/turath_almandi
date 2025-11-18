@@ -9,6 +9,7 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
+import { Trim, Escape } from 'class-sanitizer';
 import { Currency } from '@prisma/client';
 import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 import { IsAllowedCurrency } from '../../common/decorators/is-allowed-currency.decorator';
@@ -36,6 +37,8 @@ export class IsDateAfterOrEqual implements ValidatorConstraintInterface {
 }
 
 export class CreateDebtDto {
+  @Trim()
+  @Escape()
   @IsString()
   @IsNotEmpty({ message: 'Creditor name is required' })
   creditorName: string;
@@ -57,6 +60,8 @@ export class CreateDebtDto {
   @Validate(IsDateAfterOrEqual)
   dueDate: string;
 
+  @Trim()
+  @Escape()
   @IsString()
   @IsOptional()
   notes?: string;

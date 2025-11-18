@@ -7,10 +7,13 @@ import {
   MinLength,
   IsOptional,
 } from 'class-validator';
+import { Trim, Escape } from 'class-sanitizer';
 import { Transform } from 'class-transformer';
 import { InventoryUnit } from '@prisma/client';
 
 export class CreateInventoryDto {
+  @Trim()
+  @Escape()
   @IsString()
   @IsNotEmpty()
   @MinLength(2, { message: 'Item name must be at least 2 characters' })
@@ -30,6 +33,8 @@ export class CreateInventoryDto {
   @Transform(({ value }) => parseFloat(value))
   costPerUnit: number;
 
+  @Trim()
+  @Escape()
   @IsString()
   @IsOptional()
   notes?: string;

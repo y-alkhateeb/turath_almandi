@@ -9,6 +9,7 @@ import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { UserRole, Prisma, InventoryUnit } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {
   BRANCH_SELECT,
@@ -73,7 +74,10 @@ interface InventoryItemWithMetadata extends InventoryItemWithTransactions {
 
 @Injectable()
 export class InventoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   /**
    * Create a new inventory item (manual add)
@@ -307,6 +311,15 @@ export class InventoryService {
       },
     });
 
+    // Log the update in audit log
+    await this.auditLogService.logUpdate(
+      user.id,
+      AuditEntityType.INVENTORY_ITEM,
+      id,
+      existingItem,
+      updatedItem,
+    );
+
     // Add metadata
     return {
       ...updatedItem,
@@ -335,6 +348,9 @@ export class InventoryService {
     await this.prisma.inventoryItem.delete({
       where: { id },
     });
+
+    // Log the deletion in audit log
+    await this.auditLogService.logDelete(user.id, AuditEntityType.INVENTORY_ITEM, id, item);
 
     return { message: 'Inventory item deleted successfully', id };
   }

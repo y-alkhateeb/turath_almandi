@@ -2,13 +2,17 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, currentUserId?: string) {
     // Check if username already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { username: createUserDto.username },
@@ -60,6 +64,16 @@ export class UsersService {
         },
       },
     });
+
+    // Log the creation in audit log if currentUserId is provided
+    if (currentUserId) {
+      await this.auditLogService.logCreate(
+        currentUserId,
+        AuditEntityType.USER,
+        user.id,
+        user,
+      );
+    }
 
     return user;
   }
@@ -114,10 +128,10 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
-    await this.findOne(id); // Check existence
+  async update(id: string, updateUserDto: UpdateUserDto, currentUserId?: string) {
+    const existingUser = await this.findOne(id); // Check existence
 
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
       select: {
@@ -137,17 +151,30 @@ export class UsersService {
         },
       },
     });
+
+    // Log the update in audit log if currentUserId is provided
+    if (currentUserId) {
+      await this.auditLogService.logUpdate(
+        currentUserId,
+        AuditEntityType.USER,
+        id,
+        existingUser,
+        updatedUser,
+      );
+    }
+
+    return updatedUser;
   }
 
   async assignBranch(userId: string, branchId: string | null) {
     return this.update(userId, { branchId });
   }
 
-  async remove(id: string) {
-    await this.findOne(id); // Check existence
+  async remove(id: string, currentUserId?: string) {
+    const existingUser = await this.findOne(id); // Check existence
 
     // Soft delete by setting isActive to false
-    return this.prisma.user.update({
+    const deletedUser = await this.prisma.user.update({
       where: { id },
       data: { isActive: false },
       select: {
@@ -167,5 +194,17 @@ export class UsersService {
         },
       },
     });
+
+    // Log the deletion in audit log if currentUserId is provided
+    if (currentUserId) {
+      await this.auditLogService.logDelete(
+        currentUserId,
+        AuditEntityType.USER,
+        id,
+        existingUser,
+      );
+    }
+
+    return deletedUser;
   }
 }

@@ -1,6 +1,14 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionType, UserRole } from '@prisma/client';
+import {
+  formatDateForDB,
+  getCurrentTimestamp,
+  getStartOfDay,
+  getEndOfDay,
+  getStartOfMonth,
+  getEndOfMonth,
+} from '../common/utils/date.utils';
 
 interface RequestUser {
   id: string;
@@ -40,14 +48,11 @@ export class DashboardService {
    */
   async getDashboardStats(date?: string, branchId?: string, user?: RequestUser) {
     // Determine the target date (default to today)
-    const targetDate = date ? new Date(date) : new Date();
+    const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
 
     // Set to start and end of day for today's summary
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = getStartOfDay(targetDate);
+    const endOfDay = getEndOfDay(targetDate);
 
     // Determine which branch to filter by
     let filterBranchId: string | undefined = undefined;
@@ -175,7 +180,7 @@ export class DashboardService {
     ];
 
     const months: MonthlyData[] = [];
-    const currentDate = new Date();
+    const currentDate = getCurrentTimestamp();
 
     // Build base where clause
     const baseWhere: any = {};
@@ -186,8 +191,8 @@ export class DashboardService {
     // Get last 6 months
     for (let i = 5; i >= 0; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-      const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+      const startOfMonth = getStartOfMonth(date);
+      const endOfMonth = getEndOfMonth(date);
 
       // Get transactions for this month
       const [income, expenses] = await Promise.all([

@@ -11,6 +11,7 @@ import { UserRole, DebtStatus } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
+import { formatDateForDB } from '../common/utils/date.utils';
 
 interface RequestUser {
   id: string;
@@ -58,8 +59,8 @@ export class DebtsService {
     }
 
     // Validate due_date >= date
-    const date = new Date(createDebtDto.date);
-    const dueDate = new Date(createDebtDto.dueDate);
+    const date = formatDateForDB(createDebtDto.date);
+    const dueDate = formatDateForDB(createDebtDto.dueDate);
 
     if (dueDate < date) {
       throw new BadRequestException('Due date must be greater than or equal to date');
@@ -202,7 +203,7 @@ export class DebtsService {
         data: {
           debtId: debtId,
           amountPaid: payDebtDto.amountPaid,
-          paymentDate: new Date(payDebtDto.paymentDate),
+          paymentDate: formatDateForDB(payDebtDto.paymentDate),
           notes: payDebtDto.notes || null,
           recordedBy: user.id,
         },

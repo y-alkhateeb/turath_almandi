@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationSeverity, UserRole } from '@prisma/client';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
+import { getCurrentTimestamp } from '../common/utils/date.utils';
 
 export interface CreateNotificationDto {
   type: string;
@@ -155,7 +156,7 @@ export class NotificationsService {
       where: { id: notificationId },
       data: {
         isRead: true,
-        readAt: new Date(),
+        readAt: getCurrentTimestamp(),
       },
     });
   }

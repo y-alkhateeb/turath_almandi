@@ -14,6 +14,7 @@ import {
   TRANSACTION_SELECT_FOR_INVENTORY,
   TRANSACTION_SELECT_MINIMAL,
 } from '../common/constants/prisma-includes';
+import { getCurrentTimestamp } from '../common/utils/date.utils';
 
 interface RequestUser {
   id: string;
@@ -93,7 +94,7 @@ export class InventoryService {
         quantity: createInventoryDto.quantity,
         unit: createInventoryDto.unit,
         costPerUnit: createInventoryDto.costPerUnit,
-        lastUpdated: new Date(),
+        lastUpdated: getCurrentTimestamp(),
       },
       include: {
         branch: {
@@ -243,7 +244,7 @@ export class InventoryService {
 
     // Build update data
     const updateData: any = {
-      lastUpdated: new Date(),
+      lastUpdated: getCurrentTimestamp(),
     };
 
     if (updateInventoryDto.name !== undefined) updateData.name = updateInventoryDto.name;

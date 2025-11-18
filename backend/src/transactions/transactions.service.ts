@@ -18,6 +18,13 @@ import {
   INVENTORY_ITEM_SELECT,
   INVENTORY_ITEM_EXTENDED_SELECT,
 } from '../common/constants/prisma-includes';
+import {
+  formatDateForDB,
+  getCurrentTimestamp,
+  getStartOfDay,
+  getEndOfDay,
+  formatToISODate,
+} from '../common/utils/date.utils';
 
 interface RequestUser {
   id: string;
@@ -75,7 +82,7 @@ export class TransactionsService {
     const transactionData = {
       type: createTransactionDto.type,
       amount: createTransactionDto.amount,
-      date: new Date(createTransactionDto.date),
+      date: formatDateForDB(createTransactionDto.date),
       paymentMethod: createTransactionDto.paymentMethod || null,
       category: createTransactionDto.category || 'General',
       employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
@@ -140,10 +147,10 @@ export class TransactionsService {
     if (filters.startDate || filters.endDate) {
       where.date = {};
       if (filters.startDate) {
-        where.date.gte = new Date(filters.startDate);
+        where.date.gte = formatDateForDB(filters.startDate);
       }
       if (filters.endDate) {
-        where.date.lte = new Date(filters.endDate);
+        where.date.lte = formatDateForDB(filters.endDate);
       }
     }
 
@@ -255,7 +262,7 @@ export class TransactionsService {
     if (updateTransactionDto.category !== undefined)
       updateData.category = updateTransactionDto.category;
     if (updateTransactionDto.date !== undefined)
-      updateData.date = new Date(updateTransactionDto.date);
+      updateData.date = formatDateForDB(updateTransactionDto.date);
     if (updateTransactionDto.employeeVendorName !== undefined)
       updateData.employeeVendorName = updateTransactionDto.employeeVendorName;
     if (updateTransactionDto.notes !== undefined) updateData.notes = updateTransactionDto.notes;
@@ -317,14 +324,11 @@ export class TransactionsService {
    */
   async getSummary(date?: string, branchId?: string, user?: RequestUser) {
     // Determine the target date (default to today)
-    const targetDate = date ? new Date(date) : new Date();
+    const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
 
     // Set to start and end of day for the query
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = getStartOfDay(targetDate);
+    const endOfDay = getEndOfDay(targetDate);
 
     // Determine which branch to filter by
     let filterBranchId: string | undefined = undefined;
@@ -390,7 +394,7 @@ export class TransactionsService {
     const net = total_income - total_expense;
 
     return {
-      date: targetDate.toISOString().split('T')[0],
+      date: formatToISODate(targetDate),
       branchId: filterBranchId || null,
       income_cash,
       income_master,
@@ -461,7 +465,7 @@ export class TransactionsService {
             data: {
               quantity: totalQuantity,
               costPerUnit: newCostPerUnit,
-              lastUpdated: new Date(),
+              lastUpdated: getCurrentTimestamp(),
             },
           });
 
@@ -475,7 +479,7 @@ export class TransactionsService {
               quantity: createPurchaseDto.quantity!,
               unit: createPurchaseDto.unit!,
               costPerUnit: costPerUnit,
-              lastUpdated: new Date(),
+              lastUpdated: getCurrentTimestamp(),
             },
           });
 
@@ -488,7 +492,7 @@ export class TransactionsService {
         data: {
           type: TransactionType.EXPENSE,
           amount: createPurchaseDto.amount,
-          date: new Date(createPurchaseDto.date),
+          date: formatDateForDB(createPurchaseDto.date),
           employeeVendorName: createPurchaseDto.vendorName,
           category: 'Purchase', // Category for purchase expenses
           notes: createPurchaseDto.notes || null,

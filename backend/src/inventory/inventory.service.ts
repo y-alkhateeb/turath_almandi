@@ -316,8 +316,8 @@ export class InventoryService {
       user.id,
       AuditEntityType.INVENTORY_ITEM,
       id,
-      existingItem as unknown as Record<string, unknown>,
-      updatedItem as unknown as Record<string, unknown>,
+      existingItem,
+      updatedItem,
     );
 
     // Add metadata
@@ -354,7 +354,7 @@ export class InventoryService {
       user.id,
       AuditEntityType.INVENTORY_ITEM,
       id,
-      item as unknown as Record<string, unknown>,
+      item,
     );
 
     return { message: 'Inventory item deleted successfully', id };

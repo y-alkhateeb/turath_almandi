@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 export enum AuditAction {
   CREATE = 'CREATE',
@@ -23,7 +24,7 @@ interface AuditLogData {
   action: AuditAction;
   entityType: AuditEntityType;
   entityId: string;
-  changes: Record<string, unknown>;
+  changes: Prisma.InputJsonValue;
   ipAddress?: string;
 }
 
@@ -55,11 +56,11 @@ export class AuditLogService {
   /**
    * Log a create operation
    */
-  async logCreate(
+  async logCreate<T extends Prisma.InputJsonValue>(
     userId: string,
     entityType: AuditEntityType,
     entityId: string,
-    newData: Record<string, unknown>,
+    newData: T,
     ipAddress?: string,
   ): Promise<void> {
     await this.log({
@@ -77,16 +78,27 @@ export class AuditLogService {
   /**
    * Log an update operation
    */
-  async logUpdate(
+  async logUpdate<T extends Prisma.InputJsonValue>(
     userId: string,
     entityType: AuditEntityType,
     entityId: string,
-    oldData: Record<string, unknown>,
-    newData: Record<string, unknown>,
+    oldData: T,
+    newData: T,
     ipAddress?: string,
   ): Promise<void> {
-    // Calculate the changes
-    const changes = this.calculateChanges(oldData, newData);
+    // Calculate the changes (only works with objects)
+    const changes =
+      typeof oldData === 'object' &&
+      oldData !== null &&
+      typeof newData === 'object' &&
+      newData !== null &&
+      !Array.isArray(oldData) &&
+      !Array.isArray(newData)
+        ? this.calculateChanges(
+            oldData as Prisma.JsonObject,
+            newData as Prisma.JsonObject,
+          )
+        : null;
 
     await this.log({
       userId,
@@ -105,11 +117,11 @@ export class AuditLogService {
   /**
    * Log a delete operation
    */
-  async logDelete(
+  async logDelete<T extends Prisma.InputJsonValue>(
     userId: string,
     entityType: AuditEntityType,
     entityId: string,
-    deletedData: Record<string, unknown>,
+    deletedData: T,
     ipAddress?: string,
   ): Promise<void> {
     await this.log({
@@ -126,15 +138,19 @@ export class AuditLogService {
 
   /**
    * Calculate changes between old and new data
+   * Only works with JSON objects (not arrays or primitives)
    */
   private calculateChanges(
-    oldData: Record<string, unknown>,
-    newData: Record<string, unknown>,
-  ): Record<string, unknown> {
-    const changes: Record<string, unknown> = {};
+    oldData: Prisma.JsonObject,
+    newData: Prisma.JsonObject,
+  ): Prisma.JsonObject {
+    const changes: Prisma.JsonObject = {};
 
     // Get all unique keys from both objects
-    const allKeys = new Set([...Object.keys(oldData || {}), ...Object.keys(newData || {})]);
+    const allKeys = new Set([
+      ...Object.keys(oldData || {}),
+      ...Object.keys(newData || {}),
+    ]);
 
     for (const key of allKeys) {
       const oldValue = oldData?.[key];

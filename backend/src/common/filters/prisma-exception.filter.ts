@@ -3,6 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
@@ -11,10 +12,15 @@ import { ERROR_MESSAGES } from '../constants/error-messages';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(PrismaExceptionFilter.name);
+
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    // Log detailed error information
+    this.logDetailedError(exception, request);
 
     // Extract locale from Accept-Language header
     const locale = extractLocale(request.headers['accept-language']);
@@ -84,5 +90,51 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       default:
         return 'error';
     }
+  }
+
+  private logDetailedError(
+    exception: Prisma.PrismaClientKnownRequestError,
+    request: Request,
+  ): void {
+    const errorDetails = {
+      code: exception.code,
+      message: exception.message,
+      meta: exception.meta,
+      clientVersion: exception.clientVersion,
+      request: {
+        method: request.method,
+        url: request.url,
+        body: this.sanitizeRequestBody(request.body),
+        params: request.params,
+        query: request.query,
+      },
+    };
+
+    this.logger.error(
+      `Prisma Error [${exception.code}]: ${exception.message}`,
+      exception.stack,
+    );
+
+    this.logger.debug('Detailed error information:', JSON.stringify(errorDetails, null, 2));
+  }
+
+  private sanitizeRequestBody(body: Record<string, unknown>): Record<string, unknown> {
+    if (!body) {
+      return {};
+    }
+
+    // Create a shallow copy to avoid modifying the original
+    const sanitized = { ...body };
+
+    // Remove sensitive fields
+    const sensitiveFields = ['password', 'passwordHash', 'token', 'accessToken', 'refreshToken'];
+
+    for (const field of sensitiveFields) {
+      if (field in sanitized) {
+        sanitized[field] = '***REDACTED***';
+      }
+    }
+
+    return sanitized;
   }
 }

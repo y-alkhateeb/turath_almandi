@@ -59,8 +59,11 @@ export class NotificationsService {
       );
 
       return notification;
-    } catch (error) {
-      this.logger.error(`Failed to create notification: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      // Type guard: check if error is an Error instance
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to create notification: ${errorMessage}`, errorStack);
       throw error;
     }
   }

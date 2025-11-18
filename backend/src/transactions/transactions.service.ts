@@ -52,6 +52,20 @@ interface TransactionFilters {
   search?: string;
 }
 
+interface SalaryExpensesSummary {
+  total: number;
+  count: number;
+  transactions: Array<{
+    id: string;
+    amount: number;
+    date: string;
+    description: string;
+    paymentMethod: PaymentMethod;
+    branchId: string;
+    branchName: string;
+  }>;
+}
+
 // Type for transaction with branch (true) and creator select
 type TransactionWithBranchAndCreator = Prisma.TransactionGetPayload<{
   include: {
@@ -593,5 +607,93 @@ export class TransactionsService {
 
       return transaction;
     });
+  }
+
+  /**
+   * Get salary expenses with filtering support
+   * Filters transactions where category='salaries'
+   * Supports optional branch and date range filtering
+   * Returns total amount and list of salary transactions
+   */
+  async getSalaryExpenses(
+    user: RequestUser,
+    branchId?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<SalaryExpensesSummary> {
+    // Build where clause with role-based filtering
+    let where: Prisma.TransactionWhereInput = {
+      type: TransactionType.EXPENSE,
+      category: 'salaries',
+    };
+
+    // Apply branch filtering based on user role
+    if (user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && branchId) {
+      where.branchId = branchId;
+    }
+
+    // Apply date range filter if provided
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) {
+        where.date.gte = formatDateForDB(startDate);
+      }
+      if (endDate) {
+        where.date.lte = formatDateForDB(endDate);
+      }
+    }
+
+    // Execute queries in parallel for best performance
+    const [totalResult, transactions] = await Promise.all([
+      // Get total sum of salary expenses
+      this.prisma.transaction.aggregate({
+        where,
+        _sum: {
+          amount: true,
+        },
+        _count: true,
+      }),
+
+      // Get list of salary transactions
+      this.prisma.transaction.findMany({
+        where,
+        include: {
+          branch: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      }),
+    ]);
+
+    const total = Number(totalResult._sum.amount || 0);
+    const count = totalResult._count;
+
+    // Format transactions for response
+    const formattedTransactions = transactions.map((t) => ({
+      id: t.id,
+      amount: Number(t.amount),
+      date: formatToISODate(t.date),
+      description: t.description,
+      paymentMethod: t.paymentMethod,
+      branchId: t.branchId,
+      branchName: t.branch.name,
+    }));
+
+    return {
+      total,
+      count,
+      transactions: formattedTransactions,
+    };
   }
 }

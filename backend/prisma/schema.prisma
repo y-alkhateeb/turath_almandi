@@ -288,7 +288,7 @@ model InventoryConsumption {
   // Relations
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   branch        Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  recorder      User          @relation(fields: [recordedBy], references: [id])
+  recorder      User          @relation(fields: [recordedBy], references: [id], onDelete: Restrict)
 
   @@index([inventoryItemId])
   @@index([branchId])

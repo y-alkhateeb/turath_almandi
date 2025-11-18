@@ -9,6 +9,7 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
 import { UserRole, DebtStatus, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
@@ -57,6 +58,7 @@ export class DebtsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationsService: NotificationsService,
     private readonly websocketGateway: WebSocketGatewayService,
   ) {}
 
@@ -129,6 +131,21 @@ export class DebtsService {
 
     // Emit WebSocket event for real-time updates
     this.websocketGateway.emitNewDebt(debt);
+
+    // Notify about the new debt (async, don't wait)
+    this.notificationsService
+      .notifyNewDebt(
+        debt.id,
+        debt.creditorName,
+        Number(debt.originalAmount),
+        debt.dueDate,
+        debt.branchId,
+        user.id,
+      )
+      .catch((error) => {
+        // Log error but don't fail the debt creation
+        console.error('Failed to create debt notification:', error);
+      });
 
     return debt;
   }
@@ -307,6 +324,22 @@ export class DebtsService {
     // Emit WebSocket events for real-time updates
     this.websocketGateway.emitDebtPayment(result.payment);
     this.websocketGateway.emitDebtUpdate(result.debt);
+
+    // Notify about the debt payment (async, don't wait)
+    this.notificationsService
+      .notifyDebtPayment(
+        debtId,
+        result.payment.id,
+        result.debt.creditorName,
+        Number(result.payment.amountPaid),
+        Number(result.debt.remainingAmount),
+        result.debt.branchId,
+        user.id,
+      )
+      .catch((error) => {
+        // Log error but don't fail the payment
+        console.error('Failed to create debt payment notification:', error);
+      });
 
     return result.debt;
   }

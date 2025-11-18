@@ -262,4 +262,130 @@ export class NotificationsService {
 
     return notification;
   }
+
+  /**
+   * Notify about a new debt creation
+   * Creates notifications for large debts or approaching due dates
+   *
+   * @param debtId - Debt ID
+   * @param creditorName - Name of the creditor
+   * @param amount - Debt amount
+   * @param dueDate - Due date for the debt
+   * @param branchId - Branch ID where debt was created
+   * @param createdBy - User ID who created the debt
+   * @param threshold - Optional amount threshold for notifications (default: 5000)
+   * @returns Created notification or null if no notification needed
+   */
+  async notifyNewDebt(
+    debtId: string,
+    creditorName: string,
+    amount: number,
+    dueDate: Date,
+    branchId: string,
+    createdBy: string,
+    threshold: number = 5000,
+  ): Promise<NotificationWithRelations | null> {
+    // Calculate days until due
+    const daysUntilDue = Math.floor((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+    // Only notify for large debts or debts with approaching due dates
+    const shouldNotify = amount >= threshold || daysUntilDue <= 7;
+
+    if (!shouldNotify) {
+      this.logger.debug(`Debt ${debtId} does not meet notification criteria`);
+      return null;
+    }
+
+    // Determine notification severity
+    let severity: NotificationSeverity = NotificationSeverity.INFO;
+    if (amount >= threshold * 2 || daysUntilDue <= 3) {
+      severity = NotificationSeverity.WARNING;
+    } else if (amount >= threshold * 5 || daysUntilDue <= 1) {
+      severity = NotificationSeverity.CRITICAL;
+    }
+
+    // Create notification
+    const notification = await this.createNotification({
+      type: 'new_debt',
+      title: `دين جديد: ${creditorName}`,
+      message: `تم إنشاء دين جديد إلى ${creditorName} بقيمة ${amount.toFixed(2)} دولار. تاريخ الاستحقاق: ${dueDate.toISOString().split('T')[0]} (بعد ${daysUntilDue} يوم)`,
+      severity,
+      relatedId: debtId,
+      relatedType: 'DEBT',
+      branchId,
+      createdBy,
+    });
+
+    this.logger.debug(`Created notification for debt ${debtId} with severity ${severity}`);
+
+    return notification;
+  }
+
+  /**
+   * Notify about a debt payment
+   * Creates notifications for significant payments or fully paid debts
+   *
+   * @param debtId - Debt ID
+   * @param paymentId - Payment ID
+   * @param creditorName - Name of the creditor
+   * @param amountPaid - Amount paid
+   * @param remainingAmount - Remaining amount after payment
+   * @param branchId - Branch ID where payment was made
+   * @param createdBy - User ID who made the payment
+   * @param threshold - Optional amount threshold for notifications (default: 3000)
+   * @returns Created notification or null if no notification needed
+   */
+  async notifyDebtPayment(
+    debtId: string,
+    paymentId: string,
+    creditorName: string,
+    amountPaid: number,
+    remainingAmount: number,
+    branchId: string,
+    createdBy: string,
+    threshold: number = 3000,
+  ): Promise<NotificationWithRelations | null> {
+    // Only notify for large payments or when debt is fully paid
+    const isFullyPaid = remainingAmount === 0;
+    const shouldNotify = amountPaid >= threshold || isFullyPaid;
+
+    if (!shouldNotify) {
+      this.logger.debug(`Debt payment ${paymentId} does not meet notification criteria`);
+      return null;
+    }
+
+    // Determine notification severity
+    let severity: NotificationSeverity = NotificationSeverity.INFO;
+    if (isFullyPaid) {
+      severity = NotificationSeverity.SUCCESS;
+    } else if (amountPaid >= threshold * 2) {
+      severity = NotificationSeverity.WARNING;
+    }
+
+    // Create message based on payment status
+    let message: string;
+    if (isFullyPaid) {
+      message = `تم سداد الدين لـ ${creditorName} بالكامل. المبلغ المدفوع: ${amountPaid.toFixed(2)} دولار`;
+    } else {
+      message = `تم دفع ${amountPaid.toFixed(2)} دولار لـ ${creditorName}. المبلغ المتبقي: ${remainingAmount.toFixed(2)} دولار`;
+    }
+
+    // Create notification
+    const notification = await this.createNotification({
+      type: isFullyPaid ? 'debt_paid' : 'debt_payment',
+      title: `دفعة دين: ${creditorName}`,
+      message,
+      severity,
+      relatedId: debtId,
+      relatedType: 'DEBT',
+      branchId,
+      createdBy,
+    });
+
+    this.logger.debug(
+      `Created notification for debt payment ${paymentId} with severity ${severity}`,
+    );
+
+    return notification;
+  }
 }

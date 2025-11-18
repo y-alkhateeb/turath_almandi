@@ -407,4 +407,67 @@ export class InventoryService {
       return newItem.id;
     }
   }
+
+  /**
+   * Update inventory from a transaction
+   * Automatically updates inventory based on transaction details if applicable
+   *
+   * @param transaction - Transaction object with inventory-related fields
+   * @param prismaClient - Optional Prisma client for transaction support
+   * @returns ID of updated/created inventory item, or null if not applicable
+   */
+  async updateFromTransaction(
+    transaction: {
+      id: string;
+      type: string;
+      amount: number | Prisma.Decimal;
+      branchId: string;
+      category?: string;
+      inventoryItemId?: string | null;
+      // Purchase-specific fields (optional)
+      itemName?: string;
+      quantity?: number | Prisma.Decimal;
+      unit?: InventoryUnit;
+    },
+    prismaClient?: Prisma.TransactionClient,
+  ): Promise<string | null> {
+    // Only process EXPENSE transactions with inventory fields
+    if (transaction.type !== 'EXPENSE') {
+      return null;
+    }
+
+    // Check if this is a purchase transaction with inventory details
+    const isPurchase =
+      transaction.category === 'Purchase' ||
+      (transaction.itemName && transaction.quantity && transaction.unit);
+
+    if (!isPurchase) {
+      return null;
+    }
+
+    // Extract inventory fields
+    const itemName = transaction.itemName;
+    const quantity = transaction.quantity;
+    const unit = transaction.unit;
+    const amount = typeof transaction.amount === 'object'
+      ? Number(transaction.amount)
+      : transaction.amount;
+
+    // Validate required fields
+    if (!itemName || !quantity || !unit) {
+      return null;
+    }
+
+    const qty = typeof quantity === 'object' ? Number(quantity) : quantity;
+
+    // Update inventory using existing method
+    return this.updateFromPurchase(
+      transaction.branchId,
+      itemName,
+      qty,
+      unit,
+      amount,
+      prismaClient,
+    );
+  }
 }

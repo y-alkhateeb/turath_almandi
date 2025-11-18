@@ -175,7 +175,6 @@ export const useAuth = (): UseAuthReturn => {
     },
 
     // onError removed - global API interceptor handles error toasts
-  },
   });
 
   // ============================================

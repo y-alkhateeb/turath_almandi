@@ -31,7 +31,7 @@ export class IsDateAfterOrEqual implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return 'Due date must be greater than or equal to date';
+    return 'تاريخ الاستحقاق يجب أن يكون مساوياً أو بعد تاريخ الدين';
   }
 }
 

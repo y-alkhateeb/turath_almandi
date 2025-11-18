@@ -21,7 +21,7 @@ export class CreateInventoryDto {
   @Transform(({ value }) => parseFloat(value))
   quantity: number;
 
-  @IsEnum(InventoryUnit)
+  @IsEnum(InventoryUnit, { message: 'الوحدة يجب أن تكون واحدة من القيم المسموحة: KG, PIECE, LITER, OTHER' })
   @IsNotEmpty()
   unit: InventoryUnit;
 

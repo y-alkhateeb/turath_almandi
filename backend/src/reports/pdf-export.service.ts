@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as PDFDocument from 'pdfkit';
-import { TransactionType, DebtStatus, UserRole } from '@prisma/client';
+import { TransactionType, DebtStatus, UserRole, Prisma } from '@prisma/client';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { formatToISODate } from '../common/utils/date.utils';
 
@@ -34,7 +34,7 @@ export class PdfExportService {
     this.logger.log('Generating financial report PDF');
 
     // Build where clause with filters and user role
-    let where: any = {};
+    let where: Prisma.TransactionWhereInput = {};
     where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply date filters
@@ -283,7 +283,7 @@ export class PdfExportService {
     this.logger.log('Generating debt report PDF');
 
     // Build where clause with filters and user role
-    let where: any = {};
+    let where: Prisma.DebtWhereInput = {};
     where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply date filters on dueDate

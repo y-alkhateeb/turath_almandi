@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as ExcelJS from 'exceljs';
-import { TransactionType, DebtStatus, UserRole } from '@prisma/client';
+import { TransactionType, DebtStatus, UserRole, Prisma } from '@prisma/client';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { formatToISODate } from '../common/utils/date.utils';
 
@@ -34,7 +34,7 @@ export class ExcelExportService {
     this.logger.log('Exporting transactions to Excel');
 
     // Build where clause with filters and user role
-    let where: any = {};
+    let where: Prisma.TransactionWhereInput = {};
     where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply date filters
@@ -134,7 +134,7 @@ export class ExcelExportService {
     this.logger.log('Exporting debts to Excel');
 
     // Build where clause with filters and user role
-    let where: any = {};
+    let where: Prisma.DebtWhereInput = {};
     where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply date filters on dueDate
@@ -242,7 +242,7 @@ export class ExcelExportService {
     this.logger.log('Exporting inventory to Excel');
 
     // Build where clause with filters and user role
-    let where: any = {};
+    let where: Prisma.InventoryItemWhereInput = {};
     where = applyBranchFilter(user, where, filters.branchId);
 
     // Fetch inventory items from database

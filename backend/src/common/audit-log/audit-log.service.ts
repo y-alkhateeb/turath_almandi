@@ -15,6 +15,7 @@ export enum AuditEntityType {
   INVENTORY = 'INVENTORY',
   DEBT = 'DEBT',
   DEBT_PAYMENT = 'DEBT_PAYMENT',
+  INVENTORY_ITEM = 'INVENTORY_ITEM',
 }
 
 interface AuditLogData {
@@ -22,7 +23,7 @@ interface AuditLogData {
   action: AuditAction;
   entityType: AuditEntityType;
   entityId: string;
-  changes: any;
+  changes: Record<string, unknown>;
   ipAddress?: string;
 }
 
@@ -58,7 +59,7 @@ export class AuditLogService {
     userId: string,
     entityType: AuditEntityType,
     entityId: string,
-    newData: any,
+    newData: Record<string, unknown>,
     ipAddress?: string,
   ): Promise<void> {
     await this.log({
@@ -80,8 +81,8 @@ export class AuditLogService {
     userId: string,
     entityType: AuditEntityType,
     entityId: string,
-    oldData: any,
-    newData: any,
+    oldData: Record<string, unknown>,
+    newData: Record<string, unknown>,
     ipAddress?: string,
   ): Promise<void> {
     // Calculate the changes
@@ -108,7 +109,7 @@ export class AuditLogService {
     userId: string,
     entityType: AuditEntityType,
     entityId: string,
-    deletedData: any,
+    deletedData: Record<string, unknown>,
     ipAddress?: string,
   ): Promise<void> {
     await this.log({
@@ -126,8 +127,11 @@ export class AuditLogService {
   /**
    * Calculate changes between old and new data
    */
-  private calculateChanges(oldData: any, newData: any): Record<string, any> {
-    const changes: Record<string, any> = {};
+  private calculateChanges(
+    oldData: Record<string, unknown>,
+    newData: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const changes: Record<string, unknown> = {};
 
     // Get all unique keys from both objects
     const allKeys = new Set([...Object.keys(oldData || {}), ...Object.keys(newData || {})]);

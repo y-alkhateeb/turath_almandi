@@ -19,11 +19,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     });
 
     // Log Prisma warnings and errors
-    this.$on('warn' as never, (e: any) => {
+    this.$on('warn' as never, (e: unknown) => {
       this.logger.warn(e);
     });
 
-    this.$on('error' as never, (e: any) => {
+    this.$on('error' as never, (e: unknown) => {
       this.logger.error(e);
     });
   }

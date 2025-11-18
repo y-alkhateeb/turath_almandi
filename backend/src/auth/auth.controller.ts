@@ -6,6 +6,14 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { UserRole } from '@prisma/client';
+
+interface RequestUser {
+  id: string;
+  username: string;
+  role: UserRole;
+  branchId: string | null;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -30,14 +38,14 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@CurrentUser() user: any) {
+  async getProfile(@CurrentUser() user: RequestUser) {
     return user;
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(@CurrentUser() user: any) {
-    return this.authService.logout(user.sub);
+  async logout(@CurrentUser() user: RequestUser) {
+    return this.authService.logout(user.id);
   }
 }

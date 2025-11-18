@@ -173,6 +173,7 @@ model Transaction {
   createdBy          String           @map("created_by") @db.Uuid
   createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz
 
   // Relations
   branch        Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
@@ -187,6 +188,7 @@ model Transaction {
   @@index([paymentMethod])
   @@index([currency])
   @@index([inventoryItemId])
+  @@index([deletedAt])
   @@index([branchId, date])
   @@index([type, date])
   @@map("transactions")
@@ -207,6 +209,7 @@ model Debt {
   createdBy       String      @map("created_by") @db.Uuid
   createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz
   updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?   @map("deleted_at") @db.Timestamptz
 
   // Relations
   branch   Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
@@ -218,6 +221,7 @@ model Debt {
   @@index([dueDate])
   @@index([createdBy])
   @@index([date])
+  @@index([deletedAt])
   @@index([status, dueDate])
   @@map("debts")
 }
@@ -254,6 +258,7 @@ model InventoryItem {
   lastUpdated  DateTime      @map("last_updated") @db.Timestamptz
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz
 
   // Relations
   branch       Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
@@ -264,6 +269,7 @@ model InventoryItem {
   @@index([name])
   @@index([unit])
   @@index([lastUpdated])
+  @@index([deletedAt])
   @@map("inventory_items")
 }
 

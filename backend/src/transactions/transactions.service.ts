@@ -234,7 +234,9 @@ export class TransactionsService {
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    let where: Prisma.TransactionWhereInput = {};
+    let where: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
+    };
 
     // Apply role-based branch filtering
     where = applyBranchFilter(user, where, filters.branchId);
@@ -321,7 +323,7 @@ export class TransactionsService {
       },
     });
 
-    if (!transaction) {
+    if (!transaction || transaction.deletedAt) {
       throw new NotFoundException(ERROR_MESSAGES.TRANSACTION.NOT_FOUND(id));
     }
 
@@ -405,16 +407,19 @@ export class TransactionsService {
   }
 
   /**
-   * Delete a transaction (soft delete by setting a flag or hard delete)
-   * Using hard delete for now
+   * Delete a transaction (soft delete by setting deletedAt timestamp)
+   * Soft delete preserves data for audit trail and potential recovery
    */
   async remove(id: string, user: RequestUser): Promise<{ message: string; id: string }> {
     // First, find the existing transaction to ensure it exists and user has access
     const transaction = await this.findOne(id, user);
 
-    // Delete the transaction
-    await this.prisma.transaction.delete({
+    // Soft delete: Set deletedAt timestamp
+    await this.prisma.transaction.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
     });
 
     // Log the deletion in audit log
@@ -467,6 +472,7 @@ export class TransactionsService {
 
     // Build base where clause for date and branch filtering
     const baseWhere: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
       date: {
         gte: startOfDay,
         lte: endOfDay,
@@ -643,6 +649,7 @@ export class TransactionsService {
   ): Promise<SalaryExpensesSummary> {
     // Build where clause with role-based filtering
     let where: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
       type: TransactionType.EXPENSE,
       category: 'salaries',
     };
@@ -731,6 +738,7 @@ export class TransactionsService {
   ): Promise<PurchaseExpensesSummary> {
     // Build where clause with role-based filtering
     let where: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
       type: TransactionType.EXPENSE,
       category: 'purchases',
     };

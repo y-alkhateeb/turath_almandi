@@ -5,6 +5,18 @@
 // API configuration
 const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
+// WebSocket configuration
+// Convert HTTP(S) URL to WS(S) URL
+const getWebSocketUrl = (): string => {
+  const url = import.meta.env.VITE_WS_URL;
+  if (url) return url;
+
+  // Derive from API URL if not explicitly set
+  return apiBaseUrl.replace(/^http/, 'ws').replace(/\/api\/v1$/, '');
+};
+
+const wsUrl = getWebSocketUrl();
+
 // Default route after login
 const defaultRoute = '/dashboard';
 
@@ -28,6 +40,7 @@ const routerMode = 'frontend';
 
 const GLOBAL_CONFIG = {
   apiBaseUrl,
+  wsUrl,
   defaultRoute,
   appName,
   appDescription,

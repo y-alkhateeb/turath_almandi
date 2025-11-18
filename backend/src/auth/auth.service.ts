@@ -152,8 +152,10 @@ export class AuthService {
   async generateRefreshToken(userId: string, rememberMe?: boolean): Promise<string> {
     const token = crypto.randomBytes(64).toString('hex');
     const expiresAt = new Date();
-    // Set expiration based on rememberMe: 30 days if true, 7 days if false
-    const daysToAdd = rememberMe ? 30 : 7;
+    // Set expiration based on rememberMe and configuration
+    const daysToAdd = rememberMe
+      ? this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_REMEMBER_ME') || 30
+      : this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION') || 7;
     expiresAt.setDate(expiresAt.getDate() + daysToAdd);
 
     // Clean up old expired tokens

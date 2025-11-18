@@ -7,6 +7,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { BranchGuard } from '../common/guards/branch.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+
+interface RequestUser {
+  id: string;
+  username: string;
+  role: UserRole;
+  branchId: string | null;
+}
 
 @Controller('branches')
 @UseGuards(JwtAuthGuard)
@@ -20,10 +28,25 @@ export class BranchesController {
     return this.branchesService.create(createBranchDto);
   }
 
+  /**
+   * Get all branches
+   * By default returns only active branches
+   * Admin users can set includeInactive=true to see all branches (including inactive)
+   *
+   * Query Parameters:
+   * - branchId: Optional specific branch filter
+   * - includeInactive: If true and user is ADMIN, include inactive branches (default: false)
+   */
   @Get()
   @UseGuards(BranchGuard)
-  findAll(@Query('branchId') branchId?: string) {
-    return this.branchesService.findAll(branchId);
+  findAll(
+    @CurrentUser() user: RequestUser,
+    @Query('branchId') branchId?: string,
+    @Query('includeInactive') includeInactive?: string,
+  ) {
+    // Convert string query parameter to boolean
+    const shouldIncludeInactive = includeInactive === 'true';
+    return this.branchesService.findAll(user, branchId, shouldIncludeInactive);
   }
 
   @Get(':id')

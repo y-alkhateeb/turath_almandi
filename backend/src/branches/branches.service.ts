@@ -3,6 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { UserRole } from '@prisma/client';
+
+interface RequestUser {
+  id: string;
+  username: string;
+  role: UserRole;
+  branchId: string | null;
+}
 
 @Injectable()
 export class BranchesService {
@@ -29,8 +37,30 @@ export class BranchesService {
     return branch;
   }
 
-  async findAll(branchId?: string) {
-    const where = branchId ? { id: branchId, isActive: true } : { isActive: true };
+  /**
+   * Find all branches with optional filtering
+   * By default, returns only active branches
+   * Admin users can request to see all branches (including inactive) with includeInactive=true
+   *
+   * @param user - Current user (for role-based access)
+   * @param branchId - Optional specific branch ID filter
+   * @param includeInactive - If true and user is ADMIN, include inactive branches (default: false)
+   * @returns Array of branches matching the filter criteria
+   */
+  async findAll(user?: RequestUser, branchId?: string, includeInactive: boolean = false) {
+    // Build where clause
+    const where: any = {};
+
+    // Filter by specific branch if provided
+    if (branchId) {
+      where.id = branchId;
+    }
+
+    // By default, show only active branches
+    // Admin users can optionally see all branches (including inactive) by setting includeInactive=true
+    if (!includeInactive || user?.role !== UserRole.ADMIN) {
+      where.isActive = true;
+    }
 
     return this.prisma.branch.findMany({
       where,

@@ -24,7 +24,7 @@ export class CreateTransactionDto {
   @IsAllowedCurrency()
   currency?: Currency;
 
-  @IsEnum(PaymentMethod)
+  @IsEnum(PaymentMethod, { message: 'طريقة الدفع يجب أن تكون: CASH أو MASTER' })
   @IsOptional()
   @ValidateIf((o) => o.type === TransactionType.INCOME)
   paymentMethod?: PaymentMethod;

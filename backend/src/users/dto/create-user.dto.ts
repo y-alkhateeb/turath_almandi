@@ -26,7 +26,7 @@ export class CreateUserDto {
   })
   password: string;
 
-  @IsEnum(UserRole)
+  @IsEnum(UserRole, { message: 'الدور يجب أن يكون: ADMIN أو ACCOUNTANT' })
   @IsNotEmpty()
   role: UserRole;
 

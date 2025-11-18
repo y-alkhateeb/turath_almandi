@@ -122,6 +122,44 @@ export class NotificationsService {
     branchId: string,
     systemUserId: string,
   ): Promise<NotificationWithRelations> {
+    // Get today's date at midnight for duplicate check
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if a notification for this debt was already created today
+    // This prevents duplicate notifications when called multiple times
+    const existingNotification = await this.prisma.notification.findFirst({
+      where: {
+        type: 'overdue_debt',
+        relatedId: debtId,
+        createdAt: {
+          gte: today,
+        },
+      },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        creator: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
+
+    // If notification already exists today, return it instead of creating duplicate
+    if (existingNotification) {
+      this.logger.debug(
+        `Notification for debt ${debtId} already exists today (created at ${existingNotification.createdAt}). Skipping creation.`,
+      );
+      return existingNotification as NotificationWithRelations;
+    }
+
     const daysPastDue = Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
 
     const notification = await this.createNotification({

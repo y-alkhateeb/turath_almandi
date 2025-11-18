@@ -193,6 +193,7 @@ export interface InventoryQueryFilters {
   unit?: InventoryUnit;
   branchId?: string;
   search?: string; // Search by item name
+  autoAdded?: boolean; // Filter by manually vs auto-added items
   page?: number;
   limit?: number;
 }

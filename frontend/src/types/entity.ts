@@ -302,6 +302,7 @@ export interface InventoryItem {
   quantity: number; // Decimal in DB, returned as number
   unit: InventoryUnit;
   costPerUnit: number; // Decimal in DB, returned as number
+  autoAdded: boolean; // True if auto-added via transaction, false if manually added
   lastUpdated: string;
   createdAt: string;
   updatedAt: string;

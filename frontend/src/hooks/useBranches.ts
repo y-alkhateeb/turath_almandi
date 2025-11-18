@@ -1,186 +1,396 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { branchesService } from '@/services/branches.service';
-import type { Branch, CreateBranchInput, UpdateBranchInput } from '@/types';
-import { toast } from '@/utils/toast';
-import { useAuth } from './useAuth';
+/**
+ * useBranches Hooks
+ * React Query hooks for branch management with optimistic updates
+ *
+ * Features:
+ * - Branch queries with isActive filtering
+ * - Auto-filtering for accountants (only their assigned branch)
+ * - Create/Update/Delete mutations with optimistic updates
+ * - Automatic cache invalidation
+ * - Arabic toast messages
+ * - Full error handling and strict typing
+ */
 
-// Query keys
-export const branchesKeys = {
-  all: ['branches'] as const,
-  detail: (id: string) => ['branches', id] as const,
-};
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import branchService from '@/api/services/branchService';
+import { queryKeys } from '@/hooks/queries/queryKeys';
+import { useAuth } from './useAuth';
+import type { Branch, CreateBranchInput, UpdateBranchInput } from '#/entity';
+import type { BranchQueryFilters } from '#/api';
+import { ApiError } from '@/api/apiClient';
+
+// ============================================
+// QUERY HOOKS
+// ============================================
 
 /**
- * Hook to fetch all branches
- * For accountants, it filters to show only their assigned branch
+ * useBranches Hook
+ * Query branches with optional isActive filtering
+ * Auto-filters for accountants to show only their assigned branch
+ *
+ * @param options - Query options
+ * @param options.isActive - Optional filter for active branches (default: true for accountants, undefined for admins)
+ * @returns Query result with branches array
+ *
+ * @example
+ * ```tsx
+ * // Get all active branches (default for accountants)
+ * const { data: branches, isLoading } = useBranches();
+ *
+ * // Get all branches including inactive (admins only)
+ * const { data: allBranches } = useBranches({ isActive: undefined });
+ *
+ * // Get only active branches explicitly
+ * const { data: activeBranches } = useBranches({ isActive: true });
+ * ```
  */
-export const useBranches = () => {
+export const useBranches = (
+  options?: {
+    isActive?: boolean;
+  },
+) => {
   const { user, isAccountant } = useAuth();
 
-  return useQuery({
-    queryKey: branchesKeys.all,
+  // For accountants, default to showing only active branches
+  // For admins, default to showing all branches
+  const includeInactive = isAccountant
+    ? options?.isActive === undefined
+      ? false
+      : !options.isActive
+    : options?.isActive === undefined
+      ? true
+      : !options.isActive;
+
+  const filters: BranchQueryFilters = {
+    includeInactive,
+  };
+
+  return useQuery<Branch[], ApiError>({
+    queryKey: queryKeys.branches.list(filters),
     queryFn: async () => {
-      const branches = await branchesService.getAll();
+      const branches = await branchService.getAll(filters);
 
       // If user is accountant, filter to show only their assigned branch
-      if (isAccountant() && user?.branchId) {
-        return branches.filter(branch => branch.id === user.branchId);
+      // This is a client-side filter in addition to server-side filtering
+      if (isAccountant && user?.branchId) {
+        return branches.filter((branch) => branch.id === user.branchId);
       }
 
       return branches;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
+    retry: 1, // Only retry once on failure
   });
 };
 
 /**
- * Hook to fetch a single branch
+ * useBranch Hook
+ * Query single branch by ID
+ *
+ * @param id - Branch UUID
+ * @param options - Query options (enabled, etc.)
+ * @returns Query result with branch data
+ *
+ * @example
+ * ```tsx
+ * const { data: branch, isLoading } = useBranch(branchId);
+ * if (branch) {
+ *   console.log(branch.name, branch.isActive);
+ * }
+ * ```
  */
-export const useBranch = (id: string) => {
-  return useQuery({
-    queryKey: branchesKeys.detail(id),
-    queryFn: () => branchesService.getOne(id),
-    enabled: !!id,
+export const useBranch = (
+  id: string,
+  options?: {
+    enabled?: boolean;
+  },
+) => {
+  return useQuery<Branch, ApiError>({
+    queryKey: queryKeys.branches.detail(id),
+    queryFn: () => branchService.getOne(id),
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
+    retry: 1,
+    enabled: options?.enabled ?? !!id, // Disabled if no ID provided
   });
 };
 
+// ============================================
+// MUTATION HOOKS
+// ============================================
+
 /**
- * Hook to create a new branch
+ * useCreateBranch Hook
+ * Mutation to create new branch with optimistic update
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const createBranch = useCreateBranch();
+ *
+ * const handleCreate = async () => {
+ *   try {
+ *     await createBranch.mutateAsync({
+ *       name: 'فرع بغداد',
+ *       location: 'بغداد - الكرادة',
+ *     });
+ *     navigate('/branches');
+ *   } catch (error) {
+ *     // Error already handled with toast
+ *   }
+ * };
+ * ```
  */
 export const useCreateBranch = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: CreateBranchInput) => branchesService.create(data),
+  return useMutation<Branch, ApiError, CreateBranchInput>({
+    mutationFn: branchService.create,
+
+    // Optimistic update
     onMutate: async (newBranch) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: branchesKeys.all });
+      // Cancel outgoing queries to avoid race conditions
+      await queryClient.cancelQueries({ queryKey: queryKeys.branches.all });
 
-      // Snapshot the previous value
-      const previousBranches = queryClient.getQueryData<Branch[]>(branchesKeys.all);
+      // Snapshot current data for rollback
+      const previousBranches = queryClient.getQueriesData<Branch[]>({
+        queryKey: queryKeys.branches.all,
+      });
 
-      // Optimistically update to the new value
-      if (previousBranches) {
-        queryClient.setQueryData<Branch[]>(branchesKeys.all, (old = []) => [
-          ...old,
-          {
-            id: 'temp-' + Date.now(),
-            ...newBranch,
+      // Optimistically update all branch lists
+      queryClient.setQueriesData<Branch[]>(
+        { queryKey: queryKeys.branches.all },
+        (old) => {
+          if (!old) return old;
+
+          // Create temporary branch with optimistic ID
+          const tempBranch: Branch = {
+            id: `temp-${Date.now()}`,
+            name: newBranch.name,
+            location: newBranch.location || null,
             isActive: true,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-          } as Branch,
-        ]);
-      }
+          };
+
+          return [tempBranch, ...old];
+        },
+      );
 
       return { previousBranches };
     },
-    onError: (error: any, _newBranch, context) => {
+
+    onError: (_error, _newBranch, context) => {
       // Rollback on error
       if (context?.previousBranches) {
-        queryClient.setQueryData(branchesKeys.all, context.previousBranches);
+        context.previousBranches.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
       }
 
-      const message = error.response?.data?.message || 'حدث خطأ أثناء إضافة الفرع';
-      toast.error(message);
+      // Note: Error toast shown by global API interceptor
     },
-    onSuccess: () => {
-      toast.success('تم إضافة الفرع بنجاح');
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: branchesKeys.all });
+
+    onSuccess: (newBranch) => {
+      // Invalidate and refetch all branch queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.branches.all });
+
+      // Show success toast
+      toast.success(`تم إضافة الفرع "${newBranch.name}" بنجاح`);
     },
   });
 };
 
 /**
- * Hook to update an existing branch
+ * useUpdateBranch Hook
+ * Mutation to update existing branch with optimistic update
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const updateBranch = useUpdateBranch();
+ *
+ * const handleUpdate = async () => {
+ *   await updateBranch.mutateAsync({
+ *     id: branchId,
+ *     data: { isActive: false },
+ *   });
+ * };
+ * ```
  */
 export const useUpdateBranch = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateBranchInput }) =>
-      branchesService.update(id, data),
+  return useMutation<
+    Branch,
+    ApiError,
+    { id: string; data: UpdateBranchInput }
+  >({
+    mutationFn: ({ id, data }) => branchService.update(id, data),
+
+    // Optimistic update
     onMutate: async ({ id, data }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: branchesKeys.all });
+      // Cancel outgoing queries
+      await queryClient.cancelQueries({ queryKey: queryKeys.branches.all });
+      await queryClient.cancelQueries({ queryKey: queryKeys.branches.detail(id) });
 
-      // Snapshot the previous value
-      const previousBranches = queryClient.getQueryData<Branch[]>(branchesKeys.all);
+      // Snapshot current data
+      const previousBranch = queryClient.getQueryData<Branch>(
+        queryKeys.branches.detail(id),
+      );
+      const previousBranches = queryClient.getQueriesData<Branch[]>({
+        queryKey: queryKeys.branches.all,
+      });
 
-      // Optimistically update to the new value
-      if (previousBranches) {
-        queryClient.setQueryData<Branch[]>(branchesKeys.all, (old = []) =>
-          old.map((branch) =>
+      // Optimistically update branch detail
+      queryClient.setQueryData<Branch>(
+        queryKeys.branches.detail(id),
+        (old) => {
+          if (!old) return old;
+          return { ...old, ...data, updatedAt: new Date().toISOString() };
+        },
+      );
+
+      // Optimistically update branch in all lists
+      queryClient.setQueriesData<Branch[]>(
+        { queryKey: queryKeys.branches.all },
+        (old) => {
+          if (!old) return old;
+
+          return old.map((branch) =>
             branch.id === id
               ? { ...branch, ...data, updatedAt: new Date().toISOString() }
-              : branch
-          )
-        );
-      }
+              : branch,
+          );
+        },
+      );
 
-      return { previousBranches };
+      return { previousBranch, previousBranches };
     },
-    onError: (error: any, _variables, context) => {
+
+    onError: (error, { id }, context) => {
       // Rollback on error
+      if (context?.previousBranch) {
+        queryClient.setQueryData(queryKeys.branches.detail(id), context.previousBranch);
+      }
       if (context?.previousBranches) {
-        queryClient.setQueryData(branchesKeys.all, context.previousBranches);
+        context.previousBranches.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
       }
 
-      const message = error.response?.data?.message || 'حدث خطأ أثناء تحديث الفرع';
-      toast.error(message);
+      // Note: Error toast shown by global API interceptor
     },
-    onSuccess: () => {
+
+    onSuccess: (updatedBranch) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: queryKeys.branches.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.branches.detail(updatedBranch.id),
+      });
+
+      // Show success toast
       toast.success('تم تحديث الفرع بنجاح');
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: branchesKeys.all });
     },
   });
 };
 
 /**
- * Hook to delete a branch
+ * useDeleteBranch Hook
+ * Mutation to delete branch with optimistic update
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const deleteBranch = useDeleteBranch();
+ *
+ * const handleDelete = async () => {
+ *   if (confirm('هل أنت متأكد من حذف هذا الفرع؟')) {
+ *     await deleteBranch.mutateAsync(branchId);
+ *   }
+ * };
+ * ```
  */
 export const useDeleteBranch = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (id: string) => branchesService.delete(id),
+  return useMutation<void, ApiError, string>({
+    mutationFn: branchService.delete,
+
+    // Optimistic update
     onMutate: async (deletedId) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: branchesKeys.all });
+      // Cancel outgoing queries
+      await queryClient.cancelQueries({ queryKey: queryKeys.branches.all });
 
-      // Snapshot the previous value
-      const previousBranches = queryClient.getQueryData<Branch[]>(branchesKeys.all);
+      // Snapshot current data
+      const previousBranches = queryClient.getQueriesData<Branch[]>({
+        queryKey: queryKeys.branches.all,
+      });
 
-      // Optimistically update to the new value
-      if (previousBranches) {
-        queryClient.setQueryData<Branch[]>(branchesKeys.all, (old = []) =>
-          old.filter((branch) => branch.id !== deletedId)
-        );
-      }
+      // Optimistically remove branch from all lists
+      queryClient.setQueriesData<Branch[]>(
+        { queryKey: queryKeys.branches.all },
+        (old) => {
+          if (!old) return old;
+          return old.filter((branch) => branch.id !== deletedId);
+        },
+      );
+
+      // Remove branch detail from cache
+      queryClient.removeQueries({
+        queryKey: queryKeys.branches.detail(deletedId),
+      });
 
       return { previousBranches };
     },
-    onError: (error: any, _deletedId, context) => {
+
+    onError: (error, _deletedId, context) => {
       // Rollback on error
       if (context?.previousBranches) {
-        queryClient.setQueryData(branchesKeys.all, context.previousBranches);
+        context.previousBranches.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
       }
 
-      const message = error.response?.data?.message || 'حدث خطأ أثناء حذف الفرع';
-      toast.error(message);
+      // Note: Error toast shown by global API interceptor
     },
+
     onSuccess: () => {
+      // Invalidate all branch queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.branches.all });
+
+      // Show success toast
       toast.success('تم حذف الفرع بنجاح');
     },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: branchesKeys.all });
-    },
   });
+};
+
+// ============================================
+// HELPER HOOKS
+// ============================================
+
+/**
+ * useActiveBranches Hook
+ * Query only active branches (convenience hook)
+ *
+ * @returns Query result with active branches
+ */
+export const useActiveBranches = () => {
+  return useBranches({ isActive: true });
+};
+
+/**
+ * useAllBranches Hook
+ * Query all branches including inactive (convenience hook)
+ * Admin only - accountants always see only their branch
+ *
+ * @returns Query result with all branches
+ */
+export const useAllBranches = () => {
+  return useBranches({ isActive: undefined });
 };

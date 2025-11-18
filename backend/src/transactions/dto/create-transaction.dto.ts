@@ -9,6 +9,7 @@ import {
 import { TransactionType, PaymentMethod, Currency } from '@prisma/client';
 import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 import { IsAllowedCurrency } from '../../common/decorators/is-allowed-currency.decorator';
+import { IsNotFutureDate } from '../../common/decorators/is-not-future-date.decorator';
 
 export class CreateTransactionDto {
   @IsEnum(TransactionType)
@@ -34,6 +35,7 @@ export class CreateTransactionDto {
 
   @IsDateString()
   @IsNotEmpty()
+  @IsNotFutureDate()
   date: string;
 
   @IsString()

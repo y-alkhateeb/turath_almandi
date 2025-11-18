@@ -58,10 +58,10 @@ export function LoadingSpinner({
  */
 export function PageLoading({ message = 'جاري التحميل...' }: { message?: string }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg-tertiary)]">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg-primary)]">
       <LoadingSpinner size="xl" variant="primary" />
       {message && (
-        <p className="mt-4 text-sm text-[var(--text-secondary)]">{message}</p>
+        <p className="mt-4 text-lg font-medium text-[var(--text-primary)]">{message}</p>
       )}
     </div>
   );

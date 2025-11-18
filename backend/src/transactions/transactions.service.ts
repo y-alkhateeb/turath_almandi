@@ -113,9 +113,9 @@ export class TransactionsService {
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.BRANCH_REQUIRED);
+    // Validate accountant has a branch assigned
+    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
+      throw new BadRequestException('Accountant must be assigned to branch');
     }
 
     // Validate amount is positive
@@ -293,7 +293,7 @@ export class TransactionsService {
     // Role-based access control
     if (user && user.role === UserRole.ACCOUNTANT) {
       if (!user.branchId) {
-        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       if (transaction.branchId !== user.branchId) {
         throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.NO_ACCESS);
@@ -418,7 +418,7 @@ export class TransactionsService {
       if (user.role === UserRole.ACCOUNTANT) {
         // Accountants can only see their assigned branch
         if (!user.branchId) {
-          throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+          throw new BadRequestException('Accountant must be assigned to branch');
         }
         filterBranchId = user.branchId;
       } else if (user.role === UserRole.ADMIN) {
@@ -505,9 +505,9 @@ export class TransactionsService {
     createPurchaseDto: CreatePurchaseExpenseDto,
     user: RequestUser,
   ): Promise<TransactionWithFullInventory> {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.BRANCH_REQUIRED);
+    // Validate accountant has a branch assigned
+    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
+      throw new BadRequestException('Accountant must be assigned to branch');
     }
 
     // Validate amount is positive

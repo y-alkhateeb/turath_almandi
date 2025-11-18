@@ -75,7 +75,7 @@ export class DebtsService {
     if (user.role === UserRole.ACCOUNTANT) {
       // Accountants must have a branch assigned and can only create for their branch
       if (!user.branchId) {
-        throw new ForbiddenException(ERROR_MESSAGES.DEBT.BRANCH_REQUIRED_CREATE);
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       branchId = user.branchId;
     } else {
@@ -192,9 +192,9 @@ export class DebtsService {
    * Auto-updates status: PAID if remaining = 0, PARTIAL if 0 < remaining < original
    */
   async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser): Promise<DebtWithAllRelations> {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException(ERROR_MESSAGES.DEBT.BRANCH_REQUIRED_PAY);
+    // Validate accountant has a branch assigned
+    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
+      throw new BadRequestException('Accountant must be assigned to branch');
     }
 
     // Validate amount is positive

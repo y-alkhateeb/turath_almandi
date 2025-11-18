@@ -87,7 +87,7 @@ export class InventoryService {
     if (user.role === UserRole.ACCOUNTANT) {
       // Accountants must have a branch assigned and can only create for their branch
       if (!user.branchId) {
-        throw new ForbiddenException(ERROR_MESSAGES.INVENTORY.BRANCH_REQUIRED);
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       branchId = user.branchId;
     } else {
@@ -245,7 +245,7 @@ export class InventoryService {
     // Role-based access control
     if (user && user.role === UserRole.ACCOUNTANT) {
       if (!user.branchId) {
-        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       if (item.branchId !== user.branchId) {
         throw new ForbiddenException(ERROR_MESSAGES.INVENTORY.NO_ACCESS);

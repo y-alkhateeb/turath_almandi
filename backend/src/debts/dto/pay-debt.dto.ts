@@ -1,16 +1,14 @@
 import {
   IsNotEmpty,
-  IsNumber,
-  IsPositive,
   IsDateString,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 
 export class PayDebtDto {
   @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
+  @IsPositiveAmount()
   amountPaid: number;
 
   @IsNotEmpty()

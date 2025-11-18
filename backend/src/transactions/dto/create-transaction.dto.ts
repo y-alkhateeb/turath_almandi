@@ -2,23 +2,19 @@ import {
   IsString,
   IsNotEmpty,
   IsEnum,
-  IsNumber,
   IsOptional,
   IsDateString,
-  Min,
   ValidateIf,
 } from 'class-validator';
 import { TransactionType, PaymentMethod } from '@prisma/client';
-import { Transform } from 'class-transformer';
+import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 
 export class CreateTransactionDto {
   @IsEnum(TransactionType)
   @IsNotEmpty()
   type: TransactionType;
 
-  @IsNumber()
-  @Min(0.01, { message: 'Amount must be greater than 0' })
-  @Transform(({ value }) => parseFloat(value))
+  @IsPositiveAmount()
   amount: number;
 
   @IsEnum(PaymentMethod)

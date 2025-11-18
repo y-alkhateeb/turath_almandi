@@ -1,16 +1,14 @@
 import {
   IsString,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsDateString,
-  Min,
   Validate,
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 
 /**
  * Custom validator to ensure due_date >= date
@@ -39,9 +37,7 @@ export class CreateDebtDto {
   @IsNotEmpty({ message: 'Creditor name is required' })
   creditorName: string;
 
-  @IsNumber()
-  @Min(0.01, { message: 'Amount must be greater than 0' })
-  @Transform(({ value }) => parseFloat(value))
+  @IsPositiveAmount()
   amount: number;
 
   @IsDateString()

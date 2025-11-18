@@ -491,4 +491,46 @@ export class InventoryService {
       prismaClient,
     );
   }
+
+  /**
+   * Get total inventory value across all items
+   * Calculates sum of (quantity * costPerUnit) for all inventory items
+   * Supports branch filtering and role-based access control
+   */
+  async getTotalInventoryValue(
+    user: RequestUser,
+    branchId?: string,
+  ): Promise<number> {
+    // Build where clause with role-based filtering
+    let where: Prisma.InventoryItemWhereInput = {};
+
+    // Apply branch filtering based on user role
+    if (user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && branchId) {
+      where.branchId = branchId;
+    }
+
+    // Fetch all inventory items with quantity and costPerUnit
+    const inventoryItems = await this.prisma.inventoryItem.findMany({
+      where,
+      select: {
+        quantity: true,
+        costPerUnit: true,
+      },
+    });
+
+    // Calculate total value: sum of (quantity * costPerUnit)
+    const totalValue = inventoryItems.reduce((sum, item) => {
+      const quantity = Number(item.quantity);
+      const costPerUnit = Number(item.costPerUnit);
+      return sum + (quantity * costPerUnit);
+    }, 0);
+
+    // Round to 2 decimal places
+    return Math.round(totalValue * 100) / 100;
+  }
 }

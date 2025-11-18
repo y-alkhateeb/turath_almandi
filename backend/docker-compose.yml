@@ -1,38 +1,136 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
     image: postgres:18-alpine
     container_name: turath_almandi_postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: turath_almandi
+      # Performance tuning
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Optional: Custom PostgreSQL configuration
+      # - ./postgres.conf:/etc/postgresql/postgresql.conf
     networks:
       - turath_network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Redis (for token blacklist and caching)
+  redis:
+    image: redis:7-alpine
+    container_name: turath_almandi_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_password} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - turath_network
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # Backend Application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: turath_almandi_backend
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      # Application
+      NODE_ENV: production
+      PORT: 3000
+      
+      # Database
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/turath_almandi?schema=public&connection_limit=10&pool_timeout=20
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-7d}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-7}
+      JWT_REFRESH_TOKEN_EXPIRATION_REMEMBER_ME: ${JWT_REFRESH_TOKEN_EXPIRATION_REMEMBER_ME:-30}
+      
+      # CORS / Frontend
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      
+      # Bcrypt
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-10}
+      
+      # Redis
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_password}@redis:6379
+      
+      # Scheduled Tasks
+      OVERDUE_DEBT_CHECK_CRON: ${OVERDUE_DEBT_CHECK_CRON:-0 9 * * *}
+      
+      # Database Seeding
+      RUN_SEED: ${RUN_SEED:-false}
+    volumes:
+      # Optional: Mount logs directory
+      # - ./logs:/app/logs
+      # Development: Enable hot reload (comment out for production)
+      # - ./src:/app/src
+    networks:
+      - turath_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Optional: PgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: turath_almandi_pgadmin
-    restart: always
+    restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@restaurant.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@restaurant.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - '5050:80'
+      - '${PGADMIN_PORT:-5050}:80'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     networks:
       - turath_network
     depends_on:
       - postgres
+    profiles:
+      # Only start with: docker-compose --profile admin up
+      - admin
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
     driver: local
 
 networks:

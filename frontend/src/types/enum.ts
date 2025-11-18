@@ -48,6 +48,28 @@ export enum InventoryUnit {
   OTHER = 'OTHER',
 }
 
+// Currency types
+export enum Currency {
+  USD = 'USD',
+  IQD = 'IQD',
+}
+
+// Notification severity levels
+export enum NotificationSeverity {
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+  CRITICAL = 'CRITICAL',
+}
+
+// Notification display methods
+export enum DisplayMethod {
+  POPUP = 'POPUP',
+  TOAST = 'TOAST',
+  EMAIL = 'EMAIL',
+  SMS = 'SMS',
+}
+
 // Theme enums (re-exported from theme/type.ts)
 export { ThemeMode, ThemeColorPresets, ThemeLayout } from '../theme/type';
 export type { Direction } from '../theme/type';

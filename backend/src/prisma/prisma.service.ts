@@ -26,6 +26,20 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     this.$on('error' as never, (e: unknown) => {
       this.logger.error(e);
     });
+
+    // Middleware to log slow queries (>1000ms)
+    this.$use(async (params, next) => {
+      const startTime = Date.now();
+      const result = await next(params);
+      const duration = Date.now() - startTime;
+
+      // Log slow queries
+      if (duration > 1000) {
+        this.logSlowQuery(params, duration);
+      }
+
+      return result;
+    });
   }
 
   async onModuleInit() {
@@ -64,5 +78,48 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const models = Reflect.ownKeys(this).filter((key) => key[0] !== '_');
 
     return Promise.all(models.map((modelKey) => this[modelKey].deleteMany()));
+  }
+
+  private logSlowQuery(params: { model?: string; action: string; args: unknown }, duration: number): void {
+    const queryInfo = {
+      model: params.model || 'Unknown',
+      action: params.action,
+      duration: `${duration}ms`,
+      args: this.sanitizeQueryArgs(params.args),
+    };
+
+    this.logger.warn(
+      `🐌 Slow Query Detected: ${queryInfo.model}.${queryInfo.action} took ${queryInfo.duration}`,
+    );
+
+    this.logger.debug(
+      'Slow query details:',
+      JSON.stringify(queryInfo, null, 2),
+    );
+  }
+
+  private sanitizeQueryArgs(args: unknown): unknown {
+    if (!args || typeof args !== 'object') {
+      return args;
+    }
+
+    // Create a deep copy to avoid modifying the original
+    const sanitized = JSON.parse(JSON.stringify(args));
+
+    // Remove sensitive fields from query args
+    const sensitiveFields = ['password', 'passwordHash', 'token', 'accessToken', 'refreshToken'];
+
+    const sanitizeObject = (obj: Record<string, unknown>): void => {
+      for (const key in obj) {
+        if (sensitiveFields.includes(key)) {
+          obj[key] = '***REDACTED***';
+        } else if (obj[key] && typeof obj[key] === 'object') {
+          sanitizeObject(obj[key] as Record<string, unknown>);
+        }
+      }
+    };
+
+    sanitizeObject(sanitized);
+    return sanitized;
   }
 }

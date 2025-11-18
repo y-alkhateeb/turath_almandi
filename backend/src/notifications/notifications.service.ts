@@ -162,7 +162,7 @@ export class NotificationsService {
    * @param userId - User ID
    * @returns Array of unread notifications
    */
-  async getUnreadNotifications(userId: string): Promise<NotificationWithBranch[]> {
+  async getUnreadNotifications(userId: string): Promise<NotificationWithRelations[]> {
     return this.prisma.notification.findMany({
       where: {
         isRead: false,
@@ -173,6 +173,9 @@ export class NotificationsService {
       include: {
         branch: {
           select: BRANCH_SELECT,
+        },
+        creator: {
+          select: USER_SELECT,
         },
       },
     });

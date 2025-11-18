@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserInfo, useIsAdmin } from '@/store/userStore';
-import { getDashboardStats } from '@/api/services/dashboardService';
+import { getStats as getDashboardStats } from '@/api/services/dashboardService';
 import { getAll as getAllBranches } from '@/api/services/branchService';
 import type { DashboardStats } from '#/entity';
 import type { Branch } from '@/types';

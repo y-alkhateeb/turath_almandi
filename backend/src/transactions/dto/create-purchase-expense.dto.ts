@@ -11,7 +11,8 @@ import {
   MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { InventoryUnit } from '@prisma/client';
+import { InventoryUnit, Currency } from '@prisma/client';
+import { IsAllowedCurrency } from '../../common/decorators/is-allowed-currency.decorator';
 
 export class CreatePurchaseExpenseDto {
   @IsDateString()
@@ -22,6 +23,11 @@ export class CreatePurchaseExpenseDto {
   @Min(0.01, { message: 'Amount must be greater than 0' })
   @Transform(({ value }) => parseFloat(value))
   amount: number;
+
+  @IsEnum(Currency)
+  @IsOptional()
+  @IsAllowedCurrency()
+  currency?: Currency;
 
   @IsString()
   @IsNotEmpty()

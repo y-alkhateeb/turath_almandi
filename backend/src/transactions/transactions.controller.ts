@@ -4,6 +4,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole, TransactionType, PaymentMethod } from '@prisma/client';
 
@@ -15,7 +16,7 @@ interface RequestUser {
 }
 
 @Controller('transactions')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, BranchAccessGuard)
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 

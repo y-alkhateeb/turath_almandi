@@ -1,0 +1,93 @@
+/**
+ * Centralized error message keys for consistent messaging across the application
+ * These keys are used with the translation system in arabic-errors.ts
+ *
+ * Usage:
+ * - Use these keys in services: throw new BadRequestException(ERROR_MESSAGES.BRANCH.NOT_FOUND)
+ * - The exception filter will translate the key based on Accept-Language header
+ */
+
+export const ERROR_MESSAGES = {
+  // Branch-related errors
+  BRANCH: {
+    NOT_FOUND: 'branchNotFound',
+    REQUIRED: 'branchRequired',
+    REQUIRED_FOR_ACCOUNTANT: 'userMustBeAssignedToBranch',
+    ACCOUNTANT_NOT_ASSIGNED: 'accountantMustBeAssignedToBranch',
+    ACCOUNTANT_NO_ACCESS: 'accountantNotAssignedToAnyBranch',
+    CANNOT_ACCESS_OTHER: 'cannotAccessOtherBranches',
+    CANNOT_DELETE_OTHER: 'cannotDeleteFromOtherBranches',
+    BRANCH_ID_REQUIRED: 'branchIdRequired',
+    BRANCH_ID_REQUIRED_BODY: 'branchIdRequiredInRequestBody',
+  },
+
+  // User-related errors
+  USER: {
+    NOT_FOUND: (id: string) => `userWithId${id}NotFound`,
+    NOT_AUTHENTICATED: 'userNotAuthenticated',
+  },
+
+  // Transaction-related errors
+  TRANSACTION: {
+    NOT_FOUND: (id: string) => `transactionWithId${id}NotFound`,
+    NO_ACCESS: 'noAccessToTransaction',
+    BRANCH_REQUIRED: 'userMustBeAssignedToBranchToCreateTransactions',
+    PAYMENT_METHOD_INVALID: 'paymentMethodMustBeCashOrMasterForIncome',
+  },
+
+  // Debt-related errors
+  DEBT: {
+    NOT_FOUND: 'debtNotFound',
+    BRANCH_REQUIRED_CREATE: 'userMustBeAssignedToBranchToCreateDebts',
+    BRANCH_REQUIRED_PAY: 'userMustBeAssignedToBranchToPayDebts',
+    DUE_DATE_INVALID: 'dueDateMustBeGreaterThanOrEqualToDate',
+    PAYMENT_EXCEEDS_REMAINING: (paid: number, remaining: number) =>
+      `paymentAmount${paid}CannotExceedRemainingAmount${remaining}`,
+    ONLY_PAY_OWN_BRANCH: 'canOnlyPayDebtsFromYourBranch',
+  },
+
+  // Inventory-related errors
+  INVENTORY: {
+    NOT_FOUND: (id: string) => `inventoryItemWithId${id}NotFound`,
+    NO_ACCESS: 'noAccessToInventoryItem',
+    BRANCH_REQUIRED: 'userMustBeAssignedToBranchToCreateInventoryItems',
+    DUPLICATE_ITEM: 'inventoryItemWithSameNameAndUnitAlreadyExists',
+    LINKED_TRANSACTIONS: 'cannotDeleteInventoryItemWithLinkedTransactions',
+    ITEM_NAME_REQUIRED: 'itemNameRequiredWhenAddingToInventory',
+    UNIT_REQUIRED: 'unitRequiredWhenAddingToInventory',
+  },
+
+  // Validation errors
+  VALIDATION: {
+    AMOUNT_POSITIVE: 'amountMustBeGreaterThan0',
+    QUANTITY_POSITIVE: 'quantityMustBeGreaterThan0WhenAddingToInventory',
+    QUANTITY_NON_NEGATIVE: 'quantityMustBeGreaterThanOrEqualTo0',
+    COST_NON_NEGATIVE: 'costPerUnitMustBeGreaterThanOrEqualTo0',
+    PAYMENT_POSITIVE: 'paymentAmountMustBeGreaterThan0',
+  },
+
+  // Currency errors
+  CURRENCY: {
+    ONLY_USD_ALLOWED: 'onlyUSDCurrencyIsAllowed',
+    INVALID: 'invalidCurrency',
+  },
+
+  // Database errors
+  DATABASE: {
+    RECORD_NOT_FOUND: 'recordNotFound',
+    UNEXPECTED_ERROR: 'unexpectedDatabaseError',
+    USERNAME_EXISTS: 'recordWithThisUsernameAlreadyExists',
+    EMAIL_EXISTS: 'recordWithThisEmailAlreadyExists',
+  },
+
+  // HTTP errors
+  HTTP: {
+    BAD_REQUEST: 'badRequest',
+    UNAUTHORIZED: 'unauthorized',
+    FORBIDDEN: 'forbidden',
+    NOT_FOUND: 'notFound',
+    CONFLICT: 'conflict',
+    INTERNAL_SERVER_ERROR: 'internalServerError',
+    SERVICE_UNAVAILABLE: 'serviceUnavailable',
+  },
+} as const;

@@ -8,9 +8,27 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
-import { TransactionType, Currency, UserRole } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
+import { TransactionType, Currency, UserRole, Prisma, PaymentMethod } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { InventoryService } from '../inventory/inventory.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { WebSocketGatewayService } from '../websocket/websocket.gateway';
+import { applyBranchFilter } from '../common/utils/query-builder';
+import {
+  BRANCH_SELECT,
+  USER_SELECT,
+  INVENTORY_ITEM_SELECT,
+  INVENTORY_ITEM_EXTENDED_SELECT,
+} from '../common/constants/prisma-includes';
+import {
+  formatDateForDB,
+  getCurrentTimestamp,
+  getStartOfDay,
+  getEndOfDay,
+  formatToISODate,
+} from '../common/utils/date.utils';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
+import { CURRENCY_CONFIG } from '../common/constants/currency.constants';
 
 interface RequestUser {
   id: string;
@@ -34,33 +52,120 @@ interface TransactionFilters {
   search?: string;
 }
 
+interface SalaryExpensesSummary {
+  total: number;
+  count: number;
+  transactions: Array<{
+    id: string;
+    amount: number;
+    date: string;
+    description: string;
+    paymentMethod: PaymentMethod;
+    branchId: string;
+    branchName: string;
+  }>;
+}
+
+interface PurchaseExpensesSummary {
+  total: number;
+  count: number;
+  transactions: Array<{
+    id: string;
+    amount: number;
+    date: string;
+    description: string;
+    paymentMethod: PaymentMethod;
+    branchId: string;
+    branchName: string;
+    inventoryItem: {
+      id: string;
+      name: string;
+      quantity: number;
+      unit: string;
+    } | null;
+  }>;
+}
+
+// Type for transaction with branch (true) and creator select
+type TransactionWithBranchAndCreator = Prisma.TransactionGetPayload<{
+  include: {
+    branch: true;
+    creator: {
+      select: typeof USER_SELECT;
+    };
+  };
+}>;
+
+// Type for transaction with branch, creator, and inventory item selects
+type TransactionWithAllRelations = Prisma.TransactionGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    inventoryItem: {
+      select: typeof INVENTORY_ITEM_SELECT;
+    };
+  };
+}>;
+
+// Type for transaction with extended inventory item
+type TransactionWithExtendedInventory = Prisma.TransactionGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    inventoryItem: {
+      select: typeof INVENTORY_ITEM_EXTENDED_SELECT;
+    };
+  };
+}>;
+
+// Type for transaction with full inventory item
+type TransactionWithFullInventory = Prisma.TransactionGetPayload<{
+  include: {
+    branch: true;
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    inventoryItem: true;
+  };
+}>;
+
 @Injectable()
 export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
+    private readonly inventoryService: InventoryService,
+    private readonly notificationsService: NotificationsService,
+    private readonly websocketGateway: WebSocketGatewayService,
   ) {}
 
-  async create(createTransactionDto: CreateTransactionDto, user: RequestUser) {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء المعاملات');
+  async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
+    // Validate accountant has a branch assigned
+    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
+      throw new BadRequestException('Accountant must be assigned to branch');
     }
 
     // Validate amount is positive
     if (createTransactionDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate payment method for income transactions
     if (createTransactionDto.type === TransactionType.INCOME) {
       if (
         createTransactionDto.paymentMethod &&
-        !['CASH', 'MASTER'].includes(createTransactionDto.paymentMethod)
+        createTransactionDto.paymentMethod !== PaymentMethod.CASH &&
+        createTransactionDto.paymentMethod !== PaymentMethod.MASTER
       ) {
-        throw new BadRequestException(
-          'Payment method must be either CASH or MASTER for income transactions',
-        );
+        throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
       }
     }
 
@@ -68,12 +173,12 @@ export class TransactionsService {
     const transactionData = {
       type: createTransactionDto.type,
       amount: createTransactionDto.amount,
-      date: new Date(createTransactionDto.date),
+      date: formatDateForDB(createTransactionDto.date),
       paymentMethod: createTransactionDto.paymentMethod || null,
       category: createTransactionDto.category || 'General',
       employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
       notes: createTransactionDto.notes || null,
-      currency: Currency.USD, // Default currency
+      currency: CURRENCY_CONFIG.validateOrDefault(createTransactionDto.currency),
       branchId: user.branchId, // Auto-fill from logged user
       createdBy: user.id,
     };
@@ -83,11 +188,7 @@ export class TransactionsService {
       include: {
         branch: true,
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
       },
     });
@@ -100,6 +201,24 @@ export class TransactionsService {
       transaction,
     );
 
+    // Notify about the transaction (async, don't wait)
+    this.notificationsService
+      .notifyNewTransaction(
+        transaction.id,
+        transaction.type,
+        Number(transaction.amount),
+        transaction.category,
+        transaction.branchId,
+        user.id,
+      )
+      .catch((error) => {
+        // Log error but don't fail the transaction
+        console.error('Failed to create transaction notification:', error);
+      });
+
+    // Emit WebSocket event for real-time updates
+    this.websocketGateway.emitNewTransaction(transaction);
+
     return transaction;
   }
 
@@ -110,24 +229,15 @@ export class TransactionsService {
     user: RequestUser,
     pagination: PaginationParams = {},
     filters: TransactionFilters = {},
-  ) {
-    const { page = 1, limit = 20 } = pagination;
+  ): Promise<{ data: TransactionWithAllRelations[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
+    const { page = 1, limit = 50 } = pagination;
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    const where: any = {};
+    let where: Prisma.TransactionWhereInput = {};
 
-    // Role-based access control
-    if (user.role === UserRole.ACCOUNTANT) {
-      // Accountants can only see transactions from their branch
-      if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
-      }
-      where.branchId = user.branchId;
-    } else if (user.role === UserRole.ADMIN && filters.branchId) {
-      // Admins can filter by specific branch
-      where.branchId = filters.branchId;
-    }
+    // Apply role-based branch filtering
+    where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply filters
     if (filters.type) {
@@ -146,10 +256,10 @@ export class TransactionsService {
     if (filters.startDate || filters.endDate) {
       where.date = {};
       if (filters.startDate) {
-        where.date.gte = new Date(filters.startDate);
+        where.date.gte = formatDateForDB(filters.startDate);
       }
       if (filters.endDate) {
-        where.date.lte = new Date(filters.endDate);
+        where.date.lte = formatDateForDB(filters.endDate);
       }
     }
 
@@ -173,33 +283,20 @@ export class TransactionsService {
       take: limit,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         inventoryItem: {
-          select: {
-            id: true,
-            name: true,
-            quantity: true,
-            unit: true,
-          },
+          select: INVENTORY_ITEM_SELECT,
         },
       },
     });
 
     return {
       data: transactions,
-      pagination: {
+      meta: {
         page,
         limit,
         total,
@@ -208,47 +305,33 @@ export class TransactionsService {
     };
   }
 
-  async findOne(id: string, user?: RequestUser) {
+  async findOne(id: string, user?: RequestUser): Promise<TransactionWithExtendedInventory> {
     const transaction = await this.prisma.transaction.findUnique({
       where: { id },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         inventoryItem: {
-          select: {
-            id: true,
-            name: true,
-            quantity: true,
-            unit: true,
-            costPerUnit: true,
-          },
+          select: INVENTORY_ITEM_EXTENDED_SELECT,
         },
       },
     });
 
     if (!transaction) {
-      throw new NotFoundException(`Transaction with ID ${id} not found`);
+      throw new NotFoundException(ERROR_MESSAGES.TRANSACTION.NOT_FOUND(id));
     }
 
     // Role-based access control
     if (user && user.role === UserRole.ACCOUNTANT) {
       if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       if (transaction.branchId !== user.branchId) {
-        throw new ForbiddenException('You do not have access to this transaction');
+        throw new ForbiddenException(ERROR_MESSAGES.TRANSACTION.NO_ACCESS);
       }
     }
 
@@ -258,13 +341,13 @@ export class TransactionsService {
   /**
    * Update a transaction
    */
-  async update(id: string, updateTransactionDto: UpdateTransactionDto, user: RequestUser) {
+  async update(id: string, updateTransactionDto: UpdateTransactionDto, user: RequestUser): Promise<TransactionWithAllRelations> {
     // First, find the existing transaction
     const existingTransaction = await this.findOne(id, user);
 
     // Validate amount if provided
     if (updateTransactionDto.amount !== undefined && updateTransactionDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate payment method for income transactions
@@ -272,15 +355,14 @@ export class TransactionsService {
       (updateTransactionDto.type === TransactionType.INCOME ||
         existingTransaction.type === TransactionType.INCOME) &&
       updateTransactionDto.paymentMethod &&
-      !['CASH', 'MASTER'].includes(updateTransactionDto.paymentMethod)
+      updateTransactionDto.paymentMethod !== PaymentMethod.CASH &&
+      updateTransactionDto.paymentMethod !== PaymentMethod.MASTER
     ) {
-      throw new BadRequestException(
-        'Payment method must be either CASH or MASTER for income transactions',
-      );
+      throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
     }
 
     // Build update data
-    const updateData: any = {};
+    const updateData: Prisma.TransactionUpdateInput = {};
     if (updateTransactionDto.type !== undefined) updateData.type = updateTransactionDto.type;
     if (updateTransactionDto.amount !== undefined) updateData.amount = updateTransactionDto.amount;
     if (updateTransactionDto.paymentMethod !== undefined)
@@ -288,7 +370,7 @@ export class TransactionsService {
     if (updateTransactionDto.category !== undefined)
       updateData.category = updateTransactionDto.category;
     if (updateTransactionDto.date !== undefined)
-      updateData.date = new Date(updateTransactionDto.date);
+      updateData.date = formatDateForDB(updateTransactionDto.date);
     if (updateTransactionDto.employeeVendorName !== undefined)
       updateData.employeeVendorName = updateTransactionDto.employeeVendorName;
     if (updateTransactionDto.notes !== undefined) updateData.notes = updateTransactionDto.notes;
@@ -299,26 +381,13 @@ export class TransactionsService {
       data: updateData,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         inventoryItem: {
-          select: {
-            id: true,
-            name: true,
-            quantity: true,
-            unit: true,
-          },
+          select: INVENTORY_ITEM_SELECT,
         },
       },
     });
@@ -339,7 +408,7 @@ export class TransactionsService {
    * Delete a transaction (soft delete by setting a flag or hard delete)
    * Using hard delete for now
    */
-  async remove(id: string, user: RequestUser) {
+  async remove(id: string, user: RequestUser): Promise<{ message: string; id: string }> {
     // First, find the existing transaction to ensure it exists and user has access
     const transaction = await this.findOne(id, user);
 
@@ -361,16 +430,21 @@ export class TransactionsService {
    * @param user - Current user (used to enforce branch access for accountants)
    * @returns Financial summary with income breakdown, expenses, and net profit
    */
-  async getSummary(date?: string, branchId?: string, user?: RequestUser) {
+  async getSummary(date?: string, branchId?: string, user?: RequestUser): Promise<{
+    date: string;
+    branchId: string | null;
+    income_cash: number;
+    income_master: number;
+    total_income: number;
+    total_expense: number;
+    net: number;
+  }> {
     // Determine the target date (default to today)
-    const targetDate = date ? new Date(date) : new Date();
+    const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
 
     // Set to start and end of day for the query
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const startOfDay = getStartOfDay(targetDate);
+    const endOfDay = getEndOfDay(targetDate);
 
     // Determine which branch to filter by
     let filterBranchId: string | undefined = undefined;
@@ -379,7 +453,7 @@ export class TransactionsService {
       if (user.role === UserRole.ACCOUNTANT) {
         // Accountants can only see their assigned branch
         if (!user.branchId) {
-          throw new ForbiddenException('Accountant must be assigned to a branch');
+          throw new BadRequestException('Accountant must be assigned to branch');
         }
         filterBranchId = user.branchId;
       } else if (user.role === UserRole.ADMIN) {
@@ -391,8 +465,8 @@ export class TransactionsService {
       filterBranchId = branchId;
     }
 
-    // Build where clause for date and branch filtering
-    const where: any = {
+    // Build base where clause for date and branch filtering
+    const baseWhere: Prisma.TransactionWhereInput = {
       date: {
         gte: startOfDay,
         lte: endOfDay,
@@ -400,43 +474,55 @@ export class TransactionsService {
     };
 
     if (filterBranchId) {
-      where.branchId = filterBranchId;
+      baseWhere.branchId = filterBranchId;
     }
 
-    // Get all income transactions (CASH and MASTER)
-    const incomeTransactions = await this.prisma.transaction.findMany({
-      where: {
-        ...where,
-        type: TransactionType.INCOME,
-      },
-    });
+    // Execute all aggregate queries in parallel for best performance
+    const [incomeCashAggregate, incomeMasterAggregate, expenseAggregate] = await Promise.all([
+      // Aggregate CASH income
+      this.prisma.transaction.aggregate({
+        where: {
+          ...baseWhere,
+          type: TransactionType.INCOME,
+          paymentMethod: PaymentMethod.CASH,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      // Aggregate MASTER income
+      this.prisma.transaction.aggregate({
+        where: {
+          ...baseWhere,
+          type: TransactionType.INCOME,
+          paymentMethod: PaymentMethod.MASTER,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      // Aggregate expenses
+      this.prisma.transaction.aggregate({
+        where: {
+          ...baseWhere,
+          type: TransactionType.EXPENSE,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+    ]);
 
-    // Calculate income by payment method
-    const income_cash = incomeTransactions
-      .filter((t) => t.paymentMethod === 'CASH')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-    const income_master = incomeTransactions
-      .filter((t) => t.paymentMethod === 'MASTER')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    // Extract aggregated values (handle null for zero transactions)
+    const income_cash = Number(incomeCashAggregate._sum.amount || 0);
+    const income_master = Number(incomeMasterAggregate._sum.amount || 0);
+    const total_expense = Number(expenseAggregate._sum.amount || 0);
 
     const total_income = income_cash + income_master;
-
-    // Get all expense transactions
-    const expenseTransactions = await this.prisma.transaction.findMany({
-      where: {
-        ...where,
-        type: TransactionType.EXPENSE,
-      },
-    });
-
-    const total_expense = expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-
-    // Calculate net profit
     const net = total_income - total_expense;
 
     return {
-      date: targetDate.toISOString().split('T')[0],
+      date: formatToISODate(targetDate),
       branchId: filterBranchId || null,
       income_cash,
       income_master,
@@ -453,27 +539,27 @@ export class TransactionsService {
   async createPurchaseWithInventory(
     createPurchaseDto: CreatePurchaseExpenseDto,
     user: RequestUser,
-  ) {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء المعاملات');
+  ): Promise<TransactionWithFullInventory> {
+    // Validate accountant has a branch assigned
+    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
+      throw new BadRequestException('Accountant must be assigned to branch');
     }
 
     // Validate amount is positive
     if (createPurchaseDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate inventory fields if addToInventory is true
     if (createPurchaseDto.addToInventory) {
       if (!createPurchaseDto.itemName) {
-        throw new BadRequestException('Item name is required when adding to inventory');
+        throw new BadRequestException(ERROR_MESSAGES.INVENTORY.ITEM_NAME_REQUIRED);
       }
       if (!createPurchaseDto.quantity || createPurchaseDto.quantity <= 0) {
-        throw new BadRequestException('Quantity must be greater than 0 when adding to inventory');
+        throw new BadRequestException(ERROR_MESSAGES.VALIDATION.QUANTITY_POSITIVE);
       }
       if (!createPurchaseDto.unit) {
-        throw new BadRequestException('Unit is required when adding to inventory');
+        throw new BadRequestException(ERROR_MESSAGES.INVENTORY.UNIT_REQUIRED);
       }
     }
 
@@ -481,52 +567,16 @@ export class TransactionsService {
     return this.prisma.$transaction(async (prisma) => {
       let inventoryItemId: string | null = null;
 
-      // If addToInventory is true, create or update inventory item
+      // If addToInventory is true, update inventory using InventoryService
       if (createPurchaseDto.addToInventory && createPurchaseDto.itemName) {
-        // Calculate cost per unit
-        const costPerUnit = createPurchaseDto.amount / createPurchaseDto.quantity!;
-
-        // Try to find existing inventory item with same name and unit
-        const existingItem = await prisma.inventoryItem.findFirst({
-          where: {
-            branchId: user.branchId!,
-            name: createPurchaseDto.itemName,
-            unit: createPurchaseDto.unit!,
-          },
-        });
-
-        if (existingItem) {
-          // Update existing item: add quantity and recalculate weighted average cost
-          const currentValue = new Decimal(existingItem.costPerUnit).mul(existingItem.quantity);
-          const newValue = new Decimal(costPerUnit).mul(createPurchaseDto.quantity!);
-          const totalQuantity = new Decimal(existingItem.quantity).add(createPurchaseDto.quantity!);
-          const newCostPerUnit = currentValue.add(newValue).div(totalQuantity);
-
-          const updatedItem = await prisma.inventoryItem.update({
-            where: { id: existingItem.id },
-            data: {
-              quantity: totalQuantity,
-              costPerUnit: newCostPerUnit,
-              lastUpdated: new Date(),
-            },
-          });
-
-          inventoryItemId = updatedItem.id;
-        } else {
-          // Create new inventory item
-          const newItem = await prisma.inventoryItem.create({
-            data: {
-              branchId: user.branchId!,
-              name: createPurchaseDto.itemName,
-              quantity: createPurchaseDto.quantity!,
-              unit: createPurchaseDto.unit!,
-              costPerUnit: costPerUnit,
-              lastUpdated: new Date(),
-            },
-          });
-
-          inventoryItemId = newItem.id;
-        }
+        inventoryItemId = await this.inventoryService.updateFromPurchase(
+          user.branchId!,
+          createPurchaseDto.itemName,
+          createPurchaseDto.quantity!,
+          createPurchaseDto.unit!,
+          createPurchaseDto.amount,
+          prisma,
+        );
       }
 
       // Create the expense transaction
@@ -534,11 +584,11 @@ export class TransactionsService {
         data: {
           type: TransactionType.EXPENSE,
           amount: createPurchaseDto.amount,
-          date: new Date(createPurchaseDto.date),
+          date: formatDateForDB(createPurchaseDto.date),
           employeeVendorName: createPurchaseDto.vendorName,
           category: 'Purchase', // Category for purchase expenses
           notes: createPurchaseDto.notes || null,
-          currency: Currency.USD,
+          currency: CURRENCY_CONFIG.validateOrDefault(createPurchaseDto.currency),
           branchId: user.branchId!,
           createdBy: user.id,
           inventoryItemId: inventoryItemId,
@@ -546,11 +596,7 @@ export class TransactionsService {
         include: {
           branch: true,
           creator: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
+            select: USER_SELECT,
           },
           inventoryItem: true,
         },
@@ -564,7 +610,214 @@ export class TransactionsService {
         transaction,
       );
 
+      // Notify about the transaction (async, don't wait)
+      this.notificationsService
+        .notifyNewTransaction(
+          transaction.id,
+          transaction.type,
+          Number(transaction.amount),
+          transaction.category,
+          transaction.branchId,
+          user.id,
+        )
+        .catch((error) => {
+          // Log error but don't fail the transaction
+          console.error('Failed to create transaction notification:', error);
+        });
+
       return transaction;
     });
+  }
+
+  /**
+   * Get salary expenses with filtering support
+   * Filters transactions where category='salaries'
+   * Supports optional branch and date range filtering
+   * Returns total amount and list of salary transactions
+   */
+  async getSalaryExpenses(
+    user: RequestUser,
+    branchId?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<SalaryExpensesSummary> {
+    // Build where clause with role-based filtering
+    let where: Prisma.TransactionWhereInput = {
+      type: TransactionType.EXPENSE,
+      category: 'salaries',
+    };
+
+    // Apply branch filtering based on user role
+    if (user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && branchId) {
+      where.branchId = branchId;
+    }
+
+    // Apply date range filter if provided
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) {
+        where.date.gte = formatDateForDB(startDate);
+      }
+      if (endDate) {
+        where.date.lte = formatDateForDB(endDate);
+      }
+    }
+
+    // Execute queries in parallel for best performance
+    const [totalResult, transactions] = await Promise.all([
+      // Get total sum of salary expenses
+      this.prisma.transaction.aggregate({
+        where,
+        _sum: {
+          amount: true,
+        },
+        _count: true,
+      }),
+
+      // Get list of salary transactions
+      this.prisma.transaction.findMany({
+        where,
+        include: {
+          branch: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      }),
+    ]);
+
+    const total = Number(totalResult._sum.amount || 0);
+    const count = totalResult._count;
+
+    // Format transactions for response
+    const formattedTransactions = transactions.map((t) => ({
+      id: t.id,
+      amount: Number(t.amount),
+      date: formatToISODate(t.date),
+      description: t.description,
+      paymentMethod: t.paymentMethod,
+      branchId: t.branchId,
+      branchName: t.branch.name,
+    }));
+
+    return {
+      total,
+      count,
+      transactions: formattedTransactions,
+    };
+  }
+
+  /**
+   * Get purchase expenses with filtering support
+   * Filters transactions where category='purchases'
+   * Supports optional branch and date range filtering
+   * Returns total amount and list of purchase transactions with inventory item details
+   */
+  async getPurchaseExpenses(
+    user: RequestUser,
+    branchId?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<PurchaseExpensesSummary> {
+    // Build where clause with role-based filtering
+    let where: Prisma.TransactionWhereInput = {
+      type: TransactionType.EXPENSE,
+      category: 'purchases',
+    };
+
+    // Apply branch filtering based on user role
+    if (user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && branchId) {
+      where.branchId = branchId;
+    }
+
+    // Apply date range filter if provided
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) {
+        where.date.gte = formatDateForDB(startDate);
+      }
+      if (endDate) {
+        where.date.lte = formatDateForDB(endDate);
+      }
+    }
+
+    // Execute queries in parallel for best performance
+    const [totalResult, transactions] = await Promise.all([
+      // Get total sum of purchase expenses
+      this.prisma.transaction.aggregate({
+        where,
+        _sum: {
+          amount: true,
+        },
+        _count: true,
+      }),
+
+      // Get list of purchase transactions with inventory item details
+      this.prisma.transaction.findMany({
+        where,
+        include: {
+          branch: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          inventoryItem: {
+            select: {
+              id: true,
+              name: true,
+              quantity: true,
+              unit: true,
+            },
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      }),
+    ]);
+
+    const total = Number(totalResult._sum.amount || 0);
+    const count = totalResult._count;
+
+    // Format transactions for response
+    const formattedTransactions = transactions.map((t) => ({
+      id: t.id,
+      amount: Number(t.amount),
+      date: formatToISODate(t.date),
+      description: t.description,
+      paymentMethod: t.paymentMethod,
+      branchId: t.branchId,
+      branchName: t.branch.name,
+      inventoryItem: t.inventoryItem
+        ? {
+            id: t.inventoryItem.id,
+            name: t.inventoryItem.name,
+            quantity: Number(t.inventoryItem.quantity),
+            unit: t.inventoryItem.unit,
+          }
+        : null,
+    }));
+
+    return {
+      total,
+      count,
+      transactions: formattedTransactions,
+    };
   }
 }

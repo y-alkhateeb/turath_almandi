@@ -7,8 +7,15 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
-import { UserRole, DebtStatus } from '@prisma/client';
+import { UserRole, DebtStatus, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { WebSocketGatewayService } from '../websocket/websocket.gateway';
+import { applyBranchFilter } from '../common/utils/query-builder';
+import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
+import { formatDateForDB } from '../common/utils/date.utils';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
+import { CURRENCY_CONFIG } from '../common/constants/currency.constants';
 
 interface RequestUser {
   id: string;
@@ -17,11 +24,57 @@ interface RequestUser {
   branchId: string | null;
 }
 
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+interface DateRangeFilter {
+  startDate?: string;
+  endDate?: string;
+}
+
+interface DebtsSummary {
+  totalDebts: number;
+  activeDebts: number;
+  paidDebts: number;
+  partialDebts: number;
+  totalOwed: number;
+  overdueDebts: number;
+}
+
+// Type for debt with branch and creator relations
+type DebtWithRelations = Prisma.DebtGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+  };
+}>;
+
+// Type for debt with branch, creator, and payments
+type DebtWithAllRelations = Prisma.DebtGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    creator: {
+      select: typeof USER_SELECT;
+    };
+    payments: true;
+  };
+}>;
+
 @Injectable()
 export class DebtsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationsService: NotificationsService,
+    private readonly websocketGateway: WebSocketGatewayService,
   ) {}
 
   /**
@@ -30,7 +83,7 @@ export class DebtsService {
    * Validates: due_date >= date
    * Filters by branch: accountants can only create debts for their branch
    */
-  async create(createDebtDto: CreateDebtDto, user: RequestUser) {
+  async create(createDebtDto: CreateDebtDto, user: RequestUser): Promise<DebtWithRelations> {
     // Determine branch ID
     // - For accountants: Always use their assigned branch
     // - For admins: Use provided branchId or require it
@@ -39,28 +92,28 @@ export class DebtsService {
     if (user.role === UserRole.ACCOUNTANT) {
       // Accountants must have a branch assigned and can only create for their branch
       if (!user.branchId) {
-        throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء الديون');
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       branchId = user.branchId;
     } else {
       // Admins must provide a branch ID
       if (!createDebtDto.branchId) {
-        throw new BadRequestException('يجب تحديد الفرع');
+        throw new BadRequestException(ERROR_MESSAGES.BRANCH.REQUIRED);
       }
       branchId = createDebtDto.branchId;
     }
 
     // Validate amount is positive
     if (createDebtDto.amount <= 0) {
-      throw new BadRequestException('Amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate due_date >= date
-    const date = new Date(createDebtDto.date);
-    const dueDate = new Date(createDebtDto.dueDate);
+    const date = formatDateForDB(createDebtDto.date);
+    const dueDate = formatDateForDB(createDebtDto.dueDate);
 
     if (dueDate < date) {
-      throw new BadRequestException('Due date must be greater than or equal to date');
+      throw new BadRequestException(ERROR_MESSAGES.DEBT.DUE_DATE_INVALID);
     }
 
     // Build debt data
@@ -68,6 +121,7 @@ export class DebtsService {
       creditorName: createDebtDto.creditorName,
       originalAmount: createDebtDto.amount,
       remainingAmount: createDebtDto.amount, // Auto-set to amount
+      currency: CURRENCY_CONFIG.validateOrDefault(createDebtDto.currency),
       date: date,
       dueDate: dueDate,
       status: DebtStatus.ACTIVE, // Auto-set to ACTIVE
@@ -80,18 +134,10 @@ export class DebtsService {
       data: debtData,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
       },
     });
@@ -99,45 +145,60 @@ export class DebtsService {
     // Log the creation in audit log
     await this.auditLogService.logCreate(user.id, AuditEntityType.DEBT, debt.id, debt);
 
+    // Emit WebSocket event for real-time updates
+    this.websocketGateway.emitNewDebt(debt);
+
+    // Notify about the new debt (async, don't wait)
+    this.notificationsService
+      .notifyNewDebt(
+        debt.id,
+        debt.creditorName,
+        Number(debt.originalAmount),
+        debt.dueDate,
+        debt.branchId,
+        user.id,
+      )
+      .catch((error) => {
+        // Log error but don't fail the debt creation
+        console.error('Failed to create debt notification:', error);
+      });
+
     return debt;
   }
 
   /**
-   * Find all debts with filtering by branch
+   * Find all debts with filtering by branch and pagination
    * Accountants can only see debts from their branch
    * Admins can see all debts
    */
-  async findAll(user: RequestUser) {
-    // Build where clause based on user role
-    const where: any = {};
+  async findAll(
+    user: RequestUser,
+    pagination: PaginationParams = {},
+  ): Promise<{ data: DebtWithAllRelations[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
+    const { page = 1, limit = 50 } = pagination;
+    const skip = (page - 1) * limit;
 
-    // Role-based access control
-    if (user.role === UserRole.ACCOUNTANT) {
-      // Accountants can only see debts from their branch
-      if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
-      }
-      where.branchId = user.branchId;
-    }
+    // Build where clause based on user role
+    let where: Prisma.DebtWhereInput = {};
+
+    // Apply role-based branch filtering
+    where = applyBranchFilter(user, where);
+
+    // Get total count for pagination
+    const total = await this.prisma.debt.count({ where });
 
     // Get debts
     const debts = await this.prisma.debt.findMany({
       where,
       orderBy: { dueDate: 'asc' },
+      skip,
+      take: limit,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         payments: {
           orderBy: { paymentDate: 'desc' },
@@ -145,7 +206,15 @@ export class DebtsService {
       },
     });
 
-    return debts;
+    return {
+      data: debts,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**
@@ -155,15 +224,15 @@ export class DebtsService {
    * Updates: remaining_amount = remaining_amount - amount_paid
    * Auto-updates status: PAID if remaining = 0, PARTIAL if 0 < remaining < original
    */
-  async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser) {
-    // Validate user has a branch assigned
-    if (!user.branchId) {
-      throw new ForbiddenException('يجب تعيين فرع للمستخدم لسداد الديون');
+  async payDebt(debtId: string, payDebtDto: PayDebtDto, user: RequestUser): Promise<DebtWithAllRelations> {
+    // Validate accountant has a branch assigned
+    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
+      throw new BadRequestException('Accountant must be assigned to branch');
     }
 
     // Validate amount is positive
     if (payDebtDto.amountPaid <= 0) {
-      throw new BadRequestException('Payment amount must be greater than 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.PAYMENT_POSITIVE);
     }
 
     // Use Prisma transaction to ensure atomicity
@@ -173,24 +242,16 @@ export class DebtsService {
         where: { id: debtId },
         include: {
           branch: {
-            select: {
-              id: true,
-              name: true,
-              location: true,
-            },
+            select: BRANCH_SELECT,
           },
           creator: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
+            select: USER_SELECT,
           },
         },
       });
 
       if (!debt) {
-        throw new NotFoundException('Debt not found');
+        throw new NotFoundException(ERROR_MESSAGES.DEBT.NOT_FOUND);
       }
 
       // Capture old debt data for audit log
@@ -201,14 +262,14 @@ export class DebtsService {
 
       // Role-based access control
       if (user.role === UserRole.ACCOUNTANT && debt.branchId !== user.branchId) {
-        throw new ForbiddenException('You can only pay debts from your branch');
+        throw new ForbiddenException(ERROR_MESSAGES.DEBT.ONLY_PAY_OWN_BRANCH);
       }
 
       // Validate payment amount doesn't exceed remaining amount
       const remainingAmount = Number(debt.remainingAmount);
       if (payDebtDto.amountPaid > remainingAmount) {
         throw new BadRequestException(
-          `Payment amount (${payDebtDto.amountPaid}) cannot exceed remaining amount (${remainingAmount})`,
+          ERROR_MESSAGES.DEBT.PAYMENT_EXCEEDS_REMAINING(payDebtDto.amountPaid, remainingAmount),
         );
       }
 
@@ -230,7 +291,8 @@ export class DebtsService {
         data: {
           debtId: debtId,
           amountPaid: payDebtDto.amountPaid,
-          paymentDate: new Date(payDebtDto.paymentDate),
+          currency: CURRENCY_CONFIG.validateOrDefault(payDebtDto.currency),
+          paymentDate: formatDateForDB(payDebtDto.paymentDate),
           notes: payDebtDto.notes || null,
           recordedBy: user.id,
         },
@@ -245,18 +307,10 @@ export class DebtsService {
         },
         include: {
           branch: {
-            select: {
-              id: true,
-              name: true,
-              location: true,
-            },
+            select: BRANCH_SELECT,
           },
           creator: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
+            select: USER_SELECT,
           },
           payments: {
             orderBy: { paymentDate: 'desc' },
@@ -284,6 +338,124 @@ export class DebtsService {
       { remainingAmount: result.debt.remainingAmount, status: result.debt.status },
     );
 
+    // Emit WebSocket events for real-time updates
+    this.websocketGateway.emitDebtPayment(result.payment);
+    this.websocketGateway.emitDebtUpdate(result.debt);
+
+    // Notify about the debt payment (async, don't wait)
+    this.notificationsService
+      .notifyDebtPayment(
+        debtId,
+        result.payment.id,
+        result.debt.creditorName,
+        Number(result.payment.amountPaid),
+        Number(result.debt.remainingAmount),
+        result.debt.branchId,
+        user.id,
+      )
+      .catch((error) => {
+        // Log error but don't fail the payment
+        console.error('Failed to create debt payment notification:', error);
+      });
+
     return result.debt;
+  }
+
+  /**
+   * Get comprehensive debts summary with statistics
+   * Useful for dashboard and reporting
+   */
+  async getDebtsSummary(
+    user: RequestUser,
+    dateRange?: DateRangeFilter,
+    branchId?: string,
+  ): Promise<DebtsSummary> {
+    // Build base where clause with role-based filtering
+    let where: Prisma.DebtWhereInput = {};
+
+    // Apply branch filtering based on user role
+    if (user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && branchId) {
+      where.branchId = branchId;
+    }
+
+    // Apply date range filter if provided
+    if (dateRange) {
+      where.date = {};
+      if (dateRange.startDate) {
+        where.date.gte = formatDateForDB(dateRange.startDate);
+      }
+      if (dateRange.endDate) {
+        where.date.lte = formatDateForDB(dateRange.endDate);
+      }
+    }
+
+    // Get today's date for overdue calculation
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Execute all queries in parallel for best performance
+    const [
+      totalDebts,
+      activeDebts,
+      paidDebts,
+      partialDebts,
+      totalOwedResult,
+      overdueDebts,
+    ] = await Promise.all([
+      // Total count of all debts
+      this.prisma.debt.count({ where }),
+
+      // Count of active debts
+      this.prisma.debt.count({
+        where: { ...where, status: DebtStatus.ACTIVE },
+      }),
+
+      // Count of paid debts
+      this.prisma.debt.count({
+        where: { ...where, status: DebtStatus.PAID },
+      }),
+
+      // Count of partial debts
+      this.prisma.debt.count({
+        where: { ...where, status: DebtStatus.PARTIAL },
+      }),
+
+      // Sum of all remaining amounts
+      this.prisma.debt.aggregate({
+        where,
+        _sum: {
+          remainingAmount: true,
+        },
+      }),
+
+      // Count of overdue debts (past due date and not fully paid)
+      this.prisma.debt.count({
+        where: {
+          ...where,
+          dueDate: {
+            lt: today,
+          },
+          status: {
+            not: DebtStatus.PAID,
+          },
+        },
+      }),
+    ]);
+
+    const totalOwed = Number(totalOwedResult._sum.remainingAmount || 0);
+
+    return {
+      totalDebts,
+      activeDebts,
+      paidDebts,
+      partialDebts,
+      totalOwed,
+      overdueDebts,
+    };
   }
 }

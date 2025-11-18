@@ -2,19 +2,65 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
+import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { UserRole, Prisma } from '@prisma/client';
+
+interface RequestUser {
+  id: string;
+  username: string;
+  role: UserRole;
+  branchId: string | null;
+}
 
 @Injectable()
 export class BranchesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
-  async create(createBranchDto: CreateBranchDto) {
-    return this.prisma.branch.create({
+  async create(createBranchDto: CreateBranchDto, currentUserId?: string) {
+    const branch = await this.prisma.branch.create({
       data: createBranchDto,
     });
+
+    // Log the creation in audit log if currentUserId is provided
+    if (currentUserId) {
+      await this.auditLogService.logCreate(
+        currentUserId,
+        AuditEntityType.BRANCH,
+        branch.id,
+        branch,
+      );
+    }
+
+    return branch;
   }
 
-  async findAll(branchId?: string) {
-    const where = branchId ? { id: branchId, isActive: true } : { isActive: true };
+  /**
+   * Find all branches with optional filtering
+   * By default, returns only active branches
+   * Admin users can request to see all branches (including inactive) with includeInactive=true
+   *
+   * @param user - Current user (for role-based access)
+   * @param branchId - Optional specific branch ID filter
+   * @param includeInactive - If true and user is ADMIN, include inactive branches (default: false)
+   * @returns Array of branches matching the filter criteria
+   */
+  async findAll(user?: RequestUser, branchId?: string, includeInactive: boolean = false) {
+    // Build where clause
+    const where: Prisma.BranchWhereInput = {};
+
+    // Filter by specific branch if provided
+    if (branchId) {
+      where.id = branchId;
+    }
+
+    // By default, show only active branches
+    // Admin users can optionally see all branches (including inactive) by setting includeInactive=true
+    if (!includeInactive || user?.role !== UserRole.ADMIN) {
+      where.isActive = true;
+    }
 
     return this.prisma.branch.findMany({
       where,
@@ -59,22 +105,47 @@ export class BranchesService {
     return branch;
   }
 
-  async update(id: string, updateBranchDto: UpdateBranchDto) {
-    await this.findOne(id); // Check existence
+  async update(id: string, updateBranchDto: UpdateBranchDto, currentUserId?: string) {
+    const existingBranch = await this.findOne(id); // Check existence
 
-    return this.prisma.branch.update({
+    const updatedBranch = await this.prisma.branch.update({
       where: { id },
       data: updateBranchDto,
     });
+
+    // Log the update in audit log if currentUserId is provided
+    if (currentUserId) {
+      await this.auditLogService.logUpdate(
+        currentUserId,
+        AuditEntityType.BRANCH,
+        id,
+        existingBranch,
+        updatedBranch,
+      );
+    }
+
+    return updatedBranch;
   }
 
-  async remove(id: string) {
-    await this.findOne(id); // Check existence
+  async remove(id: string, currentUserId?: string) {
+    const existingBranch = await this.findOne(id); // Check existence
 
     // Soft delete: set isActive to false
-    return this.prisma.branch.update({
+    const deletedBranch = await this.prisma.branch.update({
       where: { id },
       data: { isActive: false },
     });
+
+    // Log the deletion in audit log if currentUserId is provided
+    if (currentUserId) {
+      await this.auditLogService.logDelete(
+        currentUserId,
+        AuditEntityType.BRANCH,
+        id,
+        existingBranch,
+      );
+    }
+
+    return deletedBranch;
   }
 }

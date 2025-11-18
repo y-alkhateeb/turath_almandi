@@ -1,16 +1,17 @@
 import {
   IsString,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsDateString,
-  Min,
+  IsEnum,
   Validate,
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Currency } from '@prisma/client';
+import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
+import { IsAllowedCurrency } from '../../common/decorators/is-allowed-currency.decorator';
 
 /**
  * Custom validator to ensure due_date >= date
@@ -39,10 +40,13 @@ export class CreateDebtDto {
   @IsNotEmpty({ message: 'Creditor name is required' })
   creditorName: string;
 
-  @IsNumber()
-  @Min(0.01, { message: 'Amount must be greater than 0' })
-  @Transform(({ value }) => parseFloat(value))
+  @IsPositiveAmount()
   amount: number;
+
+  @IsEnum(Currency)
+  @IsOptional()
+  @IsAllowedCurrency()
+  currency?: Currency;
 
   @IsDateString()
   @IsNotEmpty({ message: 'Date is required' })

@@ -1,8 +1,3 @@
-const {
-    defineConfig,
-    globalIgnores,
-} = require("eslint/config");
-
 const tsParser = require("@typescript-eslint/parser");
 const typescriptEslintEslintPlugin = require("@typescript-eslint/eslint-plugin");
 const globals = require("globals");
@@ -18,7 +13,9 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-module.exports = defineConfig([{
+module.exports = [{
+    ignores: ["**/.eslintrc.js", "dist/**", "node_modules/**"],
+}, {
     languageOptions: {
         parser: tsParser,
         sourceType: "module",
@@ -38,12 +35,16 @@ module.exports = defineConfig([{
         "@typescript-eslint": typescriptEslintEslintPlugin,
     },
 
-    extends: compat.extends("plugin:@typescript-eslint/recommended", "plugin:prettier/recommended"),
+    ...compat.extends("plugin:@typescript-eslint/recommended", "plugin:prettier/recommended")[0],
 
     rules: {
         "@typescript-eslint/interface-name-prefix": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": ["warn", {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_"
+        }],
     },
-}, globalIgnores(["**/.eslintrc.js"])]);
+}];

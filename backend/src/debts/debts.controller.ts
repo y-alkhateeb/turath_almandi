@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Param, Query } from '@nestjs/common';
 import { DebtsService } from './debts.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 
@@ -14,7 +15,7 @@ interface RequestUser {
 }
 
 @Controller('debts')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, BranchAccessGuard)
 export class DebtsController {
   constructor(private readonly debtsService: DebtsService) {}
 
@@ -24,8 +25,12 @@ export class DebtsController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: RequestUser) {
-    return this.debtsService.findAll(user);
+  findAll(
+    @CurrentUser() user: RequestUser,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.debtsService.findAll(user, { page, limit });
   }
 
   @Post(':id/payments')

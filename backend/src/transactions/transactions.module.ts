@@ -3,9 +3,12 @@ import { TransactionsService } from './transactions.service';
 import { TransactionsController } from './transactions.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuditLogModule } from '../common/audit-log/audit-log.module';
+import { InventoryModule } from '../inventory/inventory.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { WebSocketModule } from '../websocket/websocket.module';
 
 @Module({
-  imports: [PrismaModule, AuditLogModule],
+  imports: [PrismaModule, AuditLogModule, InventoryModule, NotificationsModule, WebSocketModule],
   controllers: [TransactionsController],
   providers: [TransactionsService],
   exports: [TransactionsService],

@@ -23,6 +23,7 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { username },
+      select: { id: true },
     });
 
     if (existingUser) {
@@ -120,6 +121,11 @@ export class AuthService {
       return null;
     }
 
+    // Check if user is active
+    if (!user.isActive) {
+      return null;
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
@@ -143,7 +149,8 @@ export class AuthService {
   async verifyToken(token: string) {
     try {
       return this.jwtService.verify(token);
-    } catch (error) {
+    } catch (error: unknown) {
+      // Type guard: check if error is an Error instance
       throw new UnauthorizedException('الرمز غير صالح');
     }
   }
@@ -151,8 +158,10 @@ export class AuthService {
   async generateRefreshToken(userId: string, rememberMe?: boolean): Promise<string> {
     const token = crypto.randomBytes(64).toString('hex');
     const expiresAt = new Date();
-    // Set expiration based on rememberMe: 30 days if true, 7 days if false
-    const daysToAdd = rememberMe ? 30 : 7;
+    // Set expiration based on rememberMe and configuration
+    const daysToAdd = rememberMe
+      ? this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_REMEMBER_ME') || 30
+      : this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION') || 7;
     expiresAt.setDate(expiresAt.getDate() + daysToAdd);
 
     // Clean up old expired tokens

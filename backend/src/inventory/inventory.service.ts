@@ -7,7 +7,17 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
-import { UserRole } from '@prisma/client';
+import { UserRole, Prisma, InventoryUnit } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
+import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { applyBranchFilter } from '../common/utils/query-builder';
+import {
+  BRANCH_SELECT,
+  TRANSACTION_SELECT_FOR_INVENTORY,
+  TRANSACTION_SELECT_MINIMAL,
+} from '../common/constants/prisma-includes';
+import { getCurrentTimestamp } from '../common/utils/date.utils';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
 
 interface RequestUser {
   id: string;
@@ -27,14 +37,52 @@ interface InventoryFilters {
   unit?: string;
 }
 
+// Type for inventory item with branch and minimal transactions
+type InventoryItemWithMinimalTransactions = Prisma.InventoryItemGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    transactions: {
+      select: typeof TRANSACTION_SELECT_MINIMAL;
+    };
+  };
+}>;
+
+// Type for inventory item with branch and full transactions
+type InventoryItemWithTransactions = Prisma.InventoryItemGetPayload<{
+  include: {
+    branch: {
+      select: typeof BRANCH_SELECT;
+    };
+    transactions: {
+      select: typeof TRANSACTION_SELECT_FOR_INVENTORY;
+    };
+  };
+}>;
+
+// Type for transaction in inventory context
+type TransactionForInventory = Prisma.TransactionGetPayload<{
+  select: typeof TRANSACTION_SELECT_FOR_INVENTORY;
+}>;
+
+// Type for inventory item with metadata
+interface InventoryItemWithMetadata extends InventoryItemWithTransactions {
+  isAutoAdded: boolean;
+  relatedPurchases: TransactionForInventory[];
+}
+
 @Injectable()
 export class InventoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   /**
    * Create a new inventory item (manual add)
    */
-  async create(createInventoryDto: CreateInventoryDto, user: RequestUser) {
+  async create(createInventoryDto: CreateInventoryDto, user: RequestUser): Promise<InventoryItemWithMinimalTransactions> {
     // Determine branch ID
     // - For accountants: Always use their assigned branch
     // - For admins: Use provided branchId or require it
@@ -43,25 +91,25 @@ export class InventoryService {
     if (user.role === UserRole.ACCOUNTANT) {
       // Accountants must have a branch assigned and can only create for their branch
       if (!user.branchId) {
-        throw new ForbiddenException('يجب تعيين فرع للمستخدم لإنشاء عناصر المخزون');
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       branchId = user.branchId;
     } else {
       // Admins must provide a branch ID
       if (!createInventoryDto.branchId) {
-        throw new BadRequestException('يجب تحديد الفرع');
+        throw new BadRequestException(ERROR_MESSAGES.BRANCH.REQUIRED);
       }
       branchId = createInventoryDto.branchId;
     }
 
     // Validate quantity is non-negative
     if (createInventoryDto.quantity < 0) {
-      throw new BadRequestException('Quantity must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.QUANTITY_NON_NEGATIVE);
     }
 
     // Validate cost per unit is non-negative
     if (createInventoryDto.costPerUnit < 0) {
-      throw new BadRequestException('Cost per unit must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.COST_NON_NEGATIVE);
     }
 
     // Check if item with same name and unit already exists in this branch
@@ -74,9 +122,7 @@ export class InventoryService {
     });
 
     if (existingItem) {
-      throw new BadRequestException(
-        'An inventory item with the same name and unit already exists in this branch',
-      );
+      throw new BadRequestException(ERROR_MESSAGES.INVENTORY.DUPLICATE_ITEM);
     }
 
     // Create the inventory item
@@ -87,23 +133,14 @@ export class InventoryService {
         quantity: createInventoryDto.quantity,
         unit: createInventoryDto.unit,
         costPerUnit: createInventoryDto.costPerUnit,
-        lastUpdated: new Date(),
+        lastUpdated: getCurrentTimestamp(),
       },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
-          select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-          },
+          select: TRANSACTION_SELECT_MINIMAL,
           orderBy: {
             date: 'desc',
           },
@@ -122,24 +159,15 @@ export class InventoryService {
     user: RequestUser,
     pagination: PaginationParams = {},
     filters: InventoryFilters = {},
-  ) {
-    const { page = 1, limit = 20 } = pagination;
+  ): Promise<{ data: InventoryItemWithMetadata[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
+    const { page = 1, limit = 50 } = pagination;
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    const where: any = {};
+    let where: Prisma.InventoryItemWhereInput = {};
 
-    // Role-based access control
-    if (user.role === UserRole.ACCOUNTANT) {
-      // Accountants can only see inventory from their branch
-      if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
-      }
-      where.branchId = user.branchId;
-    } else if (user.role === UserRole.ADMIN && filters.branchId) {
-      // Admins can filter by specific branch
-      where.branchId = filters.branchId;
-    }
+    // Apply role-based branch filtering
+    where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply filters
     if (filters.unit) {
@@ -162,20 +190,10 @@ export class InventoryService {
       take: limit,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
-          select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-            category: true,
-          },
+          select: TRANSACTION_SELECT_FOR_INVENTORY,
           orderBy: {
             date: 'desc',
           },
@@ -193,7 +211,7 @@ export class InventoryService {
 
     return {
       data: itemsWithMetadata,
-      pagination: {
+      meta: {
         page,
         limit,
         total,
@@ -205,24 +223,16 @@ export class InventoryService {
   /**
    * Find one inventory item by ID
    */
-  async findOne(id: string, user?: RequestUser) {
+  async findOne(id: string, user?: RequestUser): Promise<InventoryItemWithMetadata> {
     const item = await this.prisma.inventoryItem.findUnique({
       where: { id },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
           select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-            category: true,
+            ...TRANSACTION_SELECT_FOR_INVENTORY,
             notes: true,
           },
           orderBy: {
@@ -233,16 +243,16 @@ export class InventoryService {
     });
 
     if (!item) {
-      throw new NotFoundException(`Inventory item with ID ${id} not found`);
+      throw new NotFoundException(ERROR_MESSAGES.INVENTORY.NOT_FOUND(id));
     }
 
     // Role-based access control
     if (user && user.role === UserRole.ACCOUNTANT) {
       if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
+        throw new BadRequestException('Accountant must be assigned to branch');
       }
       if (item.branchId !== user.branchId) {
-        throw new ForbiddenException('You do not have access to this inventory item');
+        throw new ForbiddenException(ERROR_MESSAGES.INVENTORY.NO_ACCESS);
       }
     }
 
@@ -257,23 +267,23 @@ export class InventoryService {
   /**
    * Update an inventory item
    */
-  async update(id: string, updateInventoryDto: UpdateInventoryDto, user: RequestUser) {
+  async update(id: string, updateInventoryDto: UpdateInventoryDto, user: RequestUser): Promise<InventoryItemWithMetadata> {
     // First, find the existing item
     const existingItem = await this.findOne(id, user);
 
     // Validate quantity if provided
     if (updateInventoryDto.quantity !== undefined && updateInventoryDto.quantity < 0) {
-      throw new BadRequestException('Quantity must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.QUANTITY_NON_NEGATIVE);
     }
 
     // Validate cost per unit if provided
     if (updateInventoryDto.costPerUnit !== undefined && updateInventoryDto.costPerUnit < 0) {
-      throw new BadRequestException('Cost per unit must be greater than or equal to 0');
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.COST_NON_NEGATIVE);
     }
 
     // Build update data
-    const updateData: any = {
-      lastUpdated: new Date(),
+    const updateData: Prisma.InventoryItemUpdateInput = {
+      lastUpdated: getCurrentTimestamp(),
     };
 
     if (updateInventoryDto.name !== undefined) updateData.name = updateInventoryDto.name;
@@ -289,20 +299,10 @@ export class InventoryService {
       data: updateData,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
-          select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-            category: true,
-          },
+          select: TRANSACTION_SELECT_FOR_INVENTORY,
           orderBy: {
             date: 'desc',
           },
@@ -310,6 +310,15 @@ export class InventoryService {
         },
       },
     });
+
+    // Log the update in audit log
+    await this.auditLogService.logUpdate(
+      user.id,
+      AuditEntityType.INVENTORY_ITEM,
+      id,
+      existingItem,
+      updatedItem,
+    );
 
     // Add metadata
     return {
@@ -322,7 +331,7 @@ export class InventoryService {
   /**
    * Delete an inventory item
    */
-  async remove(id: string, user: RequestUser) {
+  async remove(id: string, user: RequestUser): Promise<{ message: string; id: string }> {
     // First, find the existing item to ensure it exists and user has access
     const item = await this.findOne(id, user);
 
@@ -332,9 +341,7 @@ export class InventoryService {
     });
 
     if (linkedTransactions > 0) {
-      throw new BadRequestException(
-        'Cannot delete inventory item with linked transactions. Unlink transactions first or set quantity to 0.',
-      );
+      throw new BadRequestException(ERROR_MESSAGES.INVENTORY.LINKED_TRANSACTIONS);
     }
 
     // Delete the item
@@ -342,6 +349,188 @@ export class InventoryService {
       where: { id },
     });
 
+    // Log the deletion in audit log
+    await this.auditLogService.logDelete(
+      user.id,
+      AuditEntityType.INVENTORY_ITEM,
+      id,
+      item,
+    );
+
     return { message: 'Inventory item deleted successfully', id };
+  }
+
+  /**
+   * Update inventory from a purchase transaction
+   * Creates or updates an inventory item based on purchase details
+   * Uses weighted average cost calculation
+   *
+   * @param branchId - Branch ID where purchase was made
+   * @param itemName - Name of the inventory item
+   * @param quantity - Quantity purchased
+   * @param unit - Unit of measurement
+   * @param totalAmount - Total purchase amount
+   * @param prismaClient - Optional Prisma client for transaction support
+   * @returns ID of created or updated inventory item
+   */
+  async updateFromPurchase(
+    branchId: string,
+    itemName: string,
+    quantity: number,
+    unit: InventoryUnit,
+    totalAmount: number,
+    prismaClient?: Prisma.TransactionClient,
+  ): Promise<string> {
+    const prisma = prismaClient || this.prisma;
+
+    // Calculate cost per unit
+    const costPerUnit = totalAmount / quantity;
+
+    // Try to find existing inventory item with same name and unit
+    const existingItem = await prisma.inventoryItem.findFirst({
+      where: {
+        branchId,
+        name: itemName,
+        unit,
+      },
+    });
+
+    if (existingItem) {
+      // Update existing item: add quantity and recalculate weighted average cost
+      const currentValue = new Decimal(existingItem.costPerUnit).mul(existingItem.quantity);
+      const newValue = new Decimal(costPerUnit).mul(quantity);
+      const totalQuantity = new Decimal(existingItem.quantity).add(quantity);
+      const newCostPerUnit = currentValue.add(newValue).div(totalQuantity);
+
+      const updatedItem = await prisma.inventoryItem.update({
+        where: { id: existingItem.id },
+        data: {
+          quantity: totalQuantity,
+          costPerUnit: newCostPerUnit,
+          lastUpdated: getCurrentTimestamp(),
+        },
+      });
+
+      return updatedItem.id;
+    } else {
+      // Create new inventory item
+      const newItem = await prisma.inventoryItem.create({
+        data: {
+          branchId,
+          name: itemName,
+          quantity,
+          unit,
+          costPerUnit,
+          lastUpdated: getCurrentTimestamp(),
+        },
+      });
+
+      return newItem.id;
+    }
+  }
+
+  /**
+   * Update inventory from a transaction
+   * Automatically updates inventory based on transaction details if applicable
+   *
+   * @param transaction - Transaction object with inventory-related fields
+   * @param prismaClient - Optional Prisma client for transaction support
+   * @returns ID of updated/created inventory item, or null if not applicable
+   */
+  async updateFromTransaction(
+    transaction: {
+      id: string;
+      type: string;
+      amount: number | Prisma.Decimal;
+      branchId: string;
+      category?: string;
+      inventoryItemId?: string | null;
+      // Purchase-specific fields (optional)
+      itemName?: string;
+      quantity?: number | Prisma.Decimal;
+      unit?: InventoryUnit;
+    },
+    prismaClient?: Prisma.TransactionClient,
+  ): Promise<string | null> {
+    // Only process EXPENSE transactions with inventory fields
+    if (transaction.type !== 'EXPENSE') {
+      return null;
+    }
+
+    // Check if this is a purchase transaction with inventory details
+    const isPurchase =
+      transaction.category === 'Purchase' ||
+      (transaction.itemName && transaction.quantity && transaction.unit);
+
+    if (!isPurchase) {
+      return null;
+    }
+
+    // Extract inventory fields
+    const itemName = transaction.itemName;
+    const quantity = transaction.quantity;
+    const unit = transaction.unit;
+    const amount = typeof transaction.amount === 'object'
+      ? Number(transaction.amount)
+      : transaction.amount;
+
+    // Validate required fields
+    if (!itemName || !quantity || !unit) {
+      return null;
+    }
+
+    const qty = typeof quantity === 'object' ? Number(quantity) : quantity;
+
+    // Update inventory using existing method
+    return this.updateFromPurchase(
+      transaction.branchId,
+      itemName,
+      qty,
+      unit,
+      amount,
+      prismaClient,
+    );
+  }
+
+  /**
+   * Get total inventory value across all items
+   * Calculates sum of (quantity * costPerUnit) for all inventory items
+   * Supports branch filtering and role-based access control
+   */
+  async getTotalInventoryValue(
+    user: RequestUser,
+    branchId?: string,
+  ): Promise<number> {
+    // Build where clause with role-based filtering
+    let where: Prisma.InventoryItemWhereInput = {};
+
+    // Apply branch filtering based on user role
+    if (user.role === UserRole.ACCOUNTANT) {
+      if (!user.branchId) {
+        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
+      }
+      where.branchId = user.branchId;
+    } else if (user.role === UserRole.ADMIN && branchId) {
+      where.branchId = branchId;
+    }
+
+    // Fetch all inventory items with quantity and costPerUnit
+    const inventoryItems = await this.prisma.inventoryItem.findMany({
+      where,
+      select: {
+        quantity: true,
+        costPerUnit: true,
+      },
+    });
+
+    // Calculate total value: sum of (quantity * costPerUnit)
+    const totalValue = inventoryItems.reduce((sum, item) => {
+      const quantity = Number(item.quantity);
+      const costPerUnit = Number(item.costPerUnit);
+      return sum + (quantity * costPerUnit);
+    }, 0);
+
+    // Round to 2 decimal places
+    return Math.round(totalValue * 100) / 100;
   }
 }

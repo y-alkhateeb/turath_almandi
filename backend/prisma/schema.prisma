@@ -182,6 +182,8 @@ model Transaction {
   @@index([paymentMethod])
   @@index([currency])
   @@index([inventoryItemId])
+  @@index([branchId, date])
+  @@index([type, date])
   @@map("transactions")
 }
 
@@ -210,6 +212,7 @@ model Debt {
   @@index([dueDate])
   @@index([createdBy])
   @@index([date])
+  @@index([status, dueDate])
   @@map("debts")
 }
 

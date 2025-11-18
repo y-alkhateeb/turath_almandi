@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -9,6 +10,7 @@ import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { TokenBlacklistService } from './services/token-blacklist.service';
+import { LoginThrottleGuard } from './guards/login-throttle.guard';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +19,8 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private tokenBlacklistService: TokenBlacklistService,
+    @Inject(forwardRef(() => LoginThrottleGuard))
+    private loginThrottleGuard: LoginThrottleGuard,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -65,8 +69,11 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+  async login(loginDto: LoginDto, request: Request): Promise<LoginResponseDto> {
     const { username, password, rememberMe } = loginDto;
+
+    // Get client IP for throttling
+    const ip = this.getClientIp(request);
 
     // Find user with branch relation
     const user = await this.prisma.user.findUnique({
@@ -82,11 +89,15 @@ export class AuthService {
     });
 
     if (!user) {
+      // Record failed attempt for non-existent user
+      await this.loginThrottleGuard.recordFailedAttempt(ip);
       throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
 
     // Check if user is active
     if (!user.isActive) {
+      // Record failed attempt for inactive user
+      await this.loginThrottleGuard.recordFailedAttempt(ip);
       throw new UnauthorizedException('الحساب معطل. يرجى التواصل مع المسؤول');
     }
 
@@ -94,8 +105,13 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
+      // Record failed attempt for wrong password
+      await this.loginThrottleGuard.recordFailedAttempt(ip);
       throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
+
+    // Successful login - reset throttle attempts
+    await this.loginThrottleGuard.resetAttempts(ip);
 
     // Generate tokens
     const access_token = await this.generateToken(user.id, user.username, user.role, user.branchId);
@@ -112,6 +128,28 @@ export class AuthService {
       access_token,
       refresh_token,
     };
+  }
+
+  /**
+   * Get client IP address from request
+   * Handles proxies and load balancers
+   */
+  private getClientIp(request: Request): string {
+    // Check for IP from reverse proxy
+    const forwarded = request.headers['x-forwarded-for'];
+    if (forwarded) {
+      const ips = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+      return ips.split(',')[0].trim();
+    }
+
+    // Check for real IP header
+    const realIp = request.headers['x-real-ip'];
+    if (realIp) {
+      return Array.isArray(realIp) ? realIp[0] : realIp;
+    }
+
+    // Fall back to socket IP
+    return request.ip || request.socket.remoteAddress || 'unknown';
   }
 
   async validateUser(username: string, password: string) {

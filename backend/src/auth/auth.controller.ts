@@ -6,6 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LoginThrottleGuard } from './guards/login-throttle.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 
@@ -18,7 +19,10 @@ interface RequestUser {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly loginThrottleGuard: LoginThrottleGuard,
+  ) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -27,8 +31,9 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
-    return this.authService.login(loginDto);
+  @UseGuards(LoginThrottleGuard)
+  async login(@Body() loginDto: LoginDto, @Req() request: Request): Promise<LoginResponseDto> {
+    return this.authService.login(loginDto, request);
   }
 
   @Post('refresh')

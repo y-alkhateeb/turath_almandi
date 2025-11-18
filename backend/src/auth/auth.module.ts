@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { TokenBlacklistService } from './services/token-blacklist.service';
+import { LoginThrottleGuard } from './guards/login-throttle.guard';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { TokenBlacklistService } from './services/token-blacklist.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, TokenBlacklistService],
-  exports: [AuthService, JwtModule, TokenBlacklistService],
+  providers: [AuthService, JwtStrategy, LocalStrategy, TokenBlacklistService, LoginThrottleGuard],
+  exports: [AuthService, JwtModule, TokenBlacklistService, LoginThrottleGuard],
 })
 export class AuthModule {}

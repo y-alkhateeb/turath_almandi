@@ -15,6 +15,7 @@ import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
+import { CURRENCY_CONFIG } from '../common/constants/currency.constants';
 
 interface RequestUser {
   id: string;
@@ -106,6 +107,7 @@ export class DebtsService {
       creditorName: createDebtDto.creditorName,
       originalAmount: createDebtDto.amount,
       remainingAmount: createDebtDto.amount, // Auto-set to amount
+      currency: CURRENCY_CONFIG.validateOrDefault(createDebtDto.currency),
       date: date,
       dueDate: dueDate,
       status: DebtStatus.ACTIVE, // Auto-set to ACTIVE
@@ -275,6 +277,7 @@ export class DebtsService {
         data: {
           debtId: debtId,
           amountPaid: payDebtDto.amountPaid,
+          currency: CURRENCY_CONFIG.validateOrDefault(payDebtDto.currency),
           paymentDate: formatDateForDB(payDebtDto.paymentDate),
           notes: payDebtDto.notes || null,
           recordedBy: user.id,

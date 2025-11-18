@@ -6,8 +6,9 @@ import {
   IsDateString,
   ValidateIf,
 } from 'class-validator';
-import { TransactionType, PaymentMethod } from '@prisma/client';
+import { TransactionType, PaymentMethod, Currency } from '@prisma/client';
 import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
+import { IsAllowedCurrency } from '../../common/decorators/is-allowed-currency.decorator';
 
 export class CreateTransactionDto {
   @IsEnum(TransactionType)
@@ -16,6 +17,11 @@ export class CreateTransactionDto {
 
   @IsPositiveAmount()
   amount: number;
+
+  @IsEnum(Currency)
+  @IsOptional()
+  @IsAllowedCurrency()
+  currency?: Currency;
 
   @IsEnum(PaymentMethod)
   @IsOptional()

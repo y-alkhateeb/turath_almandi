@@ -194,6 +194,7 @@ model Debt {
   creditorName    String      @map("creditor_name") @db.VarChar(200)
   originalAmount  Decimal     @map("original_amount") @db.Decimal(15, 2)
   remainingAmount Decimal     @map("remaining_amount") @db.Decimal(15, 2)
+  currency        Currency    @default(USD)
   date            DateTime    @db.Date
   dueDate         DateTime?   @map("due_date") @db.Date
   status          DebtStatus  @default(ACTIVE)
@@ -221,6 +222,7 @@ model DebtPayment {
   id          String   @id @default(uuid()) @db.Uuid
   debtId      String   @map("debt_id") @db.Uuid
   amountPaid  Decimal  @map("amount_paid") @db.Decimal(15, 2)
+  currency    Currency @default(USD)
   paymentDate DateTime @map("payment_date") @db.Date
   notes       String?  @db.Text
   recordedBy  String   @map("recorded_by") @db.Uuid

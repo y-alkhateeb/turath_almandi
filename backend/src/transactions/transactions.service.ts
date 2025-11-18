@@ -28,6 +28,7 @@ import {
   formatToISODate,
 } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
+import { CURRENCY_CONFIG } from '../common/constants/currency.constants';
 
 interface RequestUser {
   id: string;
@@ -143,7 +144,7 @@ export class TransactionsService {
       category: createTransactionDto.category || 'General',
       employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
       notes: createTransactionDto.notes || null,
-      currency: Currency.USD, // Default currency
+      currency: CURRENCY_CONFIG.validateOrDefault(createTransactionDto.currency),
       branchId: user.branchId, // Auto-fill from logged user
       createdBy: user.id,
     };
@@ -553,7 +554,7 @@ export class TransactionsService {
           employeeVendorName: createPurchaseDto.vendorName,
           category: 'Purchase', // Category for purchase expenses
           notes: createPurchaseDto.notes || null,
-          currency: Currency.USD,
+          currency: CURRENCY_CONFIG.validateOrDefault(createPurchaseDto.currency),
           branchId: user.branchId!,
           createdBy: user.id,
           inventoryItemId: inventoryItemId,

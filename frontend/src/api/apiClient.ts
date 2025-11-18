@@ -514,8 +514,3 @@ export default apiClient;
  * Export axios instance for direct use if needed
  */
 export { axiosInstance };
-
-/**
- * Export ApiError for error handling
- */
-export { ApiError };

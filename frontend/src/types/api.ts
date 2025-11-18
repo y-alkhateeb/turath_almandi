@@ -303,6 +303,222 @@ export interface InventorySummaryResponse {
   lowStockItems?: number;
 }
 
+/**
+ * Dashboard statistics response
+ * Aggregated metrics for dashboard overview
+ */
+export interface DashboardStats {
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  todayTransactions: number;
+  cashRevenue?: number;
+  masterRevenue?: number;
+  totalDebts?: number;
+  activeDebts?: number;
+  inventoryValue?: number;
+}
+
+/**
+ * Revenue data point for charts
+ * Time series data for revenue tracking
+ */
+export interface RevenueDataPoint {
+  date: string; // ISO date or month label
+  revenue: number;
+  expenses: number;
+  net?: number;
+}
+
+/**
+ * Category data point for charts
+ * Category-based spending/revenue breakdown
+ */
+export interface CategoryDataPoint {
+  category: string;
+  value: number;
+  count?: number;
+  color?: string;
+}
+
+/**
+ * Branch performance comparison
+ * Comparative metrics across branches
+ */
+export interface BranchPerformance {
+  branchId: string;
+  branchName: string;
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  transactionCount: number;
+  averageTransactionValue: number;
+  topCategory?: string;
+}
+
+/**
+ * Dashboard query filters
+ */
+export interface DashboardQueryFilters {
+  branchId?: string;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+}
+
+// ============================================
+// REPORT TYPES
+// ============================================
+
+/**
+ * Financial report response
+ * Comprehensive financial summary for a period
+ */
+export interface FinancialReport {
+  branchId: string | null;
+  branchName?: string;
+  startDate: string;
+  endDate: string;
+  summary: {
+    totalIncome: number;
+    totalExpenses: number;
+    netProfit: number;
+    cashIncome: number;
+    masterIncome: number;
+  };
+  incomeByCategory: Array<{
+    category: string;
+    amount: number;
+    count: number;
+  }>;
+  expensesByCategory: Array<{
+    category: string;
+    amount: number;
+    count: number;
+  }>;
+  dailyBreakdown?: Array<{
+    date: string;
+    income: number;
+    expenses: number;
+    net: number;
+  }>;
+  generatedAt: string;
+}
+
+/**
+ * Debt report response
+ * Summary of debts with optional status filtering
+ */
+export interface DebtReport {
+  branchId: string | null;
+  branchName?: string;
+  status?: string;
+  summary: {
+    totalDebts: number;
+    totalAmount: number;
+    totalPaid: number;
+    totalRemaining: number;
+    activeDebtsCount: number;
+    paidDebtsCount: number;
+    overdueDebtsCount: number;
+  };
+  debts: Array<{
+    id: string;
+    creditorName: string;
+    originalAmount: number;
+    remainingAmount: number;
+    status: string;
+    date: string;
+    dueDate: string;
+    overdueDays?: number;
+  }>;
+  generatedAt: string;
+}
+
+/**
+ * Inventory report response
+ * Current inventory status and valuation
+ */
+export interface InventoryReport {
+  branchId: string | null;
+  branchName?: string;
+  summary: {
+    totalItems: number;
+    totalValue: number;
+    lowStockItems: number;
+    outOfStockItems: number;
+  };
+  items: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    unit: string;
+    costPerUnit: number;
+    totalValue: number;
+    autoAdded: boolean;
+    isLowStock?: boolean;
+  }>;
+  byUnit: Array<{
+    unit: string;
+    itemCount: number;
+    totalQuantity: number;
+    totalValue: number;
+  }>;
+  generatedAt: string;
+}
+
+/**
+ * Salary report response
+ * Salary/payroll summary for employees
+ */
+export interface SalaryReport {
+  branchId: string | null;
+  branchName?: string;
+  startDate: string;
+  endDate: string;
+  summary: {
+    totalSalariesPaid: number;
+    employeeCount: number;
+    averageSalary: number;
+    transactionCount: number;
+  };
+  salaries: Array<{
+    employeeName: string;
+    totalAmount: number;
+    paymentCount: number;
+    lastPaymentDate: string | null;
+    paymentDates: string[];
+  }>;
+  byMonth?: Array<{
+    month: string;
+    totalPaid: number;
+    employeeCount: number;
+  }>;
+  generatedAt: string;
+}
+
+/**
+ * Report query filters
+ * Common filters for all report types
+ */
+export interface ReportQueryFilters {
+  branchId?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
+
+/**
+ * Report export request
+ * Body for export endpoints
+ */
+export interface ReportExportRequest {
+  reportType: 'financial' | 'debts' | 'inventory' | 'salaries';
+  filters?: ReportQueryFilters;
+  format?: 'excel' | 'pdf';
+}
+
 // ============================================
 // BATCH OPERATION RESPONSES
 // ============================================

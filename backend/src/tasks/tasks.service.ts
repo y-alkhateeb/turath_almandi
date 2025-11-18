@@ -83,11 +83,14 @@ export class TasksService {
       today.setHours(0, 0, 0, 0);
 
       // Find all active debts where due_date < today
+      // This query is optimized with a composite index on (status, due_date)
+      // The 'lt' (less than) operator ensures efficient query execution
+      // Index: debts_status_dueDate_idx on (status, due_date)
       const overdueDebts = await this.prisma.debt.findMany({
         where: {
           status: DebtStatus.ACTIVE,
           dueDate: {
-            lt: today,
+            lt: today, // Uses Prisma's lt operator for efficient comparison
           },
         },
         include: {

@@ -8,7 +8,8 @@ import { useTransactions, useUpdateTransaction } from '@/hooks/useTransactions';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
 import { PageLoading } from '@/components/loading';
-import { Alert } from '@/ui/alert';
+import { PageLayout } from '@/components/layouts';
+import { ErrorAlert } from '@/components/layouts';
 import { TransactionType, PaymentMethod } from '@/types/transactions.types';
 
 /**
@@ -97,40 +98,27 @@ export const EditTransactionPage = () => {
 
   if (!transaction) {
     return (
-      <div className="space-y-6">
-        <Alert variant="destructive">
-          لم يتم العثور على العملية المطلوبة
-        </Alert>
-        <Button onClick={handleCancel}>
+      <PageLayout title="تعديل العملية" description="العملية غير موجودة">
+        <ErrorAlert error="لم يتم العثور على العملية المطلوبة" />
+        <Button onClick={handleCancel} className="mt-4">
           <ArrowRight className="w-4 h-4" />
           العودة إلى العمليات
         </Button>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-          className="gap-2"
-        >
+    <PageLayout
+      title="تعديل العملية"
+      description="تعديل بيانات العملية المالية"
+      actions={
+        <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />
           رجوع
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-            تعديل العملية
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            تعديل بيانات العملية المالية
-          </p>
-        </div>
-      </div>
+      }
+    >
 
       {/* Edit Form Card */}
       <Card padding="lg">
@@ -280,7 +268,7 @@ export const EditTransactionPage = () => {
           </div>
         </form>
       </Card>
-    </div>
+    </PageLayout>
   );
 };
 

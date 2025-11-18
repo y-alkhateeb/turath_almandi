@@ -4,6 +4,7 @@ import { UserForm } from '@/components/UserForm';
 import { useCreateUser } from '@/hooks/useUsers';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
+import { PageLayout } from '@/components/layouts';
 import type { CreateUserDto } from '@/types';
 
 /**
@@ -24,28 +25,16 @@ export const CreateUserPage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-          className="gap-2"
-        >
+    <PageLayout
+      title="إضافة مستخدم جديد"
+      description="إنشاء حساب مستخدم جديد في النظام"
+      actions={
+        <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />
           رجوع
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-            إضافة مستخدم جديد
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            إنشاء حساب مستخدم جديد في النظام
-          </p>
-        </div>
-      </div>
-
+      }
+    >
       {/* Form Card */}
       <Card padding="lg">
         <UserForm
@@ -54,7 +43,7 @@ export const CreateUserPage = () => {
           isLoading={createUser.isPending}
         />
       </Card>
-    </div>
+    </PageLayout>
   );
 };
 

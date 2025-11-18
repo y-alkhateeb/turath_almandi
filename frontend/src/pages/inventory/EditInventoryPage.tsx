@@ -5,7 +5,8 @@ import { useInventory } from '@/hooks/useInventory';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
 import { PageLoading } from '@/components/loading';
-import { Alert } from '@/ui/alert';
+import { PageLayout } from '@/components/layouts';
+import { ErrorAlert } from '@/components/layouts';
 
 /**
  * Edit Inventory Page
@@ -33,41 +34,27 @@ export const EditInventoryPage = () => {
 
   if (!item) {
     return (
-      <div className="space-y-6">
-        <Alert variant="destructive">
-          لم يتم العثور على الصنف المطلوب
-        </Alert>
-        <Button onClick={handleCancel}>
+      <PageLayout title="تعديل صنف" description="الصنف غير موجود">
+        <ErrorAlert error="لم يتم العثور على الصنف المطلوب" />
+        <Button onClick={handleCancel} className="mt-4">
           <ArrowRight className="w-4 h-4" />
           العودة إلى المخزون
         </Button>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-          className="gap-2"
-        >
+    <PageLayout
+      title="تعديل صنف"
+      description={`تعديل بيانات ${item.name}`}
+      actions={
+        <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />
           رجوع
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-            تعديل صنف
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            تعديل بيانات {item.name}
-          </p>
-        </div>
-      </div>
-
+      }
+    >
       {/* Form Card */}
       <Card padding="lg">
         <InventoryForm
@@ -76,7 +63,7 @@ export const EditInventoryPage = () => {
           onCancel={handleCancel}
         />
       </Card>
-    </div>
+    </PageLayout>
   );
 };
 

@@ -251,7 +251,7 @@ export class TransactionsService {
     }
 
     if (filters.paymentMethod) {
-      where.paymentMethod = filters.paymentMethod;
+      where.paymentMethod = filters.paymentMethod as PaymentMethod;
     }
 
     // Date range filter
@@ -711,7 +711,7 @@ export class TransactionsService {
       id: t.id,
       amount: Number(t.amount),
       date: formatToISODate(t.date),
-      description: t.description,
+      description: t.employeeVendorName,
       paymentMethod: t.paymentMethod,
       branchId: t.branchId,
       branchName: t.branch.name,
@@ -808,7 +808,7 @@ export class TransactionsService {
       id: t.id,
       amount: Number(t.amount),
       date: formatToISODate(t.date),
-      description: t.description,
+      description: t.employeeVendorName,
       paymentMethod: t.paymentMethod,
       branchId: t.branchId,
       branchName: t.branch.name,

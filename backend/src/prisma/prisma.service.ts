@@ -27,19 +27,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       this.logger.error(e);
     });
 
-    // Middleware to log slow queries (>1000ms)
-    this.$use(async (params, next) => {
-      const startTime = Date.now();
-      const result = await next(params);
-      const duration = Date.now() - startTime;
-
-      // Log slow queries
-      if (duration > 1000) {
-        this.logSlowQuery(params, duration);
-      }
-
-      return result;
-    });
+    // Note: $use middleware was removed in Prisma v6
+    // Slow query logging can be re-implemented using Prisma extensions if needed
+    // See: https://www.prisma.io/docs/orm/prisma-client/client-extensions
   }
 
   async onModuleInit() {

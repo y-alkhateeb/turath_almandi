@@ -63,7 +63,7 @@ export class AuditLogController {
    * }
    */
   @Get()
-  @Roles(UserRole.ADMIN)
+  @Roles([UserRole.ADMIN])
   async queryAuditLogs(@Query() query: QueryAuditLogsDto) {
     return this.auditLogService.queryLogs({
       entityType: query.entityType,

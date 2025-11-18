@@ -10,6 +10,13 @@ interface RequestUser {
 }
 
 /**
+ * Interface for Prisma where clauses that support branch filtering
+ */
+interface BranchFilterable {
+  branchId?: string;
+}
+
+/**
  * Apply branch filtering to a Prisma where clause based on user role
  * - ACCOUNTANT: Can only access their assigned branch
  * - ADMIN: Can access all branches or filter by specific branchId
@@ -20,7 +27,7 @@ interface RequestUser {
  * @returns Updated where clause with branch filtering applied
  * @throws ForbiddenException if accountant has no assigned branch
  */
-export function applyBranchFilter<T extends Record<string, unknown>>(
+export function applyBranchFilter<T extends Record<string, unknown> & BranchFilterable>(
   user: RequestUser,
   where: T = {} as T,
   filterBranchId?: string,

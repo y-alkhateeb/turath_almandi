@@ -7,12 +7,20 @@ import {
   Param,
   Body,
   UseGuards,
-  Request,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { NotificationSettingsService } from './notification-settings.service';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { UserRole } from '@prisma/client';
+
+interface RequestUser {
+  id: string;
+  username: string;
+  role: UserRole;
+  branchId: string | null;
+}
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
@@ -26,8 +34,8 @@ export class NotificationsController {
    * Get all unread notifications for the current user
    */
   @Get('unread')
-  getUnreadNotifications(@Request() req: any) {
-    return this.notificationsService.getUnreadNotifications(req.user.id);
+  getUnreadNotifications(@CurrentUser() user: RequestUser) {
+    return this.notificationsService.getUnreadNotifications(user.id);
   }
 
   /**
@@ -42,39 +50,39 @@ export class NotificationsController {
    * Get notification settings for the current user
    */
   @Get('settings')
-  getUserSettings(@Request() req: any) {
-    return this.notificationSettingsService.getUserSettings(req.user.id);
+  getUserSettings(@CurrentUser() user: RequestUser) {
+    return this.notificationSettingsService.getUserSettings(user.id);
   }
 
   /**
    * Get a specific notification setting for the current user
    */
   @Get('settings/:notificationType')
-  getSetting(@Request() req: any, @Param('notificationType') notificationType: string) {
-    return this.notificationSettingsService.getSetting(req.user.id, notificationType);
+  getSetting(@CurrentUser() user: RequestUser, @Param('notificationType') notificationType: string) {
+    return this.notificationSettingsService.getSetting(user.id, notificationType);
   }
 
   /**
    * Update notification settings for the current user
    */
   @Post('settings')
-  updateSettings(@Request() req: any, @Body() updateDto: UpdateNotificationSettingsDto) {
-    return this.notificationSettingsService.updateSettings(req.user.id, updateDto);
+  updateSettings(@CurrentUser() user: RequestUser, @Body() updateDto: UpdateNotificationSettingsDto) {
+    return this.notificationSettingsService.updateSettings(user.id, updateDto);
   }
 
   /**
    * Delete a notification setting
    */
   @Delete('settings/:notificationType')
-  deleteSetting(@Request() req: any, @Param('notificationType') notificationType: string) {
-    return this.notificationSettingsService.deleteSetting(req.user.id, notificationType);
+  deleteSetting(@CurrentUser() user: RequestUser, @Param('notificationType') notificationType: string) {
+    return this.notificationSettingsService.deleteSetting(user.id, notificationType);
   }
 
   /**
    * Get enabled notification types for the current user
    */
   @Get('settings/enabled/types')
-  getEnabledTypes(@Request() req: any) {
-    return this.notificationSettingsService.getEnabledNotificationTypes(req.user.id);
+  getEnabledTypes(@CurrentUser() user: RequestUser) {
+    return this.notificationSettingsService.getEnabledNotificationTypes(user.id);
   }
 }

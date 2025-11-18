@@ -155,7 +155,7 @@ export const useDebtSummary = (branchId?: string) => {
  * const handleCreate = async () => {
  *   try {
  *     await createDebt.mutateAsync({
- *       creditorName: 'E-E/ 9DJ',
+ *       creditorName: 'محمد علي',
  *       amount: 1000,
  *       date: new Date().toISOString(),
  *       dueDate: '2025-12-31',
@@ -346,7 +346,7 @@ export const useUpdateDebt = () => {
  * const deleteDebt = useDeleteDebt();
  *
  * const handleDelete = async () => {
- *   if (confirm('GD #F* E*#C/ EF -0A G0' 'D/JF')) {
+       if (confirm('هل أنت متأكد من حذف هذا الدين؟')) {
  *     await deleteDebt.mutateAsync(debtId);
  *   }
  * };
@@ -432,7 +432,7 @@ export const useDeleteDebt = () => {
  *     data: {
  *       amountPaid: 500,
  *       paymentDate: new Date().toISOString(),
- *       notes: '/A9) #HDI',
+       notes: 'دفعة أولى',
  *     },
  *   });
  * };

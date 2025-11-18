@@ -17,6 +17,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { ReportsModule } from './reports/reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 
 @Module({
   imports: [
@@ -54,6 +55,10 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
+    // Apply RequestIdMiddleware first to generate request ID
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+
+    // Apply LoggerMiddleware after RequestIdMiddleware
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

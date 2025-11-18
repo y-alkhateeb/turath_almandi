@@ -12,6 +12,7 @@ export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction): void {
     const { method, originalUrl, ip } = req;
     const userAgent = req.get('user-agent') || 'Unknown';
+    const requestId = req.requestId || 'unknown';
     const startTime = Date.now();
 
     // Log the response when it finishes
@@ -20,8 +21,8 @@ export class LoggerMiddleware implements NestMiddleware {
       const contentLength = res.get('content-length') || '0';
       const responseTime = Date.now() - startTime;
 
-      // Format: METHOD URL STATUS_CODE - IP - USER_AGENT - RESPONSE_TIME ms
-      const logMessage = `${method} ${originalUrl} ${statusCode} - ${ip} - ${userAgent} - ${responseTime}ms - ${contentLength} bytes`;
+      // Format: [REQUEST_ID] METHOD URL STATUS_CODE - IP - USER_AGENT - RESPONSE_TIME ms - SIZE bytes
+      const logMessage = `[${requestId}] ${method} ${originalUrl} ${statusCode} - ${ip} - ${userAgent} - ${responseTime}ms - ${contentLength} bytes`;
 
       // Log with appropriate level based on status code
       if (statusCode >= 500) {

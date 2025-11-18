@@ -56,6 +56,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       statusCode: status,
       message: translatedMessage,
       error: translatedError,
+      requestId: request.requestId,
       timestamp: new Date().toISOString(),
     });
   }
@@ -96,7 +97,10 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     exception: Prisma.PrismaClientKnownRequestError,
     request: Request,
   ): void {
+    const requestId = request.requestId || 'unknown';
+
     const errorDetails = {
+      requestId,
       code: exception.code,
       message: exception.message,
       meta: exception.meta,
@@ -111,11 +115,14 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     };
 
     this.logger.error(
-      `Prisma Error [${exception.code}]: ${exception.message}`,
+      `[${requestId}] Prisma Error [${exception.code}]: ${exception.message}`,
       exception.stack,
     );
 
-    this.logger.debug('Detailed error information:', JSON.stringify(errorDetails, null, 2));
+    this.logger.debug(
+      `[${requestId}] Detailed error information:`,
+      JSON.stringify(errorDetails, null, 2),
+    );
   }
 
   private sanitizeRequestBody(body: Record<string, unknown>): Record<string, unknown> {

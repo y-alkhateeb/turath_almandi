@@ -1,46 +1,81 @@
 /**
  * Enumerations for the application
+ *
+ * IMPORTANT: These enums match the backend Prisma schema and service enums exactly.
+ * Using const enums for compile-time and runtime type safety.
  */
 
-// Basic status enum
+// ============================================
+// BASIC ENUMS
+// ============================================
+
+// Basic status enum (frontend-only)
 export enum BasicStatus {
   DISABLE = 0,
   ENABLE = 1,
 }
 
-// API result status
+// API result status (frontend-only)
 export enum ResultStatus {
   SUCCESS = 0,
   ERROR = -1,
   TIMEOUT = 401,
 }
 
-// User roles
+// ============================================
+// PRISMA SCHEMA ENUMS
+// ============================================
+
+/**
+ * User roles
+ * Matches backend Prisma enum: UserRole
+ */
 export enum UserRole {
   ADMIN = 'ADMIN',
   ACCOUNTANT = 'ACCOUNTANT',
 }
 
-// Transaction types
+/**
+ * Transaction types
+ * Matches backend Prisma enum: TransactionType
+ */
 export enum TransactionType {
   INCOME = 'INCOME',
   EXPENSE = 'EXPENSE',
 }
 
-// Payment methods
+/**
+ * Payment methods
+ * Matches backend Prisma enum: PaymentMethod
+ */
 export enum PaymentMethod {
   CASH = 'CASH',
   MASTER = 'MASTER',
 }
 
-// Debt status
+/**
+ * Currency types
+ * Matches backend Prisma enum: Currency
+ */
+export enum Currency {
+  USD = 'USD',
+  IQD = 'IQD',
+}
+
+/**
+ * Debt status
+ * Matches backend Prisma enum: DebtStatus
+ */
 export enum DebtStatus {
   ACTIVE = 'ACTIVE',
   PAID = 'PAID',
   PARTIAL = 'PARTIAL',
 }
 
-// Inventory units
+/**
+ * Inventory units
+ * Matches backend Prisma enum: InventoryUnit
+ */
 export enum InventoryUnit {
   KG = 'KG',
   PIECE = 'PIECE',
@@ -48,13 +83,10 @@ export enum InventoryUnit {
   OTHER = 'OTHER',
 }
 
-// Currency types
-export enum Currency {
-  USD = 'USD',
-  IQD = 'IQD',
-}
-
-// Notification severity levels
+/**
+ * Notification severity levels
+ * Matches backend Prisma enum: NotificationSeverity
+ */
 export enum NotificationSeverity {
   INFO = 'INFO',
   WARNING = 'WARNING',
@@ -62,13 +94,65 @@ export enum NotificationSeverity {
   CRITICAL = 'CRITICAL',
 }
 
-// Notification display methods
+/**
+ * Notification display methods
+ * Matches backend Prisma enum: DisplayMethod
+ */
 export enum DisplayMethod {
   POPUP = 'POPUP',
   TOAST = 'TOAST',
   EMAIL = 'EMAIL',
   SMS = 'SMS',
 }
+
+// ============================================
+// BACKEND SERVICE ENUMS
+// ============================================
+
+/**
+ * Notification types
+ * Matches notification types used in backend services
+ * These are string literals used in the notification.type field
+ */
+export enum NotificationType {
+  OVERDUE_DEBT = 'overdue_debt',
+  NEW_DEBT = 'new_debt',
+  DEBT_PAYMENT = 'debt_payment',
+  DEBT_PAID = 'debt_paid',
+  LARGE_TRANSACTION = 'large_transaction',
+  BACKUP_REMINDER = 'backup_reminder',
+}
+
+/**
+ * Audit log actions
+ * Matches backend enum: AuditAction
+ * From: backend/src/common/audit-log/audit-log.service.ts
+ */
+export enum AuditAction {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  VIEW = 'VIEW',
+}
+
+/**
+ * Audit log entity types
+ * Matches backend enum: AuditEntityType
+ * From: backend/src/common/audit-log/audit-log.service.ts
+ */
+export enum AuditEntityType {
+  USER = 'USER',
+  BRANCH = 'BRANCH',
+  TRANSACTION = 'TRANSACTION',
+  DEBT = 'DEBT',
+  DEBT_PAYMENT = 'DEBT_PAYMENT',
+  INVENTORY_ITEM = 'INVENTORY_ITEM',
+  INVENTORY = 'INVENTORY',
+}
+
+// ============================================
+// THEME ENUMS (re-exported)
+// ============================================
 
 // Theme enums (re-exported from theme/type.ts)
 export { ThemeMode, ThemeColorPresets, ThemeLayout } from '../theme/type';

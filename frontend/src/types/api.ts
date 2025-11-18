@@ -1,55 +1,415 @@
 /**
- * API type definitions
- * Request/Response types for API communication
+ * API Response Type Definitions
+ *
+ * Strict types for all API responses from the backend.
+ * These types match the backend NestJS response structures exactly.
+ *
+ * IMPORTANT:
+ * - No `any` types
+ * - No `unknown` without proper type guards
+ * - All nullable fields use `| null` to match backend
  */
 
-import type { ResultStatus } from './enum';
+import type {
+  UserRole,
+  TransactionType,
+  PaymentMethod,
+  DebtStatus,
+  InventoryUnit,
+  Currency,
+} from './enum';
 
-// Generic API response wrapper
-export interface Result<T = any> {
-  status: ResultStatus;
-  message: string;
+// ============================================
+// GENERIC API RESPONSE TYPES
+// ============================================
+
+/**
+ * Generic API response wrapper
+ * Used for single entity responses
+ */
+export interface ApiResponse<T> {
   data: T;
+  message?: string;
+  timestamp?: string;
 }
 
-// Paginated response
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
+/**
+ * Pagination metadata
+ * Matches backend pagination structure from services
+ */
+export interface PaginationMeta {
   page: number;
   limit: number;
+  total: number;
   totalPages: number;
 }
 
-// Pagination parameters
-export interface PaginationParams {
+/**
+ * Paginated API response
+ * Used for list endpoints with pagination
+ * Matches backend return structure: { data: T[], meta: PaginationMeta }
+ */
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+/**
+ * NestJS HTTP Exception response structure
+ * Matches NestJS default error format
+ */
+export interface ErrorResponse {
+  statusCode: number;
+  message: string | string[];
+  error: string;
+  timestamp?: string;
+  path?: string;
+}
+
+/**
+ * Validation error detail
+ * Used when backend returns field-specific validation errors
+ */
+export interface ValidationError {
+  field: string;
+  message: string;
+  constraints?: Record<string, string>;
+}
+
+// ============================================
+// AUTH & USER RESPONSES
+// ============================================
+
+/**
+ * Login response
+ * Matches backend LoginResponseDto
+ */
+export interface LoginResponse {
+  user: {
+    id: string;
+    username: string;
+    role: string;
+    branchId: string | null;
+    isActive: boolean;
+  };
+  access_token: string;
+  refresh_token: string;
+}
+
+/**
+ * Token refresh response
+ */
+export interface RefreshTokenResponse {
+  access_token: string;
+  refresh_token: string;
+}
+
+/**
+ * User profile response
+ */
+export interface UserProfileResponse {
+  id: string;
+  username: string;
+  role: UserRole;
+  branchId: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  branch?: {
+    id: string;
+    name: string;
+    location: string;
+  };
+}
+
+// ============================================
+// HEALTH CHECK RESPONSE
+// ============================================
+
+/**
+ * Health check response
+ * Matches backend AppController healthCheck endpoint
+ */
+export interface HealthCheckResponse {
+  status: 'ok' | 'degraded' | 'error';
+  timestamp: string;
+  service: string;
+  uptime: {
+    ms: number;
+    seconds: number;
+    formatted: string;
+  };
+  memory: {
+    rss: string;
+    heapTotal: string;
+    heapUsed: string;
+    external: string;
+  };
+  database: {
+    status: 'healthy' | 'unhealthy' | 'unknown';
+    latency: string;
+  };
+}
+
+// ============================================
+// QUERY FILTER TYPES
+// ============================================
+
+/**
+ * Transaction query filters
+ * Matches backend TransactionFilters interface
+ */
+export interface TransactionQueryFilters {
+  type?: TransactionType;
+  category?: string;
+  paymentMethod?: PaymentMethod;
+  currency?: Currency;
+  branchId?: string;
+  startDate?: string; // ISO date string
+  endDate?: string; // ISO date string
+  search?: string;
   page?: number;
   limit?: number;
 }
 
-// Sort parameters
-export interface SortParams {
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+/**
+ * Debt query filters
+ * Matches backend debt service filters
+ */
+export interface DebtQueryFilters {
+  status?: DebtStatus;
+  branchId?: string;
+  startDate?: string; // ISO date string (for dueDate range)
+  endDate?: string; // ISO date string (for dueDate range)
+  page?: number;
+  limit?: number;
 }
 
-// Filter base
-export interface FilterParams extends PaginationParams, SortParams {
-  search?: string;
+/**
+ * Inventory query filters
+ * Matches backend InventoryFilters interface
+ */
+export interface InventoryQueryFilters {
+  unit?: InventoryUnit;
+  branchId?: string;
+  search?: string; // Search by item name
+  page?: number;
+  limit?: number;
 }
 
-// API Error
-export interface ApiError {
-  status: number;
-  message: string;
-  errors?: Record<string, string[]>;
+/**
+ * Branch query filters
+ */
+export interface BranchQueryFilters {
+  branchId?: string;
+  includeInactive?: boolean;
 }
 
-// Form submission states
-export interface FormState<T = any> {
-  isSubmitting: boolean;
-  isSuccess: boolean;
-  isError: boolean;
-  error?: string;
-  data?: T;
+/**
+ * Notification query filters
+ */
+export interface NotificationQueryFilters {
+  branchId?: string;
+  isRead?: boolean;
+  type?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * Audit log query filters
+ * Matches backend QueryAuditLogsDto
+ */
+export interface AuditLogQueryFilters {
+  entityType?: string;
+  entityId?: string;
+  userId?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * User query filters
+ */
+export interface UserQueryFilters {
+  role?: UserRole;
+  branchId?: string;
+  isActive?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+// ============================================
+// DASHBOARD & STATISTICS RESPONSES
+// ============================================
+
+/**
+ * Dashboard summary response
+ */
+export interface DashboardSummaryResponse {
+  date: string;
+  branchId: string | null;
+  income_cash: number;
+  income_master: number;
+  total_income: number;
+  total_expense: number;
+  net: number;
+}
+
+/**
+ * Transaction statistics response
+ */
+export interface TransactionStatsResponse {
+  totalIncome: number;
+  totalExpenses: number;
+  netProfit: number;
+  totalTransactions: number;
+  byCurrency?: Record<string, {
+    income: number;
+    expenses: number;
+    net: number;
+  }>;
+  byPaymentMethod?: Record<string, number>;
+  byCategory?: Record<string, number>;
+}
+
+/**
+ * Debt summary response
+ */
+export interface DebtSummaryResponse {
+  totalDebts: number;
+  activeDebts: number;
+  paidDebts: number;
+  partialDebts: number;
+  totalOwed: number;
+  overdueDebts: number;
+}
+
+/**
+ * Inventory summary response
+ */
+export interface InventorySummaryResponse {
+  totalItems: number;
+  totalValue: number;
+  byUnit?: Record<string, {
+    count: number;
+    totalQuantity: number;
+    totalValue: number;
+  }>;
+  lowStockItems?: number;
+}
+
+// ============================================
+// BATCH OPERATION RESPONSES
+// ============================================
+
+/**
+ * Batch operation result
+ * Used when performing bulk operations
+ */
+export interface BatchOperationResult<T> {
+  success: T[];
+  failed: Array<{
+    item: T;
+    error: string;
+  }>;
+  totalProcessed: number;
+  successCount: number;
+  failureCount: number;
+}
+
+/**
+ * Bulk delete response
+ */
+export interface BulkDeleteResponse {
+  deletedCount: number;
+  deletedIds: string[];
+  errors?: Array<{
+    id: string;
+    error: string;
+  }>;
+}
+
+// ============================================
+// EXPORT RESPONSES
+// ============================================
+
+/**
+ * Export response (for Excel, PDF, CSV)
+ */
+export interface ExportResponse {
+  url?: string;
+  buffer?: ArrayBuffer;
+  filename: string;
+  contentType: string;
+  size?: number;
+}
+
+// ============================================
+// TYPE GUARDS
+// ============================================
+
+/**
+ * Type guard for error responses
+ */
+export function isErrorResponse(response: unknown): response is ErrorResponse {
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'statusCode' in response &&
+    'message' in response &&
+    'error' in response &&
+    typeof (response as ErrorResponse).statusCode === 'number' &&
+    (typeof (response as ErrorResponse).message === 'string' ||
+      Array.isArray((response as ErrorResponse).message))
+  );
+}
+
+/**
+ * Type guard for paginated responses
+ */
+export function isPaginatedResponse<T>(
+  response: unknown,
+): response is PaginatedResponse<T> {
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'data' in response &&
+    'meta' in response &&
+    Array.isArray((response as PaginatedResponse<T>).data) &&
+    typeof (response as PaginatedResponse<T>).meta === 'object' &&
+    (response as PaginatedResponse<T>).meta !== null &&
+    'page' in (response as PaginatedResponse<T>).meta &&
+    'limit' in (response as PaginatedResponse<T>).meta &&
+    'total' in (response as PaginatedResponse<T>).meta &&
+    'totalPages' in (response as PaginatedResponse<T>).meta
+  );
+}
+
+/**
+ * Type guard for API responses
+ */
+export function isApiResponse<T>(response: unknown): response is ApiResponse<T> {
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'data' in response
+  );
+}
+
+/**
+ * Type guard for validation errors
+ */
+export function isValidationError(error: unknown): error is ErrorResponse & {
+  message: string[];
+} {
+  return (
+    isErrorResponse(error) &&
+    Array.isArray(error.message) &&
+    error.statusCode === 400
+  );
 }

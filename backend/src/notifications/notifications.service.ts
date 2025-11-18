@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationSeverity, UserRole } from '@prisma/client';
+import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 
 export interface CreateNotificationDto {
   type: string;
@@ -44,18 +45,10 @@ export class NotificationsService {
         },
         include: {
           branch: {
-            select: {
-              id: true,
-              name: true,
-              location: true,
-            },
+            select: BRANCH_SELECT,
           },
           creator: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
+            select: USER_SELECT,
           },
         },
       });
@@ -146,10 +139,7 @@ export class NotificationsService {
       },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-          },
+          select: BRANCH_SELECT,
         },
       },
     });

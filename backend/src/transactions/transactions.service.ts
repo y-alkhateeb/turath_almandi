@@ -11,6 +11,13 @@ import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
 import { TransactionType, Currency, UserRole } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { applyBranchFilter } from '../common/utils/query-builder';
+import {
+  BRANCH_SELECT,
+  USER_SELECT,
+  INVENTORY_ITEM_SELECT,
+  INVENTORY_ITEM_EXTENDED_SELECT,
+} from '../common/constants/prisma-includes';
 
 interface RequestUser {
   id: string;
@@ -83,11 +90,7 @@ export class TransactionsService {
       include: {
         branch: true,
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
       },
     });
@@ -115,19 +118,10 @@ export class TransactionsService {
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    const where: any = {};
+    let where: any = {};
 
-    // Role-based access control
-    if (user.role === UserRole.ACCOUNTANT) {
-      // Accountants can only see transactions from their branch
-      if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
-      }
-      where.branchId = user.branchId;
-    } else if (user.role === UserRole.ADMIN && filters.branchId) {
-      // Admins can filter by specific branch
-      where.branchId = filters.branchId;
-    }
+    // Apply role-based branch filtering
+    where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply filters
     if (filters.type) {
@@ -173,26 +167,13 @@ export class TransactionsService {
       take: limit,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         inventoryItem: {
-          select: {
-            id: true,
-            name: true,
-            quantity: true,
-            unit: true,
-          },
+          select: INVENTORY_ITEM_SELECT,
         },
       },
     });
@@ -213,27 +194,13 @@ export class TransactionsService {
       where: { id },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         inventoryItem: {
-          select: {
-            id: true,
-            name: true,
-            quantity: true,
-            unit: true,
-            costPerUnit: true,
-          },
+          select: INVENTORY_ITEM_EXTENDED_SELECT,
         },
       },
     });
@@ -299,26 +266,13 @@ export class TransactionsService {
       data: updateData,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         inventoryItem: {
-          select: {
-            id: true,
-            name: true,
-            quantity: true,
-            unit: true,
-          },
+          select: INVENTORY_ITEM_SELECT,
         },
       },
     });
@@ -546,11 +500,7 @@ export class TransactionsService {
         include: {
           branch: true,
           creator: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
+            select: USER_SELECT,
           },
           inventoryItem: true,
         },

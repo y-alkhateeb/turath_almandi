@@ -9,6 +9,8 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
 import { UserRole, DebtStatus } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { applyBranchFilter } from '../common/utils/query-builder';
+import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 
 interface RequestUser {
   id: string;
@@ -80,18 +82,10 @@ export class DebtsService {
       data: debtData,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
       },
     });
@@ -109,16 +103,10 @@ export class DebtsService {
    */
   async findAll(user: RequestUser) {
     // Build where clause based on user role
-    const where: any = {};
+    let where: any = {};
 
-    // Role-based access control
-    if (user.role === UserRole.ACCOUNTANT) {
-      // Accountants can only see debts from their branch
-      if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
-      }
-      where.branchId = user.branchId;
-    }
+    // Apply role-based branch filtering
+    where = applyBranchFilter(user, where);
 
     // Get debts
     const debts = await this.prisma.debt.findMany({
@@ -126,18 +114,10 @@ export class DebtsService {
       orderBy: { dueDate: 'asc' },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         creator: {
-          select: {
-            id: true,
-            username: true,
-            role: true,
-          },
+          select: USER_SELECT,
         },
         payments: {
           orderBy: { paymentDate: 'desc' },
@@ -173,18 +153,10 @@ export class DebtsService {
         where: { id: debtId },
         include: {
           branch: {
-            select: {
-              id: true,
-              name: true,
-              location: true,
-            },
+            select: BRANCH_SELECT,
           },
           creator: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
+            select: USER_SELECT,
           },
         },
       });
@@ -245,18 +217,10 @@ export class DebtsService {
         },
         include: {
           branch: {
-            select: {
-              id: true,
-              name: true,
-              location: true,
-            },
+            select: BRANCH_SELECT,
           },
           creator: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
+            select: USER_SELECT,
           },
           payments: {
             orderBy: { paymentDate: 'desc' },

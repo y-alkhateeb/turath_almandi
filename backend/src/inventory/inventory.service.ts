@@ -8,6 +8,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { UserRole } from '@prisma/client';
+import { applyBranchFilter } from '../common/utils/query-builder';
+import {
+  BRANCH_SELECT,
+  TRANSACTION_SELECT_FOR_INVENTORY,
+  TRANSACTION_SELECT_MINIMAL,
+} from '../common/constants/prisma-includes';
 
 interface RequestUser {
   id: string;
@@ -91,19 +97,10 @@ export class InventoryService {
       },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
-          select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-          },
+          select: TRANSACTION_SELECT_MINIMAL,
           orderBy: {
             date: 'desc',
           },
@@ -127,19 +124,10 @@ export class InventoryService {
     const skip = (page - 1) * limit;
 
     // Build where clause based on filters and user role
-    const where: any = {};
+    let where: any = {};
 
-    // Role-based access control
-    if (user.role === UserRole.ACCOUNTANT) {
-      // Accountants can only see inventory from their branch
-      if (!user.branchId) {
-        throw new ForbiddenException('Accountant must be assigned to a branch');
-      }
-      where.branchId = user.branchId;
-    } else if (user.role === UserRole.ADMIN && filters.branchId) {
-      // Admins can filter by specific branch
-      where.branchId = filters.branchId;
-    }
+    // Apply role-based branch filtering
+    where = applyBranchFilter(user, where, filters.branchId);
 
     // Apply filters
     if (filters.unit) {
@@ -162,20 +150,10 @@ export class InventoryService {
       take: limit,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
-          select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-            category: true,
-          },
+          select: TRANSACTION_SELECT_FOR_INVENTORY,
           orderBy: {
             date: 'desc',
           },
@@ -210,19 +188,11 @@ export class InventoryService {
       where: { id },
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
           select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-            category: true,
+            ...TRANSACTION_SELECT_FOR_INVENTORY,
             notes: true,
           },
           orderBy: {
@@ -289,20 +259,10 @@ export class InventoryService {
       data: updateData,
       include: {
         branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+          select: BRANCH_SELECT,
         },
         transactions: {
-          select: {
-            id: true,
-            amount: true,
-            date: true,
-            employeeVendorName: true,
-            category: true,
-          },
+          select: TRANSACTION_SELECT_FOR_INVENTORY,
           orderBy: {
             date: 'desc',
           },

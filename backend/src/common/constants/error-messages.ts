@@ -78,6 +78,11 @@ export const ERROR_MESSAGES = {
     UNEXPECTED_ERROR: 'unexpectedDatabaseError',
     USERNAME_EXISTS: 'recordWithThisUsernameAlreadyExists',
     EMAIL_EXISTS: 'recordWithThisEmailAlreadyExists',
+    FOREIGN_KEY_CONSTRAINT: 'foreignKeyConstraintViolation',
+    INVALID_BRANCH_REFERENCE: 'invalidBranchReference',
+    INVALID_USER_REFERENCE: 'invalidUserReference',
+    INVALID_INVENTORY_REFERENCE: 'invalidInventoryItemReference',
+    INVALID_DEBT_REFERENCE: 'invalidDebtReference',
   },
 
   // HTTP errors

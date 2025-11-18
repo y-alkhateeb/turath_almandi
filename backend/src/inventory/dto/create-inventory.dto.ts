@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsEnum,
+  IsUUID,
   Min,
   MinLength,
   IsOptional,
@@ -39,7 +40,7 @@ export class CreateInventoryDto {
   @IsOptional()
   notes?: string;
 
-  @IsString()
+  @IsUUID('4', { message: 'معرف الفرع يجب أن يكون UUID صالح' })
   @IsOptional()
   branchId?: string;
 }

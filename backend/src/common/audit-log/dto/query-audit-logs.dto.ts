@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsInt, Min, Max, IsDateString, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsInt, Min, Max, IsDateString, IsEnum, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AuditEntityType } from '../audit-log.service';
 
@@ -8,11 +8,11 @@ export class QueryAuditLogsDto {
   entityType?: AuditEntityType;
 
   @IsOptional()
-  @IsString()
+  @IsUUID('4', { message: 'Entity ID must be a valid UUID' })
   entityId?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUUID('4', { message: 'User ID must be a valid UUID' })
   userId?: string;
 
   @IsOptional()

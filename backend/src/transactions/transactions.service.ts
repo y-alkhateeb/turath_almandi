@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
-import { TransactionType, Currency, UserRole, Prisma } from '@prisma/client';
+import { TransactionType, Currency, UserRole, Prisma, PaymentMethod } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -125,7 +125,8 @@ export class TransactionsService {
     if (createTransactionDto.type === TransactionType.INCOME) {
       if (
         createTransactionDto.paymentMethod &&
-        !['CASH', 'MASTER'].includes(createTransactionDto.paymentMethod)
+        createTransactionDto.paymentMethod !== PaymentMethod.CASH &&
+        createTransactionDto.paymentMethod !== PaymentMethod.MASTER
       ) {
         throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
       }
@@ -314,7 +315,8 @@ export class TransactionsService {
       (updateTransactionDto.type === TransactionType.INCOME ||
         existingTransaction.type === TransactionType.INCOME) &&
       updateTransactionDto.paymentMethod &&
-      !['CASH', 'MASTER'].includes(updateTransactionDto.paymentMethod)
+      updateTransactionDto.paymentMethod !== PaymentMethod.CASH &&
+      updateTransactionDto.paymentMethod !== PaymentMethod.MASTER
     ) {
       throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
     }
@@ -423,8 +425,8 @@ export class TransactionsService {
       filterBranchId = branchId;
     }
 
-    // Build where clause for date and branch filtering
-    const where: Prisma.TransactionWhereInput = {
+    // Build base where clause for date and branch filtering
+    const baseWhere: Prisma.TransactionWhereInput = {
       date: {
         gte: startOfDay,
         lte: endOfDay,
@@ -432,39 +434,51 @@ export class TransactionsService {
     };
 
     if (filterBranchId) {
-      where.branchId = filterBranchId;
+      baseWhere.branchId = filterBranchId;
     }
 
-    // Get all income transactions (CASH and MASTER)
-    const incomeTransactions = await this.prisma.transaction.findMany({
-      where: {
-        ...where,
-        type: TransactionType.INCOME,
-      },
-    });
+    // Execute all aggregate queries in parallel for best performance
+    const [incomeCashAggregate, incomeMasterAggregate, expenseAggregate] = await Promise.all([
+      // Aggregate CASH income
+      this.prisma.transaction.aggregate({
+        where: {
+          ...baseWhere,
+          type: TransactionType.INCOME,
+          paymentMethod: PaymentMethod.CASH,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      // Aggregate MASTER income
+      this.prisma.transaction.aggregate({
+        where: {
+          ...baseWhere,
+          type: TransactionType.INCOME,
+          paymentMethod: PaymentMethod.MASTER,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      // Aggregate expenses
+      this.prisma.transaction.aggregate({
+        where: {
+          ...baseWhere,
+          type: TransactionType.EXPENSE,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+    ]);
 
-    // Calculate income by payment method
-    const income_cash = incomeTransactions
-      .filter((t) => t.paymentMethod === 'CASH')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-    const income_master = incomeTransactions
-      .filter((t) => t.paymentMethod === 'MASTER')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    // Extract aggregated values (handle null for zero transactions)
+    const income_cash = Number(incomeCashAggregate._sum.amount || 0);
+    const income_master = Number(incomeMasterAggregate._sum.amount || 0);
+    const total_expense = Number(expenseAggregate._sum.amount || 0);
 
     const total_income = income_cash + income_master;
-
-    // Get all expense transactions
-    const expenseTransactions = await this.prisma.transaction.findMany({
-      where: {
-        ...where,
-        type: TransactionType.EXPENSE,
-      },
-    });
-
-    const total_expense = expenseTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-
-    // Calculate net profit
     const net = total_income - total_expense;
 
     return {

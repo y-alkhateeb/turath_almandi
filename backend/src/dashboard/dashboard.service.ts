@@ -88,47 +88,57 @@ export class DashboardService {
       baseWhere.branchId = filterBranchId;
     }
 
+    // Build where clause for today's transactions
+    const todayWhere: Prisma.TransactionWhereInput = {
+      ...baseWhere,
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    };
+
     // Execute all queries in parallel for best performance
     const [
-      todayIncome,
-      todayExpenses,
+      todayIncomeAggregate,
+      todayExpensesAggregate,
+      todayIncomeTransactions,
       todayTransactionCount,
       recentTransactions,
       monthlyData,
     ] = await Promise.all([
-      // Today's income
-      this.prisma.transaction.findMany({
+      // Aggregate today's income
+      this.prisma.transaction.aggregate({
         where: {
-          ...baseWhere,
+          ...todayWhere,
           type: TransactionType.INCOME,
-          date: {
-            gte: startOfDay,
-            lte: endOfDay,
-          },
+        },
+        _sum: {
+          amount: true,
         },
       }),
 
-      // Today's expenses
+      // Aggregate today's expenses
+      this.prisma.transaction.aggregate({
+        where: {
+          ...todayWhere,
+          type: TransactionType.EXPENSE,
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+
+      // Get today's income transactions for category breakdown
       this.prisma.transaction.findMany({
         where: {
-          ...baseWhere,
-          type: TransactionType.EXPENSE,
-          date: {
-            gte: startOfDay,
-            lte: endOfDay,
-          },
+          ...todayWhere,
+          type: TransactionType.INCOME,
         },
       }),
 
       // Today's transaction count
       this.prisma.transaction.count({
-        where: {
-          ...baseWhere,
-          date: {
-            gte: startOfDay,
-            lte: endOfDay,
-          },
-        },
+        where: todayWhere,
       }),
 
       // Recent transactions (last 5)
@@ -151,13 +161,13 @@ export class DashboardService {
       this.getMonthlyData(filterBranchId),
     ]);
 
-    // Calculate today's totals
-    const totalRevenue = todayIncome.reduce((sum, t) => sum + Number(t.amount), 0);
-    const totalExpenses = todayExpenses.reduce((sum, t) => sum + Number(t.amount), 0);
+    // Extract aggregated values
+    const totalRevenue = Number(todayIncomeAggregate._sum.amount || 0);
+    const totalExpenses = Number(todayExpensesAggregate._sum.amount || 0);
     const netProfit = totalRevenue - totalExpenses;
 
     // Get category breakdown from today's income
-    const categoryData = this.getCategoryBreakdown(todayIncome);
+    const categoryData = this.getCategoryBreakdown(todayIncomeTransactions);
 
     // Format recent transactions
     const formattedTransactions: RecentTransaction[] = recentTransactions.map((t) => ({
@@ -204,32 +214,38 @@ export class DashboardService {
       const startOfMonth = getStartOfMonth(date);
       const endOfMonth = getEndOfMonth(date);
 
-      // Get transactions for this month
-      const [income, expenses] = await Promise.all([
-        this.prisma.transaction.findMany({
+      const monthWhere: Prisma.TransactionWhereInput = {
+        ...baseWhere,
+        date: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      };
+
+      // Use aggregate queries for this month
+      const [incomeAggregate, expensesAggregate] = await Promise.all([
+        this.prisma.transaction.aggregate({
           where: {
-            ...baseWhere,
+            ...monthWhere,
             type: TransactionType.INCOME,
-            date: {
-              gte: startOfMonth,
-              lte: endOfMonth,
-            },
+          },
+          _sum: {
+            amount: true,
           },
         }),
-        this.prisma.transaction.findMany({
+        this.prisma.transaction.aggregate({
           where: {
-            ...baseWhere,
+            ...monthWhere,
             type: TransactionType.EXPENSE,
-            date: {
-              gte: startOfMonth,
-              lte: endOfMonth,
-            },
+          },
+          _sum: {
+            amount: true,
           },
         }),
       ]);
 
-      const revenue = income.reduce((sum, t) => sum + Number(t.amount), 0);
-      const expenseTotal = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
+      const revenue = Number(incomeAggregate._sum.amount || 0);
+      const expenseTotal = Number(expensesAggregate._sum.amount || 0);
 
       months.push({
         month: monthNames[date.getMonth()],

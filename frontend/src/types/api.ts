@@ -303,6 +303,70 @@ export interface InventorySummaryResponse {
   lowStockItems?: number;
 }
 
+/**
+ * Dashboard statistics response
+ * Aggregated metrics for dashboard overview
+ */
+export interface DashboardStats {
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  todayTransactions: number;
+  cashRevenue?: number;
+  masterRevenue?: number;
+  totalDebts?: number;
+  activeDebts?: number;
+  inventoryValue?: number;
+}
+
+/**
+ * Revenue data point for charts
+ * Time series data for revenue tracking
+ */
+export interface RevenueDataPoint {
+  date: string; // ISO date or month label
+  revenue: number;
+  expenses: number;
+  net?: number;
+}
+
+/**
+ * Category data point for charts
+ * Category-based spending/revenue breakdown
+ */
+export interface CategoryDataPoint {
+  category: string;
+  value: number;
+  count?: number;
+  color?: string;
+}
+
+/**
+ * Branch performance comparison
+ * Comparative metrics across branches
+ */
+export interface BranchPerformance {
+  branchId: string;
+  branchName: string;
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  transactionCount: number;
+  averageTransactionValue: number;
+  topCategory?: string;
+}
+
+/**
+ * Dashboard query filters
+ */
+export interface DashboardQueryFilters {
+  branchId?: string;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+}
+
 // ============================================
 // BATCH OPERATION RESPONSES
 // ============================================

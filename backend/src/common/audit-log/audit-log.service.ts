@@ -218,4 +218,91 @@ export class AuditLogService {
       take: limit,
     });
   }
+
+  /**
+   * Query audit logs with filters and pagination
+   */
+  async queryLogs(params: {
+    entityType?: string;
+    entityId?: string;
+    userId?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    data: any[];
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> {
+    const { entityType, entityId, userId, startDate, endDate, page = 1, limit = 50 } = params;
+
+    // Build where clause
+    const where: Prisma.AuditLogWhereInput = {};
+
+    if (entityType) {
+      where.entityType = entityType;
+    }
+
+    if (entityId) {
+      where.entityId = entityId;
+    }
+
+    if (userId) {
+      where.userId = userId;
+    }
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate);
+      }
+      if (endDate) {
+        // Set time to end of day for endDate
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
+    }
+
+    // Get total count
+    const total = await this.prisma.auditLog.count({ where });
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+    const totalPages = Math.ceil(total / limit);
+
+    // Get audit logs
+    const data = await this.prisma.auditLog.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
+  }
 }

@@ -47,4 +47,14 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+
+  /**
+   * Reactivate a deactivated user
+   * Sets isActive to true
+   */
+  @Patch(':id/reactivate')
+  @Roles([UserRole.ADMIN])
+  reactivate(@Param('id') id: string) {
+    return this.usersService.reactivate(id);
+  }
 }

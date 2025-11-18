@@ -121,6 +121,11 @@ export class AuthService {
       return null;
     }
 
+    // Check if user is active
+    if (!user.isActive) {
+      return null;
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {

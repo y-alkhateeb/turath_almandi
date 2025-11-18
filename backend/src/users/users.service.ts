@@ -207,4 +207,47 @@ export class UsersService {
 
     return deletedUser;
   }
+
+  /**
+   * Reactivate a deactivated user
+   * Sets isActive to true
+   */
+  async reactivate(id: string, currentUserId?: string) {
+    const existingUser = await this.findOne(id); // Check existence
+
+    // Reactivate user by setting isActive to true
+    const reactivatedUser = await this.prisma.user.update({
+      where: { id },
+      data: { isActive: true },
+      select: {
+        id: true,
+        username: true,
+        role: true,
+        branchId: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            location: true,
+          },
+        },
+      },
+    });
+
+    // Log the reactivation in audit log if currentUserId is provided
+    if (currentUserId) {
+      await this.auditLogService.logUpdate(
+        currentUserId,
+        AuditEntityType.USER,
+        id,
+        existingUser,
+        reactivatedUser,
+      );
+    }
+
+    return reactivatedUser;
+  }
 }

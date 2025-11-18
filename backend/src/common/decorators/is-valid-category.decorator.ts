@@ -11,6 +11,7 @@ import {
   EXPENSE_CATEGORIES,
   TRANSACTION_CATEGORIES,
   CATEGORY_LABELS_AR,
+  TransactionCategory,
 } from '../constants/transaction-categories';
 
 interface TransactionWithTypeAndCategory {
@@ -20,6 +21,10 @@ interface TransactionWithTypeAndCategory {
 
 @ValidatorConstraint({ name: 'isValidCategory', async: false })
 export class IsValidCategoryConstraint implements ValidatorConstraintInterface {
+  private isInCategory(category: string, categories: readonly string[]): boolean {
+    return categories.includes(category);
+  }
+
   validate(category: string | undefined, args: ValidationArguments): boolean {
     // If category is not provided, validation passes (handled by @IsOptional)
     if (!category) {
@@ -30,17 +35,17 @@ export class IsValidCategoryConstraint implements ValidatorConstraintInterface {
     const transactionType = object.type;
 
     // Check if category is in the predefined list
-    if (!TRANSACTION_CATEGORIES.includes(category as any)) {
+    if (!this.isInCategory(category, TRANSACTION_CATEGORIES)) {
       return false;
     }
 
     // If transaction type is specified, validate category matches the type
     if (transactionType === TransactionType.INCOME) {
-      return INCOME_CATEGORIES.includes(category as any);
+      return this.isInCategory(category, INCOME_CATEGORIES);
     }
 
     if (transactionType === TransactionType.EXPENSE) {
-      return EXPENSE_CATEGORIES.includes(category as any);
+      return this.isInCategory(category, EXPENSE_CATEGORIES);
     }
 
     return true;

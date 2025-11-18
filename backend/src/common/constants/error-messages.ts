@@ -1,63 +1,93 @@
 /**
- * Centralized error messages for consistent messaging across the application
+ * Centralized error message keys for consistent messaging across the application
+ * These keys are used with the translation system in arabic-errors.ts
+ *
+ * Usage:
+ * - Use these keys in services: throw new BadRequestException(ERROR_MESSAGES.BRANCH.NOT_FOUND)
+ * - The exception filter will translate the key based on Accept-Language header
  */
 
 export const ERROR_MESSAGES = {
   // Branch-related errors
   BRANCH: {
-    NOT_FOUND: 'الفرع غير موجود',
-    REQUIRED: 'يجب تحديد الفرع',
-    REQUIRED_FOR_ACCOUNTANT: 'يجب تعيين فرع للمستخدم',
-    ACCOUNTANT_NOT_ASSIGNED: 'Accountant must be assigned to a branch',
-    ACCOUNTANT_NO_ACCESS: 'Accountant not assigned to any branch',
-    CANNOT_ACCESS_OTHER: 'Cannot access other branches',
-    CANNOT_DELETE_OTHER: 'Cannot delete from other branches',
-    BRANCH_ID_REQUIRED: 'branchId required',
-    BRANCH_ID_REQUIRED_BODY: 'branchId required in request body',
+    NOT_FOUND: 'branchNotFound',
+    REQUIRED: 'branchRequired',
+    REQUIRED_FOR_ACCOUNTANT: 'userMustBeAssignedToBranch',
+    ACCOUNTANT_NOT_ASSIGNED: 'accountantMustBeAssignedToBranch',
+    ACCOUNTANT_NO_ACCESS: 'accountantNotAssignedToAnyBranch',
+    CANNOT_ACCESS_OTHER: 'cannotAccessOtherBranches',
+    CANNOT_DELETE_OTHER: 'cannotDeleteFromOtherBranches',
+    BRANCH_ID_REQUIRED: 'branchIdRequired',
+    BRANCH_ID_REQUIRED_BODY: 'branchIdRequiredInRequestBody',
   },
 
   // User-related errors
   USER: {
-    NOT_FOUND: (id: string) => `User with ID ${id} not found`,
-    NOT_AUTHENTICATED: 'User not authenticated',
+    NOT_FOUND: (id: string) => `userWithId${id}NotFound`,
+    NOT_AUTHENTICATED: 'userNotAuthenticated',
   },
 
   // Transaction-related errors
   TRANSACTION: {
-    NOT_FOUND: (id: string) => `Transaction with ID ${id} not found`,
-    NO_ACCESS: 'You do not have access to this transaction',
-    BRANCH_REQUIRED: 'يجب تعيين فرع للمستخدم لإنشاء المعاملات',
-    PAYMENT_METHOD_INVALID: 'Payment method must be either CASH or MASTER for income transactions',
+    NOT_FOUND: (id: string) => `transactionWithId${id}NotFound`,
+    NO_ACCESS: 'noAccessToTransaction',
+    BRANCH_REQUIRED: 'userMustBeAssignedToBranchToCreateTransactions',
+    PAYMENT_METHOD_INVALID: 'paymentMethodMustBeCashOrMasterForIncome',
   },
 
   // Debt-related errors
   DEBT: {
-    NOT_FOUND: 'Debt not found',
-    BRANCH_REQUIRED_CREATE: 'يجب تعيين فرع للمستخدم لإنشاء الديون',
-    BRANCH_REQUIRED_PAY: 'يجب تعيين فرع للمستخدم لسداد الديون',
-    DUE_DATE_INVALID: 'Due date must be greater than or equal to date',
+    NOT_FOUND: 'debtNotFound',
+    BRANCH_REQUIRED_CREATE: 'userMustBeAssignedToBranchToCreateDebts',
+    BRANCH_REQUIRED_PAY: 'userMustBeAssignedToBranchToPayDebts',
+    DUE_DATE_INVALID: 'dueDateMustBeGreaterThanOrEqualToDate',
     PAYMENT_EXCEEDS_REMAINING: (paid: number, remaining: number) =>
-      `Payment amount (${paid}) cannot exceed remaining amount (${remaining})`,
-    ONLY_PAY_OWN_BRANCH: 'You can only pay debts from your branch',
+      `paymentAmount${paid}CannotExceedRemainingAmount${remaining}`,
+    ONLY_PAY_OWN_BRANCH: 'canOnlyPayDebtsFromYourBranch',
   },
 
   // Inventory-related errors
   INVENTORY: {
-    NOT_FOUND: (id: string) => `Inventory item with ID ${id} not found`,
-    NO_ACCESS: 'You do not have access to this inventory item',
-    BRANCH_REQUIRED: 'يجب تعيين فرع للمستخدم لإنشاء عناصر المخزون',
-    DUPLICATE_ITEM: 'An inventory item with the same name and unit already exists in this branch',
-    LINKED_TRANSACTIONS: 'Cannot delete inventory item with linked transactions. Unlink transactions first or set quantity to 0.',
-    ITEM_NAME_REQUIRED: 'Item name is required when adding to inventory',
-    UNIT_REQUIRED: 'Unit is required when adding to inventory',
+    NOT_FOUND: (id: string) => `inventoryItemWithId${id}NotFound`,
+    NO_ACCESS: 'noAccessToInventoryItem',
+    BRANCH_REQUIRED: 'userMustBeAssignedToBranchToCreateInventoryItems',
+    DUPLICATE_ITEM: 'inventoryItemWithSameNameAndUnitAlreadyExists',
+    LINKED_TRANSACTIONS: 'cannotDeleteInventoryItemWithLinkedTransactions',
+    ITEM_NAME_REQUIRED: 'itemNameRequiredWhenAddingToInventory',
+    UNIT_REQUIRED: 'unitRequiredWhenAddingToInventory',
   },
 
   // Validation errors
   VALIDATION: {
-    AMOUNT_POSITIVE: 'Amount must be greater than 0',
-    QUANTITY_POSITIVE: 'Quantity must be greater than 0 when adding to inventory',
-    QUANTITY_NON_NEGATIVE: 'Quantity must be greater than or equal to 0',
-    COST_NON_NEGATIVE: 'Cost per unit must be greater than or equal to 0',
-    PAYMENT_POSITIVE: 'Payment amount must be greater than 0',
+    AMOUNT_POSITIVE: 'amountMustBeGreaterThan0',
+    QUANTITY_POSITIVE: 'quantityMustBeGreaterThan0WhenAddingToInventory',
+    QUANTITY_NON_NEGATIVE: 'quantityMustBeGreaterThanOrEqualTo0',
+    COST_NON_NEGATIVE: 'costPerUnitMustBeGreaterThanOrEqualTo0',
+    PAYMENT_POSITIVE: 'paymentAmountMustBeGreaterThan0',
+  },
+
+  // Currency errors
+  CURRENCY: {
+    ONLY_USD_ALLOWED: 'onlyUSDCurrencyIsAllowed',
+    INVALID: 'invalidCurrency',
+  },
+
+  // Database errors
+  DATABASE: {
+    RECORD_NOT_FOUND: 'recordNotFound',
+    UNEXPECTED_ERROR: 'unexpectedDatabaseError',
+    USERNAME_EXISTS: 'recordWithThisUsernameAlreadyExists',
+    EMAIL_EXISTS: 'recordWithThisEmailAlreadyExists',
+  },
+
+  // HTTP errors
+  HTTP: {
+    BAD_REQUEST: 'badRequest',
+    UNAUTHORIZED: 'unauthorized',
+    FORBIDDEN: 'forbidden',
+    NOT_FOUND: 'notFound',
+    CONFLICT: 'conflict',
+    INTERNAL_SERVER_ERROR: 'internalServerError',
+    SERVICE_UNAVAILABLE: 'serviceUnavailable',
   },
 } as const;

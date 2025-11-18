@@ -19,12 +19,18 @@ import { ReportsModule } from './reports/reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
+import { envValidationSchema } from './common/config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: envValidationSchema,
+      validationOptions: {
+        abortEarly: false, // Show all validation errors at once
+        allowUnknown: true, // Allow other env vars not in schema
+      },
     }),
     ThrottlerModule.forRoot([
       {

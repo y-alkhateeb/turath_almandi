@@ -30,9 +30,10 @@ import {
 } from '@/hooks/queries/useNotifications';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { NotificationList } from '@/components/notifications/NotificationList';
-import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
-import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
+import { PageLayout } from '@/components/layouts';
+import { PageLoading } from '@/components/loading';
+import { Button } from '@/ui/button';
 
 // ============================================
 // TYPES
@@ -168,115 +169,7 @@ export default function NotificationsPage() {
   // ============================================
 
   if (isLoading) {
-    return (
-      <div className="space-y-6" dir="rtl">
-        {/* Page Header Skeleton */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="h-9 w-48 bg-[var(--bg-tertiary)] rounded animate-pulse" />
-            <div className="h-5 w-64 bg-[var(--bg-tertiary)] rounded animate-pulse" />
-          </div>
-          <div className="flex gap-2">
-            <div className="h-10 w-32 bg-[var(--bg-tertiary)] rounded animate-pulse" />
-            <div className="h-10 w-10 bg-[var(--bg-tertiary)] rounded animate-pulse" />
-          </div>
-        </div>
-
-        {/* Tabs Skeleton */}
-        <div className="flex gap-2">
-          <div className="h-10 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
-          <div className="h-10 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
-        </div>
-
-        {/* List Skeleton */}
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
-          <ListSkeleton items={5} variant="default" />
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================
-  // ERROR STATE
-  // ============================================
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between" dir="rtl">
-          <div>
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">الإشعارات</h1>
-            <p className="text-[var(--text-secondary)] mt-1">عرض وإدارة إشعاراتك</p>
-          </div>
-          <button
-            onClick={handleNavigateToSettings}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            الإعدادات
-          </button>
-        </div>
-        <ErrorState error={error} onRetry={handleRetry} />
-      </div>
-    );
-  }
-
-  // ============================================
-  // EMPTY STATE
-  // ============================================
-
-  if (notifications.length === 0) {
-    return (
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between" dir="rtl">
-          <div>
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">الإشعارات</h1>
-            <p className="text-[var(--text-secondary)] mt-1">عرض وإدارة إشعاراتك</p>
-          </div>
-          <button
-            onClick={handleNavigateToSettings}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            الإعدادات
-          </button>
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="flex gap-2" dir="rtl">
-          <button
-            onClick={() => handleTabChange('all')}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              activeTab === 'all'
-                ? 'bg-primary-600 text-white'
-                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-            }`}
-          >
-            الكل
-          </button>
-          <button
-            onClick={() => handleTabChange('unread')}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              activeTab === 'unread'
-                ? 'bg-primary-600 text-white'
-                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-            }`}
-          >
-            غير مقروء
-          </button>
-        </div>
-
-        {/* Empty State */}
-        <EmptyState
-          icon={<Bell className="w-8 h-8 text-primary-600" />}
-          title={activeTab === 'unread' ? 'لا توجد إشعارات غير مقروءة' : 'لا توجد إشعارات'}
-          description={
-            activeTab === 'unread' ? 'جميع الإشعارات مقروءة. عمل رائع!' : 'لم تتلقَ أي إشعارات بعد.'
-          }
-        />
-      </div>
-    );
+    return <PageLoading message="جاري تحميل الإشعارات..." />;
   }
 
   // ============================================
@@ -286,70 +179,94 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const hasUnread = unreadCount > 0;
 
+  // Header Actions
+  const headerActions = (
+    <div className="flex items-center gap-2">
+      {hasUnread && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleMarkAllAsRead}
+          disabled={markAllAsRead.isPending}
+        >
+          <CheckCheck className="w-4 h-4" />
+          تعليم الكل كمقروء
+        </Button>
+      )}
+      <Button variant="outline" size="sm" onClick={handleNavigateToSettings}>
+        <Settings className="w-4 h-4" />
+        الإعدادات
+      </Button>
+    </div>
+  );
+
+  // Filter Tabs Component
+  const filterTabs = (
+    <div className="flex gap-2" dir="rtl">
+      <button
+        onClick={() => handleTabChange('all')}
+        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          activeTab === 'all'
+            ? 'bg-primary-600 text-white'
+            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+        }`}
+      >
+        الكل
+      </button>
+      <button
+        onClick={() => handleTabChange('unread')}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+          activeTab === 'unread'
+            ? 'bg-primary-600 text-white'
+            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+        }`}
+      >
+        غير مقروء
+        {unreadCount > 0 && (
+          <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
+      </button>
+    </div>
+  );
+
   // ============================================
-  // MAIN CONTENT
+  // RENDER
   // ============================================
 
+  // Empty State
+  if (notifications.length === 0) {
+    return (
+      <PageLayout
+        title="الإشعارات"
+        description="عرض وإدارة إشعاراتك"
+        actions={headerActions}
+      >
+        {filterTabs}
+        <EmptyState
+          icon={<Bell className="w-8 h-8 text-primary-600" />}
+          title={activeTab === 'unread' ? 'لا توجد إشعارات غير مقروءة' : 'لا توجد إشعارات'}
+          description={
+            activeTab === 'unread' ? 'جميع الإشعارات مقروءة. عمل رائع!' : 'لم تتلقَ أي إشعارات بعد.'
+          }
+        />
+      </PageLayout>
+    );
+  }
+
+  // Main Content
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between" dir="rtl">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">الإشعارات</h1>
-          <p className="text-[var(--text-secondary)] mt-1">عرض وإدارة إشعاراتك ({total} إشعار)</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Mark All as Read Button */}
-          {hasUnread && (
-            <button
-              onClick={handleMarkAllAsRead}
-              disabled={markAllAsRead.isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <CheckCheck className="w-4 h-4" />
-              تعليم الكل كمقروء
-            </button>
-          )}
-
-          {/* Settings Button */}
-          <button
-            onClick={handleNavigateToSettings}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            الإعدادات
-          </button>
-        </div>
-      </div>
+    <PageLayout
+      title="الإشعارات"
+      description={`عرض وإدارة إشعاراتك (${total} إشعار)`}
+      actions={headerActions}
+      error={error}
+      onRetry={handleRetry}
+    >
 
       {/* Filter Tabs */}
-      <div className="flex gap-2" dir="rtl">
-        <button
-          onClick={() => handleTabChange('all')}
-          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === 'all'
-              ? 'bg-primary-600 text-white'
-              : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-          }`}
-        >
-          الكل
-        </button>
-        <button
-          onClick={() => handleTabChange('unread')}
-          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-            activeTab === 'unread'
-              ? 'bg-primary-600 text-white'
-              : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-          }`}
-        >
-          غير مقروء
-          {unreadCount > 0 && (
-            <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
-          )}
-        </button>
-      </div>
+      {filterTabs}
 
       {/* Notifications List */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg overflow-hidden">
@@ -362,10 +279,9 @@ export default function NotificationsPage() {
       </div>
 
       {/* Auto-refresh indicator */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" dir="rtl">
-        <p className="text-sm text-blue-800">
-          <strong>ملاحظة:</strong> يتم تحديث الإشعارات تلقائياً كل 30 ثانية وفي الوقت الفعلي عبر
-          WebSocket.
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4" dir="rtl">
+        <p className="text-sm text-blue-800 dark:text-blue-300">
+          <strong>ملاحظة:</strong> يتم تحديث الإشعارات تلقائياً كل 30 ثانية وفي الوقت الفعلي عبر WebSocket.
         </p>
       </div>
 
@@ -378,6 +294,6 @@ export default function NotificationsPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }

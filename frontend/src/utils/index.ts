@@ -5,6 +5,16 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+// Re-export specialized utilities
+export * from './format';
+export * from './validation';
+export * from './download';
+export * from './error';
+export * from './permissions';
+export * from './storage';
+export * from './toast';
+export * from './rtl';
+
 /**
  * Merge Tailwind CSS classes using clsx and tailwind-merge
  */

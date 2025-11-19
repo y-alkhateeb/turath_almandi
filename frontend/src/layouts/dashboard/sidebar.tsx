@@ -1,15 +1,22 @@
 /**
  * Sidebar Navigation
  * Vertical navigation menu with mobile drawer support
+ * Features:
+ * - Role-based menu filtering
+ * - Unread notifications badge
+ * - Active state highlighting
+ * - RTL support
+ * - Nested navigation items
  */
 
-import { X } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Logo } from '@/components/logo';
 import { cn } from '@/utils';
-import { navData } from './nav/nav-data/nav-data-frontend';
-import { AuthGuard } from '@/components/auth/auth-guard';
+import { navData, getFilteredNavItems, isNavItemActive } from './nav/nav-data/nav-data-frontend';
+import { useUser } from '@/store/userStore';
+import { useUnreadNotifications } from '@/hooks/queries/useNotifications';
 import type { NavItem } from '#/router';
+import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -18,6 +25,23 @@ export interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
+  const user = useUser();
+  const { data: unreadData } = useUnreadNotifications();
+  const unreadCount = unreadData?.count || 0;
+
+  // Filter nav items based on user role
+  const filteredNavData = getFilteredNavItems(navData, user?.role);
+
+  // Add unread badge to notifications item
+  const navDataWithBadge = filteredNavData.map((item) => {
+    if (item.path === '/notifications' && unreadCount > 0) {
+      return {
+        ...item,
+        info: unreadCount > 99 ? '99+' : String(unreadCount),
+      };
+    }
+    return item;
+  });
 
   return (
     <aside
@@ -41,11 +65,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Navigation Menu */}
       <nav className="p-6 border-t border-brand-gold-500/20 dark:border-brand-gold-400/30">
         <ul className="space-y-1">
-          {navData.map((item) => (
+          {navDataWithBadge.map((item, index) => (
             <NavigationItem
-              key={item.path}
+              key={item.path || `nav-item-${index}`}
               item={item}
-              isActive={location.pathname === item.path}
+              currentPath={location.pathname}
               onClick={onClose}
             />
           ))}
@@ -57,41 +81,101 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
 interface NavigationItemProps {
   item: NavItem;
-  isActive: boolean;
+  currentPath: string;
   onClick: () => void;
+  depth?: number;
 }
 
-function NavigationItem({ item, isActive, onClick }: NavigationItemProps) {
-  // Check if item should be rendered based on roles
-  if (item.roles && item.roles.length > 0) {
+function NavigationItem({ item, currentPath, onClick, depth = 0 }: NavigationItemProps) {
+  const [isExpanded, setIsExpanded] = useState(() => {
+    // Auto-expand if this item or its children are active
+    return isNavItemActive(item, currentPath);
+  });
+
+  const hasChildren = item.children && item.children.length > 0;
+  const isActive = item.path === currentPath;
+  const isParentActive = item.children?.some((child) => child.path === currentPath);
+
+  // Parent item with children
+  if (hasChildren) {
     return (
-      <AuthGuard roles={item.roles}>
-        <NavigationItemContent item={item} isActive={isActive} onClick={onClick} />
-      </AuthGuard>
+      <li>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={cn(
+            'w-full flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all relative overflow-hidden group',
+            isParentActive
+              ? 'bg-gradient-to-r from-brand-gold-500/30 to-brand-gold-500/15 text-brand-cream-100 border-r-4 border-brand-gold-500 dark:border-brand-gold-300 shadow-lg dark:shadow-gold-glow font-semibold'
+              : 'text-brand-cream-100 hover:bg-brand-gold-500/15 hover:translate-x-[-5px] hover:pr-5'
+          )}
+        >
+          {item.icon && (
+            <span
+              className={cn(
+                'shrink-0 group-hover:scale-110 transition-transform',
+                isParentActive ? 'text-brand-cream-100' : 'text-brand-cream-200'
+              )}
+            >
+              {item.icon}
+            </span>
+          )}
+          <span className="flex-1 font-medium text-right">{item.title}</span>
+          {item.info && (
+            <span className="bg-gradient-to-br from-brand-gold-500 to-brand-gold-700 dark:from-brand-gold-300 dark:to-brand-gold-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-md">
+              {item.info}
+            </span>
+          )}
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 transition-transform',
+              isExpanded && 'rotate-180'
+            )}
+          />
+        </button>
+
+        {/* Children */}
+        {isExpanded && (
+          <ul className="mr-4 mt-1 space-y-1 border-r-2 border-brand-gold-500/20 pr-2">
+            {item.children!.map((child, index) => (
+              <NavigationItem
+                key={child.path || `child-${index}`}
+                item={child}
+                currentPath={currentPath}
+                onClick={onClick}
+                depth={depth + 1}
+              />
+            ))}
+          </ul>
+        )}
+      </li>
     );
   }
 
-  return <NavigationItemContent item={item} isActive={isActive} onClick={onClick} />;
-}
+  // Leaf item (no children)
+  if (!item.path) {
+    return null;
+  }
 
-function NavigationItemContent({ item, isActive, onClick }: NavigationItemProps) {
   return (
     <li>
       <NavLink
-        to={item.path!}
+        to={item.path}
         onClick={onClick}
         className={cn(
           'flex items-center gap-3 px-4 py-3 mb-1 rounded-xl transition-all relative overflow-hidden group',
+          depth > 0 && 'py-2 text-sm', // Smaller padding for nested items
           isActive
             ? 'bg-gradient-to-r from-brand-gold-500/30 to-brand-gold-500/15 text-brand-cream-100 border-r-4 border-brand-gold-500 dark:border-brand-gold-300 shadow-lg dark:shadow-gold-glow font-semibold'
             : 'text-brand-cream-100 hover:bg-brand-gold-500/15 hover:translate-x-[-5px] hover:pr-5'
         )}
       >
         {item.icon && (
-          <span className={cn(
-            'shrink-0 group-hover:scale-110 transition-transform',
-            isActive ? 'text-brand-cream-100' : 'text-brand-cream-200'
-          )}>
+          <span
+            className={cn(
+              'shrink-0 group-hover:scale-110 transition-transform',
+              isActive ? 'text-brand-cream-100' : 'text-brand-cream-200'
+            )}
+          >
             {item.icon}
           </span>
         )}

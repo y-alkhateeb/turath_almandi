@@ -14,9 +14,22 @@ dayjs.locale('ar');
 
 /**
  * Format number as Iraqi Dinar currency
+ * @param amount - Number to format (returns '0 د.ع' if null/undefined)
+ * @param locale - Locale string (default: 'ar-IQ')
  */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('ar-IQ', {
+export function formatCurrency(
+  amount: number | null | undefined,
+  locale: string = 'ar-IQ',
+): string {
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'IQD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(0);
+  }
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'IQD',
     minimumFractionDigits: 0,
@@ -26,9 +39,19 @@ export function formatCurrency(amount: number): string {
 
 /**
  * Format date in Arabic (long format)
+ * @param date - Date to format (returns '-' if null/undefined)
+ * @param locale - Locale string (default: 'ar-IQ')
  */
-export function formatDate(date: string | Date): string {
-  return dayjs(date).format('D MMMM YYYY');
+export function formatDate(
+  date: string | Date | null | undefined,
+  locale: string = 'ar-IQ',
+): string {
+  if (!date) return '-';
+  const dayjsDate = dayjs(date);
+  if (!dayjsDate.isValid()) return '-';
+
+  // Set locale for this specific formatting
+  return dayjsDate.locale(locale === 'ar-IQ' ? 'ar' : locale).format('D MMMM YYYY');
 }
 
 /**
@@ -40,9 +63,18 @@ export function formatDateShort(date: string | Date): string {
 
 /**
  * Format date and time
+ * @param date - Date to format (returns '-' if null/undefined)
+ * @param locale - Locale string (default: 'ar-IQ')
  */
-export function formatDateTime(date: string | Date): string {
-  return dayjs(date).format('D MMMM YYYY، h:mm A');
+export function formatDateTime(
+  date: string | Date | null | undefined,
+  locale: string = 'ar-IQ',
+): string {
+  if (!date) return '-';
+  const dayjsDate = dayjs(date);
+  if (!dayjsDate.isValid()) return '-';
+
+  return dayjsDate.locale(locale === 'ar-IQ' ? 'ar' : locale).format('D MMMM YYYY، h:mm A');
 }
 
 /**
@@ -54,16 +86,66 @@ export function formatTime(date: string | Date): string {
 
 /**
  * Format date relative to now (e.g., "منذ ساعتين")
+ * @param date - Date to format (returns '-' if null/undefined)
+ * @param locale - Locale string (default: 'ar')
  */
-export function formatRelativeTime(date: string | Date): string {
-  return dayjs(date).fromNow();
+export function formatRelativeTime(
+  date: string | Date | null | undefined,
+  locale: string = 'ar',
+): string {
+  if (!date) return '-';
+  const dayjsDate = dayjs(date);
+  if (!dayjsDate.isValid()) return '-';
+
+  return dayjsDate.locale(locale).fromNow();
 }
 
 /**
- * Format number with Arabic numerals
+ * Format number with specified decimals
+ * @param value - Number to format (returns '0' if null/undefined)
+ * @param decimals - Number of decimal places (default: 2)
  */
-export function formatNumber(num: number): string {
-  return new Intl.NumberFormat('ar-IQ').format(num);
+export function formatNumber(
+  value: number | null | undefined,
+  decimals: number = 2,
+): string {
+  if (value === null || value === undefined || isNaN(value)) {
+    return '0';
+  }
+  return new Intl.NumberFormat('ar-IQ', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value);
+}
+
+/**
+ * Parse decimal from string or number, handling Arabic numerals
+ * @param value - Value to parse
+ * @returns Parsed number (0 if invalid)
+ */
+export function parseDecimal(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return 0;
+
+  if (typeof value === 'number') {
+    return isNaN(value) ? 0 : value;
+  }
+
+  // Convert Arabic numerals to Western numerals
+  const arabicToWestern: Record<string, string> = {
+    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+  };
+
+  let normalized = value;
+  Object.entries(arabicToWestern).forEach(([arabic, western]) => {
+    normalized = normalized.replace(new RegExp(arabic, 'g'), western);
+  });
+
+  // Remove any non-numeric characters except decimal point and minus sign
+  normalized = normalized.replace(/[^\d.-]/g, '');
+
+  const parsed = parseFloat(normalized);
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 /**

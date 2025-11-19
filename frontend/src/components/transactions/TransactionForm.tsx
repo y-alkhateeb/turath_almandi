@@ -132,16 +132,32 @@ const paymentMethodOptions: RadioOption[] = [
 ];
 
 /**
- * Category options (Arabic)
+ * Income category options (Arabic)
+ * These values match backend INCOME_CATEGORIES constants
  */
-const categoryOptions: SelectOption[] = [
+const incomeCategoryOptions: SelectOption[] = [
   { value: '', label: 'اختر الفئة...' },
-  { value: 'SALE', label: 'بيع' },
-  { value: 'PURCHASE', label: 'شراء' },
-  { value: 'EXPENSE', label: 'مصروف' },
-  { value: 'SALARY', label: 'راتب' },
-  { value: 'DEBT_PAYMENT', label: 'دفع دين' },
-  { value: 'OTHER', label: 'أخرى' },
+  { value: 'SALES', label: 'مبيعات' },
+  { value: 'SERVICES', label: 'خدمات' },
+  { value: 'DEBT_PAYMENT', label: 'سداد دين' },
+  { value: 'OTHER_INCOME', label: 'إيرادات أخرى' },
+];
+
+/**
+ * Expense category options (Arabic)
+ * These values match backend EXPENSE_CATEGORIES constants
+ */
+const expenseCategoryOptions: SelectOption[] = [
+  { value: '', label: 'اختر الفئة...' },
+  { value: 'SALARIES', label: 'رواتب' },
+  { value: 'RENT', label: 'إيجار' },
+  { value: 'UTILITIES', label: 'مرافق' },
+  { value: 'SUPPLIES', label: 'مستلزمات' },
+  { value: 'MAINTENANCE', label: 'صيانة' },
+  { value: 'TRANSPORTATION', label: 'مواصلات' },
+  { value: 'INVENTORY', label: 'مشتريات مخزون' },
+  { value: 'DEBT_REPAYMENT', label: 'سداد دين' },
+  { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى' },
 ];
 
 /**
@@ -351,11 +367,21 @@ export function TransactionForm({
         inline
       />
 
-      {/* Category */}
+      {/* Category - Dynamic based on transaction type */}
       <FormSelect
         name="category"
         label="الفئة"
-        options={categoryOptions}
+        options={
+          mode === 'edit' && initialData
+            ? initialData.type === TransactionType.INCOME
+              ? incomeCategoryOptions
+              : expenseCategoryOptions
+            : transactionType === TransactionType.INCOME
+            ? incomeCategoryOptions
+            : transactionType === TransactionType.EXPENSE
+            ? expenseCategoryOptions
+            : incomeCategoryOptions // Default to income if not selected yet
+        }
         register={register}
         error={errors.category}
         disabled={isSubmitting}

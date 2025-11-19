@@ -9,6 +9,18 @@ import {
 } from 'class-validator';
 import { TransactionType, PaymentMethod } from '@prisma/client';
 import { Transform } from 'class-transformer';
+import { IsValidCategory } from '../../common/decorators/is-valid-category.decorator';
+import {
+  CATEGORY_LABELS_AR,
+  TransactionCategory,
+  TRANSACTION_CATEGORIES
+} from '../../common/constants/transaction-categories';
+
+// Create reverse mapping from Arabic labels to English constants
+const AR_TO_CATEGORY_MAP = Object.entries(CATEGORY_LABELS_AR).reduce((acc, [key, value]) => {
+  acc[value] = key as TransactionCategory;
+  return acc;
+}, {} as Record<string, TransactionCategory>);
 
 export class UpdateTransactionDto {
   @IsEnum(TransactionType)
@@ -26,8 +38,21 @@ export class UpdateTransactionDto {
   @ValidateIf((o) => o.type === TransactionType.INCOME || o.paymentMethod !== undefined)
   paymentMethod?: PaymentMethod;
 
+  @Transform(({ value }) => {
+    if (!value || typeof value !== 'string') return value;
+
+    // If already an English constant, return it
+    if (TRANSACTION_CATEGORIES.includes(value as TransactionCategory)) {
+      return value;
+    }
+
+    // Try to map from Arabic label to English constant
+    const mappedCategory = AR_TO_CATEGORY_MAP[value];
+    return mappedCategory || value;
+  })
   @IsString()
   @IsOptional()
+  @IsValidCategory()
   category?: string;
 
   @IsDateString()

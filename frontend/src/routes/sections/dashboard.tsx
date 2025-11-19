@@ -28,20 +28,20 @@ import type { RouteObject } from 'react-router-dom';
 const DashboardPage = lazy(() => import('@/pages/dashboard/workbench'));
 
 // Transactions
-const TransactionsListPage = lazy(() => import('@/pages/transactions/list'));
-const TransactionsCreatePage = lazy(() => import('@/pages/transactions/create'));
-const TransactionsViewPage = lazy(() => import('@/pages/transactions/view/[id]'));
-const TransactionsEditPage = lazy(() => import('@/pages/transactions/edit/[id]'));
+const TransactionsListPage = lazy(() => import('@/pages/transactions/TransactionsPage'));
+const TransactionsCreatePage = lazy(() => import('@/pages/transactions/CreateIncomePage'));
+const TransactionsViewPage = lazy(() => import('@/pages/transactions/ViewTransactionPage'));
+const TransactionsEditPage = lazy(() => import('@/pages/transactions/EditTransactionPage'));
 
 // Debts
-const DebtsListPage = lazy(() => import('@/pages/debts/list'));
-const DebtsCreatePage = lazy(() => import('@/pages/debts/create'));
-const DebtsViewPage = lazy(() => import('@/pages/debts/view/[id]'));
+const DebtsListPage = lazy(() => import('@/pages/debts/DebtsPage'));
+const DebtsCreatePage = lazy(() => import('@/pages/debts/CreateDebtPage'));
+const DebtsViewPage = lazy(() => import('@/pages/debts/PayDebtPage'));
 
 // Inventory
-const InventoryListPage = lazy(() => import('@/pages/inventory/list'));
-const InventoryCreatePage = lazy(() => import('@/pages/inventory/create'));
-const InventoryEditPage = lazy(() => import('@/pages/inventory/edit/[id]'));
+const InventoryListPage = lazy(() => import('@/pages/inventory/Inventory'));
+const InventoryCreatePage = lazy(() => import('@/pages/inventory/CreateInventoryPage'));
+const InventoryEditPage = lazy(() => import('@/pages/inventory/EditInventoryPage'));
 
 // Reports
 const ReportsPage = lazy(() => import('@/pages/reports'));

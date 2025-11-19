@@ -46,7 +46,13 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@CurrentUser() user: RequestUser) {
-    return user;
+    // Return user profile with consistent camelCase property names
+    return {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      branchId: user.branchId,
+    };
   }
 
   @Post('logout')

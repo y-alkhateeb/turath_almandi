@@ -37,12 +37,24 @@ const createTransactionSchema = z.object({
     errorMap: () => ({ message: 'نوع العملية مطلوب' }),
   }),
   amount: z
-    .number({
-      required_error: 'المبلغ مطلوب',
-      invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
-    })
-    .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
-    .positive({ message: 'المبلغ يجب أن يكون موجبًا' }),
+    .preprocess(
+      (val) => {
+        // Convert empty string to undefined for proper required validation
+        if (val === '' || val === null) return undefined;
+        // Convert string numbers to actual numbers
+        if (typeof val === 'string') {
+          const num = parseFloat(val);
+          return isNaN(num) ? undefined : num;
+        }
+        return val;
+      },
+      z.number({
+        required_error: 'المبلغ مطلوب',
+        invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
+      })
+        .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
+        .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
+    ),
   currency: z.nativeEnum(Currency).optional(),
   paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   category: z.string().optional(),
@@ -58,12 +70,24 @@ const createTransactionSchema = z.object({
  */
 const updateTransactionSchema = z.object({
   amount: z
-    .number({
-      invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
-    })
-    .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
-    .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
-    .optional(),
+    .preprocess(
+      (val) => {
+        // Convert empty string to undefined for optional field
+        if (val === '' || val === null) return undefined;
+        // Convert string numbers to actual numbers
+        if (typeof val === 'string') {
+          const num = parseFloat(val);
+          return isNaN(num) ? undefined : num;
+        }
+        return val;
+      },
+      z.number({
+        invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
+      })
+        .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
+        .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
+        .optional()
+    ),
   currency: z.nativeEnum(Currency).optional(),
   paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   category: z.string().optional(),

@@ -49,6 +49,12 @@ export class AuthController {
     return user;
   }
 
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfileAlias(@CurrentUser() user: RequestUser) {
+    return user;
+  }
+
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

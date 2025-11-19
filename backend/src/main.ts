@@ -77,7 +77,13 @@ async function bootstrap() {
     origin: configService.get('FRONTEND_URL') || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Accept-Language'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Accept-Language',
+      'X-Request-ID',
+    ],
   });
 
   // Global Prefix

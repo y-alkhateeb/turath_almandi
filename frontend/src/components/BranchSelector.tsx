@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { branchesService } from '@services/branches.service';
-import type { Branch } from '@/types/branches.types';
+import { useBranches } from '@/hooks/useBranches';
+import type { Branch } from '#/entity';
 
 interface BranchSelectorProps {
   value?: string | null;
@@ -17,30 +16,10 @@ export const BranchSelector = ({
   className = '',
 }: BranchSelectorProps) => {
   const { user, isAdmin } = useAuth();
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchBranches = async () => {
-      try {
-        setLoading(true);
-        const data = await branchesService.getAll();
-        setBranches(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load branches');
-        console.error('Error fetching branches:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBranches();
-  }, []);
+  const { data: branches = [], isLoading: loading, error } = useBranches();
 
   // Accountants can't change branch - show their assigned branch only
-  if (!isAdmin() && user?.branchId) {
+  if (!isAdmin && user?.branchId) {
     const userBranch = branches.find((b) => b.id === user.branchId);
     return (
       <div className={className}>

@@ -1,43 +1,50 @@
 /**
- * Dashboard Workbench Page - Refactored
+ * Dashboard Workbench Page - Updated
  *
  * Modern dashboard with comprehensive financial overview.
- * Refactored to separate logic from presentation using new architecture pattern.
+ * Uses new presentational components with strict typing.
  *
  * Features:
- * - 4 stat cards (totalRevenue, totalExpenses, netProfit, todayTransactions)
- * - RevenueChart: Line chart showing revenue vs expenses for last 6 months
- * - CategoryChart: Pie chart showing category breakdown
- * - RecentTransactions: Table showing 5 latest transactions
- * - Filters: Date picker + branch select (admin only)
- * - Auto-refresh: 30s via TanStack Query refetchInterval
- * - RTL: Full RTL support with Arabic labels
- * - Responsive: Mobile-first design
+ * - 4 stat cards with trends (DashboardStatsCards)
+ * - Line chart showing revenue vs expenses (DashboardRevenueChart)
+ * - Pie chart showing category breakdown (DashboardCategoryChart)
+ * - Recent transactions table (DashboardRecentTransactions)
+ * - Filters with branch selector (DashboardFilters)
+ * - Real-time updates via WebSocket
+ * - Loading states with skeleton components
+ * - Error states with ErrorState component
+ * - Empty states with EmptyState component
+ * - RTL support, responsive design
  *
  * Architecture:
  * - Business logic in hooks/features/useDashboardData
- * - Presentational components in components/features/dashboard
- * - This page only orchestrates components
+ * - Presentational components in components/dashboard
+ * - This page only orchestrates components (container pattern)
  */
 
-import { TrendingUp, TrendingDown, DollarSign, Activity, RefreshCw, AlertCircle } from 'lucide-react';
-import { Button } from '@/ui/button';
-import { Alert, AlertDescription } from '@/ui/alert';
-import { PageLoading } from '@/components/loading';
-import { EmptyState } from '@/components/ui';
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Activity, RefreshCw } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
-import { formatCurrency } from '@/utils/formatters';
+import { useDashboardData } from '@/hooks/features';
+import { useWebSocketEvent } from '@/hooks/useWebSocket';
+import { queryKeys } from '@/hooks/queries/queryKeys';
+import { EmptyState } from '@/components/common/EmptyState';
+import { ErrorState } from '@/components/common/ErrorState';
+import { CardSkeleton } from '@/components/skeletons/CardSkeleton';
+import { ChartSkeleton } from '@/components/skeletons/ChartSkeleton';
+import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
 import {
-  DashboardStatCard,
+  DashboardStatsCards,
   DashboardRevenueChart,
   DashboardCategoryChart,
   DashboardRecentTransactions,
   DashboardFilters,
-} from '@/components/features/dashboard';
-import { useDashboardData } from '@/hooks/features';
+} from '@/components/dashboard';
 
 export default function DashboardWorkbench() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // All business logic is in the hook
   const {
@@ -56,42 +63,117 @@ export default function DashboardWorkbench() {
     hasNoTransactionsEver,
   } = useDashboardData();
 
-  // Loading state
+  // ============================================
+  // REAL-TIME UPDATES
+  // ============================================
+
+  /**
+   * Handle real-time transaction events
+   * Invalidates dashboard queries to trigger refetch
+   */
+  const handleTransactionEvent = useCallback(() => {
+    // Invalidate dashboard stats to refetch
+    queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+  }, [queryClient]);
+
+  // Listen to WebSocket events
+  useWebSocketEvent('transaction:created', handleTransactionEvent);
+  useWebSocketEvent('transaction:updated', handleTransactionEvent);
+  useWebSocketEvent('transaction:deleted', handleTransactionEvent);
+
+  // ============================================
+  // LOADING STATE
+  // ============================================
+
   if (isLoading) {
-    return <PageLoading message="جاري تحميل لوحة التحكم..." />;
+    return (
+      <div className="space-y-6" dir="rtl">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-9 w-48 bg-[var(--bg-tertiary)] rounded animate-pulse" />
+            <div className="h-5 w-64 bg-[var(--bg-tertiary)] rounded animate-pulse" />
+          </div>
+          <div className="h-10 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
+        </div>
+
+        {/* Filters Skeleton */}
+        <div className="h-20 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg animate-pulse" />
+
+        {/* Stats Cards Skeleton */}
+        <CardSkeleton count={4} variant="stat" />
+
+        {/* Charts Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ChartSkeleton variant="line" />
+          <ChartSkeleton variant="pie" />
+        </div>
+
+        {/* Recent Transactions Skeleton */}
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
+          <div className="h-6 w-32 bg-[var(--bg-tertiary)] rounded mb-4 animate-pulse" />
+          <ListSkeleton items={5} variant="compact" />
+        </div>
+      </div>
+    );
   }
 
-  // Error state
+  // ============================================
+  // ERROR STATE
+  // ============================================
+
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription className="flex items-center justify-between">
-          <span>حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.</span>
-          <Button variant="outline" size="sm" onClick={handleRetry} className="mr-4">
-            <RefreshCw className="w-4 h-4 ml-2" />
-            إعادة المحاولة
-          </Button>
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between" dir="rtl">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+            <p className="text-[var(--text-secondary)] mt-1">
+              مرحباً بك، {userInfo?.username || 'المستخدم'}
+            </p>
+          </div>
+        </div>
+        <ErrorState error={error} onRetry={handleRetry} />
+      </div>
     );
   }
 
-  // No data state
+  // ============================================
+  // NO DATA STATE
+  // ============================================
+
   if (!stats) {
     return (
-      <Alert>
-        <AlertDescription>لا توجد بيانات متاحة</AlertDescription>
-      </Alert>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between" dir="rtl">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+            <p className="text-[var(--text-secondary)] mt-1">
+              مرحباً بك، {userInfo?.username || 'المستخدم'}
+            </p>
+          </div>
+        </div>
+        <EmptyState
+          title="لا توجد بيانات متاحة"
+          description="لم نتمكن من تحميل بيانات لوحة التحكم. يرجى المحاولة مرة أخرى."
+          action={{
+            label: 'إعادة المحاولة',
+            onClick: handleRetry,
+          }}
+        />
+      </div>
     );
   }
 
-  // Empty state - No transactions ever
+  // ============================================
+  // EMPTY STATE - NO TRANSACTIONS EVER
+  // ============================================
+
   if (hasNoTransactionsEver) {
     return (
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
             <p className="text-[var(--text-secondary)] mt-1">
@@ -102,103 +184,80 @@ export default function DashboardWorkbench() {
 
         {/* Empty State */}
         <EmptyState
-          variant="default"
-          icon={<Activity className="w-full h-full" />}
+          icon={<Activity className="w-8 h-8 text-primary-600" />}
           title="ابدأ رحلتك المالية"
           description="لم يتم تسجيل أي عمليات مالية بعد. ابدأ بإضافة أول إيراد أو مصروف لتتبع أموالك وإدارتها بشكل احترافي."
-          actions={{
-            primary: {
-              label: 'إضافة عملية جديدة',
-              onClick: () => router.push('/transactions'),
-            },
+          action={{
+            label: 'إضافة عملية جديدة',
+            onClick: () => router.push('/transactions'),
           }}
-          size="lg"
         />
       </div>
     );
   }
 
+  // ============================================
+  // MAIN CONTENT
+  // ============================================
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" dir="rtl">
         <div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
           <p className="text-[var(--text-secondary)] mt-1">
             مرحباً بك، {userInfo?.username || 'المستخدم'}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRetry}>
-          <RefreshCw className="w-4 h-4 ml-2" />
+        <button
+          onClick={handleRetry}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
           تحديث
-        </Button>
+        </button>
       </div>
 
       {/* Filters */}
       <DashboardFilters
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-        onTodayClick={handleTodayClick}
-        showBranchFilter={isAdmin}
-        branches={branches}
-        selectedBranchId={selectedBranchId}
-        onBranchChange={setSelectedBranchId}
+        filters={{
+          date: selectedDate,
+          branchId: isAdmin ? selectedBranchId : null,
+        }}
+        branches={branches || []}
+        onChange={(filters) => {
+          if (filters.date) setSelectedDate(filters.date);
+          if (filters.branchId !== undefined) setSelectedBranchId(filters.branchId || 'ALL');
+        }}
       />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <DashboardStatCard
-          title="إجمالي الإيرادات"
-          value={formatCurrency(stats.totalRevenue)}
-          icon={TrendingUp}
-          description="إيرادات اليوم"
-          color="blue"
-        />
-        <DashboardStatCard
-          title="إجمالي المصروفات"
-          value={formatCurrency(stats.totalExpenses)}
-          icon={TrendingDown}
-          description="مصروفات اليوم"
-          color="red"
-        />
-        <DashboardStatCard
-          title="صافي الربح"
-          value={formatCurrency(stats.netProfit)}
-          icon={DollarSign}
-          description="الربح الصافي اليوم"
-          color="green"
-        />
-        <DashboardStatCard
-          title="معاملات اليوم"
-          value={stats.todayTransactions}
-          icon={Activity}
-          description="إجمالي العمليات"
-          color="purple"
-        />
-      </div>
+      {/* Stats Cards */}
+      <DashboardStatsCards stats={stats} isLoading={false} />
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardRevenueChart data={stats.revenueData} />
-        <DashboardCategoryChart data={stats.categoryData} />
+        <DashboardRevenueChart data={stats.revenueData} isLoading={false} />
+        <DashboardCategoryChart data={stats.categoryData} isLoading={false} />
       </div>
 
       {/* Recent Transactions */}
-      <DashboardRecentTransactions transactions={stats.recentTransactions} maxItems={5} />
+      <DashboardRecentTransactions transactions={stats.recentTransactions} isLoading={false} />
 
-      {/* Empty State - No Transactions Today */}
+      {/* Info: No Transactions Today (if applicable) */}
       {stats.todayTransactions === 0 && (
-        <Alert>
-          <Activity className="h-4 w-4" />
-          <AlertDescription>
-            <div className="flex flex-col gap-1">
-              <span className="font-medium">لا توجد عمليات لهذا التاريخ</span>
-              <span className="text-sm text-[var(--text-secondary)]">
-                لم يتم تسجيل أي عمليات مالية في التاريخ المحدد.
-              </span>
-            </div>
-          </AlertDescription>
-        </Alert>
+        <div
+          className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+          dir="rtl"
+        >
+          <Activity className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-blue-900">لا توجد عمليات لهذا التاريخ</p>
+            <p className="text-sm text-blue-700 mt-1">
+              لم يتم تسجيل أي عمليات مالية في التاريخ المحدد.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

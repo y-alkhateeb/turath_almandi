@@ -152,6 +152,7 @@ export class ApiError extends Error {
 
 /**
  * Get access token from storage
+ * Matches userStore structure: state.tokens.accessToken
  */
 const getToken = (): string | null => {
   try {
@@ -159,8 +160,8 @@ const getToken = (): string | null => {
     const localStore = localStorage.getItem('auth-storage');
     if (localStore) {
       const parsed = JSON.parse(localStore);
-      if (parsed.state?.userToken?.accessToken) {
-        return parsed.state.userToken.accessToken;
+      if (parsed.state?.tokens?.accessToken) {
+        return parsed.state.tokens.accessToken;
       }
     }
 
@@ -168,8 +169,8 @@ const getToken = (): string | null => {
     const sessionStore = sessionStorage.getItem('auth-storage');
     if (sessionStore) {
       const parsed = JSON.parse(sessionStore);
-      if (parsed.state?.userToken?.accessToken) {
-        return parsed.state.userToken.accessToken;
+      if (parsed.state?.tokens?.accessToken) {
+        return parsed.state.tokens.accessToken;
       }
     }
   } catch (error) {
@@ -181,6 +182,7 @@ const getToken = (): string | null => {
 
 /**
  * Get refresh token from storage
+ * Matches userStore structure: state.tokens.refreshToken
  */
 const getRefreshToken = (): string | null => {
   try {
@@ -188,8 +190,8 @@ const getRefreshToken = (): string | null => {
     const localStore = localStorage.getItem('auth-storage');
     if (localStore) {
       const parsed = JSON.parse(localStore);
-      if (parsed.state?.userToken?.refreshToken) {
-        return parsed.state.userToken.refreshToken;
+      if (parsed.state?.tokens?.refreshToken) {
+        return parsed.state.tokens.refreshToken;
       }
     }
 
@@ -197,8 +199,8 @@ const getRefreshToken = (): string | null => {
     const sessionStore = sessionStorage.getItem('auth-storage');
     if (sessionStore) {
       const parsed = JSON.parse(sessionStore);
-      if (parsed.state?.userToken?.refreshToken) {
-        return parsed.state.userToken.refreshToken;
+      if (parsed.state?.tokens?.refreshToken) {
+        return parsed.state.tokens.refreshToken;
       }
     }
   } catch (error) {
@@ -229,6 +231,7 @@ const clearAuthData = (): void => {
 
 /**
  * Update access token in storage
+ * Matches userStore structure: state.tokens.accessToken
  */
 const updateAccessToken = (newAccessToken: string): void => {
   const storage = getStorage();
@@ -237,8 +240,8 @@ const updateAccessToken = (newAccessToken: string): void => {
     const storageData = storage.getItem('auth-storage');
     if (storageData) {
       const parsed = JSON.parse(storageData);
-      if (parsed.state?.userToken) {
-        parsed.state.userToken.accessToken = newAccessToken;
+      if (parsed.state?.tokens) {
+        parsed.state.tokens.accessToken = newAccessToken;
         storage.setItem('auth-storage', JSON.stringify(parsed));
       }
     }
@@ -400,8 +403,8 @@ axiosInstance.interceptors.response.use(
             const storageData = storage.getItem('auth-storage');
             if (storageData) {
               const parsed = JSON.parse(storageData);
-              if (parsed.state?.userToken) {
-                parsed.state.userToken.refreshToken = newRefreshToken;
+              if (parsed.state?.tokens) {
+                parsed.state.tokens.refreshToken = newRefreshToken;
                 storage.setItem('auth-storage', JSON.stringify(parsed));
               }
             }

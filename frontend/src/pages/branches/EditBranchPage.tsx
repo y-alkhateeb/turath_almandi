@@ -16,7 +16,7 @@ import type { BranchFormData } from '@/types';
 export const EditBranchPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: branches = [], isLoading } = useBranches();
+  const { data: branches = [], isLoading, error, refetch } = useBranches();
   const updateBranch = useUpdateBranch();
 
   // Find the branch to edit
@@ -52,6 +52,8 @@ export const EditBranchPage = () => {
     <PageLayout
       title="تعديل الفرع"
       description={`تعديل بيانات ${branch.name}`}
+      error={error}
+      onRetry={() => refetch()}
       actions={
         <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />

@@ -18,7 +18,7 @@ import type { Column } from '@/components/ui/Table';
 export const BranchesPage = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const { data: branches = [], isLoading, error } = useBranches();
+  const { data: branches = [], isLoading, error, refetch } = useBranches();
   const updateBranch = useUpdateBranch();
   const deleteBranch = useDeleteBranch();
 
@@ -120,7 +120,7 @@ export const BranchesPage = () => {
       title="إدارة الفروع"
       description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
       error={error}
-      errorMessage="حدث خطأ أثناء تحميل الفروع. يرجى المحاولة مرة أخرى."
+      onRetry={() => refetch()}
       actions={
         isAdmin() ? (
           <Button onClick={() => navigate('/branches/create')}>

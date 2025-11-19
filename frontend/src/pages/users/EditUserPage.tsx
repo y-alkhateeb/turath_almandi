@@ -16,7 +16,7 @@ import type { CreateUserDto } from '@/types';
 export const EditUserPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: users = [], isLoading } = useUsers();
+  const { data: users = [], isLoading, error, refetch } = useUsers();
   const updateUser = useUpdateUser();
 
   // Find the user to edit
@@ -52,6 +52,8 @@ export const EditUserPage = () => {
     <PageLayout
       title="تعديل المستخدم"
       description={`تعديل بيانات ${user.username}`}
+      error={error}
+      onRetry={() => refetch()}
       actions={
         <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />

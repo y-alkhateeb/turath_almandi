@@ -18,7 +18,7 @@ export default function TransactionsPage() {
 
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
 
-  const { data, isLoading, error } = useTransactions(filters);
+  const { data, isLoading, error, refetch } = useTransactions(filters);
   const deleteTransaction = useDeleteTransaction();
 
   const handleView = (transaction: Transaction) => {
@@ -64,7 +64,7 @@ export default function TransactionsPage() {
       title="إدارة العمليات المالية"
       description="عرض وإدارة جميع الإيرادات والمصروفات"
       error={error}
-      errorMessage="حدث خطأ أثناء تحميل البيانات"
+      onRetry={() => refetch()}
       actions={
         <Button onClick={() => navigate('/income/create')}>
           <Plus className="w-5 h-5" />

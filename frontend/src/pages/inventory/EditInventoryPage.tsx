@@ -15,7 +15,7 @@ import { ErrorAlert } from '@/components/layouts';
 export const EditInventoryPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: items = [], isLoading } = useInventory();
+  const { data: items = [], isLoading, error, refetch } = useInventory();
 
   // Find the item to edit
   const item = items.find((i) => i.id === id);
@@ -48,6 +48,8 @@ export const EditInventoryPage = () => {
     <PageLayout
       title="تعديل صنف"
       description={`تعديل بيانات ${item.name}`}
+      error={error}
+      onRetry={() => refetch()}
       actions={
         <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />

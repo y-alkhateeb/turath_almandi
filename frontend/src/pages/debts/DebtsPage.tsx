@@ -28,7 +28,7 @@ import { formatCurrency, formatDateShort } from '@/utils/formatters';
 export const DebtsPage = () => {
   const navigate = useNavigate();
   const [expandedDebtId, setExpandedDebtId] = useState<string | null>(null);
-  const { data: debts, isLoading, error } = useDebts();
+  const { data: debts, isLoading, error, refetch } = useDebts();
 
   const toggleExpandDebt = (debtId: string) => {
     setExpandedDebtId(expandedDebtId === debtId ? null : debtId);
@@ -213,7 +213,7 @@ export const DebtsPage = () => {
       title="إدارة الديون"
       description="إدارة جميع الديون والذمم"
       error={error}
-      errorMessage="حدث خطأ أثناء تحميل البيانات"
+      onRetry={() => refetch()}
       actions={
         <Button variant="default" onClick={() => navigate('/debts/create')}>
           <Plus className="w-5 h-5" />

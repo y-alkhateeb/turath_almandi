@@ -35,12 +35,39 @@ function isApiError(error: Error | ApiError): error is ApiError {
 }
 
 /**
+ * Check if error is a network error
+ */
+function isNetworkError(error: Error | ApiError): boolean {
+  // Check for common network error indicators
+  if (error.message.toLowerCase().includes('network')) return true;
+  if (error.message.toLowerCase().includes('failed to fetch')) return true;
+  if (error.message.toLowerCase().includes('network request failed')) return true;
+  if (error.message === 'Network Error') return true;
+
+  // Check for ERR_NETWORK or similar codes
+  if ('code' in error && typeof error.code === 'string') {
+    const code = error.code.toLowerCase();
+    if (code.includes('network') || code === 'err_network') return true;
+  }
+
+  return false;
+}
+
+/**
  * Map HTTP status code to Arabic error message
  */
 function getErrorMessage(error: Error | ApiError): {
   title: string;
   description: string;
 } {
+  // Check for network errors first
+  if (isNetworkError(error)) {
+    return {
+      title: 'خطأ في الاتصال',
+      description: 'تعذر الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت والمحاولة مرة أخرى.',
+    };
+  }
+
   // If it's an ApiError, use status code mapping
   if (isApiError(error)) {
     const statusCode = error.statusCode;

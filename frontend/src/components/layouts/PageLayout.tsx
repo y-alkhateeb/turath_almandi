@@ -1,6 +1,7 @@
 import React from 'react';
 import { PageHeader, type PageHeaderProps } from '../ui/PageHeader';
-import { Alert } from '@/ui/alert';
+import { ErrorState } from '@/components/common/ErrorState';
+import { ApiError } from '@/api/apiClient';
 
 /**
  * PageLayout - Standard page layout wrapper
@@ -34,10 +35,10 @@ export interface PageLayoutProps {
   breadcrumbs?: PageHeaderProps['breadcrumbs'];
   /** Page content */
   children: React.ReactNode;
-  /** Optional error to display */
-  error?: Error | null | string;
-  /** Optional error message override */
-  errorMessage?: string;
+  /** Optional error to display (supports Error, ApiError) */
+  error?: Error | ApiError | null;
+  /** Optional retry callback for error state */
+  onRetry?: () => void;
   /** Optional: Hide header */
   hideHeader?: boolean;
   /** Optional: Custom spacing class */
@@ -59,7 +60,7 @@ export function PageLayout({
   breadcrumbs,
   children,
   error,
-  errorMessage,
+  onRetry,
   hideHeader = false,
   spacing = 'default',
   className = '',
@@ -76,15 +77,11 @@ export function PageLayout({
         />
       )}
 
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive">
-          {errorMessage || 'حدث خطأ. يرجى المحاولة مرة أخرى.'}
-        </Alert>
-      )}
+      {/* Error State */}
+      {error && <ErrorState error={error} onRetry={onRetry} />}
 
-      {/* Main Content */}
-      {children}
+      {/* Main Content - only show if no error */}
+      {!error && children}
     </div>
   );
 }

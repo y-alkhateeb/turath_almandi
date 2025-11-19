@@ -18,7 +18,7 @@ import type { Column } from '@/components/ui/Table';
 export const UsersPage = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const { data: users = [], isLoading, error } = useUsers();
+  const { data: users = [], isLoading, error, refetch } = useUsers();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
 
@@ -143,7 +143,7 @@ export const UsersPage = () => {
       title="إدارة المستخدمين"
       description="إدارة المستخدمين وصلاحياتهم في النظام"
       error={error}
-      errorMessage="حدث خطأ أثناء تحميل المستخدمين. يرجى المحاولة مرة أخرى."
+      onRetry={() => refetch()}
       actions={
         isAdmin() ? (
           <Button onClick={() => navigate('/users/create')}>

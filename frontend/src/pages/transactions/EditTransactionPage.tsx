@@ -33,8 +33,10 @@ type EditTransactionFormData = z.infer<typeof editTransactionSchema>;
 export const EditTransactionPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: transactions = [], isLoading } = useTransactions();
+  const { data, isLoading, error, refetch } = useTransactions();
   const updateTransaction = useUpdateTransaction();
+
+  const transactions = data?.data || [];
 
   // Find the transaction to edit
   const transaction = transactions.find((t) => t.id === id);
@@ -112,6 +114,8 @@ export const EditTransactionPage = () => {
     <PageLayout
       title="تعديل العملية"
       description="تعديل بيانات العملية المالية"
+      error={error}
+      onRetry={() => refetch()}
       actions={
         <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />

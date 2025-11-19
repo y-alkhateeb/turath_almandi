@@ -23,6 +23,7 @@ import { useRouter } from '@/routes/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { Icon } from '@/components/icon';
 import GLOBAL_CONFIG from '@/global-config';
+import { ApiError } from '@/api/apiClient';
 
 // Validation schema - matches backend validation rules
 const loginSchema = z.object({
@@ -57,16 +58,36 @@ export default function LoginPage() {
       await login({
         username: data.username,
         password: data.password,
+        rememberMe: data.rememberMe,
       });
 
       // Small delay to ensure Zustand persist completes before navigation
       setTimeout(() => {
         router.replace(GLOBAL_CONFIG.defaultRoute);
       }, 100);
-    } catch (err: any) {
-      // Error toast already shown by API interceptor or hook
-      const message = err.message || 'حدث خطأ أثناء تسجيل الدخول';
-      setError(message);
+    } catch (err) {
+      // Handle specific error cases with Arabic messages
+      if (err instanceof ApiError) {
+        switch (err.statusCode) {
+          case 401:
+            setError('اسم المستخدم أو كلمة المرور غير صحيحة');
+            break;
+          case 400:
+            setError(err.message || 'البيانات المدخلة غير صحيحة. يرجى التحقق والمحاولة مرة أخرى');
+            break;
+          case 429:
+            setError('تم تجاوز عدد المحاولات المسموح به. يرجى المحاولة لاحقاً');
+            break;
+          case 503:
+            setError('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً');
+            break;
+          default:
+            setError(err.message || 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى');
+        }
+      } else {
+        // Generic error fallback
+        setError('حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى');
+      }
     }
   };
 

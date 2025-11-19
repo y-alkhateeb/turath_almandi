@@ -33,6 +33,16 @@ export class NotificationsController {
   ) {}
 
   /**
+   * Get count of unread notifications for the current user
+   * Must be before @Get('unread') to avoid route conflicts
+   */
+  @Get('unread/count')
+  async getUnreadCount(@CurrentUser() user: RequestUser) {
+    const count = await this.notificationsService.getUnreadCount(user.id);
+    return { count };
+  }
+
+  /**
    * Get all unread notifications for the current user
    */
   @Get('unread')

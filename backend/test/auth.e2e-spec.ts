@@ -300,10 +300,10 @@ describe('Auth E2E Tests', () => {
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('sub', testUser.id);
+          expect(res.body).toHaveProperty('id', testUser.id);
           expect(res.body).toHaveProperty('username', testUser.username);
           expect(res.body).toHaveProperty('role', testUser.role);
-          expect(res.body).toHaveProperty('branch_id', testUser.branchId);
+          expect(res.body).toHaveProperty('branchId', testUser.branchId);
         });
     });
 

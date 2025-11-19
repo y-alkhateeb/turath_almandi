@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -33,6 +34,36 @@ export class NotificationsController {
   ) {}
 
   /**
+   * Get all notifications with pagination and filters
+   * Query parameters: branchId, isRead, type, startDate, endDate, page, limit
+   */
+  @Get()
+  getAll(
+    @CurrentUser() user: RequestUser,
+    @Query('branchId') branchId?: string,
+    @Query('isRead') isRead?: string,
+    @Query('type') type?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    // Convert string query params to correct types
+    const filters = {
+      branchId,
+      isRead: isRead !== undefined ? isRead === 'true' : undefined,
+      type,
+      startDate,
+      endDate,
+    };
+
+    const pageNumber = page ? parseInt(page, 10) : 1;
+    const limitNumber = limit ? parseInt(limit, 10) : 50;
+
+    return this.notificationsService.getAll(filters, pageNumber, limitNumber);
+  }
+
+  /**
    * Get count of unread notifications for the current user
    * Must be before @Get('unread') to avoid route conflicts
    */
@@ -56,6 +87,15 @@ export class NotificationsController {
   @Patch(':id/read')
   markAsRead(@Param('id') id: string) {
     return this.notificationsService.markAsRead(id);
+  }
+
+  /**
+   * Mark all unread notifications as read
+   */
+  @Patch('read-all')
+  @HttpCode(HttpStatus.OK)
+  markAllAsRead(@CurrentUser() user: RequestUser) {
+    return this.notificationsService.markAllAsRead(user.id);
   }
 
   /**

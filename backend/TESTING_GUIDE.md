@@ -156,7 +156,7 @@ backend/
 - ✓ Validation errors (missing fields, too short)
 - ✓ RememberMe option support
 
-#### GET /auth/me (5 tests)
+#### GET /auth/profile (5 tests)
 - ✓ Returns user profile with valid token
 - ✓ Fails without token
 - ✓ Fails with invalid token

@@ -87,7 +87,7 @@ Save the returned JWT token for authenticated requests.
 
 2. **Get current user (replace YOUR_TOKEN):**
    ```bash
-   curl -X GET http://localhost:3000/api/v1/auth/me \
+   curl -X GET http://localhost:3000/api/v1/auth/profile \
      -H "Authorization: Bearer YOUR_TOKEN"
    ```
 

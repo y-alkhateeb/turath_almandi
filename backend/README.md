@@ -358,7 +358,7 @@ Base URL: `http://localhost:3000/api/v1`
 - `POST /auth/login` - Login (with throttling & lockout protection)
 - `POST /auth/refresh` - Refresh access token
 - `POST /auth/logout` - Logout (blacklists tokens)
-- `GET /auth/me` - Get current user info
+- `GET /auth/profile` - Get current user info
 
 ### Users
 - `GET /users` - List all users (Admin only)

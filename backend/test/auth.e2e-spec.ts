@@ -275,7 +275,7 @@ describe('Auth E2E Tests', () => {
     });
   });
 
-  describe('GET /auth/me (Protected Route)', () => {
+  describe('GET /auth/profile (Protected Route)', () => {
     let validAccessToken: string;
     let expiredToken: string;
 
@@ -296,7 +296,7 @@ describe('Auth E2E Tests', () => {
 
     it('should return user profile with valid token', () => {
       return request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(200)
         .expect((res) => {
@@ -309,7 +309,7 @@ describe('Auth E2E Tests', () => {
 
     it('should fail without token', () => {
       return request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .expect(401)
         .expect((res) => {
           expect(res.body).toHaveProperty('message');
@@ -318,7 +318,7 @@ describe('Auth E2E Tests', () => {
 
     it('should fail with invalid token', () => {
       return request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', 'Bearer invalid-token-here')
         .expect(401)
         .expect((res) => {
@@ -328,7 +328,7 @@ describe('Auth E2E Tests', () => {
 
     it('should fail with malformed authorization header', () => {
       return request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', validAccessToken) // Missing 'Bearer' prefix
         .expect(401)
         .expect((res) => {
@@ -338,7 +338,7 @@ describe('Auth E2E Tests', () => {
 
     it('should fail with expired token', () => {
       return request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', `Bearer ${expiredToken}`)
         .expect(401)
         .expect((res) => {
@@ -529,7 +529,7 @@ describe('Auth E2E Tests', () => {
 
       // Step 2: Access protected route
       const profileResponse = await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', `Bearer ${access_token}`)
         .expect(200);
 
@@ -547,7 +547,7 @@ describe('Auth E2E Tests', () => {
 
       // Step 4: Use new access token
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', `Bearer ${newAccessToken}`)
         .expect(200);
 
@@ -584,12 +584,12 @@ describe('Auth E2E Tests', () => {
 
       // Both sessions should be valid
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', `Bearer ${login1.body.access_token}`)
         .expect(200);
 
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/auth/profile')
         .set('Authorization', `Bearer ${login2.body.access_token}`)
         .expect(200);
 

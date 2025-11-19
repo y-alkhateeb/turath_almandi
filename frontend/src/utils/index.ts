@@ -9,6 +9,8 @@ import { twMerge } from 'tailwind-merge';
 export * from './format';
 export * from './validation';
 export * from './download';
+export * from './error';
+export * from './permissions';
 export * from './storage';
 export * from './toast';
 export * from './rtl';

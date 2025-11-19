@@ -3,6 +3,8 @@
  * Browser-compatible file download and print helpers
  */
 
+import ExcelJS from 'exceljs';
+
 /**
  * Download blob as file
  * Triggers browser file download for any Blob
@@ -98,6 +100,141 @@ export function downloadCSV<T extends Record<string, unknown>>(
   // Add BOM for proper UTF-8 encoding in Excel
   const BOM = '\uFEFF';
   downloadText(BOM + csv, filename, 'text/csv;charset=utf-8;');
+}
+
+/**
+ * Download data as Excel file using ExcelJS
+ * Creates formatted Excel workbook with proper styling
+ *
+ * @param data - Array of objects or object with sheet names as keys
+ * @param filename - Filename for download (should end with .xlsx)
+ * @param options - Optional configuration
+ */
+export async function downloadExcel<T extends Record<string, unknown>>(
+  data: T[] | Record<string, T[]>,
+  filename: string,
+  options?: {
+    sheetName?: string;
+    headerStyle?: Partial<ExcelJS.Style>;
+    cellStyle?: Partial<ExcelJS.Style>;
+    autoWidth?: boolean;
+  },
+): Promise<void> {
+  // Default options
+  const opts = {
+    sheetName: 'Sheet1',
+    autoWidth: true,
+    headerStyle: {
+      font: { bold: true, size: 12 },
+      fill: {
+        type: 'pattern' as const,
+        pattern: 'solid' as const,
+        fgColor: { argb: 'FF4472C4' },
+      },
+      font: { bold: true, color: { argb: 'FFFFFFFF' } },
+      alignment: { vertical: 'middle' as const, horizontal: 'center' as const },
+    },
+    cellStyle: {
+      alignment: { vertical: 'middle' as const, horizontal: 'right' as const },
+    },
+    ...options,
+  };
+
+  // Create workbook
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Turath Almandi';
+  workbook.created = new Date();
+  workbook.modified = new Date();
+  workbook.lastModifiedBy = 'Turath Almandi';
+
+  // Handle multiple sheets or single sheet
+  const sheets: Record<string, T[]> = Array.isArray(data)
+    ? { [opts.sheetName]: data }
+    : data;
+
+  // Create each sheet
+  Object.entries(sheets).forEach(([sheetName, sheetData]) => {
+    if (sheetData.length === 0) {
+      console.warn(`No data for sheet: ${sheetName}`);
+      return;
+    }
+
+    // Add worksheet
+    const worksheet = workbook.addWorksheet(sheetName, {
+      properties: { defaultRowHeight: 20 },
+      views: [{ rightToLeft: true }], // RTL for Arabic
+    });
+
+    // Get headers from first object
+    const headers = Object.keys(sheetData[0]);
+
+    // Add header row
+    const headerRow = worksheet.addRow(headers);
+    headerRow.height = 25;
+    headerRow.eachCell((cell) => {
+      cell.style = opts.headerStyle;
+    });
+
+    // Add data rows
+    sheetData.forEach((row) => {
+      const values = headers.map((header) => {
+        const value = row[header];
+        // Handle null/undefined
+        if (value === null || value === undefined) return '';
+        // Handle dates
+        if (value instanceof Date) return value;
+        // Handle numbers
+        if (typeof value === 'number') return value;
+        // Convert to string
+        return String(value);
+      });
+
+      const dataRow = worksheet.addRow(values);
+      dataRow.eachCell((cell) => {
+        cell.style = opts.cellStyle;
+      });
+    });
+
+    // Auto-size columns if enabled
+    if (opts.autoWidth) {
+      worksheet.columns.forEach((column, index) => {
+        const header = headers[index];
+        let maxLength = header.length;
+
+        // Check data rows for max length
+        sheetData.forEach((row) => {
+          const value = row[header];
+          const cellLength = value ? String(value).length : 0;
+          maxLength = Math.max(maxLength, cellLength);
+        });
+
+        // Set column width (with min/max limits)
+        column.width = Math.min(Math.max(maxLength + 2, 10), 50);
+      });
+    }
+
+    // Freeze header row
+    worksheet.views = [
+      {
+        state: 'frozen',
+        xSplit: 0,
+        ySplit: 1,
+        rightToLeft: true,
+      },
+    ];
+  });
+
+  // Generate Excel file as blob
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+
+  // Ensure filename has .xlsx extension
+  const xlsxFilename = ensureFileExtension(filename, 'xlsx');
+
+  // Download
+  downloadBlob(blob, xlsxFilename);
 }
 
 /**

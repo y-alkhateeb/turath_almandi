@@ -12,10 +12,17 @@
  */
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { toast } from 'sonner';
 import { useWebSocketEvent } from './useWebSocket';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './queries/queryKeys';
+import {
+  showNotificationToast,
+  requestDesktopNotificationPermission,
+  type NotificationPayload as EnhancedNotificationPayload,
+} from '@/utils/notificationToast';
+
+// Re-export for convenience
+export { requestDesktopNotificationPermission };
 
 // ============================================
 // TYPES
@@ -23,25 +30,18 @@ import { queryKeys } from './queries/queryKeys';
 
 /**
  * Notification payload from WebSocket
- * Matches backend notification event payload
+ * Extended from enhanced notification payload
  */
-export interface NotificationPayload {
-  id: string;
-  userId?: string;
-  branchId?: string;
-  type: string;
-  title: string;
-  message: string;
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  createdAt: string;
-}
+export type NotificationPayload = EnhancedNotificationPayload;
 
 /**
  * Notification settings
+ * Stored in localStorage
  */
 export interface NotificationSettings {
   soundEnabled: boolean;
   toastEnabled: boolean;
+  desktopEnabled: boolean;
   soundVolume: number; // 0-1
 }
 
@@ -103,6 +103,7 @@ const getNotificationSettings = (): NotificationSettings => {
   return {
     soundEnabled: true,
     toastEnabled: true,
+    desktopEnabled: false, // Must be explicitly enabled by user
     soundVolume: 0.5,
   };
 };
@@ -167,64 +168,8 @@ const updateFaviconBadge = (unreadCount: number): void => {
   console.log('[Notifications] Unread count:', unreadCount);
 };
 
-// ============================================
-// TOAST NOTIFICATION FORMATTING
-// ============================================
-
-/**
- * Get toast icon based on notification type and priority
- */
-const getNotificationIcon = (type: string, priority?: string): string => {
-  // Priority-based icons
-  if (priority === 'URGENT') return '🚨';
-  if (priority === 'HIGH') return '⚠️';
-
-  // Type-based icons
-  switch (type) {
-    case 'DEBT_OVERDUE':
-    case 'DEBT_DUE_SOON':
-      return '💳';
-    case 'LOW_STOCK':
-    case 'OUT_OF_STOCK':
-      return '📦';
-    case 'TRANSACTION':
-      return '💰';
-    case 'SYSTEM':
-      return 'ℹ️';
-    default:
-      return '🔔';
-  }
-};
-
-/**
- * Show toast notification
- */
-const showToastNotification = (notification: NotificationPayload): void => {
-  const icon = getNotificationIcon(notification.type, notification.priority);
-  const message = `${icon} ${notification.title}`;
-
-  // Choose toast type based on priority
-  switch (notification.priority) {
-    case 'URGENT':
-    case 'HIGH':
-      toast.error(message, {
-        description: notification.message,
-        duration: 6000,
-      });
-      break;
-    case 'MEDIUM':
-      toast.warning(message, {
-        description: notification.message,
-        duration: 5000,
-      });
-      break;
-    default:
-      toast.info(message, {
-        description: notification.message,
-        duration: 4000,
-      });
-  }
-};
+// NOTE: Toast formatting and display logic has been moved to @/utils/notificationToast
+// This keeps the hook focused on WebSocket event handling and settings management
 
 // ============================================
 // MAIN HOOK
@@ -280,6 +225,7 @@ export const useRealtimeNotifications = () => {
 
   /**
    * Handle notification:created event
+   * Uses enhanced toast with navigation, sound, and desktop notifications
    */
   const handleNotification = useCallback(
     (payload: NotificationPayload) => {
@@ -287,14 +233,13 @@ export const useRealtimeNotifications = () => {
 
       console.log('[Notifications] Received:', payload);
 
-      // Show toast notification
+      // Show enhanced toast notification
       if (settings.toastEnabled) {
-        showToastNotification(payload);
-      }
-
-      // Play sound
-      if (settings.soundEnabled) {
-        playNotificationSound(settings.soundVolume);
+        showNotificationToast(payload, {
+          soundEnabled: settings.soundEnabled,
+          soundVolume: settings.soundVolume,
+          desktopEnabled: settings.desktopEnabled,
+        });
       }
 
       // Invalidate notifications query to refetch

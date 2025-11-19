@@ -1,180 +1,313 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersService } from '@/services/users.service';
-import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
-import { toast } from '@/utils/toast';
+/**
+ * useUsers Hooks
+ * React Query hooks for user management with optimistic updates
+ *
+ * Features:
+ * - User queries
+ * - Create/Update/Delete mutations with optimistic updates
+ * - Automatic cache invalidation
+ * - Arabic toast messages
+ * - Full error handling and strict typing
+ */
 
-// Query keys
-export const usersKeys = {
-  all: ['users'] as const,
-  detail: (id: string) => ['users', id] as const,
-};
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { usersService } from '@/services/users.service';
+import { queryKeys } from '@/hooks/queries/queryKeys';
+import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
+import { ApiError } from '@/api/apiClient';
+
+// ============================================
+// QUERY HOOKS
+// ============================================
 
 /**
- * Hook to fetch all users
+ * useUsers Hook
+ * Query all users
+ *
+ * @returns Query result with users array
+ *
+ * @example
+ * ```tsx
+ * const { data: users, isLoading } = useUsers();
+ * ```
  */
 export const useUsers = () => {
-  return useQuery({
-    queryKey: usersKeys.all,
+  return useQuery<UserWithBranch[], ApiError>({
+    queryKey: queryKeys.users.all,
     queryFn: () => usersService.getAll(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
+    retry: 1,
   });
 };
 
 /**
- * Hook to fetch a single user
+ * useUser Hook
+ * Query single user by ID
+ *
+ * @param id - User UUID
+ * @returns Query result with user data
+ *
+ * @example
+ * ```tsx
+ * const { data: user, isLoading } = useUser(userId);
+ * ```
  */
 export const useUser = (id: string) => {
-  return useQuery({
-    queryKey: usersKeys.detail(id),
+  return useQuery<UserWithBranch, ApiError>({
+    queryKey: queryKeys.users.detail(id),
     queryFn: () => usersService.getOne(id),
     enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
   });
 };
 
+// ============================================
+// MUTATION HOOKS
+// ============================================
+
 /**
- * Hook to create a new user
+ * useCreateUser Hook
+ * Mutation to create new user with optimistic update
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const createUser = useCreateUser();
+ *
+ * const handleCreate = async () => {
+ *   try {
+ *     await createUser.mutateAsync({
+ *       username: 'user1',
+ *       password: 'password123',
+ *       role: 'ACCOUNTANT',
+ *       branchId: 'branch-id',
+ *     });
+ *   } catch (error) {
+ *     // Error already handled with toast
+ *   }
+ * };
+ * ```
  */
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<UserWithBranch, ApiError, CreateUserDto>({
     mutationFn: (data: CreateUserDto) => usersService.create(data),
+
+    // Optimistic update
     onMutate: async (newUser) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: usersKeys.all });
+      // Cancel outgoing queries
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
 
-      // Snapshot the previous value
-      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(usersKeys.all);
+      // Snapshot current data
+      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(
+        queryKeys.users.all,
+      );
 
-      // Optimistically update to the new value
+      // Optimistically add new user with temp ID
       if (previousUsers) {
-        queryClient.setQueryData<UserWithBranch[]>(usersKeys.all, (old = []) => [
-          {
-            id: 'temp-' + Date.now(),
-            username: newUser.username,
-            role: newUser.role,
-            branchId: newUser.branchId || null,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            branch: null,
-          } as UserWithBranch,
-          ...old,
-        ]);
+        queryClient.setQueryData<UserWithBranch[]>(
+          queryKeys.users.all,
+          (old = []) => [
+            {
+              id: `temp-${Date.now()}`,
+              username: newUser.username,
+              role: newUser.role,
+              branchId: newUser.branchId || null,
+              isActive: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              branch: null,
+            } as UserWithBranch,
+            ...old,
+          ],
+        );
       }
 
       return { previousUsers };
     },
-    onError: (error: any, _newUser, context) => {
+
+    onError: (_error, _newUser, context) => {
       // Rollback on error
       if (context?.previousUsers) {
-        queryClient.setQueryData(usersKeys.all, context.previousUsers);
+        queryClient.setQueryData(queryKeys.users.all, context.previousUsers);
       }
 
-      const message = error.response?.data?.message || 'حدث خطأ أثناء إضافة المستخدم';
-      toast.error(message);
+      // Note: Error toast shown by global API interceptor
     },
+
     onSuccess: () => {
+      // Invalidate users query
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+
+      // Show success toast
       toast.success('تم إضافة المستخدم بنجاح');
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: usersKeys.all });
     },
   });
 };
 
 /**
- * Hook to update an existing user
+ * useUpdateUser Hook
+ * Mutation to update existing user with optimistic update
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const updateUser = useUpdateUser();
+ *
+ * const handleUpdate = async () => {
+ *   await updateUser.mutateAsync({
+ *     id: userId,
+ *     data: { role: 'ADMIN' },
+ *   });
+ * };
+ * ```
  */
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    UserWithBranch,
+    ApiError,
+    { id: string; data: UpdateUserDto }
+  >({
     mutationFn: ({ id, data }: { id: string; data: UpdateUserDto }) =>
       usersService.update(id, data),
+
+    // Optimistic update
     onMutate: async ({ id, data }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: usersKeys.all });
+      // Cancel outgoing queries
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.detail(id) });
 
-      // Snapshot the previous value
-      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(usersKeys.all);
+      // Snapshot current data
+      const previousUser = queryClient.getQueryData<UserWithBranch>(
+        queryKeys.users.detail(id),
+      );
+      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(
+        queryKeys.users.all,
+      );
 
-      // Optimistically update to the new value
+      // Optimistically update user detail
+      queryClient.setQueryData<UserWithBranch>(
+        queryKeys.users.detail(id),
+        (old) => {
+          if (!old) return old;
+          return { ...old, ...data, updatedAt: new Date().toISOString() };
+        },
+      );
+
+      // Optimistically update user in list
       if (previousUsers) {
-        queryClient.setQueryData<UserWithBranch[]>(usersKeys.all, (old = []) =>
-          old.map((user) =>
-            user.id === id
-              ? { ...user, ...data, updatedAt: new Date().toISOString() }
-              : user
-          )
+        queryClient.setQueryData<UserWithBranch[]>(
+          queryKeys.users.all,
+          (old = []) =>
+            old.map((user) =>
+              user.id === id
+                ? { ...user, ...data, updatedAt: new Date().toISOString() }
+                : user,
+            ),
         );
       }
 
-      return { previousUsers };
+      return { previousUser, previousUsers };
     },
-    onError: (error: any, _variables, context) => {
+
+    onError: (_error, { id }, context) => {
       // Rollback on error
+      if (context?.previousUser) {
+        queryClient.setQueryData(queryKeys.users.detail(id), context.previousUser);
+      }
       if (context?.previousUsers) {
-        queryClient.setQueryData(usersKeys.all, context.previousUsers);
+        queryClient.setQueryData(queryKeys.users.all, context.previousUsers);
       }
 
-      const message = error.response?.data?.message || 'حدث خطأ أثناء تحديث المستخدم';
-      toast.error(message);
+      // Note: Error toast shown by global API interceptor
     },
-    onSuccess: () => {
+
+    onSuccess: (updatedUser) => {
+      // Invalidate user queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.users.detail(updatedUser.id),
+      });
+
+      // Show success toast
       toast.success('تم تحديث المستخدم بنجاح');
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: usersKeys.all });
     },
   });
 };
 
 /**
- * Hook to delete a user (soft delete)
+ * useDeleteUser Hook
+ * Mutation to delete user (soft delete) with optimistic update
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const deleteUser = useDeleteUser();
+ *
+ * const handleDelete = async () => {
+ *   if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+ *     await deleteUser.mutateAsync(userId);
+ *   }
+ * };
+ * ```
  */
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<void, ApiError, string>({
     mutationFn: (id: string) => usersService.delete(id),
+
+    // Optimistic update
     onMutate: async (deletedId) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: usersKeys.all });
+      // Cancel outgoing queries
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
 
-      // Snapshot the previous value
-      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(usersKeys.all);
+      // Snapshot current data
+      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(
+        queryKeys.users.all,
+      );
 
-      // Optimistically update to the new value (mark as inactive)
+      // Optimistically mark user as inactive (soft delete)
       if (previousUsers) {
-        queryClient.setQueryData<UserWithBranch[]>(usersKeys.all, (old = []) =>
-          old.map((user) =>
-            user.id === deletedId
-              ? { ...user, isActive: false, updatedAt: new Date().toISOString() }
-              : user
-          )
+        queryClient.setQueryData<UserWithBranch[]>(
+          queryKeys.users.all,
+          (old = []) =>
+            old.map((user) =>
+              user.id === deletedId
+                ? { ...user, isActive: false, updatedAt: new Date().toISOString() }
+                : user,
+            ),
         );
       }
 
       return { previousUsers };
     },
-    onError: (error: any, _deletedId, context) => {
+
+    onError: (_error, _deletedId, context) => {
       // Rollback on error
       if (context?.previousUsers) {
-        queryClient.setQueryData(usersKeys.all, context.previousUsers);
+        queryClient.setQueryData(queryKeys.users.all, context.previousUsers);
       }
 
-      const message = error.response?.data?.message || 'حدث خطأ أثناء حذف المستخدم';
-      toast.error(message);
+      // Note: Error toast shown by global API interceptor
     },
+
     onSuccess: () => {
+      // Invalidate users query
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+
+      // Show success toast
       toast.success('تم تعطيل المستخدم بنجاح');
-    },
-    onSettled: () => {
-      // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: usersKeys.all });
     },
   });
 };

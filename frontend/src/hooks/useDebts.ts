@@ -237,6 +237,9 @@ export const useCreateDebt = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.debts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
 
+      // Invalidate dashboard (new debt affects debt stats)
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+
       // Show success toast
       toast.success(`تم إضافة دين "${variables.creditorName}" بنجاح`);
     },
@@ -329,6 +332,12 @@ export const useUpdateDebt = () => {
         queryKey: queryKeys.debts.detail(updatedDebt.id),
       });
 
+      // Invalidate notifications (may affect overdue alerts)
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+
+      // Invalidate dashboard (debt stats may have changed)
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+
       // Show success toast
       toast.success('تم تحديث الدين بنجاح');
     },
@@ -407,6 +416,9 @@ export const useDeleteDebt = () => {
     onSuccess: () => {
       // Invalidate debts
       queryClient.invalidateQueries({ queryKey: queryKeys.debts.all });
+
+      // Invalidate dashboard (debt stats affected)
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
 
       // Show success toast
       toast.success('تم حذف الدين بنجاح');
@@ -547,6 +559,9 @@ export const usePayDebt = () => {
         queryKey: queryKeys.debts.detail(updatedDebt.id),
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+
+      // Invalidate dashboard (debt payment affects stats)
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
 
       // Show success toast
       const formattedAmount = new Intl.NumberFormat('ar-IQ', {

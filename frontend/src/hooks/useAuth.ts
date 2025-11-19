@@ -96,11 +96,11 @@ export const useAuth = (): UseAuthReturn => {
 
   // Get user data from Zustand store
   const userInfo = useUserInfo();
-  const { accessToken } = useUserToken();
-  const { setUserInfo, setUserToken, clearUserInfoAndToken } = useUserActions();
+  const tokens = useUserToken();
+  const { setUser, setAuth, clearAuth } = useUserActions();
 
   // Determine if authenticated
-  const isAuthenticated = !!accessToken;
+  const isAuthenticated = !!tokens.accessToken;
 
   // ============================================
   // PROFILE QUERY
@@ -128,7 +128,7 @@ export const useAuth = (): UseAuthReturn => {
     // On success, update userStore
     onSuccess: (data) => {
       if (data.user) {
-        setUserInfo(data.user);
+        setUser(data.user);
       }
     },
 
@@ -136,7 +136,7 @@ export const useAuth = (): UseAuthReturn => {
     onError: (error) => {
       if (error.statusCode === 401) {
         // Token is invalid, clear auth
-        clearUserInfoAndToken();
+        clearAuth();
         queryClient.clear(); // Clear all cached queries
       }
     },
@@ -159,11 +159,14 @@ export const useAuth = (): UseAuthReturn => {
 
     onSuccess: (data) => {
       // Store tokens and user info
-      setUserToken({
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      });
-      setUserInfo(data.user);
+      setAuth(
+        data.user,
+        {
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+        },
+        false // rememberMe - can be made configurable later
+      );
 
       // Update profile cache
       queryClient.setQueryData(queryKeys.auth.profile, {
@@ -190,7 +193,7 @@ export const useAuth = (): UseAuthReturn => {
 
     onSuccess: () => {
       // Clear user store
-      clearUserInfoAndToken();
+      clearAuth();
 
       // Clear all React Query caches
       queryClient.clear();
@@ -201,7 +204,7 @@ export const useAuth = (): UseAuthReturn => {
 
     onError: () => {
       // Even if logout fails on server, clear local state
-      clearUserInfoAndToken();
+      clearAuth();
       queryClient.clear();
 
       // Note: Error toast shown by global API interceptor

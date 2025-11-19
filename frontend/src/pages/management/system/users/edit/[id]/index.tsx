@@ -97,19 +97,13 @@ export default function EditUserPage() {
     async (data: UpdateUserInput) => {
       if (!id) return;
 
-      try {
-        await updateUser.mutateAsync({
-          id,
-          data,
-        });
-        // Success toast shown by mutation
-        // Navigate to users list
-        router.push('/management/system/users/list');
-      } catch (error) {
-        // Error toast shown by global API interceptor
-        // Error is re-thrown so form can handle it if needed
-        throw error;
-      }
+      await updateUser.mutateAsync({
+        id,
+        data,
+      });
+      // Success toast shown by mutation
+      // Navigate to users list
+      router.push('/management/system/users/list');
     },
     [id, updateUser, router]
   );
@@ -281,7 +275,9 @@ export default function EditUserPage() {
           إدارة المستخدمين
         </button>
         <ChevronRight className="w-4 h-4 text-[var(--text-tertiary)]" />
-        <span className="text-[var(--text-primary)] font-medium">تعديل مستخدم: {user.username}</span>
+        <span className="text-[var(--text-primary)] font-medium">
+          تعديل مستخدم: {user.username}
+        </span>
       </nav>
 
       {/* Page Header */}

@@ -38,11 +38,7 @@ export function Logo({
 }: LogoProps) {
   const content = (
     <div
-      className={cn(
-        'flex items-center gap-2 font-bold',
-        sizeClasses[size],
-        className
-      )}
+      className={cn('flex items-center gap-2 font-bold', sizeClasses[size], className)}
       onClick={onClick}
     >
       {/* Logo Icon */}

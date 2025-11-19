@@ -6,7 +6,8 @@
 import { type ReactNode } from 'react';
 import { useUserInfo } from '@/store/userStore';
 import { UserRole } from '#/enum';
-import { check, checkAny, checkAll } from '@/utils';
+import { checkAny, checkAll } from '@/utils';
+import type { UserInfo } from '#/entity';
 
 export interface AuthGuardProps {
   children: ReactNode;
@@ -21,7 +22,7 @@ export interface AuthGuardProps {
   branchId?: string;
 
   // Custom check function
-  check?: (userInfo: any) => boolean;
+  check?: (userInfo: UserInfo) => boolean;
 }
 
 /**
@@ -117,7 +118,13 @@ export function AuthGuard({
 /**
  * AdminOnly - Shortcut for admin-only content
  */
-export function AdminOnly({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
+export function AdminOnly({
+  children,
+  fallback = null,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
     <AuthGuard role={UserRole.ADMIN} fallback={fallback}>
       {children}
@@ -128,7 +135,13 @@ export function AdminOnly({ children, fallback = null }: { children: ReactNode; 
 /**
  * AccountantOnly - Shortcut for accountant-only content
  */
-export function AccountantOnly({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
+export function AccountantOnly({
+  children,
+  fallback = null,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
   return (
     <AuthGuard role={UserRole.ACCOUNTANT} fallback={fallback}>
       {children}

@@ -50,16 +50,10 @@ export default function CreateInventoryPage() {
    */
   const handleSubmit = useCallback(
     async (data: CreateInventoryInput) => {
-      try {
-        await createInventory.mutateAsync(data);
-        // Success toast shown by mutation
-        // Navigate to inventory list
-        router.push('/management/inventory/list');
-      } catch (error) {
-        // Error toast shown by global API interceptor
-        // Error is re-thrown so form can handle it if needed
-        throw error;
-      }
+      await createInventory.mutateAsync(data);
+      // Success toast shown by mutation
+      // Navigate to inventory list
+      router.push('/management/inventory/list');
     },
     [createInventory, router]
   );
@@ -93,9 +87,7 @@ export default function CreateInventoryPage() {
       {/* Page Header */}
       <div dir="rtl">
         <h1 className="text-3xl font-bold text-[var(--text-primary)]">إضافة صنف جديد</h1>
-        <p className="text-[var(--text-secondary)] mt-1">
-          قم بإضافة صنف جديد إلى المخزون
-        </p>
+        <p className="text-[var(--text-secondary)] mt-1">قم بإضافة صنف جديد إلى المخزون</p>
       </div>
 
       {/* Form Card */}

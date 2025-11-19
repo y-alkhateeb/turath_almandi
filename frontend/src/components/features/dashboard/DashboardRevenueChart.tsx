@@ -89,11 +89,7 @@ export function DashboardRevenueChart({ data }: DashboardRevenueChartProps) {
             <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
-              <YAxis
-                stroke="#6b7280"
-                style={{ fontSize: '12px' }}
-                tickFormatter={formatYAxis}
-              />
+              <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} tickFormatter={formatYAxis} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ fontSize: '14px' }} iconType="circle" />
               <Line

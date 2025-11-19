@@ -47,11 +47,7 @@ function InventoryValueCardSkeleton() {
 // COMPONENT
 // ============================================
 
-export function InventoryValueCard({
-  totalValue,
-  itemCount,
-  isLoading,
-}: InventoryValueCardProps) {
+export function InventoryValueCard({ totalValue, itemCount, isLoading }: InventoryValueCardProps) {
   if (isLoading) {
     return (
       <div dir="rtl">

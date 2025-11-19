@@ -230,9 +230,7 @@ function ErrorFallback({ error, errorInfo, resetError, reloadPage }: ErrorFallba
               {/* Title */}
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-red-900">حدث خطأ غير متوقع</h1>
-                <p className="text-sm text-red-700 mt-1">
-                  عذراً، حدث خطأ أثناء تحميل هذه الصفحة
-                </p>
+                <p className="text-sm text-red-700 mt-1">عذراً، حدث خطأ أثناء تحميل هذه الصفحة</p>
               </div>
             </div>
           </div>
@@ -336,10 +334,7 @@ function ErrorFallback({ error, errorInfo, resetError, reloadPage }: ErrorFallba
 
         {/* Back to Home */}
         <div className="text-center mt-6">
-          <a
-            href="/"
-            className="text-sm text-primary-600 hover:text-primary-700 underline"
-          >
+          <a href="/" className="text-sm text-primary-600 hover:text-primary-700 underline">
             العودة إلى الصفحة الرئيسية
           </a>
         </div>

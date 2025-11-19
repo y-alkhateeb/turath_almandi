@@ -15,17 +15,8 @@
  */
 
 import apiClient from '../apiClient';
-import type {
-  Debt,
-  CreateDebtInput,
-  UpdateDebtInput,
-  PayDebtInput,
-} from '#/entity';
-import type {
-  PaginatedResponse,
-  DebtQueryFilters,
-  DebtSummaryResponse,
-} from '#/api';
+import type { Debt, CreateDebtInput, UpdateDebtInput, PayDebtInput } from '#/entity';
+import type { PaginatedResponse, DebtQueryFilters, DebtSummaryResponse } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -36,13 +27,10 @@ import type {
  * Centralized endpoint definitions
  */
 export enum DebtApiEndpoints {
-  GetAll = '/debts',
-  GetOne = '/debts/:id',
-  Create = '/debts',
-  Update = '/debts/:id',
-  Delete = '/debts/:id',
-  PayDebt = '/debts/:id/payments',
-  GetSummary = '/debts/summary',
+  Base = '/debts',
+  ById = '/debts/:id',
+  Payments = '/debts/:id/payments',
+  Summary = '/debts/summary',
 }
 
 // ============================================
@@ -75,11 +63,9 @@ export enum DebtApiEndpoints {
  * @returns PaginatedResponse<Debt> with debts (including payments) and pagination meta
  * @throws ApiError on 401 (not authenticated)
  */
-export const getAll = (
-  filters?: DebtQueryFilters,
-): Promise<PaginatedResponse<Debt>> => {
+export const getAll = (filters?: DebtQueryFilters): Promise<PaginatedResponse<Debt>> => {
   return apiClient.get<PaginatedResponse<Debt>>({
-    url: DebtApiEndpoints.GetAll,
+    url: DebtApiEndpoints.Base,
     params: filters,
   });
 };
@@ -130,7 +116,7 @@ export const getOne = (id: string): Promise<Debt> => {
  */
 export const create = (data: CreateDebtInput): Promise<Debt> => {
   return apiClient.post<Debt>({
-    url: DebtApiEndpoints.Create,
+    url: DebtApiEndpoints.Base,
     data,
   });
 };
@@ -251,10 +237,10 @@ export const payDebt = (id: string, data: PayDebtInput): Promise<Debt> => {
  * @throws ApiError on 401 (not authenticated)
  */
 export const getSummary = (
-  filters?: Omit<DebtQueryFilters, 'page' | 'limit'>,
+  filters?: Omit<DebtQueryFilters, 'page' | 'limit'>
 ): Promise<DebtSummaryResponse> => {
   return apiClient.get<DebtSummaryResponse>({
-    url: DebtApiEndpoints.GetSummary,
+    url: DebtApiEndpoints.Summary,
     params: filters,
   });
 };
@@ -275,11 +261,11 @@ export const getSummary = (
  * @throws ApiError on 401
  */
 export const getAllUnpaginated = (
-  filters?: Omit<DebtQueryFilters, 'page' | 'limit'>,
+  filters?: Omit<DebtQueryFilters, 'page' | 'limit'>
 ): Promise<Debt[]> => {
   return apiClient
     .get<PaginatedResponse<Debt>>({
-      url: DebtApiEndpoints.GetAll,
+      url: DebtApiEndpoints.Base,
       params: { ...filters, limit: 10000 },
     })
     .then((response) => {
@@ -299,7 +285,7 @@ export const getAllUnpaginated = (
  * @throws ApiError on 401
  */
 export const getActiveDebts = (
-  filters?: Omit<DebtQueryFilters, 'status'>,
+  filters?: Omit<DebtQueryFilters, 'status'>
 ): Promise<PaginatedResponse<Debt>> => {
   return getAll({
     ...filters,
@@ -318,7 +304,7 @@ export const getActiveDebts = (
  * @throws ApiError on 401
  */
 export const getPaidDebts = (
-  filters?: Omit<DebtQueryFilters, 'status'>,
+  filters?: Omit<DebtQueryFilters, 'status'>
 ): Promise<PaginatedResponse<Debt>> => {
   return getAll({
     ...filters,
@@ -337,7 +323,7 @@ export const getPaidDebts = (
  * @throws ApiError on 401
  */
 export const getPartialDebts = (
-  filters?: Omit<DebtQueryFilters, 'status'>,
+  filters?: Omit<DebtQueryFilters, 'status'>
 ): Promise<PaginatedResponse<Debt>> => {
   return getAll({
     ...filters,
@@ -356,7 +342,7 @@ export const getPartialDebts = (
  * @throws ApiError on 401
  */
 export const getOverdueDebts = (
-  filters?: Omit<DebtQueryFilters, 'status'>,
+  filters?: Omit<DebtQueryFilters, 'status'>
 ): Promise<PaginatedResponse<Debt>> => {
   return getAll({
     ...filters,
@@ -379,7 +365,7 @@ export const getOverdueDebts = (
 export const getByDueDateRange = (
   dueDateStart: string,
   dueDateEnd: string,
-  additionalFilters?: Omit<DebtQueryFilters, 'dueDateStart' | 'dueDateEnd'>,
+  additionalFilters?: Omit<DebtQueryFilters, 'dueDateStart' | 'dueDateEnd'>
 ): Promise<PaginatedResponse<Debt>> => {
   return getAll({
     ...additionalFilters,
@@ -405,7 +391,7 @@ export const getDebtsDueSoon = (): Promise<PaginatedResponse<Debt>> => {
   return getByDueDateRange(
     today.toISOString().split('T')[0],
     sevenDaysFromNow.toISOString().split('T')[0],
-    { status: 'ACTIVE' },
+    { status: 'ACTIVE' }
   );
 };
 

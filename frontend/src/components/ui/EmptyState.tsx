@@ -124,28 +124,14 @@ export function EmptyState({
         )}
         aria-hidden="true"
       >
-        <div className={cn(sizes.icon, colors.iconColor)}>
-          {icon}
-        </div>
+        <div className={cn(sizes.icon, colors.iconColor)}>{icon}</div>
       </div>
 
       {/* Title */}
-      <h3
-        className={cn(
-          'font-semibold text-[var(--text-primary)] mb-2',
-          sizes.title
-        )}
-      >
-        {title}
-      </h3>
+      <h3 className={cn('font-semibold text-[var(--text-primary)] mb-2', sizes.title)}>{title}</h3>
 
       {/* Description */}
-      <p
-        className={cn(
-          'text-[var(--text-secondary)] max-w-md mb-8 leading-relaxed',
-          sizes.desc
-        )}
-      >
+      <p className={cn('text-[var(--text-secondary)] max-w-md mb-8 leading-relaxed', sizes.desc)}>
         {description}
       </p>
 
@@ -176,11 +162,7 @@ export function EmptyState({
       )}
 
       {/* Optional Illustration */}
-      {illustration && (
-        <div className="mt-8 max-w-xs opacity-40">
-          {illustration}
-        </div>
-      )}
+      {illustration && <div className="mt-8 max-w-xs opacity-40">{illustration}</div>}
     </div>
   );
 }

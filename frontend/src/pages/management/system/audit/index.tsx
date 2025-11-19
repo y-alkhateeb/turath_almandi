@@ -60,18 +60,11 @@ export default function AuditLogPage() {
    * Audit log filters state
    * Manages: entityType, entityId, userId, dateRange, pagination
    */
-  const {
-    filters,
-    setEntityType,
-    setEntityId,
-    setUserId,
-    setDateRange,
-    setPage,
-    resetFilters,
-  } = useAuditFilters({
-    page: 1,
-    limit: 50, // Show 50 logs per page
-  });
+  const { filters, setEntityType, setEntityId, setUserId, setDateRange, setPage, resetFilters } =
+    useAuditFilters({
+      page: 1,
+      limit: 50, // Show 50 logs per page
+    });
 
   // ============================================
   // DATA FETCHING
@@ -80,12 +73,7 @@ export default function AuditLogPage() {
   /**
    * Fetch audit logs with filters and pagination
    */
-  const {
-    data: auditData,
-    isLoading,
-    error,
-    refetch,
-  } = useAuditLogs(filters);
+  const { data: auditData, isLoading, error, refetch } = useAuditLogs(filters);
 
   const logs = auditData?.data || [];
   const pagination = auditData?.meta;
@@ -130,10 +118,7 @@ export default function AuditLogPage() {
         setUserId(newFilters.userId || undefined);
       }
       if (newFilters.startDate !== undefined || newFilters.endDate !== undefined) {
-        setDateRange(
-          newFilters.startDate || undefined,
-          newFilters.endDate || undefined
-        );
+        setDateRange(newFilters.startDate || undefined, newFilters.endDate || undefined);
       }
     },
     [setEntityType, setEntityId, setUserId, setDateRange]
@@ -231,9 +216,7 @@ export default function AuditLogPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">سجل التدقيق</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              عرض سجل تدقيق النظام والتغييرات
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">عرض سجل تدقيق النظام والتغييرات</p>
           </div>
         </div>
         <ErrorState error={error} onRetry={handleRetry} />
@@ -252,9 +235,7 @@ export default function AuditLogPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">سجل التدقيق</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              عرض سجل تدقيق النظام والتغييرات
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">عرض سجل تدقيق النظام والتغييرات</p>
           </div>
           <button
             onClick={handleResetFilters}
@@ -317,8 +298,9 @@ export default function AuditLogPage() {
           <div>
             <p className="font-medium text-blue-900">سجل التدقيق - للمدراء فقط</p>
             <p className="text-sm text-blue-700 mt-1">
-              يتتبع سجل التدقيق جميع العمليات المهمة في النظام بما في ذلك إنشاء وتعديل وحذف البيانات.
-              يمكنك استخدام الفلاتر أدناه لتصفية السجلات حسب نوع الكيان، المستخدم، أو التاريخ.
+              يتتبع سجل التدقيق جميع العمليات المهمة في النظام بما في ذلك إنشاء وتعديل وحذف
+              البيانات. يمكنك استخدام الفلاتر أدناه لتصفية السجلات حسب نوع الكيان، المستخدم، أو
+              التاريخ.
             </p>
           </div>
         </div>

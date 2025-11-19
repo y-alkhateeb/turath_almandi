@@ -66,7 +66,7 @@ export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'err
  * Event handler function type
  */
 export type EventHandler<T extends WebSocketEventType> = (
-  payload: WebSocketEventPayload[T],
+  payload: WebSocketEventPayload[T]
 ) => void;
 
 // ============================================
@@ -75,8 +75,7 @@ export type EventHandler<T extends WebSocketEventType> = (
 
 class WebSocketManager {
   private socket: WebSocket | null = null;
-  private listeners: Map<WebSocketEventType, Set<EventHandler<WebSocketEventType>>> =
-    new Map();
+  private listeners: Map<WebSocketEventType, Set<EventHandler<WebSocketEventType>>> = new Map();
   private connectionState: ConnectionState = 'disconnected';
   private stateListeners: Set<(state: ConnectionState) => void> = new Set();
   private reconnectTimeout: NodeJS.Timeout | null = null;
@@ -253,7 +252,7 @@ class WebSocketManager {
     const delay = this.reconnectDelay * this.reconnectAttempts; // Exponential backoff
 
     console.log(
-      `[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`,
+      `[WebSocket] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
     );
 
     this.reconnectTimeout = setTimeout(() => {
@@ -316,9 +315,7 @@ const wsManager = new WebSocketManager();
  */
 export const useWebSocket = () => {
   const { isAuthenticated, user } = useAuth();
-  const [connectionState, setConnectionState] = useState<ConnectionState>(
-    wsManager.getState(),
-  );
+  const [connectionState, setConnectionState] = useState<ConnectionState>(wsManager.getState());
 
   // Get token from storage
   const getToken = useCallback((): string | null => {
@@ -404,7 +401,7 @@ export const useWebSocket = () => {
  */
 export const useWebSocketEvent = <T extends WebSocketEventType>(
   event: T,
-  handler?: EventHandler<T>,
+  handler?: EventHandler<T>
 ) => {
   const queryClient = useQueryClient();
   const handlerRef = useRef(handler);
@@ -475,18 +472,22 @@ export const useWebSocketEvent = <T extends WebSocketEventType>(
  * useWebSocketEvents Hook
  * Subscribe to multiple WebSocket events at once
  *
+ * Note: This hook cannot be implemented using forEach with hooks
+ * as it violates the rules of hooks (hooks cannot be called in loops).
+ * Instead, call useWebSocketEvent multiple times explicitly for each event.
+ *
+ * @deprecated Use multiple useWebSocketEvent calls instead
+ *
  * @param events - Array of event types to subscribe to
  * @param handler - Optional custom handler for all events
  *
  * @example
  * ```tsx
  * function Dashboard() {
- *   // Subscribe to multiple events
- *   useWebSocketEvents([
- *     'transaction:created',
- *     'debt:created',
- *     'notification:created',
- *   ]);
+ *   // Instead of useWebSocketEvents, use multiple calls:
+ *   useWebSocketEvent('transaction:created', handleTransaction);
+ *   useWebSocketEvent('debt:created', handleDebt);
+ *   useWebSocketEvent('notification:created', handleNotification);
  *
  *   return <DashboardContent />;
  * }
@@ -494,9 +495,12 @@ export const useWebSocketEvent = <T extends WebSocketEventType>(
  */
 export const useWebSocketEvents = (
   events: WebSocketEventType[],
-  handler?: (event: WebSocketEventType, payload: unknown) => void,
+  handler?: (event: WebSocketEventType, payload: unknown) => void
 ) => {
+  // This implementation violates rules of hooks
+  // Kept for backwards compatibility but should not be used
   events.forEach((event) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useWebSocketEvent(event, handler ? (payload) => handler(event, payload) : undefined);
   });
 };

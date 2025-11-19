@@ -32,10 +32,7 @@ export function useDashboardStats(options: UseDashboardStatsOptions = {}) {
   return useQuery<DashboardStats>({
     queryKey: ['dashboard', 'stats', date, effectiveBranchId],
     queryFn: async () => {
-      return await dashboardService.getDashboardStats(
-        date,
-        effectiveBranchId || undefined
-      );
+      return await dashboardService.getDashboardStats(date, effectiveBranchId || undefined);
     },
     enabled,
     refetchInterval: 30000, // Auto-refresh every 30 seconds

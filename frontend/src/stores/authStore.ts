@@ -8,7 +8,7 @@ const REMEMBER_ME_KEY = 'auth-remember-me';
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       refreshToken: null,

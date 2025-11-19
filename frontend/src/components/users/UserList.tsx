@@ -81,13 +81,7 @@ const getActiveBadge = (isActive: boolean): React.ReactNode => {
 // COMPONENT
 // ============================================
 
-export function UserList({
-  users,
-  isLoading,
-  onEdit,
-  onDelete,
-  onToggleActive,
-}: UserListProps) {
+export function UserList({ users, isLoading, onEdit, onDelete, onToggleActive }: UserListProps) {
   // Define table columns
   const columns: Column<UserWithTimestamp>[] = [
     {
@@ -99,9 +93,7 @@ export function UserList({
           <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
             <UserIcon className="w-4 h-4 text-primary-600" />
           </div>
-          <span className="font-medium text-[var(--text-primary)]">
-            {user.username}
-          </span>
+          <span className="font-medium text-[var(--text-primary)]">{user.username}</span>
         </div>
       ),
     },

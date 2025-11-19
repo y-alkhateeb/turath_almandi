@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, UserX, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  useUsers,
-  useUpdateUser,
-  useDeleteUser,
-} from '@/hooks/useUsers';
+import { useUsers, useUpdateUser, useDeleteUser } from '@/hooks/useUsers';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
 import { EmptyState, Table, ConfirmModal } from '@/components/ui';
@@ -42,7 +38,9 @@ export const UsersPage = () => {
     return role === 'ADMIN' ? 'مدير' : 'محاسب';
   };
 
-  const getRoleBadgeVariant = (role: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+  const getRoleBadgeVariant = (
+    role: string
+  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
     return role === 'ADMIN' ? 'default' : 'secondary';
   };
 
@@ -59,9 +57,7 @@ export const UsersPage = () => {
             </span>
           </div>
           <div className="mr-4">
-            <div className="text-sm font-medium text-[var(--text-primary)]">
-              {user.username}
-            </div>
+            <div className="text-sm font-medium text-[var(--text-primary)]">{user.username}</div>
           </div>
         </div>
       ),
@@ -70,9 +66,7 @@ export const UsersPage = () => {
       key: 'role',
       header: 'الدور',
       render: (user) => (
-        <Badge variant={getRoleBadgeVariant(user.role)}>
-          {getRoleDisplay(user.role)}
-        </Badge>
+        <Badge variant={getRoleBadgeVariant(user.role)}>{getRoleDisplay(user.role)}</Badge>
       ),
     },
     {
@@ -116,11 +110,7 @@ export const UsersPage = () => {
       header: 'الإجراءات',
       render: (user) => (
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/users/edit/${user.id}`)}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/users/edit/${user.id}`)}>
             <Edit className="w-4 h-4" />
             تعديل
           </Button>
@@ -153,7 +143,6 @@ export const UsersPage = () => {
         ) : undefined
       }
     >
-
       {/* Loading State */}
       {isLoading ? (
         <PageLoading message="جاري تحميل المستخدمين..." />

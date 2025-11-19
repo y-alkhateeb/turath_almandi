@@ -14,7 +14,7 @@ export const ConditionalRender = ({
   children,
   fallback = null,
 }: ConditionalRenderProps) => {
-  const { user, isAdmin, hasRole, canAccessBranch } = useAuth();
+  const { user, hasRole, canAccessBranch } = useAuth();
 
   if (!user) {
     return <>{fallback}</>;

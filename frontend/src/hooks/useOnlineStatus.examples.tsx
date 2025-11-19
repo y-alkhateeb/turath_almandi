@@ -42,15 +42,9 @@ function CustomOfflineExample() {
     return (
       <div className="flex items-center justify-center min-h-screen" dir="rtl">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
-            أنت غير متصل بالإنترنت
-          </h1>
-          <p className="text-gray-600 mb-6">
-            يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى
-          </p>
-          <Button onClick={() => window.location.reload()}>
-            إعادة المحاولة
-          </Button>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">أنت غير متصل بالإنترنت</h1>
+          <p className="text-gray-600 mb-6">يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى</p>
+          <Button onClick={() => window.location.reload()}>إعادة المحاولة</Button>
         </div>
       </div>
     );
@@ -101,11 +95,7 @@ function FormWithOfflineExample() {
         {isOnline ? 'Submit' : 'Offline - Cannot Submit'}
       </Button>
 
-      {!isOnline && (
-        <p className="text-sm text-red-600 mt-2">
-          Form is disabled while offline
-        </p>
-      )}
+      {!isOnline && <p className="text-sm text-red-600 mt-2">Form is disabled while offline</p>}
     </form>
   );
 }
@@ -191,18 +181,11 @@ function ApiCallExample() {
 
   return (
     <div className="p-4">
-      <Button
-        onClick={fetchData}
-        disabled={!isOnline}
-      >
+      <Button onClick={fetchData} disabled={!isOnline}>
         Fetch Data
       </Button>
 
-      {!isOnline && (
-        <p className="text-red-600 mt-2">
-          Cannot fetch data while offline
-        </p>
-      )}
+      {!isOnline && <p className="text-red-600 mt-2">Cannot fetch data while offline</p>}
     </div>
   );
 }
@@ -225,10 +208,10 @@ function NetworkStatusIndicator() {
           ${isOnline ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
         `}
       >
-        <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-200' : 'bg-red-200'} animate-pulse`} />
-        <span className="text-sm font-medium">
-          {isOnline ? 'Online' : 'Offline'}
-        </span>
+        <span
+          className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-200' : 'bg-red-200'} animate-pulse`}
+        />
+        <span className="text-sm font-medium">{isOnline ? 'Online' : 'Offline'}</span>
       </div>
     </div>
   );
@@ -270,9 +253,7 @@ function RetryQueueExample() {
 
   return (
     <div className="p-4">
-      <Button onClick={saveData}>
-        {isOnline ? 'Save Now' : 'Queue for Later'}
-      </Button>
+      <Button onClick={saveData}>{isOnline ? 'Save Now' : 'Queue for Later'}</Button>
     </div>
   );
 }
@@ -302,9 +283,7 @@ function FullAppExample() {
         {/* Show "back online" notification */}
         {wasOffline && isOnline && (
           <div className="bg-green-50 border border-green-200 rounded p-4 mb-4">
-            <p className="text-green-800">
-              ✅ Connection restored! Data is being synced...
-            </p>
+            <p className="text-green-800">✅ Connection restored! Data is being synced...</p>
           </div>
         )}
 

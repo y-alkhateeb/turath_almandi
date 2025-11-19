@@ -117,9 +117,7 @@ export function DebtList({ debts, isLoading, onPay, onView }: DebtListProps) {
       width: '180px',
       render: (debt) => (
         <div>
-          <div className="font-medium text-[var(--text-primary)]">
-            {debt.creditorName}
-          </div>
+          <div className="font-medium text-[var(--text-primary)]">{debt.creditorName}</div>
           {isOverdue(debt) && getOverdueIndicator(debt)}
         </div>
       ),
@@ -176,9 +174,7 @@ export function DebtList({ debts, isLoading, onPay, onView }: DebtListProps) {
               {formatDate(debt.dueDate)}
             </div>
             {daysOverdue > 0 && (
-              <div className="text-xs text-red-600 mt-1">
-                متأخر {daysOverdue} يوم
-              </div>
+              <div className="text-xs text-red-600 mt-1">متأخر {daysOverdue} يوم</div>
             )}
           </div>
         );

@@ -30,10 +30,7 @@ export function FormSelect<T extends FieldValues>({
 }: FormSelectProps<T>) {
   return (
     <div className={`mb-4 ${className}`}>
-      <label
-        htmlFor={name}
-        className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-      >
+      <label htmlFor={name} className="block text-sm font-medium text-[var(--text-primary)] mb-2">
         {label}
         {required && <span className="text-red-500 mr-1">*</span>}
       </label>
@@ -60,11 +57,7 @@ export function FormSelect<T extends FieldValues>({
         ))}
       </select>
       {error && (
-        <p
-          id={`${name}-error`}
-          className="mt-2 text-sm text-red-600"
-          role="alert"
-        >
+        <p id={`${name}-error`} className="mt-2 text-sm text-red-600" role="alert">
           {error.message}
         </p>
       )}

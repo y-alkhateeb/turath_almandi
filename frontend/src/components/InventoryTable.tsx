@@ -26,7 +26,7 @@ export default function InventoryTable({
   onDelete,
   isLoading = false,
 }: InventoryTableProps) {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [searchInput, setSearchInput] = useState(filters.search || '');
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -34,7 +34,10 @@ export default function InventoryTable({
     onFiltersChange({ ...filters, search: searchInput, page: 1 });
   };
 
-  const handleFilterChange = (key: keyof InventoryFilters, value: any) => {
+  const handleFilterChange = (
+    key: keyof InventoryFilters,
+    value: InventoryFilters[keyof InventoryFilters]
+  ) => {
     onFiltersChange({ ...filters, [key]: value, page: 1 });
   };
 
@@ -313,8 +316,7 @@ export default function InventoryTable({
                   <span className="font-medium">
                     {Math.min(pagination.page * pagination.limit, pagination.total)}
                   </span>{' '}
-                  من{' '}
-                  <span className="font-medium">{pagination.total}</span> نتيجة
+                  من <span className="font-medium">{pagination.total}</span> نتيجة
                 </p>
               </div>
               <div>
@@ -326,21 +328,19 @@ export default function InventoryTable({
                   >
                     <span>السابق</span>
                   </button>
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-                    (pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                          pageNum === pagination.page
-                            ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
-                            : 'bg-[var(--bg-secondary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    )
-                  )}
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        pageNum === pagination.page
+                          ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
+                          : 'bg-[var(--bg-secondary)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page === pagination.totalPages}

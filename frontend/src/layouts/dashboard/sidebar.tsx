@@ -56,9 +56,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-cream-100 to-brand-gold-300 bg-clip-text text-transparent">
             تراث المندي
           </h1>
-          <p className="text-xs text-brand-gold-300 mt-1 tracking-widest">
-            TURATH RESTAURANTS
-          </p>
+          <p className="text-xs text-brand-gold-300 mt-1 tracking-widest">TURATH RESTAURANTS</p>
         </div>
       </div>
 
@@ -125,12 +123,7 @@ function NavigationItem({ item, currentPath, onClick, depth = 0 }: NavigationIte
               {item.info}
             </span>
           )}
-          <ChevronDown
-            className={cn(
-              'w-4 h-4 transition-transform',
-              isExpanded && 'rotate-180'
-            )}
-          />
+          <ChevronDown className={cn('w-4 h-4 transition-transform', isExpanded && 'rotate-180')} />
         </button>
 
         {/* Children */}

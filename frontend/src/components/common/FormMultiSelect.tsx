@@ -16,7 +16,7 @@
  */
 
 import { Controller, Control, FieldValues, Path } from 'react-hook-form';
-import { MultiSelect, MultiSelectProps, MultiSelectOption } from './MultiSelect';
+import { MultiSelect, MultiSelectProps } from './MultiSelect';
 
 // ============================================
 // TYPES
@@ -52,7 +52,7 @@ export function FormMultiSelect<T extends FieldValues>({
     <Controller
       name={name}
       control={control}
-      defaultValue={defaultValue as any}
+      defaultValue={defaultValue as unknown}
       render={({ field }) => (
         <MultiSelect
           {...multiSelectProps}

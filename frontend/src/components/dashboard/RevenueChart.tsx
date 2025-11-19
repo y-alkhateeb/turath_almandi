@@ -17,10 +17,7 @@ interface RevenueChartProps {
   data: RevenueDataPoint[];
 }
 
-const CustomTooltip = ({
-  active,
-  payload,
-}: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
@@ -28,11 +25,7 @@ const CustomTooltip = ({
           {payload[0].payload.month}
         </p>
         {payload.map((entry, index) => (
-          <p
-            key={index}
-            className="text-sm"
-            style={{ color: entry.color }}
-          >
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
             {entry.name}: {formatCurrency(entry.value as number)}
           </p>
         ))}
@@ -51,9 +44,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card className="p-6">
       <div className="border-b border-[var(--border-color)] pb-5 mb-6">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-          الإيرادات والمصروفات
-        </h3>
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">الإيرادات والمصروفات</h3>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           مقارنة شهرية للإيرادات والمصروفات
         </p>
@@ -61,26 +52,12 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-          >
+          <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis
-              dataKey="month"
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-              tickFormatter={formatYAxis}
-            />
+            <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} tickFormatter={formatYAxis} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ fontSize: '14px' }}
-              iconType="circle"
-            />
+            <Legend wrapperStyle={{ fontSize: '14px' }} iconType="circle" />
             <Line
               type="monotone"
               dataKey="revenue"

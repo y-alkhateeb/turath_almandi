@@ -15,10 +15,8 @@ const variantClasses = {
     'bg-brand-gold-500 text-white hover:bg-brand-gold-600 focus:ring-brand-gold-500 disabled:bg-brand-gold-300',
   secondary:
     'bg-brand-green-500 text-white hover:bg-brand-green-600 focus:ring-brand-green-500 disabled:bg-brand-green-300',
-  success:
-    'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300',
-  danger:
-    'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
+  success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300',
+  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
   outline:
     'bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-brand-gold-500 hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-[var(--bg-tertiary)]',
   ghost:

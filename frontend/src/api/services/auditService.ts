@@ -3,7 +3,7 @@
  * Audit log tracking and querying (Admin only)
  *
  * Endpoints:
- * - GET /audit?entityType&entityId&userId&startDate&endDate&page&limit ’ PaginatedResponse<AuditLog>
+ * - GET /audit?entityType&entityId&userId&startDate&endDate&page&limit ï¿½ PaginatedResponse<AuditLog>
  *
  * All types match backend DTOs exactly. No any types.
  * Admin-only access enforced by backend.
@@ -67,9 +67,7 @@ export enum AuditApiEndpoints {
  * @returns PaginatedResponse<AuditLog> with audit records and pagination meta
  * @throws ApiError on 401 (not authenticated), 403 (not admin)
  */
-export const getAll = (
-  filters?: AuditLogQueryFilters,
-): Promise<PaginatedResponse<AuditLog>> => {
+export const getAll = (filters?: AuditLogQueryFilters): Promise<PaginatedResponse<AuditLog>> => {
   return apiClient.get<PaginatedResponse<AuditLog>>({
     url: AuditApiEndpoints.GetAll,
     params: filters,
@@ -95,7 +93,7 @@ export const getAll = (
 export const getEntityHistory = (
   entityType: string,
   entityId: string,
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType' | 'entityId'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType' | 'entityId'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   return getAll({
     ...additionalFilters,
@@ -117,7 +115,7 @@ export const getEntityHistory = (
  */
 export const getUserActions = (
   userId: string,
-  additionalFilters?: Omit<AuditLogQueryFilters, 'userId'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'userId'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   return getAll({
     ...additionalFilters,
@@ -138,7 +136,7 @@ export const getUserActions = (
  */
 export const getByEntityType = (
   entityType: string,
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   return getAll({
     ...additionalFilters,
@@ -161,7 +159,7 @@ export const getByEntityType = (
 export const getByDateRange = (
   startDate: string,
   endDate: string,
-  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   return getAll({
     ...additionalFilters,
@@ -181,7 +179,7 @@ export const getByDateRange = (
  * @throws ApiError on 401, 403
  */
 export const getTodayLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   const today = new Date().toISOString().split('T')[0];
   return getByDateRange(today, today, additionalFilters);
@@ -200,7 +198,7 @@ export const getTodayLogs = (
  */
 export const getRecentLogs = (
   days: number = 7,
-  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   const today = new Date();
   const nDaysAgo = new Date(today);
@@ -209,7 +207,7 @@ export const getRecentLogs = (
   return getByDateRange(
     nDaysAgo.toISOString().split('T')[0],
     today.toISOString().split('T')[0],
-    additionalFilters,
+    additionalFilters
   );
 };
 
@@ -225,7 +223,7 @@ export const getRecentLogs = (
  * @throws ApiError on 401, 403
  */
 export const getAllUnpaginated = (
-  filters?: Omit<AuditLogQueryFilters, 'page' | 'limit'>,
+  filters?: Omit<AuditLogQueryFilters, 'page' | 'limit'>
 ): Promise<AuditLog[]> => {
   return apiClient
     .get<PaginatedResponse<AuditLog>>({
@@ -249,7 +247,7 @@ export const getAllUnpaginated = (
  * @throws ApiError on 401, 403
  */
 export const getTransactionLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   return getByEntityType('TRANSACTION', additionalFilters);
 };
@@ -265,7 +263,7 @@ export const getTransactionLogs = (
  * @throws ApiError on 401, 403
  */
 export const getDebtLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   return getByEntityType('DEBT', additionalFilters);
 };
@@ -281,7 +279,7 @@ export const getDebtLogs = (
  * @throws ApiError on 401, 403
  */
 export const getUserManagementLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>
 ): Promise<PaginatedResponse<AuditLog>> => {
   return getByEntityType('USER', additionalFilters);
 };

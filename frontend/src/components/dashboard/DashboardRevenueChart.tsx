@@ -84,9 +84,7 @@ function EmptyState() {
   return (
     <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
       <div className="border-b border-[var(--border-color)] pb-5 mb-6">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-          الإيرادات والمصروفات
-        </h3>
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">الإيرادات والمصروفات</h3>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           مقارنة شهرية للإيرادات والمصروفات
         </p>
@@ -95,9 +93,7 @@ function EmptyState() {
         <div className="w-16 h-16 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center mb-4">
           <TrendingUp className="w-8 h-8 text-[var(--text-tertiary)]" />
         </div>
-        <p className="text-[var(--text-secondary)] text-center">
-          لا توجد بيانات لعرضها
-        </p>
+        <p className="text-[var(--text-secondary)] text-center">لا توجد بيانات لعرضها</p>
         <p className="text-sm text-[var(--text-tertiary)] text-center mt-1">
           سيتم عرض الإيرادات والمصروفات هنا بعد تسجيل المعاملات
         </p>
@@ -132,11 +128,12 @@ export function DashboardRevenueChart({ data, isLoading }: DashboardRevenueChart
   };
 
   return (
-    <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+    <div
+      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+      dir="rtl"
+    >
       <div className="border-b border-[var(--border-color)] pb-5 mb-6">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-          الإيرادات والمصروفات
-        </h3>
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">الإيرادات والمصروفات</h3>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           مقارنة شهرية للإيرادات والمصروفات
         </p>
@@ -157,10 +154,7 @@ export function DashboardRevenueChart({ data, isLoading }: DashboardRevenueChart
               tickFormatter={formatYAxis}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ fontSize: '14px', fontFamily: 'inherit' }}
-              iconType="circle"
-            />
+            <Legend wrapperStyle={{ fontSize: '14px', fontFamily: 'inherit' }} iconType="circle" />
             <Line
               type="monotone"
               dataKey="revenue"

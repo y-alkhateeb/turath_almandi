@@ -138,7 +138,7 @@ export const userMenuData: NavItem[] = [
  */
 export function getFilteredNavItems(
   items: NavItem[],
-  userRole: UserRole | null | undefined,
+  userRole: UserRole | null | undefined
 ): NavItem[] {
   if (!userRole) return [];
 

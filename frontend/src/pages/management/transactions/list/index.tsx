@@ -19,7 +19,7 @@
  */
 
 import { useCallback } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import {
   useTransactions,
@@ -45,13 +45,7 @@ export default function TransactionsListPage() {
   // FILTERS & PAGINATION STATE
   // ============================================
 
-  const {
-    filters,
-    setFilter,
-    setFilters,
-    setPage,
-    resetFilters,
-  } = useTransactionFilters({
+  const { filters, setFilter: _setFilter, setFilters, setPage, resetFilters } = useTransactionFilters({
     page: 1,
     limit: 20, // Default 20 items per page
   });
@@ -137,7 +131,7 @@ export default function TransactionsListPage() {
         await deleteTransaction.mutateAsync(id);
         // Success toast shown by mutation
         // Queries automatically invalidated by mutation
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by global API interceptor
       }
     },
@@ -210,9 +204,7 @@ export default function TransactionsListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">العمليات المالية</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              إدارة جميع الإيرادات والمصروفات
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">إدارة جميع الإيرادات والمصروفات</p>
           </div>
         </div>
         <ErrorState error={transactionsError} onRetry={handleRetry} />
@@ -231,9 +223,7 @@ export default function TransactionsListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">العمليات المالية</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              إدارة جميع الإيرادات والمصروفات
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">إدارة جميع الإيرادات والمصروفات</p>
           </div>
           <button
             onClick={handleAddNew}
@@ -282,11 +272,7 @@ export default function TransactionsListPage() {
       </div>
 
       {/* Filters */}
-      <TransactionFilters
-        filters={filters}
-        onChange={handleFiltersChange}
-        branches={branches}
-      />
+      <TransactionFilters filters={filters} onChange={handleFiltersChange} branches={branches} />
 
       {/* Transactions List */}
       {transactions.length === 0 ? (

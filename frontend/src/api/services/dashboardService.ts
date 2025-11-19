@@ -66,7 +66,7 @@ export enum DashboardApiEndpoints {
  * @throws ApiError on 401 (not authenticated)
  */
 export const getStats = (
-  filters?: Pick<DashboardQueryFilters, 'branchId' | 'date'>,
+  filters?: Pick<DashboardQueryFilters, 'branchId' | 'date'>
 ): Promise<DashboardStats> => {
   return apiClient.get<DashboardStats>({
     url: DashboardApiEndpoints.GetStats,
@@ -95,7 +95,7 @@ export const getStats = (
  * @throws ApiError on 401 (not authenticated)
  */
 export const getRevenueData = (
-  filters?: Pick<DashboardQueryFilters, 'branchId' | 'startDate' | 'endDate'>,
+  filters?: Pick<DashboardQueryFilters, 'branchId' | 'startDate' | 'endDate'>
 ): Promise<RevenueDataPoint[]> => {
   return apiClient.get<RevenueDataPoint[]>({
     url: DashboardApiEndpoints.GetRevenueData,
@@ -125,7 +125,7 @@ export const getRevenueData = (
  * @throws ApiError on 401 (not authenticated)
  */
 export const getCategoryData = (
-  filters?: Pick<DashboardQueryFilters, 'branchId' | 'startDate' | 'endDate'>,
+  filters?: Pick<DashboardQueryFilters, 'branchId' | 'startDate' | 'endDate'>
 ): Promise<CategoryDataPoint[]> => {
   return apiClient.get<CategoryDataPoint[]>({
     url: DashboardApiEndpoints.GetCategoryData,
@@ -154,7 +154,7 @@ export const getCategoryData = (
  * @throws ApiError on 401 (not authenticated)
  */
 export const getRecentTransactions = (
-  filters?: Pick<DashboardQueryFilters, 'branchId' | 'limit'>,
+  filters?: Pick<DashboardQueryFilters, 'branchId' | 'limit'>
 ): Promise<Transaction[]> => {
   return apiClient.get<Transaction[]>({
     url: DashboardApiEndpoints.GetRecentTransactions,
@@ -186,7 +186,7 @@ export const getRecentTransactions = (
  * @throws ApiError on 401 (not authenticated), 403 (not admin)
  */
 export const getBranchComparison = (
-  filters?: Pick<DashboardQueryFilters, 'startDate' | 'endDate'>,
+  filters?: Pick<DashboardQueryFilters, 'startDate' | 'endDate'>
 ): Promise<BranchPerformance[]> => {
   return apiClient.get<BranchPerformance[]>({
     url: DashboardApiEndpoints.GetBranchComparison,
@@ -250,7 +250,7 @@ export const getCurrentMonthRevenue = (branchId?: string): Promise<RevenueDataPo
  */
 export const getLastNDaysRevenue = (
   days: number = 7,
-  branchId?: string,
+  branchId?: string
 ): Promise<RevenueDataPoint[]> => {
   const today = new Date();
   const nDaysAgo = new Date(today);
@@ -297,7 +297,7 @@ export const getCurrentMonthCategories = (branchId?: string): Promise<CategoryDa
  */
 export const getTopRecentTransactions = (
   limit: number = 5,
-  branchId?: string,
+  branchId?: string
 ): Promise<Transaction[]> => {
   return getRecentTransactions({
     limit,

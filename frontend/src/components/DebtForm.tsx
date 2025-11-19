@@ -115,12 +115,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Branch Selection using reusable BranchSelector component */}
-      <BranchSelector
-        name="branchId"
-        register={register}
-        error={errors.branchId}
-        required
-      />
+      <BranchSelector name="branchId" register={register} error={errors.branchId} required />
 
       <FormInput
         name="creditorName"
@@ -160,14 +155,15 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
-        {errors.date && (
-          <p className="mt-2 text-sm text-red-600">{errors.date.message}</p>
-        )}
+        {errors.date && <p className="mt-2 text-sm text-red-600">{errors.date.message}</p>}
       </div>
 
       {/* Due Date Picker - Note: Uses valueAsDate for Date object conversion */}
       <div>
-        <label htmlFor="dueDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+        <label
+          htmlFor="dueDate"
+          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+        >
           تاريخ الاستحقاق <span className="text-red-500">*</span>
         </label>
         <input
@@ -180,9 +176,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
-        {errors.dueDate && (
-          <p className="mt-2 text-sm text-red-600">{errors.dueDate.message}</p>
-        )}
+        {errors.dueDate && <p className="mt-2 text-sm text-red-600">{errors.dueDate.message}</p>}
         <p className="mt-1 text-xs text-[var(--text-secondary)]">
           تاريخ الاستحقاق يجب أن يكون أكبر من أو يساوي التاريخ
         </p>
@@ -205,9 +199,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
           disabled={isSubmitting || createDebt.isPending}
           className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:bg-[var(--text-secondary)] disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
         >
-          {(isSubmitting || createDebt.isPending) && (
-            <LoadingSpinner size="sm" color="white" />
-          )}
+          {(isSubmitting || createDebt.isPending) && <LoadingSpinner size="sm" color="white" />}
           {isSubmitting || createDebt.isPending ? 'جاري الإضافة...' : 'إضافة دين'}
         </button>
 
@@ -224,9 +216,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
       </div>
 
       {/* Success Message */}
-      {createDebt.isSuccess && (
-        <Alert variant="success">تم إضافة الدين بنجاح</Alert>
-      )}
+      {createDebt.isSuccess && <Alert variant="success">تم إضافة الدين بنجاح</Alert>}
     </form>
   );
 };

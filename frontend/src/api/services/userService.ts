@@ -25,11 +25,8 @@ import type { PaginatedResponse, UserQueryFilters } from '#/api';
  * Centralized endpoint definitions
  */
 export enum UserApiEndpoints {
-  GetAll = '/users',
-  GetOne = '/users/:id',
-  Create = '/users',
-  Update = '/users/:id',
-  Delete = '/users/:id',
+  Base = '/users',
+  ById = '/users/:id',
 }
 
 // ============================================
@@ -46,7 +43,7 @@ export enum UserApiEndpoints {
  */
 export const getAll = (filters?: UserQueryFilters): Promise<PaginatedResponse<User>> => {
   return apiClient.get<PaginatedResponse<User>>({
-    url: UserApiEndpoints.GetAll,
+    url: UserApiEndpoints.Base,
     params: filters,
   });
 };
@@ -59,17 +56,19 @@ export const getAll = (filters?: UserQueryFilters): Promise<PaginatedResponse<Us
  * @throws ApiError on 401 (not authenticated), 403 (not admin)
  */
 export const getAllUnpaginated = (): Promise<User[]> => {
-  return apiClient.get<User[]>({
-    url: UserApiEndpoints.GetAll,
-    params: { limit: 1000 },
-  }).then((response) => {
-    // If backend returns paginated response, extract data array
-    if (response && typeof response === 'object' && 'data' in response) {
-      return (response as PaginatedResponse<User>).data;
-    }
-    // Otherwise assume it's already an array
-    return response as User[];
-  });
+  return apiClient
+    .get<User[]>({
+      url: UserApiEndpoints.Base,
+      params: { limit: 1000 },
+    })
+    .then((response) => {
+      // If backend returns paginated response, extract data array
+      if (response && typeof response === 'object' && 'data' in response) {
+        return (response as PaginatedResponse<User>).data;
+      }
+      // Otherwise assume it's already an array
+      return response as User[];
+    });
 };
 
 /**
@@ -102,7 +101,7 @@ export const getOne = (id: string): Promise<User> => {
  */
 export const create = (data: CreateUserInput): Promise<User> => {
   return apiClient.post<User>({
-    url: UserApiEndpoints.Create,
+    url: UserApiEndpoints.Base,
     data,
   });
 };

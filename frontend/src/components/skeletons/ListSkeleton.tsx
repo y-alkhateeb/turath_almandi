@@ -112,8 +112,8 @@ export function ListSkeleton({ items, variant = 'default' }: ListSkeletonProps) 
     variant === 'compact'
       ? CompactListItemSkeleton
       : variant === 'detailed'
-      ? DetailedListItemSkeleton
-      : DefaultListItemSkeleton;
+        ? DetailedListItemSkeleton
+        : DefaultListItemSkeleton;
 
   return (
     <div className="space-y-3" dir="rtl">

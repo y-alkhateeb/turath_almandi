@@ -80,9 +80,7 @@ export const DebtsPage = () => {
                 aria-label={isExpanded ? 'إخفاء السجل' : 'عرض السجل'}
               >
                 <ChevronRight
-                  className={`w-5 h-5 transition-transform ${
-                    isExpanded ? 'rotate-90' : ''
-                  }`}
+                  className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                 />
               </button>
             )}
@@ -129,7 +127,9 @@ export const DebtsPage = () => {
     {
       key: 'date',
       header: 'التاريخ',
-      render: (debt) => <div className="text-[var(--text-primary)]">{formatDateShort(debt.date)}</div>,
+      render: (debt) => (
+        <div className="text-[var(--text-primary)]">{formatDateShort(debt.date)}</div>
+      ),
     },
     {
       key: 'dueDate',
@@ -147,9 +147,7 @@ export const DebtsPage = () => {
       key: 'status',
       header: 'الحالة',
       render: (debt) => (
-        <Badge variant={getStatusVariant(debt.status)}>
-          {formatStatus(debt.status)}
-        </Badge>
+        <Badge variant={getStatusVariant(debt.status)}>{formatStatus(debt.status)}</Badge>
       ),
     },
     {
@@ -165,11 +163,7 @@ export const DebtsPage = () => {
       render: (debt) => (
         <div className="flex items-center gap-2">
           {debt.status !== DebtStatus.PAID && (
-            <Button
-              variant="success"
-              size="sm"
-              onClick={() => navigate(`/debts/pay/${debt.id}`)}
-            >
+            <Button variant="success" size="sm" onClick={() => navigate(`/debts/pay/${debt.id}`)}>
               دفع
             </Button>
           )}
@@ -221,7 +215,6 @@ export const DebtsPage = () => {
         </Button>
       }
     >
-
       {/* Loading State */}
       {isLoading ? (
         <PageLoading message="جاري تحميل الديون..." />

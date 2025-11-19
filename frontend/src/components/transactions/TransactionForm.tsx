@@ -306,9 +306,7 @@ export function TransactionForm({
       {/* Branch Display - Read-only for accountants */}
       {mode === 'create' && !isAdmin && user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الفرع
-          </label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
           <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>

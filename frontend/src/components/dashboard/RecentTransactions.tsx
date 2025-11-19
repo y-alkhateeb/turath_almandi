@@ -7,9 +7,7 @@ interface RecentTransactionsProps {
   transactions: Transaction[];
 }
 
-export function RecentTransactions({
-  transactions,
-}: RecentTransactionsProps) {
+export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   return (
     <Card className="p-6">
       <div className="border-b border-[var(--border-color)] pb-5 mb-6">
@@ -50,24 +48,16 @@ export function RecentTransactions({
                   {formatDateShort(transaction.date)}
                 </td>
                 <td className="py-3">
-                  <Badge
-                    variant={
-                      transaction.type === 'INCOME' ? 'success' : 'danger'
-                    }
-                  >
+                  <Badge variant={transaction.type === 'INCOME' ? 'success' : 'danger'}>
                     {transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
                   </Badge>
                 </td>
-                <td className="py-3 text-sm text-[var(--text-primary)]">
-                  {transaction.category}
-                </td>
+                <td className="py-3 text-sm text-[var(--text-primary)]">{transaction.category}</td>
                 <td className="py-3">
                   <span
                     className={cn(
                       'text-sm font-medium',
-                      transaction.type === 'INCOME'
-                        ? 'text-green-600'
-                        : 'text-red-600'
+                      transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
                     )}
                   >
                     {transaction.type === 'INCOME' ? '+ ' : '- '}

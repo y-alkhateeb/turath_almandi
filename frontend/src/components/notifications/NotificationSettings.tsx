@@ -15,7 +15,7 @@
  */
 
 import { useState } from 'react';
-import { Bell, BellOff, DollarSign, CheckCircle } from 'lucide-react';
+import { Bell, DollarSign, CheckCircle } from 'lucide-react';
 import { NotificationType, DisplayMethod } from '@/types/enum';
 import type { NotificationSettings, UpdateNotificationSettingsInput, Branch } from '#/entity';
 
@@ -238,9 +238,7 @@ export function NotificationSettings({
                   <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">
                     {typeConfig.label}
                   </h3>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {typeConfig.description}
-                  </p>
+                  <p className="text-sm text-[var(--text-secondary)]">{typeConfig.description}</p>
                 </div>
               </div>
 
@@ -368,15 +366,14 @@ export function NotificationSettings({
                             disabled={isSubmitting}
                             className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                           />
-                          <span className="text-sm text-[var(--text-primary)]">
-                            {branch.name}
-                          </span>
+                          <span className="text-sm text-[var(--text-primary)]">{branch.name}</span>
                         </label>
                       );
                     })}
                   </div>
 
-                  {(typeSetting.selectedBranches?.length === 0 || !typeSetting.selectedBranches) && (
+                  {(typeSetting.selectedBranches?.length === 0 ||
+                    !typeSetting.selectedBranches) && (
                     <p className="mt-2 text-xs text-[var(--text-secondary)]">
                       لم يتم تحديد أي فرع - سيتم إرسال الإشعارات لجميع الفروع
                     </p>

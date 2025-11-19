@@ -45,9 +45,7 @@ const categoryOptions: MultiSelectOption[] = [
 // ============================================
 
 const basicSchema = z.object({
-  branches: z
-    .array(z.string())
-    .min(1, { message: 'يجب اختيار فرع واحد على الأقل' }),
+  branches: z.array(z.string()).min(1, { message: 'يجب اختيار فرع واحد على الأقل' }),
 });
 
 type BasicFormData = z.infer<typeof basicSchema>;
@@ -224,9 +222,7 @@ function MaxSelectionExample() {
         required
       />
 
-      <p className="text-xs text-[var(--text-secondary)]">
-        {selectedCategories.length} / 3 محدد
-      </p>
+      <p className="text-xs text-[var(--text-secondary)]">{selectedCategories.length} / 3 محدد</p>
 
       <button type="submit">حفظ</button>
     </form>
@@ -238,9 +234,7 @@ function MaxSelectionExample() {
 // ============================================
 
 const notificationSettingsSchema = z.object({
-  branches: z
-    .array(z.string())
-    .min(1, { message: 'يجب اختيار فرع واحد على الأقل' }),
+  branches: z.array(z.string()).min(1, { message: 'يجب اختيار فرع واحد على الأقل' }),
   notificationTypes: z
     .array(z.string())
     .min(1, { message: 'يجب اختيار طريقة تنبيه واحدة على الأقل' }),

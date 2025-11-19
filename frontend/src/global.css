@@ -157,7 +157,7 @@
 }
 
 /* Dark mode theme variables */
-[data-theme-mode="dark"] {
+[data-theme-mode='dark'] {
   --color-background: 10, 10, 10;
   --color-foreground: 245, 245, 244;
   --color-card: 28, 25, 23;
@@ -246,12 +246,20 @@
 
   body {
     @apply bg-brand-cream-100 text-gray-900;
-    font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-family:
+      'Cairo',
+      'Tajawal',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  [data-theme-mode="dark"] body {
+  [data-theme-mode='dark'] body {
     @apply bg-gray-950 text-gray-100;
   }
 
@@ -261,7 +269,12 @@
     flex-direction: column;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Cairo', sans-serif;
     font-weight: 700;
     line-height: 1.3;
@@ -285,11 +298,11 @@
     @apply bg-gray-400;
   }
 
-  [data-theme-mode="dark"] ::-webkit-scrollbar-thumb {
+  [data-theme-mode='dark'] ::-webkit-scrollbar-thumb {
     @apply bg-gray-700;
   }
 
-  [data-theme-mode="dark"] ::-webkit-scrollbar-thumb:hover {
+  [data-theme-mode='dark'] ::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-600;
   }
 
@@ -298,7 +311,7 @@
     @apply bg-primary-200 text-primary-900;
   }
 
-  [data-theme-mode="dark"] ::selection {
+  [data-theme-mode='dark'] ::selection {
     @apply bg-primary-800 text-primary-100;
   }
 
@@ -326,7 +339,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  [data-theme-mode="dark"] .card {
+  [data-theme-mode='dark'] .card {
     @apply bg-gray-900 border-brand-gold-600;
   }
 
@@ -343,7 +356,7 @@
     @apply border border-white/40;
   }
 
-  [data-theme-mode="dark"] .glass {
+  [data-theme-mode='dark'] .glass {
     background: rgba(28, 25, 23, 0.85);
     @apply border-gray-700/40;
   }
@@ -377,15 +390,27 @@
 
   /* Gradient Utilities */
   .bg-gradient-brand {
-    background: linear-gradient(135deg, theme('colors.brand.500') 0%, theme('colors.brand.400') 100%);
+    background: linear-gradient(
+      135deg,
+      theme('colors.brand.500') 0%,
+      theme('colors.brand.400') 100%
+    );
   }
 
   .bg-gradient-primary {
-    background: linear-gradient(135deg, theme('colors.primary.500') 0%, theme('colors.primary.400') 100%);
+    background: linear-gradient(
+      135deg,
+      theme('colors.primary.500') 0%,
+      theme('colors.primary.400') 100%
+    );
   }
 
   .bg-gradient-success {
-    background: linear-gradient(135deg, theme('colors.success.500') 0%, theme('colors.success.400') 100%);
+    background: linear-gradient(
+      135deg,
+      theme('colors.success.500') 0%,
+      theme('colors.success.400') 100%
+    );
   }
 
   /* Loading Skeleton */
@@ -401,7 +426,7 @@
     @apply rounded;
   }
 
-  [data-theme-mode="dark"] .skeleton {
+  [data-theme-mode='dark'] .skeleton {
     background: linear-gradient(
       90deg,
       theme('colors.gray.800') 25%,
@@ -412,11 +437,11 @@
   }
 
   /* RTL Utilities */
-  [dir="rtl"] .rtl\:text-right {
+  [dir='rtl'] .rtl\:text-right {
     text-align: right;
   }
 
-  [dir="ltr"] .ltr\:text-left {
+  [dir='ltr'] .ltr\:text-left {
     text-align: left;
   }
 }

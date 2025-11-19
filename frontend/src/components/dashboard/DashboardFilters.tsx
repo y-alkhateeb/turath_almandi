@@ -65,11 +65,7 @@ const getQuickDateOptions = (): QuickDateOption[] => {
 // COMPONENT
 // ============================================
 
-export function DashboardFilters({
-  filters,
-  branches,
-  onChange,
-}: DashboardFiltersProps) {
+export function DashboardFilters({ filters, branches: _branches, onChange }: DashboardFiltersProps) {
   const { isAdmin } = useAuth();
   const quickDateOptions = getQuickDateOptions();
 
@@ -108,16 +104,22 @@ export function DashboardFilters({
   };
 
   // Check if any filters are active
-  const hasActiveFilters = !!(filters.branchId || filters.date || filters.startDate || filters.endDate);
+  const hasActiveFilters = !!(
+    filters.branchId ||
+    filters.date ||
+    filters.startDate ||
+    filters.endDate
+  );
 
   return (
-    <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+    <div
+      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+      dir="rtl"
+    >
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-            الفلاتر
-          </h3>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">الفلاتر</h3>
           {hasActiveFilters && (
             <button
               onClick={handleClearFilters}

@@ -71,9 +71,7 @@ export function BranchList({
           <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
             <MapPin className="w-4 h-4 text-primary-600" />
           </div>
-          <span className="font-medium text-[var(--text-primary)]">
-            {branch.name}
-          </span>
+          <span className="font-medium text-[var(--text-primary)]">{branch.name}</span>
         </div>
       ),
     },

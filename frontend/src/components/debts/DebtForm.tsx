@@ -11,7 +11,6 @@
  * - Strict typing matching backend DTOs
  */
 
-import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -101,16 +100,10 @@ const currencyOptions: SelectOption[] = [
 // COMPONENT
 // ============================================
 
-export function DebtForm({
-  mode,
-  onSubmit,
-  onCancel,
-  isSubmitting,
-}: DebtFormProps) {
+export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: DebtFormProps) {
   const { user, isAdmin } = useAuth();
 
   const {
-    register,
     control,
     handleSubmit,
     formState: { errors },
@@ -191,22 +184,22 @@ export function DebtForm({
         <Controller
           name="branchId"
           control={control}
-          render={({ field }) => (
-            <BranchSelector
-              value={field.value || null}
-              onChange={field.onChange}
-              disabled={isSubmitting}
-            />
-          )}
+          render={({ field }) => {
+            return (
+              <BranchSelector
+                value={field.value || null}
+                onChange={field.onChange}
+                disabled={isSubmitting}
+              />
+            );
+          }}
         />
       )}
 
       {/* Branch Display - Read-only for accountants */}
       {!isAdmin && user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الفرع
-          </label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
           <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>

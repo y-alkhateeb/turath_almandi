@@ -3,20 +3,17 @@
  * For handling hierarchical data (e.g., navigation menus)
  */
 
-export interface TreeNode<T = any> {
+export interface TreeNode<T = unknown> {
   id: string | number;
   parentId?: string | number | null;
   children?: TreeNode<T>[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
  * Flatten a tree structure into an array
  */
-export function flattenTree<T extends TreeNode>(
-  tree: T[],
-  result: T[] = []
-): T[] {
+export function flattenTree<T extends TreeNode>(tree: T[], result: T[] = []): T[] {
   tree.forEach((node) => {
     const { children, ...rest } = node;
     result.push(rest as T);
@@ -45,10 +42,7 @@ export function arrayToTree<T extends TreeNode>(
 /**
  * Find a node in tree by id
  */
-export function findNodeById<T extends TreeNode>(
-  tree: T[],
-  id: string | number
-): T | null {
+export function findNodeById<T extends TreeNode>(tree: T[], id: string | number): T | null {
   for (const node of tree) {
     if (node.id === id) {
       return node;
@@ -66,10 +60,7 @@ export function findNodeById<T extends TreeNode>(
 /**
  * Find a node in tree by predicate function
  */
-export function findNode<T extends TreeNode>(
-  tree: T[],
-  predicate: (node: T) => boolean
-): T | null {
+export function findNode<T extends TreeNode>(tree: T[], predicate: (node: T) => boolean): T | null {
   for (const node of tree) {
     if (predicate(node)) {
       return node;
@@ -87,10 +78,7 @@ export function findNode<T extends TreeNode>(
 /**
  * Get all ancestors of a node
  */
-export function getAncestors<T extends TreeNode>(
-  tree: T[],
-  id: string | number
-): T[] {
+export function getAncestors<T extends TreeNode>(tree: T[], id: string | number): T[] {
   const ancestors: T[] = [];
 
   function findAncestors(nodes: T[], targetId: string | number): boolean {
@@ -146,10 +134,7 @@ export function mapTree<T extends TreeNode, R extends TreeNode>(
 /**
  * Filter tree nodes
  */
-export function filterTree<T extends TreeNode>(
-  tree: T[],
-  predicate: (node: T) => boolean
-): T[] {
+export function filterTree<T extends TreeNode>(tree: T[], predicate: (node: T) => boolean): T[] {
   return tree.reduce((acc, node) => {
     if (predicate(node)) {
       const filtered = { ...node };
@@ -170,10 +155,7 @@ export function filterTree<T extends TreeNode>(
 /**
  * Sort tree nodes
  */
-export function sortTree<T extends TreeNode>(
-  tree: T[],
-  compareFn: (a: T, b: T) => number
-): T[] {
+export function sortTree<T extends TreeNode>(tree: T[], compareFn: (a: T, b: T) => number): T[] {
   const sorted = [...tree].sort(compareFn);
   return sorted.map((node) => {
     if (node.children && node.children.length > 0) {

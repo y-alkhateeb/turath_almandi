@@ -18,7 +18,7 @@ export default function TransactionsPage() {
 
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
 
-  const { data, isLoading, error, refetch } = useTransactions(filters);
+  const { data, isLoading, refetch } = useTransactions(filters);
   const deleteTransaction = useDeleteTransaction();
 
   const handleView = (transaction: Transaction) => {
@@ -39,7 +39,7 @@ export default function TransactionsPage() {
     try {
       await deleteTransaction.mutateAsync(deletingTransaction.id);
       setDeletingTransaction(null);
-    } catch (error) {
+    } catch (_error) {
       // Error is handled in the hook
     }
   };
@@ -63,7 +63,6 @@ export default function TransactionsPage() {
     <PageLayout
       title="إدارة العمليات المالية"
       description="عرض وإدارة جميع الإيرادات والمصروفات"
-      error={error}
       onRetry={() => refetch()}
       actions={
         <Button onClick={() => navigate('/income/create')}>

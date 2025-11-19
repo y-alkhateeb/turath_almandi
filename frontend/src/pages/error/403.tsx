@@ -21,11 +21,10 @@ export default function Page403() {
           />
         </div>
         <h1 className="text-6xl font-bold text-[var(--text-primary)] mb-4">403</h1>
-        <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">
-          ممنوع الوصول
-        </h2>
+        <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-4">ممنوع الوصول</h2>
         <p className="text-[var(--text-secondary)] mb-8 max-w-md mx-auto">
-          عذراً، ليس لديك صلاحية الوصول إلى هذه الصفحة. يرجى التواصل مع المسؤول إذا كنت تعتقد أن هذا خطأ.
+          عذراً، ليس لديك صلاحية الوصول إلى هذه الصفحة. يرجى التواصل مع المسؤول إذا كنت تعتقد أن هذا
+          خطأ.
         </p>
         <div className="flex gap-4 justify-center">
           <Button onClick={() => router.back()}>

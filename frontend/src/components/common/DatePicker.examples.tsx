@@ -78,13 +78,7 @@ function SimpleExample() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FormDatePicker
-        name="date"
-        control={control}
-        error={errors.date}
-        label="التاريخ"
-        required
-      />
+      <FormDatePicker name="date" control={control} error={errors.date} label="التاريخ" required />
       <button type="submit">إرسال</button>
     </form>
   );
@@ -228,21 +222,15 @@ const reportSchema = z.object({
   startDate: z
     .string()
     .optional()
-    .refine(
-      (date) => !date || !isNaN(Date.parse(date)),
-      {
-        message: 'التاريخ غير صالح',
-      }
-    ),
+    .refine((date) => !date || !isNaN(Date.parse(date)), {
+      message: 'التاريخ غير صالح',
+    }),
   endDate: z
     .string()
     .optional()
-    .refine(
-      (date) => !date || !isNaN(Date.parse(date)),
-      {
-        message: 'التاريخ غير صالح',
-      }
-    ),
+    .refine((date) => !date || !isNaN(Date.parse(date)), {
+      message: 'التاريخ غير صالح',
+    }),
 });
 
 type ReportFormData = z.infer<typeof reportSchema>;

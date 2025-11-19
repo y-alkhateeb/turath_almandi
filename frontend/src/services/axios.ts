@@ -18,7 +18,7 @@ const axiosInstance = axios.create({
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 });
 
@@ -84,7 +84,9 @@ axiosInstance.interceptors.response.use(
 
     // Handle 403 Forbidden
     if (error.response?.status === 403) {
-      const errorMessage = (error.response?.data as any)?.message || 'Access denied. Insufficient permissions.';
+      const errorMessage =
+        (error.response?.data as { message?: string })?.message ||
+        'Access denied. Insufficient permissions.';
 
       // Dynamically import toast to avoid circular dependencies
       import('../utils/toast').then(({ toast }) => {

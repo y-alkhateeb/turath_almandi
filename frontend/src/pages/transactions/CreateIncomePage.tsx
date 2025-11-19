@@ -33,10 +33,7 @@ export const CreateIncomePage = () => {
     >
       {/* Form Card */}
       <Card padding="lg">
-        <IncomeForm
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-        />
+        <IncomeForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </Card>
     </PageLayout>
   );

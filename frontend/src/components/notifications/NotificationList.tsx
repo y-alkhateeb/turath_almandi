@@ -144,9 +144,7 @@ export function NotificationList({
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
           <CheckCircle className="w-8 h-8 text-green-500" />
         </div>
-        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-          لا توجد إشعارات
-        </h3>
+        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">لا توجد إشعارات</h3>
         <p className="text-sm text-[var(--text-secondary)]">
           جميع الإشعارات تم قراءتها أو لا توجد إشعارات جديدة
         </p>
@@ -175,7 +173,10 @@ export function NotificationList({
       <div className="space-y-3">
         {notifications.map((notification) => {
           const { icon: Icon, colorClass, bgClass } = getSeverityStyle(notification.severity);
-          const relatedPath = getRelatedEntityPath(notification.relatedType, notification.relatedId);
+          const relatedPath = getRelatedEntityPath(
+            notification.relatedType,
+            notification.relatedId
+          );
 
           return (
             <div
@@ -205,7 +206,9 @@ export function NotificationList({
                   {/* Title */}
                   <h4
                     className={`text-base font-semibold mb-1 ${
-                      notification.isRead ? 'text-[var(--text-secondary)]' : 'text-[var(--text-primary)]'
+                      notification.isRead
+                        ? 'text-[var(--text-secondary)]'
+                        : 'text-[var(--text-primary)]'
                     }`}
                   >
                     {notification.title}
@@ -214,7 +217,9 @@ export function NotificationList({
                   {/* Message */}
                   <p
                     className={`text-sm mb-2 ${
-                      notification.isRead ? 'text-[var(--text-tertiary)]' : 'text-[var(--text-secondary)]'
+                      notification.isRead
+                        ? 'text-[var(--text-tertiary)]'
+                        : 'text-[var(--text-secondary)]'
                     }`}
                   >
                     {notification.message}

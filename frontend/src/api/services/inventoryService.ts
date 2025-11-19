@@ -14,15 +14,8 @@
  */
 
 import apiClient from '../apiClient';
-import type {
-  InventoryItem,
-  CreateInventoryInput,
-  UpdateInventoryInput,
-} from '#/entity';
-import type {
-  PaginatedResponse,
-  InventoryQueryFilters,
-} from '#/api';
+import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '#/entity';
+import type { PaginatedResponse, InventoryQueryFilters } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -33,12 +26,9 @@ import type {
  * Centralized endpoint definitions
  */
 export enum InventoryApiEndpoints {
-  GetAll = '/inventory',
-  GetOne = '/inventory/:id',
-  Create = '/inventory',
-  Update = '/inventory/:id',
-  Delete = '/inventory/:id',
-  GetValue = '/inventory/value',
+  Base = '/inventory',
+  ById = '/inventory/:id',
+  Value = '/inventory/value',
 }
 
 // ============================================
@@ -68,10 +58,10 @@ export enum InventoryApiEndpoints {
  * @throws ApiError on 401 (not authenticated)
  */
 export const getAll = (
-  filters?: InventoryQueryFilters,
+  filters?: InventoryQueryFilters
 ): Promise<PaginatedResponse<InventoryItem>> => {
   return apiClient.get<PaginatedResponse<InventoryItem>>({
-    url: InventoryApiEndpoints.GetAll,
+    url: InventoryApiEndpoints.Base,
     params: filters,
   });
 };
@@ -120,7 +110,7 @@ export const getOne = (id: string): Promise<InventoryItem> => {
  */
 export const create = (data: CreateInventoryInput): Promise<InventoryItem> => {
   return apiClient.post<InventoryItem>({
-    url: InventoryApiEndpoints.Create,
+    url: InventoryApiEndpoints.Base,
     data,
   });
 };
@@ -195,7 +185,7 @@ export const deleteInventory = (id: string): Promise<void> => {
  */
 export const getValue = (branchId?: string): Promise<number> => {
   return apiClient.get<number>({
-    url: InventoryApiEndpoints.GetValue,
+    url: InventoryApiEndpoints.Value,
     params: branchId ? { branchId } : undefined,
   });
 };
@@ -216,11 +206,11 @@ export const getValue = (branchId?: string): Promise<number> => {
  * @throws ApiError on 401
  */
 export const getAllUnpaginated = (
-  filters?: Omit<InventoryQueryFilters, 'page' | 'limit'>,
+  filters?: Omit<InventoryQueryFilters, 'page' | 'limit'>
 ): Promise<InventoryItem[]> => {
   return apiClient
     .get<PaginatedResponse<InventoryItem>>({
-      url: InventoryApiEndpoints.GetAll,
+      url: InventoryApiEndpoints.Base,
       params: { ...filters, limit: 10000 },
     })
     .then((response) => {
@@ -240,7 +230,7 @@ export const getAllUnpaginated = (
  * @throws ApiError on 401
  */
 export const getManualItems = (
-  filters?: Omit<InventoryQueryFilters, 'autoAdded'>,
+  filters?: Omit<InventoryQueryFilters, 'autoAdded'>
 ): Promise<PaginatedResponse<InventoryItem>> => {
   return getAll({
     ...filters,
@@ -259,7 +249,7 @@ export const getManualItems = (
  * @throws ApiError on 401
  */
 export const getAutoItems = (
-  filters?: Omit<InventoryQueryFilters, 'autoAdded'>,
+  filters?: Omit<InventoryQueryFilters, 'autoAdded'>
 ): Promise<PaginatedResponse<InventoryItem>> => {
   return getAll({
     ...filters,
@@ -280,7 +270,7 @@ export const getAutoItems = (
  */
 export const getByUnit = (
   unit: string,
-  filters?: Omit<InventoryQueryFilters, 'unit'>,
+  filters?: Omit<InventoryQueryFilters, 'unit'>
 ): Promise<PaginatedResponse<InventoryItem>> => {
   return getAll({
     ...filters,
@@ -302,7 +292,7 @@ export const getByUnit = (
  */
 export const getLowStock = (
   threshold: number = 10,
-  filters?: Omit<InventoryQueryFilters, 'page' | 'limit'>,
+  filters?: Omit<InventoryQueryFilters, 'page' | 'limit'>
 ): Promise<InventoryItem[]> => {
   return getAllUnpaginated(filters).then((items) => {
     return items.filter((item) => item.quantity < threshold);

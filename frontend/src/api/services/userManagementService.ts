@@ -8,18 +8,15 @@ import type { UserWithBranch, CreateUserInput, UpdateUserInput } from '#/entity'
 
 // API endpoints enum
 export enum UserManagementApi {
-  GetAll = '/users',
-  GetOne = '/users/:id',
-  Create = '/users',
-  Update = '/users/:id',
+  Base = '/users',
+  ById = '/users/:id',
   AssignBranch = '/users/:id/assign-branch',
-  Delete = '/users/:id',
 }
 
 // Get all users
 export const getAll = () =>
   apiClient.get<UserWithBranch[]>({
-    url: UserManagementApi.GetAll,
+    url: UserManagementApi.Base,
   });
 
 // Get single user by ID
@@ -31,7 +28,7 @@ export const getOne = (id: string) =>
 // Create new user
 export const create = (data: CreateUserInput) =>
   apiClient.post<UserWithBranch>({
-    url: UserManagementApi.Create,
+    url: UserManagementApi.Base,
     data,
   });
 

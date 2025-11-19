@@ -100,12 +100,7 @@ const getLowStockIndicator = (item: InventoryItem): React.ReactNode => {
 // COMPONENT
 // ============================================
 
-export function InventoryList({
-  items,
-  isLoading,
-  onEdit,
-  onDelete,
-}: InventoryListProps) {
+export function InventoryList({ items, isLoading, onEdit, onDelete }: InventoryListProps) {
   // Define table columns
   const columns: Column<InventoryItem>[] = [
     {
@@ -116,9 +111,7 @@ export function InventoryList({
         <div>
           <div className="flex items-center gap-2">
             <Package className="w-4 h-4 text-[var(--text-secondary)]" />
-            <span className="font-medium text-[var(--text-primary)]">
-              {item.name}
-            </span>
+            <span className="font-medium text-[var(--text-primary)]">{item.name}</span>
           </div>
           {getAutoAddedBadge(item.autoAdded)}
           {getLowStockIndicator(item)}
@@ -146,9 +139,7 @@ export function InventoryList({
       width: '100px',
       align: 'center',
       render: (item) => (
-        <span className="text-sm text-[var(--text-secondary)]">
-          {getUnitLabel(item.unit)}
-        </span>
+        <span className="text-sm text-[var(--text-secondary)]">{getUnitLabel(item.unit)}</span>
       ),
     },
     {
@@ -156,9 +147,7 @@ export function InventoryList({
       header: 'سعر الوحدة',
       width: '120px',
       align: 'right',
-      render: (item) => (
-        <span className="text-sm">{formatCurrency(item.costPerUnit)}</span>
-      ),
+      render: (item) => <span className="text-sm">{formatCurrency(item.costPerUnit)}</span>,
     },
     {
       key: 'totalCost',

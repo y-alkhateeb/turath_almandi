@@ -95,15 +95,9 @@ export function Alert({
       role="alert"
     >
       <div className="flex">
-        <div className={`flex-shrink-0 ${styles.icon}`}>
-          {icon || defaultIcons[variant]}
-        </div>
+        <div className={`flex-shrink-0 ${styles.icon}`}>{icon || defaultIcons[variant]}</div>
         <div className="mr-3 flex-1">
-          {title && (
-            <h3 className={`text-sm font-medium mb-1 ${styles.title}`}>
-              {title}
-            </h3>
-          )}
+          {title && <h3 className={`text-sm font-medium mb-1 ${styles.title}`}>{title}</h3>}
           <div className={`text-sm ${styles.text}`}>{children}</div>
         </div>
         {onClose && (

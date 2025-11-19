@@ -45,11 +45,7 @@ import { ApiError } from '@/api/apiClient';
  * const { data: activeBranches } = useBranches({ isActive: true });
  * ```
  */
-export const useBranches = (
-  options?: {
-    isActive?: boolean;
-  },
-) => {
+export const useBranches = (options?: { isActive?: boolean }) => {
   const { user, isAccountant } = useAuth();
 
   // For accountants, default to showing only active branches
@@ -105,7 +101,7 @@ export const useBranch = (
   id: string,
   options?: {
     enabled?: boolean;
-  },
+  }
 ) => {
   return useQuery<Branch, ApiError>({
     queryKey: queryKeys.branches.detail(id),
@@ -161,24 +157,21 @@ export const useCreateBranch = () => {
       });
 
       // Optimistically update all branch lists
-      queryClient.setQueriesData<Branch[]>(
-        { queryKey: queryKeys.branches.all },
-        (old) => {
-          if (!old) return old;
+      queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
+        if (!old) return old;
 
-          // Create temporary branch with optimistic ID
-          const tempBranch: Branch = {
-            id: `temp-${Date.now()}`,
-            name: newBranch.name,
-            location: newBranch.location || null,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
+        // Create temporary branch with optimistic ID
+        const tempBranch: Branch = {
+          id: `temp-${Date.now()}`,
+          name: newBranch.name,
+          location: newBranch.location || null,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
 
-          return [tempBranch, ...old];
-        },
-      );
+        return [tempBranch, ...old];
+      });
 
       return { previousBranches };
     },
@@ -225,11 +218,7 @@ export const useCreateBranch = () => {
 export const useUpdateBranch = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    Branch,
-    ApiError,
-    { id: string; data: UpdateBranchInput }
-  >({
+  return useMutation<Branch, ApiError, { id: string; data: UpdateBranchInput }>({
     mutationFn: ({ id, data }) => branchService.update(id, data),
 
     // Optimistic update
@@ -239,35 +228,25 @@ export const useUpdateBranch = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.branches.detail(id) });
 
       // Snapshot current data
-      const previousBranch = queryClient.getQueryData<Branch>(
-        queryKeys.branches.detail(id),
-      );
+      const previousBranch = queryClient.getQueryData<Branch>(queryKeys.branches.detail(id));
       const previousBranches = queryClient.getQueriesData<Branch[]>({
         queryKey: queryKeys.branches.all,
       });
 
       // Optimistically update branch detail
-      queryClient.setQueryData<Branch>(
-        queryKeys.branches.detail(id),
-        (old) => {
-          if (!old) return old;
-          return { ...old, ...data, updatedAt: new Date().toISOString() };
-        },
-      );
+      queryClient.setQueryData<Branch>(queryKeys.branches.detail(id), (old) => {
+        if (!old) return old;
+        return { ...old, ...data, updatedAt: new Date().toISOString() };
+      });
 
       // Optimistically update branch in all lists
-      queryClient.setQueriesData<Branch[]>(
-        { queryKey: queryKeys.branches.all },
-        (old) => {
-          if (!old) return old;
+      queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
+        if (!old) return old;
 
-          return old.map((branch) =>
-            branch.id === id
-              ? { ...branch, ...data, updatedAt: new Date().toISOString() }
-              : branch,
-          );
-        },
-      );
+        return old.map((branch) =>
+          branch.id === id ? { ...branch, ...data, updatedAt: new Date().toISOString() } : branch
+        );
+      });
 
       return { previousBranch, previousBranches };
     },
@@ -333,13 +312,10 @@ export const useDeleteBranch = () => {
       });
 
       // Optimistically remove branch from all lists
-      queryClient.setQueriesData<Branch[]>(
-        { queryKey: queryKeys.branches.all },
-        (old) => {
-          if (!old) return old;
-          return old.filter((branch) => branch.id !== deletedId);
-        },
-      );
+      queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
+        if (!old) return old;
+        return old.filter((branch) => branch.id !== deletedId);
+      });
 
       // Remove branch detail from cache
       queryClient.removeQueries({

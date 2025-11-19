@@ -79,9 +79,7 @@ export function DashboardRecentTransactions({
                     {formatDateShort(transaction.date)}
                   </td>
                   <td className="py-3">
-                    <Badge
-                      variant={transaction.type === 'INCOME' ? 'success' : 'destructive'}
-                    >
+                    <Badge variant={transaction.type === 'INCOME' ? 'success' : 'destructive'}>
                       {transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
                     </Badge>
                   </td>

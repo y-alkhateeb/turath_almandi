@@ -33,10 +33,7 @@ export const CreateInventoryPage = () => {
     >
       {/* Form Card */}
       <Card padding="lg">
-        <InventoryForm
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-        />
+        <InventoryForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </Card>
     </PageLayout>
   );

@@ -40,7 +40,7 @@ export class ApiError extends Error {
     message: string | string[],
     error: string,
     timestamp?: string,
-    path?: string,
+    path?: string
   ) {
     // Handle array of messages (validation errors)
     const errorMessage = Array.isArray(message) ? message.join(', ') : message;
@@ -121,7 +121,7 @@ export class ApiError extends Error {
         data?.message || error.message,
         data?.error || 'Error',
         data?.timestamp,
-        data?.path || error.config?.url,
+        data?.path || error.config?.url
       );
     }
 
@@ -132,7 +132,7 @@ export class ApiError extends Error {
         'فشل الاتصال بالخادم. تحقق من اتصالك بالإنترنت.',
         'NetworkError',
         new Date().toISOString(),
-        error.config?.url,
+        error.config?.url
       );
     }
 
@@ -141,7 +141,7 @@ export class ApiError extends Error {
       0,
       error.message || 'حدث خطأ غير متوقع',
       'RequestError',
-      new Date().toISOString(),
+      new Date().toISOString()
     );
   }
 }
@@ -304,7 +304,7 @@ axiosInstance.interceptors.request.use(
   },
   (error: AxiosError): Promise<never> => {
     return Promise.reject(ApiError.fromAxiosError(error));
-  },
+  }
 );
 
 // ============================================
@@ -388,7 +388,7 @@ axiosInstance.interceptors.response.use(
         // Call refresh endpoint
         const refreshResponse = await axios.post<RefreshTokenResponse>(
           `${GLOBAL_CONFIG.apiBaseUrl}/auth/refresh`,
-          { refresh_token: refreshToken },
+          { refresh_token: refreshToken }
         );
 
         const { access_token, refresh_token: newRefreshToken } = refreshResponse.data;
@@ -427,7 +427,7 @@ axiosInstance.interceptors.response.use(
         // Refresh failed - clear auth and redirect to login
         processQueue(
           refreshError instanceof Error ? refreshError : new Error('Token refresh failed'),
-          null,
+          null
         );
         isRefreshing = false;
 
@@ -449,7 +449,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(apiError);
-  },
+  }
 );
 
 // ============================================

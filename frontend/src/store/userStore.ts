@@ -92,29 +92,26 @@ const initialState: UserStoreState = {
 // STORAGE HELPERS
 // ============================================
 
-/**
- * Determine which storage to use based on current state
- * Priority: Check where data currently exists, then use rememberMe preference
- */
-const getStorageByPreference = (rememberMe: boolean): Storage => {
-  // Check if data exists in sessionStorage
-  const hasSessionData = sessionStorage.getItem('auth-storage') !== null;
-  // Check if data exists in localStorage
-  const hasLocalData = localStorage.getItem('auth-storage') !== null;
-
-  // If data exists in sessionStorage and not in localStorage, user is in session-only mode
-  if (hasSessionData && !hasLocalData) {
-    return sessionStorage;
-  }
-
-  // If data exists in localStorage, user has Remember Me enabled
-  if (hasLocalData) {
-    return localStorage;
-  }
-
-  // No existing data - use preference from login
-  return rememberMe ? localStorage : sessionStorage;
-};
+// Storage preference helper - not currently used but kept for potential future use
+// const getStorageByPreference = (rememberMe: boolean): Storage => {
+//   // Check if data exists in sessionStorage
+//   const hasSessionData = sessionStorage.getItem('auth-storage') !== null;
+//   // Check if data exists in localStorage
+//   const hasLocalData = localStorage.getItem('auth-storage') !== null;
+//
+//   // If data exists in sessionStorage and not in localStorage, user is in session-only mode
+//   if (hasSessionData && !hasLocalData) {
+//     return sessionStorage;
+//   }
+//
+//   // If data exists in localStorage, user has Remember Me enabled
+//   if (hasLocalData) {
+//     return localStorage;
+//   }
+//
+//   // No existing data - use preference from login
+//   return rememberMe ? localStorage : sessionStorage;
+// };
 
 /**
  * Migrate data between storages when rememberMe changes
@@ -257,8 +254,8 @@ const useUserStore = create<UserStore>()(
        * Version for migrations (future-proofing)
        */
       version: 1,
-    },
-  ),
+    }
+  )
 );
 
 // ============================================

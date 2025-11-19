@@ -24,13 +24,7 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <ThemeProvider>
           <App />
-          <Toaster
-            position="top-center"
-            dir="rtl"
-            richColors
-            closeButton
-            duration={4000}
-          />
+          <Toaster position="top-center" dir="rtl" richColors closeButton duration={4000} />
         </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>

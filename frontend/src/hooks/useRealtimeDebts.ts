@@ -80,8 +80,7 @@ export const useRealtimeDebts = () => {
       // Show notification if:
       // - Admin (sees all debts)
       // - Accountant in the same branch
-      const shouldNotify =
-        isAdmin || (isAccountant && user?.branchId === payload.branchId);
+      const shouldNotify = isAdmin || (isAccountant && user?.branchId === payload.branchId);
 
       if (shouldNotify) {
         toast.info('💳 دين جديد', {
@@ -92,7 +91,7 @@ export const useRealtimeDebts = () => {
 
       console.log('[Realtime] Debt created:', payload);
     },
-    [isAdmin, isAccountant, user?.branchId],
+    [isAdmin, isAccountant, user?.branchId]
   );
 
   /**
@@ -104,8 +103,7 @@ export const useRealtimeDebts = () => {
       // Show notification if:
       // - Admin (sees all debts)
       // - Accountant in the same branch
-      const shouldNotify =
-        isAdmin || (isAccountant && user?.branchId === payload.branchId);
+      const shouldNotify = isAdmin || (isAccountant && user?.branchId === payload.branchId);
 
       if (shouldNotify) {
         const formattedAmount = formatCurrency(payload.amountPaid);
@@ -117,7 +115,7 @@ export const useRealtimeDebts = () => {
 
       console.log('[Realtime] Debt paid:', payload);
     },
-    [isAdmin, isAccountant, user?.branchId],
+    [isAdmin, isAccountant, user?.branchId]
   );
 
   /**
@@ -129,8 +127,7 @@ export const useRealtimeDebts = () => {
       // Show notification if:
       // - Admin (sees all debts)
       // - Accountant in the same branch
-      const shouldNotify =
-        isAdmin || (isAccountant && user?.branchId === payload.branchId);
+      const shouldNotify = isAdmin || (isAccountant && user?.branchId === payload.branchId);
 
       if (shouldNotify) {
         toast.info('📝 تم تحديث دين', {
@@ -141,7 +138,7 @@ export const useRealtimeDebts = () => {
 
       console.log('[Realtime] Debt updated:', payload);
     },
-    [isAdmin, isAccountant, user?.branchId],
+    [isAdmin, isAccountant, user?.branchId]
   );
 
   // Subscribe to debt events
@@ -168,9 +165,7 @@ export const useRealtimeDebts = () => {
  * }
  * ```
  */
-export const useRealtimeDebtCreated = (
-  handler?: (payload: DebtCreatedPayload) => void,
-) => {
+export const useRealtimeDebtCreated = (handler?: (payload: DebtCreatedPayload) => void) => {
   useWebSocketEvent('debt:created', handler);
 };
 
@@ -193,9 +188,7 @@ export const useRealtimeDebtCreated = (
  * }
  * ```
  */
-export const useRealtimeDebtPaid = (
-  handler?: (payload: DebtPaidPayload) => void,
-) => {
+export const useRealtimeDebtPaid = (handler?: (payload: DebtPaidPayload) => void) => {
   useWebSocketEvent('debt:paid', handler);
 };
 
@@ -216,9 +209,7 @@ export const useRealtimeDebtPaid = (
  * }
  * ```
  */
-export const useRealtimeDebtUpdated = (
-  handler?: (payload: DebtUpdatedPayload) => void,
-) => {
+export const useRealtimeDebtUpdated = (handler?: (payload: DebtUpdatedPayload) => void) => {
   useWebSocketEvent('debt:updated', handler);
 };
 
@@ -245,27 +236,21 @@ export const useOverdueDebtAlerts = () => {
   // Only enable for admins and accountants
   const shouldMonitor = isAdmin || isAccountant;
 
-  const handleDebtCreated = useCallback(
-    (payload: DebtCreatedPayload) => {
-      // Overdue logic should be handled by backend
-      // Backend should send notification:created events for overdue debts
-      console.log('[Overdue Monitor] New debt created:', payload);
-    },
-    [],
-  );
+  const handleDebtCreated = useCallback((payload: DebtCreatedPayload) => {
+    if (!shouldMonitor) return;
+    // Overdue logic should be handled by backend
+    // Backend should send notification:created events for overdue debts
+    console.log('[Overdue Monitor] New debt created:', payload);
+  }, [shouldMonitor]);
 
-  const handleDebtUpdated = useCallback(
-    (payload: DebtUpdatedPayload) => {
-      // Overdue logic should be handled by backend
-      // Backend should send notification:created events for overdue debts
-      console.log('[Overdue Monitor] Debt updated:', payload);
-    },
-    [],
-  );
+  const handleDebtUpdated = useCallback((payload: DebtUpdatedPayload) => {
+    if (!shouldMonitor) return;
+    // Overdue logic should be handled by backend
+    // Backend should send notification:created events for overdue debts
+    console.log('[Overdue Monitor] Debt updated:', payload);
+  }, [shouldMonitor]);
 
-  // Only subscribe if user has permission
-  if (shouldMonitor) {
-    useWebSocketEvent('debt:created', handleDebtCreated);
-    useWebSocketEvent('debt:updated', handleDebtUpdated);
-  }
+  // Always call hooks, but handlers check permission internally
+  useWebSocketEvent('debt:created', handleDebtCreated);
+  useWebSocketEvent('debt:updated', handleDebtUpdated);
 };

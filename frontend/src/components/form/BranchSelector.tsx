@@ -63,9 +63,7 @@ export function BranchSelector<T extends FieldValues>({
   if (user?.branch) {
     return (
       <div className={`mb-4 ${className}`}>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-          الفرع
-        </label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
         <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
           {user.branch.name}
         </div>

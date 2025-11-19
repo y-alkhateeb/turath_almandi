@@ -33,10 +33,7 @@ export const CreateDebtPage = () => {
     >
       {/* Form Card */}
       <Card padding="lg">
-        <DebtForm
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-        />
+        <DebtForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </Card>
     </PageLayout>
   );

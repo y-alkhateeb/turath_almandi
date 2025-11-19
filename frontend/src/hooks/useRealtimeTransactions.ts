@@ -101,7 +101,7 @@ export const useRealtimeTransactions = () => {
 
       console.log('[Realtime] Transaction created:', payload);
     },
-    [isAdmin, user?.branchId],
+    [isAdmin, user?.branchId]
   );
 
   /**
@@ -126,7 +126,7 @@ export const useRealtimeTransactions = () => {
 
       console.log('[Realtime] Transaction updated:', payload);
     },
-    [isAdmin, user?.branchId],
+    [isAdmin, user?.branchId]
   );
 
   /**
@@ -150,7 +150,7 @@ export const useRealtimeTransactions = () => {
 
       console.log('[Realtime] Transaction deleted:', payload);
     },
-    [isAdmin, user?.branchId],
+    [isAdmin, user?.branchId]
   );
 
   // Subscribe to transaction events
@@ -178,7 +178,7 @@ export const useRealtimeTransactions = () => {
  * ```
  */
 export const useRealtimeTransactionCreated = (
-  handler?: (payload: TransactionCreatedPayload) => void,
+  handler?: (payload: TransactionCreatedPayload) => void
 ) => {
   useWebSocketEvent('transaction:created', handler);
 };
@@ -203,7 +203,7 @@ export const useRealtimeTransactionCreated = (
  * ```
  */
 export const useRealtimeTransactionUpdated = (
-  handler?: (payload: TransactionUpdatedPayload) => void,
+  handler?: (payload: TransactionUpdatedPayload) => void
 ) => {
   useWebSocketEvent('transaction:updated', handler);
 };
@@ -226,7 +226,7 @@ export const useRealtimeTransactionUpdated = (
  * ```
  */
 export const useRealtimeTransactionDeleted = (
-  handler?: (payload: TransactionDeletedPayload) => void,
+  handler?: (payload: TransactionDeletedPayload) => void
 ) => {
   useWebSocketEvent('transaction:deleted', handler);
 };

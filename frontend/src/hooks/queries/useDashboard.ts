@@ -108,7 +108,7 @@ export const useDashboardStats = (branchId?: string, date?: string) => {
  */
 export const useRevenueData = (
   branchId?: string,
-  dateRange?: { startDate?: string; endDate?: string },
+  dateRange?: { startDate?: string; endDate?: string }
 ) => {
   const { user, isAccountant } = useAuth();
 
@@ -165,7 +165,7 @@ export const useRevenueData = (
  */
 export const useCategoryData = (
   branchId?: string,
-  dateRange?: { startDate?: string; endDate?: string },
+  dateRange?: { startDate?: string; endDate?: string }
 ) => {
   const { user, isAccountant } = useAuth();
 
@@ -269,10 +269,7 @@ export const useRecentTransactions = (branchId?: string, limit?: number) => {
  * ))}
  * ```
  */
-export const useBranchComparison = (dateRange?: {
-  startDate?: string;
-  endDate?: string;
-}) => {
+export const useBranchComparison = (dateRange?: { startDate?: string; endDate?: string }) => {
   const { isAdmin } = useAuth();
 
   return useQuery<BranchPerformance[], ApiError>({
@@ -352,25 +349,18 @@ export const useBranchComparison = (dateRange?: {
  * }
  * ```
  */
-export const useDashboardFilters = (
-  initialFilters?: Partial<DashboardQueryFilters>,
-) => {
-  const [filters, setFiltersState] = useState<DashboardQueryFilters>(
-    initialFilters || {},
-  );
+export const useDashboardFilters = (initialFilters?: Partial<DashboardQueryFilters>) => {
+  const [filters, setFiltersState] = useState<DashboardQueryFilters>(initialFilters || {});
 
   const setFilters = useCallback((newFilters: Partial<DashboardQueryFilters>) => {
     setFiltersState((prev) => ({ ...prev, ...newFilters }));
   }, []);
 
   const setFilter = useCallback(
-    <K extends keyof DashboardQueryFilters>(
-      key: K,
-      value: DashboardQueryFilters[K],
-    ) => {
+    <K extends keyof DashboardQueryFilters>(key: K, value: DashboardQueryFilters[K]) => {
       setFiltersState((prev) => ({ ...prev, [key]: value }));
     },
-    [],
+    []
   );
 
   const resetFilters = useCallback(() => {
@@ -385,12 +375,9 @@ export const useDashboardFilters = (
     setFiltersState((prev) => ({ ...prev, date }));
   }, []);
 
-  const setDateRange = useCallback(
-    (startDate: string | undefined, endDate: string | undefined) => {
-      setFiltersState((prev) => ({ ...prev, startDate, endDate }));
-    },
-    [],
-  );
+  const setDateRange = useCallback((startDate: string | undefined, endDate: string | undefined) => {
+    setFiltersState((prev) => ({ ...prev, startDate, endDate }));
+  }, []);
 
   const setLimit = useCallback((limit: number | undefined) => {
     setFiltersState((prev) => ({ ...prev, limit }));

@@ -11,7 +11,7 @@
  * - Strict typing, no `any`
  */
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useWebSocketEvent } from './useWebSocket';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from './queries/queryKeys';
@@ -53,10 +53,10 @@ export interface NotificationSettings {
  * Play notification sound
  * Uses Web Audio API for better control
  */
-const playNotificationSound = (volume: number = 0.5): void => {
+const _playNotificationSound = (volume: number = 0.5): void => {
   try {
     // Create a simple notification beep using AudioContext
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -69,10 +69,7 @@ const playNotificationSound = (volume: number = 0.5): void => {
 
     // Volume envelope (fade out)
     gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.2
-    );
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
 
     // Play for 200ms
     oscillator.start(audioContext.currentTime);
@@ -126,16 +123,16 @@ export const saveNotificationSettings = (settings: NotificationSettings): void =
 /**
  * Get unread notification count from cache
  */
-const getUnreadCount = (queryClient: any): number => {
+const getUnreadCount = (queryClient: unknown): number => {
   try {
-    const notificationsData = queryClient.getQueriesData({
+    const notificationsData = (queryClient as { getQueriesData: (options: { queryKey: unknown[] }) => [unknown, unknown][] }).getQueriesData({
       queryKey: queryKeys.notifications.all,
     });
 
     if (notificationsData.length > 0) {
-      const data = notificationsData[0][1] as any;
+      const data = notificationsData[0][1] as { data?: { isRead: boolean }[] };
       if (data?.data) {
-        return data.data.filter((n: any) => !n.isRead).length;
+        return data.data.filter((n) => !n.isRead).length;
       }
     }
   } catch (error) {
@@ -252,7 +249,7 @@ export const useRealtimeNotifications = () => {
         updateFaviconBadge(unreadCount);
       }, 500); // Small delay to ensure query has refetched
     },
-    [queryClient],
+    [queryClient]
   );
 
   // Subscribe to notification:created events

@@ -19,8 +19,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { FileText, FileSpreadsheet, Printer } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { FileText } from 'lucide-react';
 import { useBranches } from '@/hooks/useBranches';
 import {
   useFinancialReport,
@@ -34,21 +33,13 @@ import reportsService from '@/api/services/reportsService';
 import {
   ReportFilters as ReportFiltersComponent,
   type ReportFilters,
-  type FinancialReportFilters,
-  type DebtReportFilters,
-  type InventoryReportFilters,
-  type SalaryReportFilters,
 } from '@/components/reports/ReportFilters';
-import {
-  ReportPreview,
-  type ReportData,
-} from '@/components/reports/ReportPreview';
+import { ReportPreview, type ReportData } from '@/components/reports/ReportPreview';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { CardSkeleton } from '@/components/skeletons/CardSkeleton';
 import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
 import { toInputDate, startOfMonth } from '@/utils/format';
-import { toast } from 'sonner';
 
 // ============================================
 // TYPES
@@ -61,7 +52,6 @@ type ReportTab = 'financial' | 'debt' | 'inventory' | 'salary';
 // ============================================
 
 export default function ReportsPage() {
-  const { isAdmin } = useAuth();
 
   // ============================================
   // STATE
@@ -209,7 +199,14 @@ export default function ReportsPage() {
       default:
         return null;
     }
-  }, [activeTab, hasGenerated, financialReport.data, debtReport.data, inventoryReport.data, salaryReport.data]);
+  }, [
+    activeTab,
+    hasGenerated,
+    financialReport.data,
+    debtReport.data,
+    inventoryReport.data,
+    salaryReport.data,
+  ]);
 
   /**
    * Check if currently loading
@@ -287,7 +284,7 @@ export default function ReportsPage() {
     try {
       await currentReport.refetch();
       setHasGenerated(true);
-    } catch (error) {
+    } catch (_error) {
       // Error toast shown by global API interceptor
     }
   }, [currentReport]);
@@ -325,7 +322,7 @@ export default function ReportsPage() {
 
       // Download blob
       reportsService.downloadBlob(blob, filename);
-    } catch (error) {
+    } catch (_error) {
       // Error toast shown by mutation
     }
   }, [reportData, activeTab, filters, exportExcel]);
@@ -356,7 +353,7 @@ export default function ReportsPage() {
 
       // Download blob
       reportsService.downloadBlob(blob, filename);
-    } catch (error) {
+    } catch (_error) {
       // Error toast shown by mutation
     }
   }, [reportData, activeTab, filters, exportPDF]);
@@ -378,9 +375,7 @@ export default function ReportsPage() {
       <div className="flex items-center justify-between" dir="rtl">
         <div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">التقارير</h1>
-          <p className="text-[var(--text-secondary)] mt-1">
-            توليد وتصدير تقارير الأعمال
-          </p>
+          <p className="text-[var(--text-secondary)] mt-1">توليد وتصدير تقارير الأعمال</p>
         </div>
       </div>
 
@@ -451,9 +446,7 @@ export default function ReportsPage() {
       )}
 
       {/* Error State */}
-      {!isGenerating && error && hasGenerated && (
-        <ErrorState error={error} onRetry={handleRetry} />
-      )}
+      {!isGenerating && error && hasGenerated && <ErrorState error={error} onRetry={handleRetry} />}
 
       {/* Empty State - Before First Generation */}
       {!isGenerating && !error && !hasGenerated && (

@@ -62,8 +62,9 @@ const pathLabels: Record<string, string> = {
  */
 function getPathLabel(segment: string): string {
   // Check if it's a UUID or ID (starts with number or contains dashes)
-  const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment) ||
-               /^\d+$/.test(segment);
+  const isId =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment) ||
+    /^\d+$/.test(segment);
 
   if (isId) {
     return `#${segment.substring(0, 8)}`; // Show first 8 chars of ID
@@ -135,10 +136,7 @@ export function Breadcrumb({ className, items: customItems }: BreadcrumbProps) {
   }
 
   return (
-    <nav
-      className={cn('flex items-center gap-2 text-sm', className)}
-      aria-label="Breadcrumb"
-    >
+    <nav className={cn('flex items-center gap-2 text-sm', className)} aria-label="Breadcrumb">
       <ol className="flex items-center gap-2">
         {items.map((item, index) => (
           <li key={item.path} className="flex items-center gap-2">
@@ -153,10 +151,7 @@ export function Breadcrumb({ className, items: customItems }: BreadcrumbProps) {
             {/* Breadcrumb item */}
             {item.isLast ? (
               // Current page - not clickable
-              <span
-                className="font-medium text-gray-900 dark:text-gray-100"
-                aria-current="page"
-              >
+              <span className="font-medium text-gray-900 dark:text-gray-100" aria-current="page">
                 {item.label}
               </span>
             ) : (
@@ -171,9 +166,7 @@ export function Breadcrumb({ className, items: customItems }: BreadcrumbProps) {
                   index === 0 && 'flex items-center gap-1'
                 )}
               >
-                {index === 0 && (
-                  <Home className="w-4 h-4" aria-hidden="true" />
-                )}
+                {index === 0 && <Home className="w-4 h-4" aria-hidden="true" />}
                 {item.label}
               </Link>
             )}

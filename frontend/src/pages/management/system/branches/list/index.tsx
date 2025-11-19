@@ -61,12 +61,7 @@ export default function BranchesListPage() {
   /**
    * Fetch all branches (including inactive)
    */
-  const {
-    data: branches = [],
-    isLoading,
-    error,
-    refetch,
-  } = useAllBranches();
+  const { data: branches = [], isLoading, error, refetch } = useAllBranches();
 
   // ============================================
   // MUTATIONS
@@ -101,7 +96,7 @@ export default function BranchesListPage() {
           data: { isActive: !branch.isActive },
         });
         // Success toast shown by mutation
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by mutation
       }
     },
@@ -138,7 +133,7 @@ export default function BranchesListPage() {
       try {
         await deleteBranch.mutateAsync(id);
         // Success toast shown by mutation
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by mutation
       }
     },
@@ -203,9 +198,7 @@ export default function BranchesListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة الفروع</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              إضافة وإدارة فروع النظام
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">إضافة وإدارة فروع النظام</p>
           </div>
         </div>
         <ErrorState error={error} onRetry={handleRetry} />
@@ -224,9 +217,7 @@ export default function BranchesListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة الفروع</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              إضافة وإدارة فروع النظام
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">إضافة وإدارة فروع النظام</p>
           </div>
           <button
             onClick={handleAddNew}
@@ -288,7 +279,8 @@ export default function BranchesListPage() {
       {/* Info Note */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" dir="rtl">
         <p className="text-sm text-blue-800">
-          <strong>ملاحظة:</strong> يتم تخصيص محاسب واحد لكل فرع. المحاسب يمكنه الوصول فقط إلى بيانات فرعه المخصص.
+          <strong>ملاحظة:</strong> يتم تخصيص محاسب واحد لكل فرع. المحاسب يمكنه الوصول فقط إلى بيانات
+          فرعه المخصص.
         </p>
       </div>
 

@@ -25,11 +25,8 @@ import type { BranchQueryFilters } from '#/api';
  * Centralized endpoint definitions
  */
 export enum BranchApiEndpoints {
-  GetAll = '/branches',
-  GetOne = '/branches/:id',
-  Create = '/branches',
-  Update = '/branches/:id',
-  Delete = '/branches/:id',
+  Base = '/branches',
+  ById = '/branches/:id',
 }
 
 // ============================================
@@ -51,7 +48,7 @@ export enum BranchApiEndpoints {
  */
 export const getAll = (filters?: BranchQueryFilters): Promise<Branch[]> => {
   return apiClient.get<Branch[]>({
-    url: BranchApiEndpoints.GetAll,
+    url: BranchApiEndpoints.Base,
     params: filters,
   });
 };
@@ -112,7 +109,7 @@ export const getOne = (id: string): Promise<Branch> => {
  */
 export const create = (data: CreateBranchInput): Promise<Branch> => {
   return apiClient.post<Branch>({
-    url: BranchApiEndpoints.Create,
+    url: BranchApiEndpoints.Base,
     data,
   });
 };

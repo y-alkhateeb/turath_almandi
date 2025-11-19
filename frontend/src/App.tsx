@@ -8,11 +8,13 @@
  * - Sets up all real-time listeners (notifications, transactions, debts)
  * - Handles connection state globally
  * - Provides real-time sync across all features
+ * - Displays offline banner when network is unavailable
  */
 
 import { useRoutes } from 'react-router-dom';
 import { routes } from '@/routes';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { OfflineBanner } from '@/components/common/OfflineBanner';
 
 function App() {
   // Initialize real-time synchronization
@@ -32,7 +34,15 @@ function App() {
     console.log('[App] Realtime sync state:', connectionState, { isConnected });
   }
 
-  return useRoutes(routes);
+  return (
+    <>
+      {/* Offline Detection Banner */}
+      <OfflineBanner />
+
+      {/* App Routes */}
+      {useRoutes(routes)}
+    </>
+  );
 }
 
 export default App;

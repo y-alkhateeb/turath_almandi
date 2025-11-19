@@ -87,16 +87,14 @@ export const FinancialCard = ({
   }
 
   return (
-    <div className={`${config.bg} border ${config.border} rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6`}>
+    <div
+      className={`${config.bg} border ${config.border} rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6`}
+    >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className={`text-sm font-medium ${config.text} mb-1`}>
-            {title}
-          </h3>
+          <h3 className={`text-sm font-medium ${config.text} mb-1`}>{title}</h3>
         </div>
-        <div className={`${config.icon} p-3 rounded-lg shadow-sm`}>
-          {icon}
-        </div>
+        <div className={`${config.icon} p-3 rounded-lg shadow-sm`}>{icon}</div>
       </div>
 
       <div className={`text-3xl font-bold ${config.valueText} mb-2 font-arabic`}>

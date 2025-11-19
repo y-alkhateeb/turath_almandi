@@ -130,10 +130,8 @@ export const transactionKeys = {
    * @param dates - Optional date range {startDate, endDate}
    * @returns ['transactions', 'summary', branchId, dates]
    */
-  summary: (
-    branchId?: string,
-    dates?: { startDate?: string; endDate?: string },
-  ) => ['transactions', 'summary', branchId, dates] as const,
+  summary: (branchId?: string, dates?: { startDate?: string; endDate?: string }) =>
+    ['transactions', 'summary', branchId, dates] as const,
 } as const;
 
 // ============================================
@@ -259,24 +257,21 @@ export const dashboardKeys = {
    * @param date - Optional date filter
    * @returns ['dashboard', branchId, date]
    */
-  stats: (branchId?: string, date?: string) =>
-    ['dashboard', branchId, date] as const,
+  stats: (branchId?: string, date?: string) => ['dashboard', branchId, date] as const,
 
   /**
    * Dashboard revenue data
    * @param filters - Optional DashboardQueryFilters
    * @returns ['dashboard', 'revenue', filters]
    */
-  revenueData: (filters?: DashboardQueryFilters) =>
-    ['dashboard', 'revenue', filters] as const,
+  revenueData: (filters?: DashboardQueryFilters) => ['dashboard', 'revenue', filters] as const,
 
   /**
    * Dashboard category data
    * @param filters - Optional DashboardQueryFilters
    * @returns ['dashboard', 'category', filters]
    */
-  categoryData: (filters?: DashboardQueryFilters) =>
-    ['dashboard', 'category', filters] as const,
+  categoryData: (filters?: DashboardQueryFilters) => ['dashboard', 'category', filters] as const,
 
   /**
    * Recent transactions for dashboard
@@ -314,42 +309,36 @@ export const reportKeys = {
    * @param filters - Optional ReportQueryFilters
    * @returns ['reports', type, filters]
    */
-  byType: (
-    type: 'financial' | 'debts' | 'inventory' | 'salaries',
-    filters?: ReportQueryFilters,
-  ) => ['reports', type, filters] as const,
+  byType: (type: 'financial' | 'debts' | 'inventory' | 'salaries', filters?: ReportQueryFilters) =>
+    ['reports', type, filters] as const,
 
   /**
    * Financial report
    * @param filters - Report filters
    * @returns ['reports', 'financial', filters]
    */
-  financial: (filters: ReportQueryFilters) =>
-    ['reports', 'financial', filters] as const,
+  financial: (filters: ReportQueryFilters) => ['reports', 'financial', filters] as const,
 
   /**
    * Debt report
    * @param filters - Optional report filters
    * @returns ['reports', 'debts', filters]
    */
-  debt: (filters?: ReportQueryFilters) =>
-    ['reports', 'debts', filters] as const,
+  debt: (filters?: ReportQueryFilters) => ['reports', 'debts', filters] as const,
 
   /**
    * Inventory report
    * @param branchId - Optional branch UUID
    * @returns ['reports', 'inventory', branchId]
    */
-  inventory: (branchId?: string) =>
-    ['reports', 'inventory', { branchId }] as const,
+  inventory: (branchId?: string) => ['reports', 'inventory', { branchId }] as const,
 
   /**
    * Salary report
    * @param filters - Report filters
    * @returns ['reports', 'salaries', filters]
    */
-  salary: (filters: ReportQueryFilters) =>
-    ['reports', 'salaries', filters] as const,
+  salary: (filters: ReportQueryFilters) => ['reports', 'salaries', filters] as const,
 } as const;
 
 // ============================================
@@ -377,8 +366,7 @@ export const auditKeys = {
    * @param entityId - Entity UUID
    * @returns ['audit', entityType, entityId]
    */
-  entity: (entityType: string, entityId: string) =>
-    ['audit', entityType, entityId] as const,
+  entity: (entityType: string, entityId: string) => ['audit', entityType, entityId] as const,
 
   /**
    * Audit logs for specific user's actions
@@ -432,6 +420,4 @@ export type QueryKeys = typeof queryKeys;
 /**
  * Helper type to extract query key arrays
  */
-export type QueryKey = ReturnType<
-  QueryKeys[keyof QueryKeys][keyof QueryKeys[keyof QueryKeys]]
->;
+export type QueryKey = ReturnType<QueryKeys[keyof QueryKeys][keyof QueryKeys[keyof QueryKeys]]>;

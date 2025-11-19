@@ -55,12 +55,11 @@ export default function DashboardWorkbench() {
     stats,
     branches,
     isLoading,
-    error,
     setSelectedDate,
     setSelectedBranchId,
-    handleTodayClick,
     handleRetry,
     hasNoTransactionsEver,
+    error,
   } = useDashboardData();
 
   // ============================================

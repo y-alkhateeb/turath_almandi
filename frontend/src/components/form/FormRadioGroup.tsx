@@ -63,8 +63,8 @@ export function FormRadioGroup<T extends FieldValues>({
                     error
                       ? `${name}-error`
                       : option.description
-                      ? `${name}-${option.value}-description`
-                      : undefined
+                        ? `${name}-${option.value}-description`
+                        : undefined
                   }
                 />
               </div>
@@ -93,11 +93,7 @@ export function FormRadioGroup<T extends FieldValues>({
         </div>
       </fieldset>
       {error && (
-        <p
-          id={`${name}-error`}
-          className="mt-2 text-sm text-red-600"
-          role="alert"
-        >
+        <p id={`${name}-error`} className="mt-2 text-sm text-red-600" role="alert">
           {error.message}
         </p>
       )}

@@ -1,6 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useBranches } from '@/hooks/useBranches';
-import type { Branch } from '#/entity';
 
 interface BranchSelectorProps {
   value?: string | null;
@@ -23,9 +22,7 @@ export const BranchSelector = ({
     const userBranch = branches.find((b) => b.id === user.branchId);
     return (
       <div className={className}>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-          Branch
-        </label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Branch</label>
         <input
           type="text"
           value={userBranch?.name || 'Loading...'}
@@ -39,7 +36,10 @@ export const BranchSelector = ({
   // Admin can select any branch
   return (
     <div className={className}>
-      <label htmlFor="branch-select" className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+      <label
+        htmlFor="branch-select"
+        className="block text-sm font-medium text-[var(--text-primary)] mb-1"
+      >
         Branch
       </label>
       <select
@@ -58,9 +58,7 @@ export const BranchSelector = ({
             </option>
           ))}
       </select>
-      {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );
 };

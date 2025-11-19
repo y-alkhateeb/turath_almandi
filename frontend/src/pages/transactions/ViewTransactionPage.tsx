@@ -54,9 +54,7 @@ export const ViewTransactionPage = () => {
   if (!transaction) {
     return (
       <div className="space-y-6">
-        <Alert variant="destructive">
-          لم يتم العثور على العملية المطلوبة
-        </Alert>
+        <Alert variant="destructive">لم يتم العثور على العملية المطلوبة</Alert>
         <Button onClick={handleCancel}>
           <ArrowRight className="w-4 h-4" />
           العودة إلى العمليات
@@ -70,22 +68,13 @@ export const ViewTransactionPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCancel}
-            className="gap-2"
-          >
+          <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
             <ArrowRight className="w-4 h-4" />
             رجوع
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-              تفاصيل العملية
-            </h1>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
-              عرض تفاصيل العملية المالية
-            </p>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]">تفاصيل العملية</h1>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">عرض تفاصيل العملية المالية</p>
           </div>
         </div>
         <Button
@@ -118,28 +107,36 @@ export const ViewTransactionPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">المبلغ</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                المبلغ
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 <span className="font-semibold">{formatAmount(transaction.amount)} IQD</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">التاريخ</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                التاريخ
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {formatDate(transaction.date)}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">طريقة الدفع</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                طريقة الدفع
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {getPaymentMethodLabel(transaction.paymentMethod)}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفئة</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                الفئة
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.category || '-'}
               </div>
@@ -155,14 +152,18 @@ export const ViewTransactionPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفرع</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                الفرع
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.branch?.name || '-'}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">أنشئ بواسطة</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                أنشئ بواسطة
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.creator?.username || '-'}
               </div>
@@ -185,7 +186,9 @@ export const ViewTransactionPage = () => {
 
           {transaction.notes && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">ملاحظات</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                ملاحظات
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md min-h-[80px]">
                 {transaction.notes}
               </div>

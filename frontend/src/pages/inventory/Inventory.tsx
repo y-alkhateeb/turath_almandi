@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useInventory, useDeleteInventory } from '@/hooks/useInventory';
-import { useAuth } from '@/hooks/useAuth';
 import InventoryTable from '@/components/InventoryTable';
 import { ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
@@ -11,7 +10,6 @@ import type { InventoryItem, InventoryFilters } from '@/types/inventory.types';
 
 export default function InventoryPage() {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
   const [filters, setFilters] = useState<InventoryFilters>({
     page: 1,
     limit: 20,
@@ -39,7 +37,7 @@ export default function InventoryPage() {
     try {
       await deleteInventory.mutateAsync(deleteConfirmation.item.id);
       setDeleteConfirmation({ isOpen: false, item: null });
-    } catch (error) {
+    } catch (_error) {
       // Error is handled in the hook
     }
   };

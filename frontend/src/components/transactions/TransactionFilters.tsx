@@ -32,11 +32,7 @@ export interface TransactionFiltersProps {
 // COMPONENT
 // ============================================
 
-export function TransactionFilters({
-  filters,
-  onChange,
-  branches,
-}: TransactionFiltersProps) {
+export function TransactionFilters({ filters, onChange, branches }: TransactionFiltersProps) {
   const { isAdmin } = useAuth();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -50,11 +46,7 @@ export function TransactionFilters({
 
   // Count active filters (excluding pagination)
   const activeFilterCount = Object.entries(filters).filter(
-    ([key, value]) =>
-      value !== undefined &&
-      value !== '' &&
-      key !== 'page' &&
-      key !== 'limit',
+    ([key, value]) => value !== undefined && value !== '' && key !== 'page' && key !== 'limit'
   ).length;
 
   return (
@@ -69,9 +61,7 @@ export function TransactionFilters({
       >
         <div className="flex items-center gap-3">
           <Filter className="w-5 h-5 text-[var(--text-secondary)]" />
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-            الفلاتر والبحث
-          </h3>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">الفلاتر والبحث</h3>
           {activeFilterCount > 0 && (
             <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-primary-600 rounded-full">
               {activeFilterCount}
@@ -109,9 +99,7 @@ export function TransactionFilters({
               <select
                 id="filter-type"
                 value={filters.type || ''}
-                onChange={(e) =>
-                  handleFilterChange('type', e.target.value || undefined)
-                }
+                onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
@@ -131,9 +119,7 @@ export function TransactionFilters({
               <select
                 id="filter-category"
                 value={filters.category || ''}
-                onChange={(e) =>
-                  handleFilterChange('category', e.target.value || undefined)
-                }
+                onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
@@ -157,9 +143,7 @@ export function TransactionFilters({
               <select
                 id="filter-payment-method"
                 value={filters.paymentMethod || ''}
-                onChange={(e) =>
-                  handleFilterChange('paymentMethod', e.target.value || undefined)
-                }
+                onChange={(e) => handleFilterChange('paymentMethod', e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
@@ -180,9 +164,7 @@ export function TransactionFilters({
                 <select
                   id="filter-branch"
                   value={filters.branchId || ''}
-                  onChange={(e) =>
-                    handleFilterChange('branchId', e.target.value || undefined)
-                  }
+                  onChange={(e) => handleFilterChange('branchId', e.target.value || undefined)}
                   className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">جميع الفروع</option>
@@ -209,9 +191,7 @@ export function TransactionFilters({
                 id="filter-start-date"
                 type="date"
                 value={filters.startDate || ''}
-                onChange={(e) =>
-                  handleFilterChange('startDate', e.target.value || undefined)
-                }
+                onChange={(e) => handleFilterChange('startDate', e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
@@ -228,9 +208,7 @@ export function TransactionFilters({
                 id="filter-end-date"
                 type="date"
                 value={filters.endDate || ''}
-                onChange={(e) =>
-                  handleFilterChange('endDate', e.target.value || undefined)
-                }
+                onChange={(e) => handleFilterChange('endDate', e.target.value || undefined)}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
@@ -247,9 +225,7 @@ export function TransactionFilters({
                 id="filter-search"
                 type="text"
                 value={filters.search || ''}
-                onChange={(e) =>
-                  handleFilterChange('search', e.target.value || undefined)
-                }
+                onChange={(e) => handleFilterChange('search', e.target.value || undefined)}
                 placeholder="بحث في الملاحظات..."
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               />

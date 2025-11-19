@@ -14,15 +14,7 @@
  * - No business logic
  */
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  TooltipProps,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 import { PieChartIcon } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '@/utils/format';
 import type { CategoryDataPoint } from '#/entity';
@@ -46,12 +38,8 @@ const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) =
     const data = payload[0];
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
-        <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
-          {data.name}
-        </p>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {formatCurrency(Number(data.value))}
-        </p>
+        <p className="text-sm font-medium text-[var(--text-primary)] mb-1">{data.name}</p>
+        <p className="text-sm text-[var(--text-secondary)]">{formatCurrency(Number(data.value))}</p>
       </div>
     );
   }
@@ -147,17 +135,13 @@ function EmptyState() {
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">
           توزيع الإيرادات حسب الفئة
         </h3>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          نسبة الإيرادات من كل فئة
-        </p>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">نسبة الإيرادات من كل فئة</p>
       </div>
       <div className="flex flex-col items-center justify-center h-80">
         <div className="w-16 h-16 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center mb-4">
           <PieChartIcon className="w-8 h-8 text-[var(--text-tertiary)]" />
         </div>
-        <p className="text-[var(--text-secondary)] text-center">
-          لا توجد بيانات لعرضها
-        </p>
+        <p className="text-[var(--text-secondary)] text-center">لا توجد بيانات لعرضها</p>
         <p className="text-sm text-[var(--text-tertiary)] text-center mt-1">
           سيتم عرض توزيع الفئات هنا بعد تسجيل المعاملات
         </p>
@@ -188,14 +172,15 @@ export function DashboardCategoryChart({ data, isLoading }: DashboardCategoryCha
   }));
 
   return (
-    <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+    <div
+      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+      dir="rtl"
+    >
       <div className="border-b border-[var(--border-color)] pb-5 mb-6">
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">
           توزيع الإيرادات حسب الفئة
         </h3>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          نسبة الإيرادات من كل فئة
-        </p>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">نسبة الإيرادات من كل فئة</p>
       </div>
 
       <div className="h-80">

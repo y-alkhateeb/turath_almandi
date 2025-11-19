@@ -39,12 +39,7 @@ export function LoadingSpinner({
 }: LoadingSpinnerProps) {
   return (
     <Loader2
-      className={cn(
-        'animate-spin',
-        sizeClasses[size],
-        variantClasses[variant],
-        className
-      )}
+      className={cn('animate-spin', sizeClasses[size], variantClasses[variant], className)}
     />
   );
 }
@@ -60,9 +55,7 @@ export function PageLoading({ message = 'جاري التحميل...' }: { messag
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg-primary)]">
       <LoadingSpinner size="xl" variant="primary" />
-      {message && (
-        <p className="mt-4 text-lg font-medium text-[var(--text-primary)]">{message}</p>
-      )}
+      {message && <p className="mt-4 text-lg font-medium text-[var(--text-primary)]">{message}</p>}
     </div>
   );
 }
@@ -78,9 +71,7 @@ export function CenteredLoading({ message }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12">
       <LoadingSpinner size="lg" variant="primary" />
-      {message && (
-        <p className="mt-4 text-sm text-[var(--text-secondary)]">{message}</p>
-      )}
+      {message && <p className="mt-4 text-sm text-[var(--text-secondary)]">{message}</p>}
     </div>
   );
 }

@@ -20,11 +20,7 @@ import { toast } from 'sonner';
 import inventoryService from '@/api/services/inventoryService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import { useAuth } from './useAuth';
-import type {
-  InventoryItem,
-  CreateInventoryInput,
-  UpdateInventoryInput,
-} from '#/entity';
+import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '#/entity';
 import type { PaginatedResponse, InventoryQueryFilters } from '#/api';
 import { ApiError } from '@/api/apiClient';
 
@@ -84,7 +80,7 @@ export const useInventoryItem = (
   id: string,
   options?: {
     enabled?: boolean;
-  },
+  }
 ) => {
   return useQuery<InventoryItem, ApiError>({
     queryKey: queryKeys.inventory.detail(id),
@@ -169,9 +165,7 @@ export const useCreateInventory = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.inventory.all });
 
       // Snapshot current data for rollback
-      const previousInventory = queryClient.getQueriesData<
-        PaginatedResponse<InventoryItem>
-      >({
+      const previousInventory = queryClient.getQueriesData<PaginatedResponse<InventoryItem>>({
         queryKey: queryKeys.inventory.all,
       });
 
@@ -204,7 +198,7 @@ export const useCreateInventory = () => {
               total: old.meta.total + 1,
             },
           };
-        },
+        }
       );
 
       return { previousInventory };
@@ -266,11 +260,7 @@ export const useCreateInventory = () => {
 export const useUpdateInventory = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    InventoryItem,
-    ApiError,
-    { id: string; data: UpdateInventoryInput }
-  >({
+  return useMutation<InventoryItem, ApiError, { id: string; data: UpdateInventoryInput }>({
     mutationFn: ({ id, data }) => inventoryService.update(id, data),
 
     // Optimistic update
@@ -280,12 +270,8 @@ export const useUpdateInventory = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.inventory.detail(id) });
 
       // Snapshot current data
-      const previousItem = queryClient.getQueryData<InventoryItem>(
-        queryKeys.inventory.detail(id),
-      );
-      const previousInventory = queryClient.getQueriesData<
-        PaginatedResponse<InventoryItem>
-      >({
+      const previousItem = queryClient.getQueryData<InventoryItem>(queryKeys.inventory.detail(id));
+      const previousInventory = queryClient.getQueriesData<PaginatedResponse<InventoryItem>>({
         queryKey: queryKeys.inventory.all,
       });
 
@@ -293,18 +279,15 @@ export const useUpdateInventory = () => {
       const oldBranchId = previousItem?.branchId;
 
       // Optimistically update inventory item detail
-      queryClient.setQueryData<InventoryItem>(
-        queryKeys.inventory.detail(id),
-        (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            ...data,
-            lastUpdated: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-        },
-      );
+      queryClient.setQueryData<InventoryItem>(queryKeys.inventory.detail(id), (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          ...data,
+          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      });
 
       // Optimistically update inventory item in all lists
       queryClient.setQueriesData<PaginatedResponse<InventoryItem>>(
@@ -322,10 +305,10 @@ export const useUpdateInventory = () => {
                     lastUpdated: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                   }
-                : item,
+                : item
             ),
           };
-        },
+        }
       );
 
       return { previousItem, previousInventory, oldBranchId };
@@ -334,10 +317,7 @@ export const useUpdateInventory = () => {
     onError: (error, { id }, context) => {
       // Rollback on error
       if (context?.previousItem) {
-        queryClient.setQueryData(
-          queryKeys.inventory.detail(id),
-          context.previousItem,
-        );
+        queryClient.setQueryData(queryKeys.inventory.detail(id), context.previousItem);
       }
       if (context?.previousInventory) {
         context.previousInventory.forEach(([queryKey, data]) => {
@@ -410,13 +390,11 @@ export const useDeleteInventory = () => {
 
       // Get the item before deletion for branchId
       const deletedItem = queryClient.getQueryData<InventoryItem>(
-        queryKeys.inventory.detail(deletedId),
+        queryKeys.inventory.detail(deletedId)
       );
 
       // Snapshot current data
-      const previousInventory = queryClient.getQueriesData<
-        PaginatedResponse<InventoryItem>
-      >({
+      const previousInventory = queryClient.getQueriesData<PaginatedResponse<InventoryItem>>({
         queryKey: queryKeys.inventory.all,
       });
 
@@ -434,7 +412,7 @@ export const useDeleteInventory = () => {
               total: old.meta.total - 1,
             },
           };
-        },
+        }
       );
 
       // Remove item detail from cache
@@ -542,25 +520,18 @@ export const useDeleteInventory = () => {
  * }
  * ```
  */
-export const useInventoryFilters = (
-  initialFilters?: Partial<InventoryQueryFilters>,
-) => {
-  const [filters, setFiltersState] = useState<InventoryQueryFilters>(
-    initialFilters || {},
-  );
+export const useInventoryFilters = (initialFilters?: Partial<InventoryQueryFilters>) => {
+  const [filters, setFiltersState] = useState<InventoryQueryFilters>(initialFilters || {});
 
   const setFilters = useCallback((newFilters: Partial<InventoryQueryFilters>) => {
     setFiltersState((prev) => ({ ...prev, ...newFilters }));
   }, []);
 
   const setFilter = useCallback(
-    <K extends keyof InventoryQueryFilters>(
-      key: K,
-      value: InventoryQueryFilters[K],
-    ) => {
+    <K extends keyof InventoryQueryFilters>(key: K, value: InventoryQueryFilters[K]) => {
       setFiltersState((prev) => ({ ...prev, [key]: value }));
     },
-    [],
+    []
   );
 
   const resetFilters = useCallback(() => {
@@ -616,9 +587,7 @@ export const useInventoryFilters = (
  * @param filters - Optional additional filters
  * @returns Query result with manually added items
  */
-export const useManualInventory = (
-  filters?: Omit<InventoryQueryFilters, 'autoAdded'>,
-) => {
+export const useManualInventory = (filters?: Omit<InventoryQueryFilters, 'autoAdded'>) => {
   return useInventory({ ...filters, autoAdded: false });
 };
 
@@ -629,8 +598,6 @@ export const useManualInventory = (
  * @param filters - Optional additional filters
  * @returns Query result with auto-added items
  */
-export const useAutoInventory = (
-  filters?: Omit<InventoryQueryFilters, 'autoAdded'>,
-) => {
+export const useAutoInventory = (filters?: Omit<InventoryQueryFilters, 'autoAdded'>) => {
   return useInventory({ ...filters, autoAdded: true });
 };

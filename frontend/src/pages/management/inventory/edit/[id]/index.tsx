@@ -97,16 +97,10 @@ export default function EditInventoryPage() {
         return;
       }
 
-      try {
-        await updateInventory.mutateAsync({ id, data });
-        // Success toast shown by mutation
-        // Navigate to inventory list
-        router.push('/management/inventory/list');
-      } catch (error) {
-        // Error toast shown by global API interceptor
-        // Error is re-thrown so form can handle it if needed
-        throw error;
-      }
+      await updateInventory.mutateAsync({ id, data });
+      // Success toast shown by mutation
+      // Navigate to inventory list
+      router.push('/management/inventory/list');
     },
     [id, item, updateInventory, router]
   );
@@ -180,9 +174,7 @@ export default function EditInventoryPage() {
         <div dir="rtl">
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">تعديل صنف</h1>
           <p className="text-[var(--text-secondary)] mt-1">
-            {error.statusCode === 404
-              ? 'الصنف المطلوب غير موجود'
-              : 'حدث خطأ أثناء تحميل الصنف'}
+            {error.statusCode === 404 ? 'الصنف المطلوب غير موجود' : 'حدث خطأ أثناء تحميل الصنف'}
           </p>
         </div>
 
@@ -267,12 +259,10 @@ export default function EditInventoryPage() {
               <span className="text-yellow-600 text-sm font-bold">!</span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-                عنصر مضاف تلقائياً
-              </h3>
+              <h3 className="text-lg font-semibold text-yellow-900 mb-2">عنصر مضاف تلقائياً</h3>
               <p className="text-yellow-800 mb-4">
-                هذا الصنف تم إضافته تلقائياً من خلال العمليات المالية ولا يمكن تعديله يدوياً.
-                يتم تحديث الكمية تلقائياً عند إضافة عمليات جديدة.
+                هذا الصنف تم إضافته تلقائياً من خلال العمليات المالية ولا يمكن تعديله يدوياً. يتم
+                تحديث الكمية تلقائياً عند إضافة عمليات جديدة.
               </p>
               <button
                 onClick={() => router.push('/management/inventory/list')}
@@ -308,9 +298,7 @@ export default function EditInventoryPage() {
       {/* Page Header */}
       <div dir="rtl">
         <h1 className="text-3xl font-bold text-[var(--text-primary)]">تعديل صنف</h1>
-        <p className="text-[var(--text-secondary)] mt-1">
-          قم بتعديل بيانات الصنف: {item.name}
-        </p>
+        <p className="text-[var(--text-secondary)] mt-1">قم بتعديل بيانات الصنف: {item.name}</p>
       </div>
 
       {/* Form Card */}

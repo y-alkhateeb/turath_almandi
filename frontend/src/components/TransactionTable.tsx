@@ -29,7 +29,7 @@ export default function TransactionTable({
   onDelete,
   isLoading = false,
 }: TransactionTableProps) {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [searchInput, setSearchInput] = useState(filters.search || '');
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -37,7 +37,7 @@ export default function TransactionTable({
     onFiltersChange({ ...filters, search: searchInput, page: 1 });
   };
 
-  const handleFilterChange = (key: keyof TransactionFilters, value: any) => {
+  const handleFilterChange = (key: keyof TransactionFilters, value: string | undefined) => {
     onFiltersChange({ ...filters, [key]: value, page: 1 });
   };
 
@@ -227,7 +227,10 @@ export default function TransactionTable({
             <tbody className="bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={isAdmin ? 8 : 7} className="px-6 py-12 text-center text-[var(--text-secondary)]">
+                  <td
+                    colSpan={isAdmin ? 8 : 7}
+                    className="px-6 py-12 text-center text-[var(--text-secondary)]"
+                  >
                     <div className="flex justify-center items-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                       <span className="mr-3">جاري التحميل...</span>
@@ -236,17 +239,25 @@ export default function TransactionTable({
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 8 : 7} className="px-6 py-12 text-center text-[var(--text-secondary)]">
+                  <td
+                    colSpan={isAdmin ? 8 : 7}
+                    className="px-6 py-12 text-center text-[var(--text-secondary)]"
+                  >
                     لا توجد عمليات
                   </td>
                 </tr>
               ) : (
                 transactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-[var(--bg-tertiary)] transition-colors">
+                  <tr
+                    key={transaction.id}
+                    className="hover:bg-[var(--bg-tertiary)] transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {formatDate(transaction.date)}
                     </td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getTypeColor(transaction.type)}`}>
+                    <td
+                      className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getTypeColor(transaction.type)}`}
+                    >
                       {getTypeLabel(transaction.type)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)] font-semibold">
@@ -303,8 +314,8 @@ export default function TransactionTable({
           <div className="px-6 py-4 bg-[var(--bg-tertiary)] border-t border-[var(--border-color)] flex items-center justify-between">
             <div className="text-sm text-[var(--text-primary)]">
               عرض {(pagination.page - 1) * pagination.limit + 1} إلى{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} من{' '}
-              {pagination.total} عملية
+              {Math.min(pagination.page * pagination.limit, pagination.total)} من {pagination.total}{' '}
+              عملية
             </div>
             <div className="flex gap-2">
               <button

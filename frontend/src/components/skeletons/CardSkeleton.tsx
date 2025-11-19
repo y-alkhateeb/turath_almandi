@@ -97,14 +97,11 @@ export function CardSkeleton({ count, variant = 'stat' }: CardSkeletonProps) {
     variant === 'stat'
       ? StatCardSkeleton
       : variant === 'content'
-      ? ContentCardSkeleton
-      : SimpleCardSkeleton;
+        ? ContentCardSkeleton
+        : SimpleCardSkeleton;
 
   return (
-    <div
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-      dir="rtl"
-    >
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" dir="rtl">
       {Array.from({ length: count }).map((_, index) => (
         <SkeletonComponent key={index} />
       ))}

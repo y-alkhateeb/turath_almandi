@@ -108,17 +108,15 @@ export function MultiSelect({
     if (!searchQuery.trim()) return options;
 
     const query = searchQuery.toLowerCase().trim();
-    return options.filter((option) =>
-      option.label.toLowerCase().includes(query) ||
-      option.value.toLowerCase().includes(query)
+    return options.filter(
+      (option) =>
+        option.label.toLowerCase().includes(query) || option.value.toLowerCase().includes(query)
     );
   }, [options, searchQuery]);
 
   // Get selected option labels for display
   const selectedLabels = useMemo(() => {
-    return value
-      .map((val) => options.find((opt) => opt.value === val)?.label)
-      .filter(Boolean);
+    return value.map((val) => options.find((opt) => opt.value === val)?.label).filter(Boolean);
   }, [value, options]);
 
   // Check if all options are selected
@@ -128,7 +126,7 @@ export function MultiSelect({
   }, [value, options]);
 
   // Check if some (but not all) options are selected
-  const someSelected = value.length > 0 && !allSelected;
+  const _someSelected = value.length > 0 && !allSelected;
 
   // Toggle dropdown
   const toggleDropdown = () => {
@@ -219,9 +217,7 @@ export function MultiSelect({
         <div className="flex-1 text-right truncate">
           {selectedLabels.length > 0 ? (
             <span className="text-sm">
-              {selectedLabels.length === 1
-                ? selectedLabels[0]
-                : `${selectedLabels.length} محدد`}
+              {selectedLabels.length === 1 ? selectedLabels[0] : `${selectedLabels.length} محدد`}
             </span>
           ) : (
             <span className="text-[var(--text-tertiary)] text-sm">{placeholder}</span>

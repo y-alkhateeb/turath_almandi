@@ -51,12 +51,9 @@ const createBranchSchema = z.object({
     .min(1, { message: 'اسم المدير مطلوب' })
     .min(2, { message: 'اسم المدير يجب أن يكون حرفين على الأقل' })
     .max(100, { message: 'اسم المدير يجب ألا يتجاوز 100 حرف' }),
-  phone: z
-    .string()
-    .min(1, { message: 'رقم الهاتف مطلوب' })
-    .regex(phoneRegex, {
-      message: 'رقم الهاتف غير صحيح. استخدم صيغة: 07XXXXXXXXX أو +964XXXXXXXXXX',
-    }),
+  phone: z.string().min(1, { message: 'رقم الهاتف مطلوب' }).regex(phoneRegex, {
+    message: 'رقم الهاتف غير صحيح. استخدم صيغة: 07XXXXXXXXX أو +964XXXXXXXXXX',
+  }),
 });
 
 /**

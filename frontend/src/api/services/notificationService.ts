@@ -26,12 +26,11 @@ import type { PaginatedResponse, NotificationQueryFilters } from '#/api';
  * Centralized endpoint definitions
  */
 export enum NotificationApiEndpoints {
-  GetAll = '/notifications',
-  GetUnreadCount = '/notifications/unread/count',
+  Base = '/notifications',
+  UnreadCount = '/notifications/unread/count',
   MarkAsRead = '/notifications/:id/read',
   MarkAllAsRead = '/notifications/read-all',
-  GetSettings = '/notifications/settings',
-  UpdateSettings = '/notifications/settings',
+  Settings = '/notifications/settings',
 }
 
 // ============================================
@@ -61,10 +60,10 @@ export enum NotificationApiEndpoints {
  * @throws ApiError on 401 (not authenticated)
  */
 export const getAll = (
-  filters?: NotificationQueryFilters,
+  filters?: NotificationQueryFilters
 ): Promise<PaginatedResponse<Notification>> => {
   return apiClient.get<PaginatedResponse<Notification>>({
-    url: NotificationApiEndpoints.GetAll,
+    url: NotificationApiEndpoints.Base,
     params: filters,
   });
 };
@@ -130,7 +129,7 @@ export const markAllAsRead = (): Promise<void> => {
  */
 export const getSettings = (): Promise<NotificationSettings[]> => {
   return apiClient.get<NotificationSettings[]>({
-    url: NotificationApiEndpoints.GetSettings,
+    url: NotificationApiEndpoints.Settings,
   });
 };
 
@@ -153,10 +152,10 @@ export const getSettings = (): Promise<NotificationSettings[]> => {
  * @throws ApiError on 400 (validation), 401 (not authenticated)
  */
 export const updateSettings = (
-  data: UpdateNotificationSettingsInput,
+  data: UpdateNotificationSettingsInput
 ): Promise<NotificationSettings> => {
   return apiClient.patch<NotificationSettings>({
-    url: NotificationApiEndpoints.UpdateSettings,
+    url: NotificationApiEndpoints.Settings,
     data,
   });
 };
@@ -176,7 +175,7 @@ export const updateSettings = (
  * @throws ApiError on 401
  */
 export const getUnreadNotifications = (
-  filters?: Omit<NotificationQueryFilters, 'isRead'>,
+  filters?: Omit<NotificationQueryFilters, 'isRead'>
 ): Promise<PaginatedResponse<Notification>> => {
   return getAll({
     ...filters,
@@ -195,7 +194,7 @@ export const getUnreadNotifications = (
  * @throws ApiError on 401
  */
 export const getReadNotifications = (
-  filters?: Omit<NotificationQueryFilters, 'isRead'>,
+  filters?: Omit<NotificationQueryFilters, 'isRead'>
 ): Promise<PaginatedResponse<Notification>> => {
   return getAll({
     ...filters,

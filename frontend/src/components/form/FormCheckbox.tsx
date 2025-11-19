@@ -38,11 +38,7 @@ export function FormCheckbox<T extends FieldValues>({
             `}
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={
-              error
-                ? `${name}-error`
-                : description
-                ? `${name}-description`
-                : undefined
+              error ? `${name}-error` : description ? `${name}-description` : undefined
             }
           />
         </div>
@@ -50,27 +46,22 @@ export function FormCheckbox<T extends FieldValues>({
           <label
             htmlFor={name}
             className={`text-sm font-medium ${
-              disabled ? 'text-[var(--text-secondary)] cursor-not-allowed' : 'text-[var(--text-primary)] cursor-pointer'
+              disabled
+                ? 'text-[var(--text-secondary)] cursor-not-allowed'
+                : 'text-[var(--text-primary)] cursor-pointer'
             }`}
           >
             {label}
           </label>
           {description && (
-            <p
-              id={`${name}-description`}
-              className="text-sm text-[var(--text-secondary)] mt-1"
-            >
+            <p id={`${name}-description`} className="text-sm text-[var(--text-secondary)] mt-1">
               {description}
             </p>
           )}
         </div>
       </div>
       {error && (
-        <p
-          id={`${name}-error`}
-          className="mt-2 text-sm text-red-600 mr-8"
-          role="alert"
-        >
+        <p id={`${name}-error`} className="mt-2 text-sm text-red-600 mr-8" role="alert">
           {error.message}
         </p>
       )}

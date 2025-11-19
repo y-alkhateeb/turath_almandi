@@ -23,7 +23,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Settings, Bell, CheckCheck } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
-import { useNotifications, useMarkAsRead, useMarkAllAsRead } from '@/hooks/queries/useNotifications';
+import {
+  useNotifications,
+  useMarkAsRead,
+  useMarkAllAsRead,
+} from '@/hooks/queries/useNotifications';
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { NotificationList } from '@/components/notifications/NotificationList';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -65,9 +69,7 @@ export default function NotificationsPage() {
     isLoading,
     error,
     refetch,
-  } = useNotifications(
-    activeTab === 'unread' ? { isRead: false } : undefined
-  );
+  } = useNotifications(activeTab === 'unread' ? { isRead: false } : undefined);
 
   const notifications = notificationsData?.data || [];
   const total = notificationsData?.pagination?.total || 0;
@@ -109,7 +111,7 @@ export default function NotificationsPage() {
       try {
         await markAsRead.mutateAsync(id);
         // Success toast shown by mutation (silent operation)
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by global API interceptor
       }
     },
@@ -124,7 +126,7 @@ export default function NotificationsPage() {
     try {
       await markAllAsRead.mutateAsync();
       // Success toast shown by mutation
-    } catch (error) {
+    } catch (_error) {
       // Error toast shown by global API interceptor
     }
   }, [markAllAsRead]);
@@ -204,9 +206,7 @@ export default function NotificationsPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">الإشعارات</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              عرض وإدارة إشعاراتك
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">عرض وإدارة إشعاراتك</p>
           </div>
           <button
             onClick={handleNavigateToSettings}
@@ -232,9 +232,7 @@ export default function NotificationsPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">الإشعارات</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              عرض وإدارة إشعاراتك
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">عرض وإدارة إشعاراتك</p>
           </div>
           <button
             onClick={handleNavigateToSettings}
@@ -274,9 +272,7 @@ export default function NotificationsPage() {
           icon={<Bell className="w-8 h-8 text-primary-600" />}
           title={activeTab === 'unread' ? 'لا توجد إشعارات غير مقروءة' : 'لا توجد إشعارات'}
           description={
-            activeTab === 'unread'
-              ? 'جميع الإشعارات مقروءة. عمل رائع!'
-              : 'لم تتلقَ أي إشعارات بعد.'
+            activeTab === 'unread' ? 'جميع الإشعارات مقروءة. عمل رائع!' : 'لم تتلقَ أي إشعارات بعد.'
           }
         />
       </div>
@@ -300,9 +296,7 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-between" dir="rtl">
         <div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">الإشعارات</h1>
-          <p className="text-[var(--text-secondary)] mt-1">
-            عرض وإدارة إشعاراتك ({total} إشعار)
-          </p>
+          <p className="text-[var(--text-secondary)] mt-1">عرض وإدارة إشعاراتك ({total} إشعار)</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Mark All as Read Button */}
@@ -370,7 +364,8 @@ export default function NotificationsPage() {
       {/* Auto-refresh indicator */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" dir="rtl">
         <p className="text-sm text-blue-800">
-          <strong>ملاحظة:</strong> يتم تحديث الإشعارات تلقائياً كل 30 ثانية وفي الوقت الفعلي عبر WebSocket.
+          <strong>ملاحظة:</strong> يتم تحديث الإشعارات تلقائياً كل 30 ثانية وفي الوقت الفعلي عبر
+          WebSocket.
         </p>
       </div>
 
@@ -379,9 +374,7 @@ export default function NotificationsPage() {
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
           <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6 shadow-lg flex items-center gap-3">
             <div className="w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
-            <span className="text-[var(--text-primary)] font-medium">
-              جاري وضع علامة مقروء...
-            </span>
+            <span className="text-[var(--text-primary)] font-medium">جاري وضع علامة مقروء...</span>
           </div>
         </div>
       )}

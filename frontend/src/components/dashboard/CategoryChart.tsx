@@ -1,12 +1,4 @@
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  TooltipProps,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Card } from '@/components/ui/Card';
 import { CategoryDataPoint } from '@/types/dashboard';
 import { formatCurrency, formatPercentage } from '@/lib/utils';
@@ -15,17 +7,12 @@ interface CategoryChartProps {
   data: CategoryDataPoint[];
 }
 
-const CustomTooltip = ({
-  active,
-  payload,
-}: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
-        <p className="text-sm font-medium text-[var(--text-primary)] mb-1">
-          {data.name}
-        </p>
+        <p className="text-sm font-medium text-[var(--text-primary)] mb-1">{data.name}</p>
         <p className="text-sm text-[var(--text-secondary)]">
           {formatCurrency(data.value as number)}
         </p>
@@ -43,7 +30,7 @@ const renderCustomizedLabel = ({
   innerRadius,
   outerRadius,
   percent,
-  name,
+  name: _name,
 }: {
   cx: number;
   cy: number;
@@ -78,9 +65,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">
           توزيع الإيرادات حسب الفئة
         </h3>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          نسبة الإيرادات من كل فئة
-        </p>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">نسبة الإيرادات من كل فئة</p>
       </div>
 
       <div className="h-80">
@@ -104,7 +89,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
             <Legend
               wrapperStyle={{ fontSize: '14px' }}
               iconType="circle"
-              formatter={(value, entry: any) => {
+              formatter={(value) => {
                 const item = data.find((d) => d.name === value);
                 return (
                   <span className="text-sm">

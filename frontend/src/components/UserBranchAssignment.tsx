@@ -38,9 +38,7 @@ export const UserBranchAssignment = () => {
     try {
       setSaving(userId);
       const updatedUser = await usersService.assignBranch(userId, branchId);
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? updatedUser : u))
-      );
+      setUsers((prev) => prev.map((u) => (u.id === userId ? updatedUser : u)));
     } catch (err) {
       console.error('Error assigning branch:', err);
       alert('Failed to assign branch');
@@ -119,9 +117,7 @@ export const UserBranchAssignment = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-secondary)]">
                     <select
                       value={user.branchId || ''}
-                      onChange={(e) =>
-                        handleAssignBranch(user.id, e.target.value || null)
-                      }
+                      onChange={(e) => handleAssignBranch(user.id, e.target.value || null)}
                       disabled={saving === user.id}
                       className="px-3 py-1 border border-[var(--border-color)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)]"
                     >
@@ -139,11 +135,7 @@ export const UserBranchAssignment = () => {
                     {saving === user.id ? (
                       <span className="text-blue-600">Saving...</span>
                     ) : (
-                      <span
-                        className={
-                          user.isActive ? 'text-green-600' : 'text-red-600'
-                        }
-                      >
+                      <span className={user.isActive ? 'text-green-600' : 'text-red-600'}>
                         {user.isActive ? 'Active' : 'Inactive'}
                       </span>
                     )}

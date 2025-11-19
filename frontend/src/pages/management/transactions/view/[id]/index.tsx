@@ -157,7 +157,7 @@ export default function ViewTransactionPage() {
       // Success toast shown by mutation
       // Navigate to transactions list
       router.push('/management/transactions/list');
-    } catch (error) {
+    } catch (_error) {
       // Error toast shown by global API interceptor
     }
   }, [id, deleteTransaction, router]);
@@ -351,7 +351,10 @@ export default function ViewTransactionPage() {
       </div>
 
       {/* Transaction Details Card */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+      <div
+        className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+        dir="rtl"
+      >
         <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">معلومات العملية</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -419,9 +422,7 @@ export default function ViewTransactionPage() {
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
                 اسم الموظف/البائع
               </label>
-              <p className="text-lg text-[var(--text-primary)]">
-                {transaction.employeeVendorName}
-              </p>
+              <p className="text-lg text-[var(--text-primary)]">{transaction.employeeVendorName}</p>
             </div>
           )}
 
@@ -471,7 +472,10 @@ export default function ViewTransactionPage() {
 
       {/* Related Inventory Item */}
       {transaction.inventoryItem && (
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+        <div
+          className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+          dir="rtl"
+        >
           <div className="flex items-center gap-3 mb-4">
             <Package className="w-6 h-6 text-primary-600" />
             <h2 className="text-xl font-semibold text-[var(--text-primary)]">
@@ -484,9 +488,7 @@ export default function ViewTransactionPage() {
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
                 اسم الصنف
               </label>
-              <p className="text-lg text-[var(--text-primary)]">
-                {transaction.inventoryItem.name}
-              </p>
+              <p className="text-lg text-[var(--text-primary)]">{transaction.inventoryItem.name}</p>
             </div>
 
             <div>
@@ -501,7 +503,9 @@ export default function ViewTransactionPage() {
 
           <div className="mt-4">
             <button
-              onClick={() => router.push(`/management/inventory/view/${transaction.inventoryItem?.id}`)}
+              onClick={() =>
+                router.push(`/management/inventory/view/${transaction.inventoryItem?.id}`)
+              }
               className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
             >
               عرض تفاصيل الصنف ←
@@ -512,7 +516,10 @@ export default function ViewTransactionPage() {
 
       {/* Audit Log - Admin Only */}
       {isAdmin && (
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+        <div
+          className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+          dir="rtl"
+        >
           <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">سجل التدقيق</h2>
           <p className="text-[var(--text-secondary)]">
             سيتم عرض سجل التدقيق الكامل للعملية هنا (قيد التطوير)

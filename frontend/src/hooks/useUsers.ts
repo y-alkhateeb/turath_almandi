@@ -105,28 +105,23 @@ export const useCreateUser = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
 
       // Snapshot current data
-      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(
-        queryKeys.users.all,
-      );
+      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(queryKeys.users.all);
 
       // Optimistically add new user with temp ID
       if (previousUsers) {
-        queryClient.setQueryData<UserWithBranch[]>(
-          queryKeys.users.all,
-          (old = []) => [
-            {
-              id: `temp-${Date.now()}`,
-              username: newUser.username,
-              role: newUser.role,
-              branchId: newUser.branchId || null,
-              isActive: true,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              branch: null,
-            } as UserWithBranch,
-            ...old,
-          ],
-        );
+        queryClient.setQueryData<UserWithBranch[]>(queryKeys.users.all, (old = []) => [
+          {
+            id: `temp-${Date.now()}`,
+            username: newUser.username,
+            role: newUser.role,
+            branchId: newUser.branchId || null,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            branch: null,
+          } as UserWithBranch,
+          ...old,
+        ]);
       }
 
       return { previousUsers };
@@ -172,11 +167,7 @@ export const useCreateUser = () => {
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    UserWithBranch,
-    ApiError,
-    { id: string; data: UpdateUserDto }
-  >({
+  return useMutation<UserWithBranch, ApiError, { id: string; data: UpdateUserDto }>({
     mutationFn: ({ id, data }: { id: string; data: UpdateUserDto }) =>
       usersService.update(id, data),
 
@@ -187,32 +178,21 @@ export const useUpdateUser = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.users.detail(id) });
 
       // Snapshot current data
-      const previousUser = queryClient.getQueryData<UserWithBranch>(
-        queryKeys.users.detail(id),
-      );
-      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(
-        queryKeys.users.all,
-      );
+      const previousUser = queryClient.getQueryData<UserWithBranch>(queryKeys.users.detail(id));
+      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(queryKeys.users.all);
 
       // Optimistically update user detail
-      queryClient.setQueryData<UserWithBranch>(
-        queryKeys.users.detail(id),
-        (old) => {
-          if (!old) return old;
-          return { ...old, ...data, updatedAt: new Date().toISOString() };
-        },
-      );
+      queryClient.setQueryData<UserWithBranch>(queryKeys.users.detail(id), (old) => {
+        if (!old) return old;
+        return { ...old, ...data, updatedAt: new Date().toISOString() };
+      });
 
       // Optimistically update user in list
       if (previousUsers) {
-        queryClient.setQueryData<UserWithBranch[]>(
-          queryKeys.users.all,
-          (old = []) =>
-            old.map((user) =>
-              user.id === id
-                ? { ...user, ...data, updatedAt: new Date().toISOString() }
-                : user,
-            ),
+        queryClient.setQueryData<UserWithBranch[]>(queryKeys.users.all, (old = []) =>
+          old.map((user) =>
+            user.id === id ? { ...user, ...data, updatedAt: new Date().toISOString() } : user
+          )
         );
       }
 
@@ -273,20 +253,16 @@ export const useDeleteUser = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
 
       // Snapshot current data
-      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(
-        queryKeys.users.all,
-      );
+      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(queryKeys.users.all);
 
       // Optimistically mark user as inactive (soft delete)
       if (previousUsers) {
-        queryClient.setQueryData<UserWithBranch[]>(
-          queryKeys.users.all,
-          (old = []) =>
-            old.map((user) =>
-              user.id === deletedId
-                ? { ...user, isActive: false, updatedAt: new Date().toISOString() }
-                : user,
-            ),
+        queryClient.setQueryData<UserWithBranch[]>(queryKeys.users.all, (old = []) =>
+          old.map((user) =>
+            user.id === deletedId
+              ? { ...user, isActive: false, updatedAt: new Date().toISOString() }
+              : user
+          )
         );
       }
 

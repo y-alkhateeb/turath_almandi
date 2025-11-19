@@ -103,9 +103,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
       {/* Branch Display (Read-only) */}
       {user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الفرع
-          </label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
           <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>
@@ -132,14 +130,15 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
           disabled={isSubmitting}
         />
-        {errors.date && (
-          <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
-        )}
+        {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>}
       </div>
 
       {/* Amount Input */}
       <div>
-        <label htmlFor="amount" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+        <label
+          htmlFor="amount"
+          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+        >
           المبلغ <span className="text-red-500">*</span>
         </label>
         <div className="relative">
@@ -160,14 +159,15 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
             IQD
           </div>
         </div>
-        {errors.amount && (
-          <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
-        )}
+        {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>}
       </div>
 
       {/* Employee Name Input */}
       <div>
-        <label htmlFor="employee_name" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+        <label
+          htmlFor="employee_name"
+          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+        >
           اسم الموظف <span className="text-red-500">*</span>
         </label>
         <input
@@ -187,7 +187,10 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
 
       {/* Notes Textarea (Optional) */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+        <label
+          htmlFor="notes"
+          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+        >
           ملاحظات
         </label>
         <textarea
@@ -200,9 +203,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none`}
           disabled={isSubmitting}
         />
-        {errors.notes && (
-          <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
-        )}
+        {errors.notes && <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>}
       </div>
 
       {/* Form Actions */}
@@ -257,11 +258,7 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
       {createTransaction.isSuccess && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-green-600 ml-3"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
+            <svg className="w-5 h-5 text-green-600 ml-3" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"

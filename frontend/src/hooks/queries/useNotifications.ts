@@ -17,11 +17,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import notificationService from '@/api/services/notificationService';
 import { queryKeys } from './queryKeys';
-import type {
-  Notification,
-  NotificationSettings,
-  UpdateNotificationSettingsInput,
-} from '#/entity';
+import type { Notification, NotificationSettings, UpdateNotificationSettingsInput } from '#/entity';
 import type { PaginatedResponse, NotificationQueryFilters } from '#/api';
 import { ApiError } from '@/api/apiClient';
 
@@ -136,14 +132,12 @@ export const useMarkAsRead = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.all });
 
       // Snapshot current data
-      const previousNotifications = queryClient.getQueriesData<
-        PaginatedResponse<Notification>
-      >({
+      const previousNotifications = queryClient.getQueriesData<PaginatedResponse<Notification>>({
         queryKey: queryKeys.notifications.all,
       });
 
       const previousUnreadCount = queryClient.getQueryData<{ count: number }>(
-        queryKeys.notifications.unreadCount(),
+        queryKeys.notifications.unreadCount()
       );
 
       // Optimistically update notification in all lists
@@ -161,20 +155,17 @@ export const useMarkAsRead = () => {
                     isRead: true,
                     readAt: new Date().toISOString(),
                   }
-                : notification,
+                : notification
             ),
           };
-        },
+        }
       );
 
       // Optimistically update unread count
-      queryClient.setQueryData<{ count: number }>(
-        queryKeys.notifications.unreadCount(),
-        (old) => {
-          if (!old) return old;
-          return { count: Math.max(0, old.count - 1) };
-        },
-      );
+      queryClient.setQueryData<{ count: number }>(queryKeys.notifications.unreadCount(), (old) => {
+        if (!old) return old;
+        return { count: Math.max(0, old.count - 1) };
+      });
 
       return { previousNotifications, previousUnreadCount };
     },
@@ -189,7 +180,7 @@ export const useMarkAsRead = () => {
       if (context?.previousUnreadCount) {
         queryClient.setQueryData(
           queryKeys.notifications.unreadCount(),
-          context.previousUnreadCount,
+          context.previousUnreadCount
         );
       }
 
@@ -233,14 +224,12 @@ export const useMarkAllAsRead = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.all });
 
       // Snapshot current data
-      const previousNotifications = queryClient.getQueriesData<
-        PaginatedResponse<Notification>
-      >({
+      const previousNotifications = queryClient.getQueriesData<PaginatedResponse<Notification>>({
         queryKey: queryKeys.notifications.all,
       });
 
       const previousUnreadCount = queryClient.getQueryData<{ count: number }>(
-        queryKeys.notifications.unreadCount(),
+        queryKeys.notifications.unreadCount()
       );
 
       // Optimistically mark all notifications as read
@@ -257,14 +246,13 @@ export const useMarkAllAsRead = () => {
               readAt: notification.readAt || new Date().toISOString(),
             })),
           };
-        },
+        }
       );
 
       // Optimistically set unread count to 0
-      queryClient.setQueryData<{ count: number }>(
-        queryKeys.notifications.unreadCount(),
-        { count: 0 },
-      );
+      queryClient.setQueryData<{ count: number }>(queryKeys.notifications.unreadCount(), {
+        count: 0,
+      });
 
       return { previousNotifications, previousUnreadCount };
     },
@@ -279,7 +267,7 @@ export const useMarkAllAsRead = () => {
       if (context?.previousUnreadCount) {
         queryClient.setQueryData(
           queryKeys.notifications.unreadCount(),
-          context.previousUnreadCount,
+          context.previousUnreadCount
         );
       }
 
@@ -319,11 +307,7 @@ export const useMarkAllAsRead = () => {
 export const useUpdateNotificationSettings = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    NotificationSettings,
-    ApiError,
-    UpdateNotificationSettingsInput
-  >({
+  return useMutation<NotificationSettings, ApiError, UpdateNotificationSettingsInput>({
     mutationFn: notificationService.updateSettings,
 
     // Optimistic update
@@ -335,7 +319,7 @@ export const useUpdateNotificationSettings = () => {
 
       // Snapshot current data
       const previousSettings = queryClient.getQueryData<NotificationSettings[]>(
-        queryKeys.notifications.settings(),
+        queryKeys.notifications.settings()
       );
 
       // Optimistically update settings
@@ -351,9 +335,9 @@ export const useUpdateNotificationSettings = () => {
                   ...newSettings,
                   updatedAt: new Date().toISOString(),
                 }
-              : setting,
+              : setting
           );
-        },
+        }
       );
 
       return { previousSettings };
@@ -362,10 +346,7 @@ export const useUpdateNotificationSettings = () => {
     onError: (_error, _newSettings, context) => {
       // Rollback on error
       if (context?.previousSettings) {
-        queryClient.setQueryData(
-          queryKeys.notifications.settings(),
-          context.previousSettings,
-        );
+        queryClient.setQueryData(queryKeys.notifications.settings(), context.previousSettings);
       }
 
       // Note: Error toast shown by global API interceptor
@@ -399,9 +380,7 @@ export const useUpdateNotificationSettings = () => {
  * const { data: unreadNotifications } = useUnreadNotificationsList();
  * ```
  */
-export const useUnreadNotificationsList = (
-  filters?: Omit<NotificationQueryFilters, 'isRead'>,
-) => {
+export const useUnreadNotificationsList = (filters?: Omit<NotificationQueryFilters, 'isRead'>) => {
   return useNotifications({ ...filters, isRead: false });
 };
 
@@ -417,9 +396,7 @@ export const useUnreadNotificationsList = (
  * const { data: readNotifications } = useReadNotificationsList();
  * ```
  */
-export const useReadNotificationsList = (
-  filters?: Omit<NotificationQueryFilters, 'isRead'>,
-) => {
+export const useReadNotificationsList = (filters?: Omit<NotificationQueryFilters, 'isRead'>) => {
   return useNotifications({ ...filters, isRead: true });
 };
 

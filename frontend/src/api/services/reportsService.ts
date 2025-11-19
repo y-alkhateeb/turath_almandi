@@ -3,12 +3,12 @@
  * Generate and export various business reports
  *
  * Endpoints:
- * - GET /reports/financial?branchId&startDate&endDate ’ FinancialReport
- * - GET /reports/debts?branchId&status ’ DebtReport
- * - GET /reports/inventory?branchId ’ InventoryReport
- * - GET /reports/salaries?branchId&startDate&endDate ’ SalaryReport
- * - POST /reports/export/excel ’ Blob
- * - POST /reports/export/pdf ’ Blob
+ * - GET /reports/financial?branchId&startDate&endDate ï¿½ FinancialReport
+ * - GET /reports/debts?branchId&status ï¿½ DebtReport
+ * - GET /reports/inventory?branchId ï¿½ InventoryReport
+ * - GET /reports/salaries?branchId&startDate&endDate ï¿½ SalaryReport
+ * - POST /reports/export/excel ï¿½ Blob
+ * - POST /reports/export/pdf ï¿½ Blob
  *
  * All types match backend DTOs exactly. No any types.
  * Blob responses handled correctly for file downloads.
@@ -68,7 +68,7 @@ export enum ReportsApiEndpoints {
  * @throws ApiError on 400 (missing dates), 401
  */
 export const getFinancialReport = (
-  filters: Pick<ReportQueryFilters, 'branchId' | 'startDate' | 'endDate'>,
+  filters: Pick<ReportQueryFilters, 'branchId' | 'startDate' | 'endDate'>
 ): Promise<FinancialReport> => {
   if (!filters.startDate || !filters.endDate) {
     throw new Error('startDate and endDate are required for financial report');
@@ -103,7 +103,7 @@ export const getFinancialReport = (
  * @throws ApiError on 401
  */
 export const getDebtReport = (
-  filters?: Pick<ReportQueryFilters, 'branchId' | 'status'>,
+  filters?: Pick<ReportQueryFilters, 'branchId' | 'status'>
 ): Promise<DebtReport> => {
   return apiClient.get<DebtReport>({
     url: ReportsApiEndpoints.GetDebtReport,
@@ -134,7 +134,7 @@ export const getDebtReport = (
  * @throws ApiError on 401
  */
 export const getInventoryReport = (
-  filters?: Pick<ReportQueryFilters, 'branchId'>,
+  filters?: Pick<ReportQueryFilters, 'branchId'>
 ): Promise<InventoryReport> => {
   return apiClient.get<InventoryReport>({
     url: ReportsApiEndpoints.GetInventoryReport,
@@ -165,7 +165,7 @@ export const getInventoryReport = (
  * @throws ApiError on 400 (missing dates), 401
  */
 export const getSalaryReport = (
-  filters: Pick<ReportQueryFilters, 'branchId' | 'startDate' | 'endDate'>,
+  filters: Pick<ReportQueryFilters, 'branchId' | 'startDate' | 'endDate'>
 ): Promise<SalaryReport> => {
   if (!filters.startDate || !filters.endDate) {
     throw new Error('startDate and endDate are required for salary report');
@@ -201,19 +201,13 @@ export const getSalaryReport = (
  * @returns Blob - Excel file for download
  * @throws ApiError on 400 (invalid reportType), 401
  */
-export const exportToExcel = async (
-  request: ReportExportRequest,
-): Promise<Blob> => {
-  const response = await axiosInstance.post<Blob>(
-    ReportsApiEndpoints.ExportExcel,
-    request,
-    {
-      responseType: 'blob',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+export const exportToExcel = async (request: ReportExportRequest): Promise<Blob> => {
+  const response = await axiosInstance.post<Blob>(ReportsApiEndpoints.ExportExcel, request, {
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+  });
 
   return response.data;
 };
@@ -238,19 +232,13 @@ export const exportToExcel = async (
  * @returns Blob - PDF file for download
  * @throws ApiError on 400 (invalid reportType), 401
  */
-export const exportToPdf = async (
-  request: ReportExportRequest,
-): Promise<Blob> => {
-  const response = await axiosInstance.post<Blob>(
-    ReportsApiEndpoints.ExportPdf,
-    request,
-    {
-      responseType: 'blob',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+export const exportToPdf = async (request: ReportExportRequest): Promise<Blob> => {
+  const response = await axiosInstance.post<Blob>(ReportsApiEndpoints.ExportPdf, request, {
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+  });
 
   return response.data;
 };
@@ -287,9 +275,7 @@ export const downloadBlob = (blob: Blob, filename: string): void => {
  * @returns FinancialReport for current month
  * @throws ApiError on 401
  */
-export const getCurrentMonthFinancialReport = (
-  branchId?: string,
-): Promise<FinancialReport> => {
+export const getCurrentMonthFinancialReport = (branchId?: string): Promise<FinancialReport> => {
   const today = new Date();
   const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -344,9 +330,7 @@ export const getOverdueDebtsReport = (branchId?: string): Promise<DebtReport> =>
  * @returns SalaryReport for current month
  * @throws ApiError on 401
  */
-export const getCurrentMonthSalaryReport = (
-  branchId?: string,
-): Promise<SalaryReport> => {
+export const getCurrentMonthSalaryReport = (branchId?: string): Promise<SalaryReport> => {
   const today = new Date();
   const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -368,7 +352,7 @@ export const getCurrentMonthSalaryReport = (
  * @throws ApiError on 400, 401
  */
 export const exportFinancialToExcel = async (
-  filters: Pick<ReportQueryFilters, 'branchId' | 'startDate' | 'endDate'>,
+  filters: Pick<ReportQueryFilters, 'branchId' | 'startDate' | 'endDate'>
 ): Promise<Blob> => {
   return exportToExcel({
     reportType: 'financial',
@@ -388,7 +372,7 @@ export const exportFinancialToExcel = async (
  * @throws ApiError on 400, 401
  */
 export const exportDebtToPdf = async (
-  filters?: Pick<ReportQueryFilters, 'branchId' | 'status'>,
+  filters?: Pick<ReportQueryFilters, 'branchId' | 'status'>
 ): Promise<Blob> => {
   return exportToPdf({
     reportType: 'debts',
@@ -407,9 +391,7 @@ export const exportDebtToPdf = async (
  * @returns Blob - Excel file
  * @throws ApiError on 400, 401
  */
-export const exportInventoryToExcel = async (
-  branchId?: string,
-): Promise<Blob> => {
+export const exportInventoryToExcel = async (branchId?: string): Promise<Blob> => {
   return exportToExcel({
     reportType: 'inventory',
     filters: { branchId },

@@ -269,11 +269,14 @@ export interface TransactionStatsResponse {
   totalExpenses: number;
   netProfit: number;
   totalTransactions: number;
-  byCurrency?: Record<string, {
-    income: number;
-    expenses: number;
-    net: number;
-  }>;
+  byCurrency?: Record<
+    string,
+    {
+      income: number;
+      expenses: number;
+      net: number;
+    }
+  >;
   byPaymentMethod?: Record<string, number>;
   byCategory?: Record<string, number>;
 }
@@ -296,11 +299,14 @@ export interface DebtSummaryResponse {
 export interface InventorySummaryResponse {
   totalItems: number;
   totalValue: number;
-  byUnit?: Record<string, {
-    count: number;
-    totalQuantity: number;
-    totalValue: number;
-  }>;
+  byUnit?: Record<
+    string,
+    {
+      count: number;
+      totalQuantity: number;
+      totalValue: number;
+    }
+  >;
   lowStockItems?: number;
 }
 
@@ -589,9 +595,7 @@ export function isErrorResponse(response: unknown): response is ErrorResponse {
 /**
  * Type guard for paginated responses
  */
-export function isPaginatedResponse<T>(
-  response: unknown,
-): response is PaginatedResponse<T> {
+export function isPaginatedResponse<T>(response: unknown): response is PaginatedResponse<T> {
   return (
     typeof response === 'object' &&
     response !== null &&
@@ -611,11 +615,7 @@ export function isPaginatedResponse<T>(
  * Type guard for API responses
  */
 export function isApiResponse<T>(response: unknown): response is ApiResponse<T> {
-  return (
-    typeof response === 'object' &&
-    response !== null &&
-    'data' in response
-  );
+  return typeof response === 'object' && response !== null && 'data' in response;
 }
 
 /**
@@ -624,9 +624,5 @@ export function isApiResponse<T>(response: unknown): response is ApiResponse<T> 
 export function isValidationError(error: unknown): error is ErrorResponse & {
   message: string[];
 } {
-  return (
-    isErrorResponse(error) &&
-    Array.isArray(error.message) &&
-    error.statusCode === 400
-  );
+  return isErrorResponse(error) && Array.isArray(error.message) && error.statusCode === 400;
 }

@@ -50,19 +50,14 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
  */
 const passwordChangeSchema = z
   .object({
-    currentPassword: z
-      .string()
-      .min(1, { message: 'كلمة المرور الحالية مطلوبة' }),
+    currentPassword: z.string().min(1, { message: 'كلمة المرور الحالية مطلوبة' }),
     newPassword: z
       .string()
       .min(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
       .regex(passwordRegex, {
-        message:
-          'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم واحد على الأقل',
+        message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم واحد على الأقل',
       }),
-    confirmPassword: z
-      .string()
-      .min(1, { message: 'تأكيد كلمة المرور مطلوب' }),
+    confirmPassword: z.string().min(1, { message: 'تأكيد كلمة المرور مطلوب' }),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'كلمات المرور غير متطابقة',
@@ -144,7 +139,7 @@ export default function ProfilePage() {
    * Currently not implemented - shows user-friendly message
    */
   const handlePasswordChange = useCallback(
-    async (data: PasswordChangeFormData) => {
+    async (_data: PasswordChangeFormData) => {
       try {
         // TODO: Implement backend endpoint POST /auth/change-password
         // Expected request body: { currentPassword: string, newPassword: string }
@@ -163,7 +158,7 @@ export default function ProfilePage() {
         toast.success('تم تغيير كلمة المرور بنجاح');
         reset();
         */
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by global API interceptor
         toast.error('حدث خطأ أثناء تغيير كلمة المرور');
       }
@@ -228,9 +223,7 @@ export default function ProfilePage() {
       <div className="space-y-6">
         <div dir="rtl">
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">الملف الشخصي</h1>
-          <p className="text-[var(--text-secondary)] mt-1">
-            لم يتم تحميل بيانات المستخدم
-          </p>
+          <p className="text-[var(--text-secondary)] mt-1">لم يتم تحميل بيانات المستخدم</p>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <p className="text-red-800">فشل تحميل بيانات المستخدم. يرجى تسجيل الدخول مرة أخرى.</p>
@@ -248,9 +241,7 @@ export default function ProfilePage() {
       {/* Page Header */}
       <div dir="rtl">
         <h1 className="text-3xl font-bold text-[var(--text-primary)]">الملف الشخصي</h1>
-        <p className="text-[var(--text-secondary)] mt-1">
-          عرض وإدارة معلومات حسابك
-        </p>
+        <p className="text-[var(--text-secondary)] mt-1">عرض وإدارة معلومات حسابك</p>
       </div>
 
       {/* User Details Card */}
@@ -269,9 +260,7 @@ export default function ProfilePage() {
               <label className="text-sm font-medium text-[var(--text-secondary)]">
                 اسم المستخدم
               </label>
-              <p className="text-lg font-medium text-[var(--text-primary)] mt-1">
-                {user.username}
-              </p>
+              <p className="text-lg font-medium text-[var(--text-primary)] mt-1">{user.username}</p>
             </div>
           </div>
 
@@ -295,9 +284,7 @@ export default function ProfilePage() {
                 <MapPin className="w-5 h-5 text-green-600" />
               </div>
               <div className="flex-1">
-                <label className="text-sm font-medium text-[var(--text-secondary)]">
-                  الفرع
-                </label>
+                <label className="text-sm font-medium text-[var(--text-secondary)]">الفرع</label>
                 <p className="text-lg font-medium text-[var(--text-primary)] mt-1">
                   {user.branchId}
                 </p>
@@ -311,9 +298,7 @@ export default function ProfilePage() {
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
         <div className="flex items-center gap-2 mb-4" dir="rtl">
           <Lock className="w-5 h-5 text-[var(--text-primary)]" />
-          <h2 className="text-xl font-semibold text-[var(--text-primary)]">
-            تغيير كلمة المرور
-          </h2>
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">تغيير كلمة المرور</h2>
         </div>
 
         {/* Not Implemented Warning */}
@@ -323,8 +308,9 @@ export default function ProfilePage() {
             <div>
               <p className="font-medium text-yellow-900">ميزة قيد التطوير</p>
               <p className="text-sm text-yellow-700 mt-1">
-                تغيير كلمة المرور غير متاح حالياً. يتطلب تنفيذ نقطة نهاية الخادم (POST /auth/change-password).
-                يرجى الاتصال بمسؤول النظام إذا كنت بحاجة إلى تغيير كلمة المرور.
+                تغيير كلمة المرور غير متاح حالياً. يتطلب تنفيذ نقطة نهاية الخادم (POST
+                /auth/change-password). يرجى الاتصال بمسؤول النظام إذا كنت بحاجة إلى تغيير كلمة
+                المرور.
               </p>
             </div>
           </div>
@@ -409,7 +395,8 @@ export default function ProfilePage() {
       {/* Security Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" dir="rtl">
         <p className="text-sm text-blue-800">
-          <strong>نصيحة أمنية:</strong> استخدم كلمة مرور قوية تحتوي على مزيج من الأحرف الكبيرة والصغيرة والأرقام. لا تشارك كلمة المرور الخاصة بك مع أي شخص.
+          <strong>نصيحة أمنية:</strong> استخدم كلمة مرور قوية تحتوي على مزيج من الأحرف الكبيرة
+          والصغيرة والأرقام. لا تشارك كلمة المرور الخاصة بك مع أي شخص.
         </p>
       </div>
     </div>

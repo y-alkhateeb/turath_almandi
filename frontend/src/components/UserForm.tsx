@@ -18,7 +18,7 @@ const userSchema = z.object({
     .optional()
     .or(z.literal('')),
   role: z.enum(['ADMIN', 'ACCOUNTANT'], {
-    errorMap: () => ({ message: 'الدور مطلوب' })
+    errorMap: () => ({ message: 'الدور مطلوب' }),
   }),
   branchId: z.string().optional().nullable(),
 });
@@ -97,9 +97,7 @@ export const UserForm: React.FC<UserFormProps> = ({
           } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
           placeholder="أدخل اسم المستخدم"
         />
-        {errors.username && (
-          <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
-        )}
+        {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>}
         {isEditMode && (
           <p className="mt-1 text-xs text-[var(--text-secondary)]">لا يمكن تعديل اسم المستخدم</p>
         )}
@@ -142,17 +140,13 @@ export const UserForm: React.FC<UserFormProps> = ({
           <option value="ACCOUNTANT">محاسب</option>
           <option value="ADMIN">مدير</option>
         </select>
-        {errors.role && (
-          <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
-        )}
+        {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>}
       </div>
 
       {/* Branch - only for ACCOUNTANT role */}
       {selectedRole === 'ACCOUNTANT' && (
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الفرع
-          </label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
           <select
             {...register('branchId')}
             disabled={isLoading || isBranchesLoading}
@@ -162,7 +156,7 @@ export const UserForm: React.FC<UserFormProps> = ({
           >
             <option value="">بدون فرع</option>
             {branches
-              .filter(branch => branch.isActive)
+              .filter((branch) => branch.isActive)
               .map((branch) => (
                 <option key={branch.id} value={branch.id}>
                   {branch.name} - {branch.location}

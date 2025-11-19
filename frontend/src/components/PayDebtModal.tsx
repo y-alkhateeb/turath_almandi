@@ -131,15 +131,15 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
                   debt.status === 'PAID'
                     ? 'bg-green-100 text-green-800'
                     : debt.status === 'PARTIAL'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
                 }`}
               >
                 {debt.status === 'PAID'
                   ? 'مدفوع'
                   : debt.status === 'PARTIAL'
-                  ? 'مدفوع جزئياً'
-                  : 'نشط'}
+                    ? 'مدفوع جزئياً'
+                    : 'نشط'}
               </span>
             </div>
 
@@ -193,7 +193,10 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
 
         {/* Payment Date Picker */}
         <div>
-          <label htmlFor="paymentDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          <label
+            htmlFor="paymentDate"
+            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+          >
             تاريخ الدفع <span className="text-red-500">*</span>
           </label>
           <input
@@ -230,9 +233,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             disabled={isSubmitting || payDebt.isPending}
             className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
-            {(isSubmitting || payDebt.isPending) && (
-              <LoadingSpinner size="sm" color="white" />
-            )}
+            {(isSubmitting || payDebt.isPending) && <LoadingSpinner size="sm" color="white" />}
             {isSubmitting || payDebt.isPending ? 'جاري الدفع...' : 'دفع الدين'}
           </button>
 

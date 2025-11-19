@@ -35,7 +35,7 @@ export function isAccountant(user: User | null | undefined): boolean {
  */
 export function canAccessBranch(
   user: User | null | undefined,
-  branchId: string | null | undefined,
+  branchId: string | null | undefined
 ): boolean {
   if (!user) return false;
 
@@ -125,7 +125,7 @@ export function canViewAuditLogs(user: User | null | undefined): boolean {
  */
 export function canManageTransactions(
   user: User | null | undefined,
-  transactionBranchId?: string | null,
+  transactionBranchId?: string | null
 ): boolean {
   if (!user) return false;
 
@@ -156,7 +156,7 @@ export function canManageTransactions(
  */
 export function canManageDebts(
   user: User | null | undefined,
-  debtBranchId?: string | null,
+  debtBranchId?: string | null
 ): boolean {
   if (!user) return false;
 
@@ -187,7 +187,7 @@ export function canManageDebts(
  */
 export function canManageInventory(
   user: User | null | undefined,
-  inventoryBranchId?: string | null,
+  inventoryBranchId?: string | null
 ): boolean {
   if (!user) return false;
 
@@ -224,9 +224,7 @@ export function canViewNotifications(user: User | null | undefined): boolean {
  * @param user - User object
  * @returns true if user can manage notification settings
  */
-export function canManageNotificationSettings(
-  user: User | null | undefined,
-): boolean {
+export function canManageNotificationSettings(user: User | null | undefined): boolean {
   return user !== null && user !== undefined;
 }
 
@@ -259,9 +257,7 @@ export function isUserActive(user: User | null | undefined): boolean {
  * @param user - User object
  * @returns Array of accessible branch IDs, null for all branches, or empty array for none
  */
-export function getAccessibleBranchIds(
-  user: User | null | undefined,
-): string[] | null {
+export function getAccessibleBranchIds(user: User | null | undefined): string[] | null {
   if (!user) return [];
 
   // Admins can access all branches
@@ -289,7 +285,7 @@ export function canPerformAction(
   user: User | null | undefined,
   action: 'create' | 'update' | 'delete' | 'view',
   resource: 'user' | 'branch' | 'transaction' | 'debt' | 'inventory' | 'report' | 'audit',
-  resourceBranchId?: string | null,
+  resourceBranchId?: string | null
 ): boolean {
   if (!user) return false;
 

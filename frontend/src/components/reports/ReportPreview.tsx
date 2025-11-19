@@ -12,16 +12,18 @@
  * - No business logic
  */
 
-import { Printer, FileSpreadsheet, FileText, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import {
+  Printer,
+  FileSpreadsheet,
+  FileText,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+} from 'lucide-react';
 import { formatCurrency, formatDate, formatNumber } from '@/utils/format';
 import { Table, type Column } from '../ui/Table';
 import { StatCard } from '../ui/StatCard';
-import type {
-  FinancialReport,
-  DebtReport,
-  InventoryReport,
-  SalaryReport,
-} from '@/types/api';
+import type { FinancialReport, DebtReport, InventoryReport, SalaryReport } from '@/types/api';
 
 // ============================================
 // DISCRIMINATED UNION FOR REPORT DATA
@@ -103,13 +105,13 @@ function FinancialReportView({ data }: { data: FinancialReport }) {
     <div className="space-y-6" dir="rtl">
       {/* Report Header */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
-        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
-          التقرير المالي
-        </h2>
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">التقرير المالي</h2>
         <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            <span>من {formatDate(data.startDate)} إلى {formatDate(data.endDate)}</span>
+            <span>
+              من {formatDate(data.startDate)} إلى {formatDate(data.endDate)}
+            </span>
           </div>
           {data.branchName && <span>• الفرع: {data.branchName}</span>}
         </div>
@@ -199,9 +201,7 @@ function DebtReportView({ data }: { data: DebtReport }) {
       width: '140px',
       align: 'right',
       render: (debt) => (
-        <span className="font-semibold text-red-600">
-          {formatCurrency(debt.remainingAmount)}
-        </span>
+        <span className="font-semibold text-red-600">{formatCurrency(debt.remainingAmount)}</span>
       ),
     },
     {
@@ -221,7 +221,9 @@ function DebtReportView({ data }: { data: DebtReport }) {
           PAID: 'مدفوع',
         };
         return (
-          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[debt.status as keyof typeof statusColors]}`}>
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[debt.status as keyof typeof statusColors]}`}
+          >
             {statusLabels[debt.status as keyof typeof statusLabels] || debt.status}
           </span>
         );
@@ -252,9 +254,7 @@ function DebtReportView({ data }: { data: DebtReport }) {
     <div className="space-y-6" dir="rtl">
       {/* Report Header */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
-        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
-          تقرير الديون
-        </h2>
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">تقرير الديون</h2>
         <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
           {data.branchName && <span>الفرع: {data.branchName}</span>}
           {data.status && data.status !== 'all' && <span>• الحالة: {data.status}</span>}
@@ -326,9 +326,7 @@ function InventoryReportView({ data }: { data: InventoryReport }) {
               تلقائي
             </span>
           )}
-          {item.isLowStock && (
-            <div className="text-xs text-orange-600 mt-1">مخزون منخفض</div>
-          )}
+          {item.isLowStock && <div className="text-xs text-orange-600 mt-1">مخزون منخفض</div>}
         </div>
       ),
     },
@@ -363,9 +361,7 @@ function InventoryReportView({ data }: { data: InventoryReport }) {
       width: '140px',
       align: 'right',
       render: (item) => (
-        <span className="font-semibold text-primary-600">
-          {formatCurrency(item.totalValue)}
-        </span>
+        <span className="font-semibold text-primary-600">{formatCurrency(item.totalValue)}</span>
       ),
     },
   ];
@@ -374,9 +370,7 @@ function InventoryReportView({ data }: { data: InventoryReport }) {
     <div className="space-y-6" dir="rtl">
       {/* Report Header */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
-        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
-          تقرير المخزون
-        </h2>
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">تقرير المخزون</h2>
         <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
           {data.branchName && <span>الفرع: {data.branchName}</span>}
         </div>
@@ -454,17 +448,14 @@ function SalaryReportView({ data }: { data: SalaryReport }) {
       width: '150px',
       align: 'right',
       render: (salary) => (
-        <span className="font-semibold text-green-600">
-          {formatCurrency(salary.totalAmount)}
-        </span>
+        <span className="font-semibold text-green-600">{formatCurrency(salary.totalAmount)}</span>
       ),
     },
     {
       key: 'lastPaymentDate',
       header: 'آخر دفعة',
       width: '140px',
-      render: (salary) =>
-        salary.lastPaymentDate ? formatDate(salary.lastPaymentDate) : '-',
+      render: (salary) => (salary.lastPaymentDate ? formatDate(salary.lastPaymentDate) : '-'),
     },
   ];
 
@@ -472,13 +463,13 @@ function SalaryReportView({ data }: { data: SalaryReport }) {
     <div className="space-y-6" dir="rtl">
       {/* Report Header */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
-        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
-          تقرير الرواتب
-        </h2>
+        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">تقرير الرواتب</h2>
         <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            <span>من {formatDate(data.startDate)} إلى {formatDate(data.endDate)}</span>
+            <span>
+              من {formatDate(data.startDate)} إلى {formatDate(data.endDate)}
+            </span>
           </div>
           {data.branchName && <span>• الفرع: {data.branchName}</span>}
         </div>
@@ -537,7 +528,10 @@ export function ReportPreview({
   return (
     <div className="space-y-6">
       {/* Action Buttons */}
-      <div className="flex items-center justify-end gap-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4" dir="rtl">
+      <div
+        className="flex items-center justify-end gap-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4"
+        dir="rtl"
+      >
         <button
           onClick={onPrint}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"

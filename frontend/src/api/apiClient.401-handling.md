@@ -8,12 +8,12 @@ The API client (`apiClient.ts`) implements comprehensive 401 (Unauthorized) erro
 
 All requirements are **fully implemented** in `apiClient.ts`:
 
-| Requirement | Status | Implementation |
-|-------------|--------|----------------|
-| ✅ Attempt token refresh | **IMPLEMENTED** | Lines 378-422 |
-| ✅ Clear auth state on failure | **IMPLEMENTED** | Line 431 |
-| ✅ Redirect to /login | **IMPLEMENTED** | Line 432 |
-| ✅ Show Arabic toast message | **IMPLEMENTED** | Line 433 |
+| Requirement                    | Status          | Implementation |
+| ------------------------------ | --------------- | -------------- |
+| ✅ Attempt token refresh       | **IMPLEMENTED** | Lines 378-422  |
+| ✅ Clear auth state on failure | **IMPLEMENTED** | Line 431       |
+| ✅ Redirect to /login          | **IMPLEMENTED** | Line 432       |
+| ✅ Show Arabic toast message   | **IMPLEMENTED** | Line 433       |
 
 ## Implementation Details
 
@@ -27,7 +27,7 @@ if (isRefreshing) {
   // Queue request to retry after refresh completes
   return new Promise((resolve, reject) => {
     failedRequestsQueue.push({ resolve, reject });
-  })
+  });
 }
 
 // Step 2: Mark request as retried to prevent infinite loops
@@ -68,7 +68,6 @@ try {
 
   isRefreshing = false;
   return axiosInstance(originalRequest);
-
 } catch (refreshError) {
   // Refresh failed - execute failure protocol
 }
@@ -180,19 +179,19 @@ const getToken = (): string | null => {
 
 The `ApiError` class includes Arabic error messages for all status codes:
 
-| Status Code | Arabic Message |
-|-------------|----------------|
-| **401** | انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى |
-| 400 | خطأ في البيانات المدخلة |
-| 403 | ليس لديك صلاحية للوصول إلى هذا المورد |
-| 404 | المورد المطلوب غير موجود |
-| 409 | هذا العنصر موجود بالفعل |
-| 422 | البيانات المدخلة غير صالحة |
-| 429 | تم تجاوز عدد المحاولات المسموح به، يرجى المحاولة لاحقاً |
-| 500 | خطأ في الخادم، يرجى المحاولة لاحقاً |
-| 502 | خطأ في الاتصال بالخادم |
-| 503 | الخدمة غير متاحة حالياً، يرجى المحاولة لاحقاً |
-| 504 | انتهت مهلة الاتصال بالخادم |
+| Status Code | Arabic Message                                          |
+| ----------- | ------------------------------------------------------- |
+| **401**     | انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى         |
+| 400         | خطأ في البيانات المدخلة                                 |
+| 403         | ليس لديك صلاحية للوصول إلى هذا المورد                   |
+| 404         | المورد المطلوب غير موجود                                |
+| 409         | هذا العنصر موجود بالفعل                                 |
+| 422         | البيانات المدخلة غير صالحة                              |
+| 429         | تم تجاوز عدد المحاولات المسموح به، يرجى المحاولة لاحقاً |
+| 500         | خطأ في الخادم، يرجى المحاولة لاحقاً                     |
+| 502         | خطأ في الاتصال بالخادم                                  |
+| 503         | الخدمة غير متاحة حالياً، يرجى المحاولة لاحقاً           |
+| 504         | انتهت مهلة الاتصال بالخادم                              |
 
 ## Security Features
 
@@ -216,12 +215,15 @@ The API client integrates seamlessly with React Query hooks (useUsers, useBranch
 ### Manual Test Scenarios
 
 #### ✅ Scenario 1: Successful Token Refresh
+
 **Steps:**
+
 1. Login to application
 2. Wait for access token to expire (or manually expire it)
 3. Make an API request (e.g., navigate to Users page)
 
 **Expected:**
+
 - Request fails with 401
 - Token refresh is attempted
 - New token is received
@@ -231,12 +233,15 @@ The API client integrates seamlessly with React Query hooks (useUsers, useBranch
 - **No** toast message
 
 #### ✅ Scenario 2: Refresh Token Expired
+
 **Steps:**
+
 1. Login to application
 2. Manually expire both access and refresh tokens
 3. Make an API request
 
 **Expected:**
+
 - Request fails with 401
 - Token refresh is attempted
 - Refresh fails (refresh token expired)
@@ -245,12 +250,15 @@ The API client integrates seamlessly with React Query hooks (useUsers, useBranch
 - Toast message appears: "انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى"
 
 #### ✅ Scenario 3: Multiple Simultaneous 401s
+
 **Steps:**
+
 1. Login to application
 2. Expire access token
 3. Navigate to page that makes multiple API calls simultaneously
 
 **Expected:**
+
 - All requests fail with 401
 - Only ONE token refresh is attempted (not multiple)
 - All requests are queued
@@ -258,13 +266,16 @@ The API client integrates seamlessly with React Query hooks (useUsers, useBranch
 - All data loads successfully
 
 #### ✅ Scenario 4: Network Error During Refresh
+
 **Steps:**
+
 1. Login to application
 2. Disconnect from internet
 3. Expire access token
 4. Make an API request
 
 **Expected:**
+
 - Request fails with 401
 - Token refresh is attempted
 - Refresh fails (network error)
@@ -273,13 +284,16 @@ The API client integrates seamlessly with React Query hooks (useUsers, useBranch
 - Toast message appears
 
 #### ✅ Scenario 5: Server Error During Refresh (500)
+
 **Steps:**
+
 1. Login to application
 2. Make refresh endpoint return 500 error
 3. Expire access token
 4. Make an API request
 
 **Expected:**
+
 - Request fails with 401
 - Token refresh is attempted
 - Refresh fails (server error)
@@ -303,44 +317,50 @@ When adding automated tests (Vitest/Jest), cover:
 ## Common Issues and Solutions
 
 ### Issue 1: Infinite Refresh Loop
+
 **Cause**: Refresh endpoint returning 401
 **Solution**: `_retry` flag prevents retrying the same request twice
 
 ### Issue 2: Multiple Refresh Requests
+
 **Cause**: Multiple 401s triggering simultaneous refreshes
 **Solution**: `isRefreshing` flag and request queueing
 
 ### Issue 3: Auth State Not Cleared
+
 **Cause**: Only clearing one storage
 **Solution**: `clearAuthData()` clears both localStorage and sessionStorage
 
 ### Issue 4: User Not Redirected
+
 **Cause**: Using React Router instead of window.location
 **Solution**: `window.location.href = '/login'` forces full page reload
 
 ### Issue 5: Toast Not Showing
+
 **Cause**: Toast called before Sonner is initialized
 **Solution**: Toast is called after redirect, ensuring Sonner is available
 
 ## Code References
 
-| Feature | File | Lines |
-|---------|------|-------|
-| 401 Interceptor | `apiClient.ts` | 356-436 |
-| Token Refresh | `apiClient.ts` | 378-422 |
-| Clear Auth Data | `apiClient.ts` | 225-228, 431 |
-| Redirect | `apiClient.ts` | 432 |
-| Toast Message | `apiClient.ts` | 433 |
-| Request Queueing | `apiClient.ts` | 314-337 |
-| Get Token | `apiClient.ts` | 156-180 |
-| Get Refresh Token | `apiClient.ts` | 185-209 |
-| Update Access Token | `apiClient.ts` | 233-248 |
+| Feature             | File           | Lines        |
+| ------------------- | -------------- | ------------ |
+| 401 Interceptor     | `apiClient.ts` | 356-436      |
+| Token Refresh       | `apiClient.ts` | 378-422      |
+| Clear Auth Data     | `apiClient.ts` | 225-228, 431 |
+| Redirect            | `apiClient.ts` | 432          |
+| Toast Message       | `apiClient.ts` | 433          |
+| Request Queueing    | `apiClient.ts` | 314-337      |
+| Get Token           | `apiClient.ts` | 156-180      |
+| Get Refresh Token   | `apiClient.ts` | 185-209      |
+| Update Access Token | `apiClient.ts` | 233-248      |
 
 ## Conclusion
 
 ✅ **All requirements are fully implemented and working as expected.**
 
 The 401 handling in `apiClient.ts` provides:
+
 - Automatic token refresh
 - Complete auth state cleanup
 - User-friendly redirection

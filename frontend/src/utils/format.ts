@@ -19,7 +19,7 @@ dayjs.locale('ar');
  */
 export function formatCurrency(
   amount: number | null | undefined,
-  locale: string = 'ar-IQ',
+  locale: string = 'ar-IQ'
 ): string {
   if (amount === null || amount === undefined || isNaN(amount)) {
     return new Intl.NumberFormat(locale, {
@@ -44,7 +44,7 @@ export function formatCurrency(
  */
 export function formatDate(
   date: string | Date | null | undefined,
-  locale: string = 'ar-IQ',
+  locale: string = 'ar-IQ'
 ): string {
   if (!date) return '-';
   const dayjsDate = dayjs(date);
@@ -68,7 +68,7 @@ export function formatDateShort(date: string | Date): string {
  */
 export function formatDateTime(
   date: string | Date | null | undefined,
-  locale: string = 'ar-IQ',
+  locale: string = 'ar-IQ'
 ): string {
   if (!date) return '-';
   const dayjsDate = dayjs(date);
@@ -91,7 +91,7 @@ export function formatTime(date: string | Date): string {
  */
 export function formatRelativeTime(
   date: string | Date | null | undefined,
-  locale: string = 'ar',
+  locale: string = 'ar'
 ): string {
   if (!date) return '-';
   const dayjsDate = dayjs(date);
@@ -105,10 +105,7 @@ export function formatRelativeTime(
  * @param value - Number to format (returns '0' if null/undefined)
  * @param decimals - Number of decimal places (default: 2)
  */
-export function formatNumber(
-  value: number | null | undefined,
-  decimals: number = 2,
-): string {
+export function formatNumber(value: number | null | undefined, decimals: number = 2): string {
   if (value === null || value === undefined || isNaN(value)) {
     return '0';
   }
@@ -132,8 +129,16 @@ export function parseDecimal(value: string | number | null | undefined): number 
 
   // Convert Arabic numerals to Western numerals
   const arabicToWestern: Record<string, string> = {
-    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+    '٠': '0',
+    '١': '1',
+    '٢': '2',
+    '٣': '3',
+    '٤': '4',
+    '٥': '5',
+    '٦': '6',
+    '٧': '7',
+    '٨': '8',
+    '٩': '9',
   };
 
   let normalized = value;

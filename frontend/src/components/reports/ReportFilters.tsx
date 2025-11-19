@@ -14,7 +14,7 @@
 
 import { Calendar, Filter, RefreshCw, FileText } from 'lucide-react';
 import { BranchSelector } from '@/components/BranchSelector';
-import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
+import type { SelectOption } from '@/components/form/FormSelect';
 import { useAuth } from '@/hooks/useAuth';
 import { toInputDate, startOfMonth } from '@/utils/format';
 import { DebtStatus, InventoryUnit } from '@/types/enum';
@@ -160,7 +160,7 @@ const getDefaultFilters = (reportType: string): ReportFilters => {
 export function ReportFilters({
   reportType,
   filters,
-  branches,
+  branches: _branches,
   onChange,
   onGenerate,
   isGenerating,
@@ -195,7 +195,10 @@ export function ReportFilters({
   };
 
   return (
-    <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+    <div
+      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+      dir="rtl"
+    >
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
@@ -207,9 +210,7 @@ export function ReportFilters({
               <h3 className="text-lg font-semibold text-[var(--text-primary)]">
                 {reportTypeLabels[reportType]}
               </h3>
-              <p className="text-sm text-[var(--text-secondary)]">
-                حدد المعايير لإنشاء التقرير
-              </p>
+              <p className="text-sm text-[var(--text-secondary)]">حدد المعايير لإنشاء التقرير</p>
             </div>
           </div>
           <button

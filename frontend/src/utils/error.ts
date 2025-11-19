@@ -96,10 +96,7 @@ export function isValidationError(error: unknown): boolean {
   }
 
   if (isAxiosError(error)) {
-    return (
-      error.response?.status === 400 &&
-      Array.isArray(error.response?.data?.message)
-    );
+    return error.response?.status === 400 && Array.isArray(error.response?.data?.message);
   }
 
   return false;

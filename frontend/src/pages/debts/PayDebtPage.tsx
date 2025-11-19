@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, DollarSign } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useDebts, usePayDebt } from '@/hooks/useDebts';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
@@ -54,7 +54,7 @@ export const PayDebtPage = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
+    reset: _reset,
   } = useForm<PayDebtFormData>({
     resolver: debt ? zodResolver(createPayDebtSchema(debt.remainingAmount)) : undefined,
     defaultValues: {
@@ -92,9 +92,7 @@ export const PayDebtPage = () => {
   if (!debt) {
     return (
       <div className="space-y-6">
-        <Alert variant="destructive">
-          لم يتم العثور على الدين المطلوب
-        </Alert>
+        <Alert variant="destructive">لم يتم العثور على الدين المطلوب</Alert>
         <Button onClick={handleCancel}>
           <ArrowRight className="w-4 h-4" />
           العودة إلى قائمة الديون
@@ -107,22 +105,13 @@ export const PayDebtPage = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-          className="gap-2"
-        >
+        <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />
           رجوع
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-            دفع دين
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            دفع دين {debt.creditorName}
-          </p>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">دفع دين</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">دفع دين {debt.creditorName}</p>
         </div>
       </div>
 
@@ -143,15 +132,15 @@ export const PayDebtPage = () => {
                 debt.status === 'PAID'
                   ? 'success'
                   : debt.status === 'PARTIAL'
-                  ? 'warning'
-                  : 'destructive'
+                    ? 'warning'
+                    : 'destructive'
               }
             >
               {debt.status === 'PAID'
                 ? 'مدفوع'
                 : debt.status === 'PARTIAL'
-                ? 'مدفوع جزئياً'
-                : 'نشط'}
+                  ? 'مدفوع جزئياً'
+                  : 'نشط'}
             </Badge>
           </div>
 
@@ -203,7 +192,10 @@ export const PayDebtPage = () => {
           </div>
 
           <div>
-            <label htmlFor="paymentDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            <label
+              htmlFor="paymentDate"
+              className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+            >
               تاريخ الدفع <span className="text-red-500">*</span>
             </label>
             <input
@@ -239,9 +231,7 @@ export const PayDebtPage = () => {
               disabled={isSubmitting || payDebt.isPending}
               className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
-              {(isSubmitting || payDebt.isPending) && (
-                <LoadingSpinner size="sm" color="white" />
-              )}
+              {(isSubmitting || payDebt.isPending) && <LoadingSpinner size="sm" color="white" />}
               {isSubmitting || payDebt.isPending ? 'جاري الدفع...' : 'دفع الدين'}
             </button>
 

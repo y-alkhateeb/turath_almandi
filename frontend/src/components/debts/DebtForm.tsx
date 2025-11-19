@@ -11,7 +11,6 @@
  * - Strict typing matching backend DTOs
  */
 
-import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,34 +30,36 @@ import type { CreateDebtInput } from '#/entity';
  * Zod schema for creating a debt
  * Matches backend CreateDebtDto validation rules
  */
-const createDebtSchema = z.object({
-  creditorName: z
-    .string()
-    .min(1, { message: 'اسم الدائن مطلوب' })
-    .max(200, { message: 'اسم الدائن يجب ألا يتجاوز 200 حرف' }),
-  amount: z
-    .number({
-      required_error: 'المبلغ مطلوب',
-      invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
-    })
-    .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
-    .positive({ message: 'المبلغ يجب أن يكون موجبًا' }),
-  currency: z.nativeEnum(Currency).optional(),
-  date: z.string().min(1, { message: 'تاريخ الدين مطلوب' }),
-  dueDate: z.string().min(1, { message: 'تاريخ الاستحقاق مطلوب' }),
-  notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
-  branchId: z.string().optional(),
-}).refine(
-  (data) => {
-    // dueDate must be >= date
-    if (!data.date || !data.dueDate) return true;
-    return new Date(data.dueDate) >= new Date(data.date);
-  },
-  {
-    message: 'تاريخ الاستحقاق يجب أن يكون بعد أو يساوي تاريخ الدين',
-    path: ['dueDate'],
-  }
-);
+const createDebtSchema = z
+  .object({
+    creditorName: z
+      .string()
+      .min(1, { message: 'اسم الدائن مطلوب' })
+      .max(200, { message: 'اسم الدائن يجب ألا يتجاوز 200 حرف' }),
+    amount: z
+      .number({
+        required_error: 'المبلغ مطلوب',
+        invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
+      })
+      .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
+      .positive({ message: 'المبلغ يجب أن يكون موجبًا' }),
+    currency: z.nativeEnum(Currency).optional(),
+    date: z.string().min(1, { message: 'تاريخ الدين مطلوب' }),
+    dueDate: z.string().min(1, { message: 'تاريخ الاستحقاق مطلوب' }),
+    notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
+    branchId: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // dueDate must be >= date
+      if (!data.date || !data.dueDate) return true;
+      return new Date(data.dueDate) >= new Date(data.date);
+    },
+    {
+      message: 'تاريخ الاستحقاق يجب أن يكون بعد أو يساوي تاريخ الدين',
+      path: ['dueDate'],
+    }
+  );
 
 type FormData = z.infer<typeof createDebtSchema>;
 
@@ -89,16 +90,10 @@ const currencyOptions: SelectOption[] = [
 // COMPONENT
 // ============================================
 
-export function DebtForm({
-  mode,
-  onSubmit,
-  onCancel,
-  isSubmitting,
-}: DebtFormProps) {
+export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: DebtFormProps) {
   const { user, isAdmin } = useAuth();
 
   const {
-    register,
     control,
     handleSubmit,
     formState: { errors },
@@ -179,22 +174,22 @@ export function DebtForm({
         <Controller
           name="branchId"
           control={control}
-          render={({ field }) => (
-            <BranchSelector
-              value={field.value || null}
-              onChange={field.onChange}
-              disabled={isSubmitting}
-            />
-          )}
+          render={({ field }) => {
+            return (
+              <BranchSelector
+                value={field.value || null}
+                onChange={field.onChange}
+                disabled={isSubmitting}
+              />
+            );
+          }}
         />
       )}
 
       {/* Branch Display - Read-only for accountants */}
       {!isAdmin && user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الفرع
-          </label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
           <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>

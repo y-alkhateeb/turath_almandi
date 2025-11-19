@@ -61,12 +61,7 @@ export default function UsersListPage() {
   /**
    * Fetch all users
    */
-  const {
-    data: users = [],
-    isLoading,
-    error,
-    refetch,
-  } = useUsers();
+  const { data: users = [], isLoading, error, refetch } = useUsers();
 
   // ============================================
   // MUTATIONS
@@ -101,7 +96,7 @@ export default function UsersListPage() {
           data: { isActive: !user.isActive },
         });
         // Success toast shown by mutation
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by mutation
       }
     },
@@ -142,7 +137,7 @@ export default function UsersListPage() {
       try {
         await deleteUser.mutateAsync(id);
         // Success toast shown by mutation
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by mutation
       }
     },
@@ -292,8 +287,8 @@ export default function UsersListPage() {
       {/* Info Note */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" dir="rtl">
         <p className="text-sm text-blue-800">
-          <strong>ملاحظة:</strong> المحاسبون يمكنهم الوصول فقط إلى بيانات الفرع المخصص لهم.
-          المدراء يمكنهم الوصول إلى جميع البيانات في جميع الفروع.
+          <strong>ملاحظة:</strong> المحاسبون يمكنهم الوصول فقط إلى بيانات الفرع المخصص لهم. المدراء
+          يمكنهم الوصول إلى جميع البيانات في جميع الفروع.
         </p>
       </div>
 

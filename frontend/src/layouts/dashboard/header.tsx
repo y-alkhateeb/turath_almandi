@@ -6,7 +6,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Menu, LogOut, Bell, Moon, Sun, User, Settings, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Logo } from '@/components/logo';
 import { useUserInfo, useUserActions } from '@/store/userStore';
 import { useTheme } from '@/theme/hooks';
 import { ThemeMode } from '@/theme/type';
@@ -167,9 +166,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           </button>
 
           {/* Title */}
-          <h1 className="text-xl md:text-2xl font-bold text-brand-cream-100">
-            لوحة التحكم
-          </h1>
+          <h1 className="text-xl md:text-2xl font-bold text-brand-cream-100">لوحة التحكم</h1>
         </div>
 
         {/* Left Side: Theme Toggle + Notifications + User Menu */}
@@ -252,7 +249,11 @@ export function Header({ onMenuClick }: HeaderProps) {
                       </p>
                       {userInfo?.branch && (
                         <div className="flex items-center gap-1 mt-1.5">
-                          <Icon icon="solar:shop-2-bold-duotone" className="text-brand-gold-500 icon-float" size={14} />
+                          <Icon
+                            icon="solar:shop-2-bold-duotone"
+                            className="text-brand-gold-500 icon-float"
+                            size={14}
+                          />
                           <span className="text-xs text-[var(--text-secondary)]">
                             {userInfo.branch.name}
                           </span>
@@ -276,8 +277,12 @@ export function Header({ onMenuClick }: HeaderProps) {
                       <User className="w-4 h-4 text-brand-gold-500 group-hover:scale-110 transition-transform" />
                     </div>
                     <div className="flex-1 text-right">
-                      <p className="text-sm font-medium group-hover:text-brand-gold-500 transition-colors">الملف الشخصي</p>
-                      <p className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">عرض وتعديل معلوماتك</p>
+                      <p className="text-sm font-medium group-hover:text-brand-gold-500 transition-colors">
+                        الملف الشخصي
+                      </p>
+                      <p className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                        عرض وتعديل معلوماتك
+                      </p>
                     </div>
                     <ChevronDown className="w-4 h-4 opacity-0 group-hover:opacity-100 -rotate-90 transition-all duration-300" />
                   </button>
@@ -294,8 +299,12 @@ export function Header({ onMenuClick }: HeaderProps) {
                       <Settings className="w-4 h-4 text-brand-green-500 group-hover:rotate-90 group-hover:scale-110 transition-all duration-500" />
                     </div>
                     <div className="flex-1 text-right">
-                      <p className="text-sm font-medium group-hover:text-brand-green-500 transition-colors">الإعدادات</p>
-                      <p className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">تخصيص التطبيق</p>
+                      <p className="text-sm font-medium group-hover:text-brand-green-500 transition-colors">
+                        الإعدادات
+                      </p>
+                      <p className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                        تخصيص التطبيق
+                      </p>
                     </div>
                     <ChevronDown className="w-4 h-4 opacity-0 group-hover:opacity-100 -rotate-90 transition-all duration-300" />
                   </button>
@@ -319,8 +328,12 @@ export function Header({ onMenuClick }: HeaderProps) {
                       <LogOut className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                     <div className="flex-1 text-right">
-                      <p className="text-sm font-medium group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors">تسجيل الخروج</p>
-                      <p className="text-xs text-red-500/70 dark:text-red-400/70 group-hover:text-red-600 dark:group-hover:text-red-300 transition-colors">الخروج من الحساب</p>
+                      <p className="text-sm font-medium group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors">
+                        تسجيل الخروج
+                      </p>
+                      <p className="text-xs text-red-500/70 dark:text-red-400/70 group-hover:text-red-600 dark:group-hover:text-red-300 transition-colors">
+                        الخروج من الحساب
+                      </p>
                     </div>
                     <ChevronDown className="w-4 h-4 opacity-0 group-hover:opacity-100 -rotate-90 transition-all duration-300 text-red-600" />
                   </button>

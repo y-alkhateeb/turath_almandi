@@ -91,19 +91,13 @@ export default function EditBranchPage() {
     async (data: UpdateBranchInput) => {
       if (!id) return;
 
-      try {
-        await updateBranch.mutateAsync({
-          id,
-          data,
-        });
-        // Success toast shown by mutation
-        // Navigate to branches list
-        router.push('/management/system/branches/list');
-      } catch (error) {
-        // Error toast shown by global API interceptor
-        // Error is re-thrown so form can handle it if needed
-        throw error;
-      }
+      await updateBranch.mutateAsync({
+        id,
+        data,
+      });
+      // Success toast shown by mutation
+      // Navigate to branches list
+      router.push('/management/system/branches/list');
     },
     [id, updateBranch, router]
   );
@@ -194,9 +188,7 @@ export default function EditBranchPage() {
         <div dir="rtl">
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">تعديل فرع</h1>
           <p className="text-[var(--text-secondary)] mt-1">
-            {error.statusCode === 404
-              ? 'الفرع المطلوب غير موجود'
-              : 'حدث خطأ أثناء تحميل الفرع'}
+            {error.statusCode === 404 ? 'الفرع المطلوب غير موجود' : 'حدث خطأ أثناء تحميل الفرع'}
           </p>
         </div>
 
@@ -281,9 +273,7 @@ export default function EditBranchPage() {
       {/* Page Header */}
       <div dir="rtl">
         <h1 className="text-3xl font-bold text-[var(--text-primary)]">تعديل فرع</h1>
-        <p className="text-[var(--text-secondary)] mt-1">
-          قم بتعديل بيانات الفرع: {branch.name}
-        </p>
+        <p className="text-[var(--text-secondary)] mt-1">قم بتعديل بيانات الفرع: {branch.name}</p>
       </div>
 
       {/* Form Card */}

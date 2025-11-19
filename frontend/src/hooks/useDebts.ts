@@ -19,17 +19,8 @@ import { toast } from 'sonner';
 import debtService from '@/api/services/debtService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import { useAuth } from './useAuth';
-import type {
-  Debt,
-  CreateDebtInput,
-  UpdateDebtInput,
-  PayDebtInput,
-} from '#/entity';
-import type {
-  PaginatedResponse,
-  DebtQueryFilters,
-  DebtSummaryResponse,
-} from '#/api';
+import type { Debt, CreateDebtInput, UpdateDebtInput, PayDebtInput } from '#/entity';
+import type { PaginatedResponse, DebtQueryFilters, DebtSummaryResponse } from '#/api';
 import { ApiError } from '@/api/apiClient';
 
 // ============================================
@@ -95,7 +86,7 @@ export const useDebt = (
   id: string,
   options?: {
     enabled?: boolean;
-  },
+  }
 ) => {
   return useQuery<Debt, ApiError>({
     queryKey: queryKeys.debts.detail(id),
@@ -215,7 +206,7 @@ export const useCreateDebt = () => {
               total: old.meta.total + 1,
             },
           };
-        },
+        }
       );
 
       return { previousDebts };
@@ -278,9 +269,7 @@ export const useUpdateDebt = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.debts.detail(id) });
 
       // Snapshot current data
-      const previousDebt = queryClient.getQueryData<Debt>(
-        queryKeys.debts.detail(id),
-      );
+      const previousDebt = queryClient.getQueryData<Debt>(queryKeys.debts.detail(id));
       const previousDebts = queryClient.getQueriesData<PaginatedResponse<Debt>>({
         queryKey: queryKeys.debts.all,
       });
@@ -300,12 +289,10 @@ export const useUpdateDebt = () => {
           return {
             ...old,
             data: old.data.map((debt) =>
-              debt.id === id
-                ? { ...debt, ...data, updatedAt: new Date().toISOString() }
-                : debt,
+              debt.id === id ? { ...debt, ...data, updatedAt: new Date().toISOString() } : debt
             ),
           };
-        },
+        }
       );
 
       return { previousDebt, previousDebts };
@@ -391,7 +378,7 @@ export const useDeleteDebt = () => {
               total: old.meta.total - 1,
             },
           };
-        },
+        }
       );
 
       // Remove debt detail from cache
@@ -463,9 +450,7 @@ export const usePayDebt = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.debts.detail(id) });
 
       // Snapshot current data
-      const previousDebt = queryClient.getQueryData<Debt>(
-        queryKeys.debts.detail(id),
-      );
+      const previousDebt = queryClient.getQueryData<Debt>(queryKeys.debts.detail(id));
       const previousDebts = queryClient.getQueriesData<PaginatedResponse<Debt>>({
         queryKey: queryKeys.debts.all,
       });
@@ -532,7 +517,7 @@ export const usePayDebt = () => {
               };
             }),
           };
-        },
+        }
       );
 
       return { previousDebt, previousDebts };
@@ -622,9 +607,7 @@ export const usePayDebt = () => {
  * ```
  */
 export const useDebtFilters = (initialFilters?: Partial<DebtQueryFilters>) => {
-  const [filters, setFiltersState] = useState<DebtQueryFilters>(
-    initialFilters || {},
-  );
+  const [filters, setFiltersState] = useState<DebtQueryFilters>(initialFilters || {});
 
   /**
    * Set all filters at once
@@ -640,7 +623,7 @@ export const useDebtFilters = (initialFilters?: Partial<DebtQueryFilters>) => {
     <K extends keyof DebtQueryFilters>(key: K, value: DebtQueryFilters[K]) => {
       setFiltersState((prev) => ({ ...prev, [key]: value }));
     },
-    [],
+    []
   );
 
   /**
@@ -660,12 +643,9 @@ export const useDebtFilters = (initialFilters?: Partial<DebtQueryFilters>) => {
   /**
    * Set due date range
    */
-  const setDueDateRange = useCallback(
-    (dueDateStart?: string, dueDateEnd?: string) => {
-      setFiltersState((prev) => ({ ...prev, dueDateStart, dueDateEnd }));
-    },
-    [],
-  );
+  const setDueDateRange = useCallback((dueDateStart?: string, dueDateEnd?: string) => {
+    setFiltersState((prev) => ({ ...prev, dueDateStart, dueDateEnd }));
+  }, []);
 
   /**
    * Set page number

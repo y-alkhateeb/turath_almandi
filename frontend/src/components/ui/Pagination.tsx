@@ -1,4 +1,3 @@
-
 export interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -28,7 +27,7 @@ export function Pagination({
       // Calculate range around current page
       const halfVisible = Math.floor(maxVisiblePages / 2);
       let startPage = Math.max(1, currentPage - halfVisible);
-      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
       // Adjust if we're near the end
       if (endPage - startPage < maxVisiblePages - 1) {
@@ -106,10 +105,7 @@ export function Pagination({
       {pages.map((page, index) => {
         if (page === '...') {
           return (
-            <span
-              key={`ellipsis-${index}`}
-              className="px-3 py-2 text-[var(--text-secondary)]"
-            >
+            <span key={`ellipsis-${index}`} className="px-3 py-2 text-[var(--text-secondary)]">
               ...
             </span>
           );

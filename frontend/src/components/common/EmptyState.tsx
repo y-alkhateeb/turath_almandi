@@ -32,13 +32,7 @@ export interface EmptyStateProps {
 // COMPONENT
 // ============================================
 
-export function EmptyState({
-  icon,
-  title,
-  description,
-  action,
-  className = '',
-}: EmptyStateProps) {
+export function EmptyState({ icon, title, description, action, className = '' }: EmptyStateProps) {
   return (
     <div
       className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}
@@ -50,15 +44,11 @@ export function EmptyState({
       </div>
 
       {/* Title */}
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-        {title}
-      </h3>
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">{title}</h3>
 
       {/* Description */}
       {description && (
-        <p className="text-sm text-[var(--text-secondary)] max-w-md mb-6">
-          {description}
-        </p>
+        <p className="text-sm text-[var(--text-secondary)] max-w-md mb-6">{description}</p>
       )}
 
       {/* Action Button */}

@@ -52,7 +52,9 @@ const getStatusBadge = (status: DebtStatus): { label: string; className: string 
       className: 'bg-green-100 text-green-800 border-green-300',
     },
   };
-  return badges[status] || { label: status, className: 'bg-gray-100 text-gray-800 border-gray-300' };
+  return (
+    badges[status] || { label: status, className: 'bg-gray-100 text-gray-800 border-gray-300' }
+  );
 };
 
 /**
@@ -197,9 +199,7 @@ export default function ViewDebtPage() {
         <div dir="rtl">
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">عرض تفاصيل الدين</h1>
           <p className="text-[var(--text-secondary)] mt-1">
-            {error.statusCode === 404
-              ? 'الدين المطلوب غير موجود'
-              : 'حدث خطأ أثناء تحميل الدين'}
+            {error.statusCode === 404 ? 'الدين المطلوب غير موجود' : 'حدث خطأ أثناء تحميل الدين'}
           </p>
         </div>
 
@@ -295,9 +295,7 @@ export default function ViewDebtPage() {
       <div className="flex items-center justify-between" dir="rtl">
         <div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">تفاصيل الدين</h1>
-          <p className="text-[var(--text-secondary)] mt-1">
-            دين: {debt.creditorName}
-          </p>
+          <p className="text-[var(--text-secondary)] mt-1">دين: {debt.creditorName}</p>
         </div>
 
         {/* Pay Button - Only for active/partial debts */}
@@ -313,13 +311,18 @@ export default function ViewDebtPage() {
       </div>
 
       {/* Debt Details Card */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+      <div
+        className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+        dir="rtl"
+      >
         <div className="flex items-start justify-between mb-6">
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">معلومات الدين</h2>
 
           {/* Status Badge */}
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusBadge.className}`}>
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusBadge.className}`}
+            >
               {statusBadge.label}
             </span>
             {overdue && (
@@ -355,7 +358,9 @@ export default function ViewDebtPage() {
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
               المبلغ المتبقي
             </label>
-            <p className={`text-lg font-semibold ${debt.status === DebtStatus.PAID ? 'text-green-600' : 'text-red-600'}`}>
+            <p
+              className={`text-lg font-semibold ${debt.status === DebtStatus.PAID ? 'text-green-600' : 'text-red-600'}`}
+            >
               {formatCurrency(debt.remainingAmount)} {getCurrencyLabel(debt.currency)}
             </p>
           </div>
@@ -390,7 +395,9 @@ export default function ViewDebtPage() {
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
                 تاريخ الاستحقاق
               </label>
-              <p className={`text-lg ${overdue ? 'text-red-600 font-semibold' : 'text-[var(--text-primary)]'}`}>
+              <p
+                className={`text-lg ${overdue ? 'text-red-600 font-semibold' : 'text-[var(--text-primary)]'}`}
+              >
                 <Calendar className="w-4 h-4 inline-block ml-2" />
                 {formatDate(debt.dueDate)}
                 {overdue && <span className="mr-2 text-sm">(متأخر)</span>}
@@ -431,12 +438,12 @@ export default function ViewDebtPage() {
       </div>
 
       {/* Payment History */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+      <div
+        className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+        dir="rtl"
+      >
         <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">سجل الدفعات</h2>
-        <DebtPaymentHistory
-          payments={debt.payments || []}
-          isLoading={false}
-        />
+        <DebtPaymentHistory payments={debt.payments || []} isLoading={false} />
       </div>
 
       {/* Back Button */}
@@ -451,13 +458,7 @@ export default function ViewDebtPage() {
       </div>
 
       {/* Pay Debt Dialog */}
-      {debt && (
-        <PayDebtModal
-          isOpen={isPayDialogOpen}
-          onClose={handleClosePayDialog}
-          debt={debt}
-        />
-      )}
+      {debt && <PayDebtModal isOpen={isPayDialogOpen} onClose={handleClosePayDialog} debt={debt} />}
     </div>
   );
 }

@@ -55,18 +55,11 @@ export default function InventoryListPage() {
   // FILTERS & PAGINATION STATE
   // ============================================
 
-  const {
-    filters,
-    setUnit,
-    setBranchId,
-    setSearch,
-    setAutoAdded,
-    setPage,
-    resetFilters,
-  } = useInventoryFilters({
-    page: 1,
-    limit: 20, // Default 20 items per page
-  });
+  const { filters, setUnit, setBranchId, setSearch, setAutoAdded, setPage, resetFilters } =
+    useInventoryFilters({
+      page: 1,
+      limit: 20, // Default 20 items per page
+    });
 
   // ============================================
   // DATA FETCHING
@@ -75,10 +68,7 @@ export default function InventoryListPage() {
   /**
    * Fetch total inventory value
    */
-  const {
-    data: totalValue = 0,
-    isLoading: isLoadingValue,
-  } = useInventoryValue(filters.branchId);
+  const { data: totalValue = 0, isLoading: isLoadingValue } = useInventoryValue(filters.branchId);
 
   /**
    * Fetch paginated inventory with filters
@@ -186,7 +176,7 @@ export default function InventoryListPage() {
       try {
         await deleteInventory.mutateAsync(id);
         // Success toast shown by mutation
-      } catch (error) {
+      } catch (_error) {
         // Error toast shown by global API interceptor
       }
     },
@@ -224,7 +214,8 @@ export default function InventoryListPage() {
   const hasNoInventoryAtAll = !isLoading && total === 0 && Object.keys(filters).length <= 2; // Only page and limit
 
   // Get auto-added filter value for select
-  const autoAddedFilterValue = filters.autoAdded === false ? 'manual' : filters.autoAdded === true ? 'auto' : '';
+  const autoAddedFilterValue =
+    filters.autoAdded === false ? 'manual' : filters.autoAdded === true ? 'auto' : '';
 
   // ============================================
   // LOADING STATE
@@ -266,9 +257,7 @@ export default function InventoryListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة المخزون</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              تتبع وإدارة جميع أصناف المخزون
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">تتبع وإدارة جميع أصناف المخزون</p>
           </div>
         </div>
         <ErrorState error={inventoryError} onRetry={handleRetry} />
@@ -287,9 +276,7 @@ export default function InventoryListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة المخزون</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              تتبع وإدارة جميع أصناف المخزون
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">تتبع وإدارة جميع أصناف المخزون</p>
           </div>
           <button
             onClick={handleAddNew}
@@ -345,7 +332,10 @@ export default function InventoryListPage() {
       />
 
       {/* Filters */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4" dir="rtl">
+      <div
+        className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4"
+        dir="rtl"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Unit Filter */}
           <div>

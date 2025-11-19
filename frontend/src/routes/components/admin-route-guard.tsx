@@ -9,7 +9,7 @@
  */
 
 import { useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useRouter } from '@/routes/hooks';
 import { useUser } from '@/store/userStore';
 import { PageLoading } from '@/components/loading';
@@ -18,7 +18,6 @@ import { toast } from 'sonner';
 
 export function AdminRouteGuard() {
   const router = useRouter();
-  const location = useLocation();
   const user = useUser();
 
   useEffect(() => {

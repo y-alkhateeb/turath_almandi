@@ -17,16 +17,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import transactionService from '@/api/services/transactionService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
-import type {
-  Transaction,
-  CreateTransactionInput,
-  UpdateTransactionInput,
-} from '#/entity';
-import type {
-  PaginatedResponse,
-  TransactionQueryFilters,
-  TransactionStatsResponse,
-} from '#/api';
+import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
+import type { PaginatedResponse, TransactionQueryFilters, TransactionStatsResponse } from '#/api';
 import { ApiError } from '@/api/apiClient';
 
 // ============================================
@@ -82,7 +74,7 @@ export const useTransaction = (
   id: string,
   options?: {
     enabled?: boolean;
-  },
+  }
 ) => {
   return useQuery<Transaction, ApiError>({
     queryKey: queryKeys.transactions.detail(id),
@@ -113,7 +105,7 @@ export const useTransaction = (
  */
 export const useTransactionSummary = (
   branchId?: string,
-  dates?: { startDate?: string; endDate?: string },
+  dates?: { startDate?: string; endDate?: string }
 ) => {
   return useQuery<TransactionStatsResponse, ApiError>({
     queryKey: queryKeys.transactions.summary(branchId, dates),
@@ -169,9 +161,7 @@ export const useCreateTransaction = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.transactions.all });
 
       // Snapshot current data
-      const previousTransactions = queryClient.getQueriesData<
-        PaginatedResponse<Transaction>
-      >({
+      const previousTransactions = queryClient.getQueriesData<PaginatedResponse<Transaction>>({
         queryKey: queryKeys.transactions.all,
       });
 
@@ -207,7 +197,7 @@ export const useCreateTransaction = () => {
               total: old.meta.total + 1,
             },
           };
-        },
+        }
       );
 
       return { previousTransactions };
@@ -232,9 +222,7 @@ export const useCreateTransaction = () => {
 
       // Show success toast based on type
       const message =
-        variables.type === 'INCOME'
-          ? 'تم إضافة الإيراد بنجاح'
-          : 'تم إضافة المصروف بنجاح';
+        variables.type === 'INCOME' ? 'تم إضافة الإيراد بنجاح' : 'تم إضافة المصروف بنجاح';
       toast.success(message);
     },
   });
@@ -261,11 +249,7 @@ export const useCreateTransaction = () => {
 export const useUpdateTransaction = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    Transaction,
-    ApiError,
-    { id: string; data: UpdateTransactionInput }
-  >({
+  return useMutation<Transaction, ApiError, { id: string; data: UpdateTransactionInput }>({
     mutationFn: ({ id, data }) => transactionService.update(id, data),
 
     // Optimistic update
@@ -278,22 +262,17 @@ export const useUpdateTransaction = () => {
 
       // Snapshot current data
       const previousTransaction = queryClient.getQueryData<Transaction>(
-        queryKeys.transactions.detail(id),
+        queryKeys.transactions.detail(id)
       );
-      const previousTransactions = queryClient.getQueriesData<
-        PaginatedResponse<Transaction>
-      >({
+      const previousTransactions = queryClient.getQueriesData<PaginatedResponse<Transaction>>({
         queryKey: queryKeys.transactions.all,
       });
 
       // Optimistically update transaction detail
-      queryClient.setQueryData<Transaction>(
-        queryKeys.transactions.detail(id),
-        (old) => {
-          if (!old) return old;
-          return { ...old, ...data, updatedAt: new Date().toISOString() };
-        },
-      );
+      queryClient.setQueryData<Transaction>(queryKeys.transactions.detail(id), (old) => {
+        if (!old) return old;
+        return { ...old, ...data, updatedAt: new Date().toISOString() };
+      });
 
       // Optimistically update transaction in all lists
       queryClient.setQueriesData<PaginatedResponse<Transaction>>(
@@ -306,10 +285,10 @@ export const useUpdateTransaction = () => {
             data: old.data.map((transaction) =>
               transaction.id === id
                 ? { ...transaction, ...data, updatedAt: new Date().toISOString() }
-                : transaction,
+                : transaction
             ),
           };
-        },
+        }
       );
 
       return { previousTransaction, previousTransactions };
@@ -318,10 +297,7 @@ export const useUpdateTransaction = () => {
     onError: (error, { id }, context) => {
       // Rollback on error
       if (context?.previousTransaction) {
-        queryClient.setQueryData(
-          queryKeys.transactions.detail(id),
-          context.previousTransaction,
-        );
+        queryClient.setQueryData(queryKeys.transactions.detail(id), context.previousTransaction);
       }
       if (context?.previousTransactions) {
         context.previousTransactions.forEach(([queryKey, data]) => {
@@ -375,9 +351,7 @@ export const useDeleteTransaction = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.transactions.all });
 
       // Snapshot current data
-      const previousTransactions = queryClient.getQueriesData<
-        PaginatedResponse<Transaction>
-      >({
+      const previousTransactions = queryClient.getQueriesData<PaginatedResponse<Transaction>>({
         queryKey: queryKeys.transactions.all,
       });
 
@@ -395,7 +369,7 @@ export const useDeleteTransaction = () => {
               total: old.meta.total - 1,
             },
           };
-        },
+        }
       );
 
       // Remove transaction detail from cache
@@ -470,12 +444,8 @@ export const useDeleteTransaction = () => {
  * const { data } = useTransactions(filters);
  * ```
  */
-export const useTransactionFilters = (
-  initialFilters?: Partial<TransactionQueryFilters>,
-) => {
-  const [filters, setFiltersState] = useState<TransactionQueryFilters>(
-    initialFilters || {},
-  );
+export const useTransactionFilters = (initialFilters?: Partial<TransactionQueryFilters>) => {
+  const [filters, setFiltersState] = useState<TransactionQueryFilters>(initialFilters || {});
 
   /**
    * Set all filters at once
@@ -488,13 +458,10 @@ export const useTransactionFilters = (
    * Set a single filter
    */
   const setFilter = useCallback(
-    <K extends keyof TransactionQueryFilters>(
-      key: K,
-      value: TransactionQueryFilters[K],
-    ) => {
+    <K extends keyof TransactionQueryFilters>(key: K, value: TransactionQueryFilters[K]) => {
       setFiltersState((prev) => ({ ...prev, [key]: value }));
     },
-    [],
+    []
   );
 
   /**
@@ -547,9 +514,7 @@ export const useTransactionFilters = (
  * @param filters - Optional additional filters
  * @returns Query result with income transactions
  */
-export const useIncomeTransactions = (
-  filters?: Omit<TransactionQueryFilters, 'type'>,
-) => {
+export const useIncomeTransactions = (filters?: Omit<TransactionQueryFilters, 'type'>) => {
   return useTransactions({ ...filters, type: 'INCOME' });
 };
 
@@ -560,9 +525,7 @@ export const useIncomeTransactions = (
  * @param filters - Optional additional filters
  * @returns Query result with expense transactions
  */
-export const useExpenseTransactions = (
-  filters?: Omit<TransactionQueryFilters, 'type'>,
-) => {
+export const useExpenseTransactions = (filters?: Omit<TransactionQueryFilters, 'type'>) => {
   return useTransactions({ ...filters, type: 'EXPENSE' });
 };
 
@@ -574,7 +537,7 @@ export const useExpenseTransactions = (
  * @returns Query result with today's transactions
  */
 export const useTodayTransactions = (
-  filters?: Omit<TransactionQueryFilters, 'startDate' | 'endDate'>,
+  filters?: Omit<TransactionQueryFilters, 'startDate' | 'endDate'>
 ) => {
   const today = new Date().toISOString().split('T')[0];
   return useTransactions({ ...filters, startDate: today, endDate: today });

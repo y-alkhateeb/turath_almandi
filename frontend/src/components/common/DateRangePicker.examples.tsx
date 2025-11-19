@@ -8,7 +8,7 @@
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { DateRangePicker, DateRange } from './DateRangePicker';
+import { DateRangePicker } from './DateRangePicker';
 import { FormDateRangePicker } from './FormDateRangePicker';
 
 // ============================================
@@ -257,8 +257,7 @@ function DashboardFiltersExample() {
       {dateRange?.start && dateRange?.end && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-sm text-green-800">
-            عرض البيانات من <strong>{dateRange.start}</strong> إلى{' '}
-            <strong>{dateRange.end}</strong>
+            عرض البيانات من <strong>{dateRange.start}</strong> إلى <strong>{dateRange.end}</strong>
           </p>
         </div>
       )}
@@ -298,8 +297,7 @@ const maxRangeSchema = z.object({
       (data) => {
         if (data.start && data.end) {
           const diffInDays =
-            (new Date(data.end).getTime() - new Date(data.start).getTime()) /
-            (1000 * 60 * 60 * 24);
+            (new Date(data.end).getTime() - new Date(data.start).getTime()) / (1000 * 60 * 60 * 24);
           return diffInDays <= 90;
         }
         return true;
@@ -349,13 +347,10 @@ function AdvancedControllerExample() {
     control,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<BasicFormData>({
     resolver: zodResolver(basicSchema),
   });
-
-  const dateRange = watch('dateRange');
 
   const onSubmit = (data: BasicFormData) => {
     console.log('Data:', data);

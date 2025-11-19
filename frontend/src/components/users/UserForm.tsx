@@ -43,62 +43,66 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$
  * Zod schema for creating a user
  * Matches backend CreateUserDto validation rules
  */
-const createUserSchema = z.object({
-  username: z
-    .string()
-    .min(1, { message: 'اسم المستخدم مطلوب' })
-    .min(3, { message: 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل' })
-    .max(50, { message: 'اسم المستخدم يجب ألا يتجاوز 50 حرف' })
-    .regex(/^[a-zA-Z0-9_]+$/, {
-      message: 'اسم المستخدم يجب أن يحتوي على أحرف وأرقام فقط',
+const createUserSchema = z
+  .object({
+    username: z
+      .string()
+      .min(1, { message: 'اسم المستخدم مطلوب' })
+      .min(3, { message: 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل' })
+      .max(50, { message: 'اسم المستخدم يجب ألا يتجاوز 50 حرف' })
+      .regex(/^[a-zA-Z0-9_]+$/, {
+        message: 'اسم المستخدم يجب أن يحتوي على أحرف وأرقام فقط',
+      }),
+    password: z
+      .string()
+      .min(1, { message: 'كلمة المرور مطلوبة' })
+      .min(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
+      .max(100, { message: 'كلمة المرور يجب ألا تتجاوز 100 حرف' })
+      .regex(passwordRegex, {
+        message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص (@$!%*?&)',
+      }),
+    role: z.nativeEnum(UserRole, {
+      errorMap: () => ({ message: 'الدور مطلوب' }),
     }),
-  password: z
-    .string()
-    .min(1, { message: 'كلمة المرور مطلوبة' })
-    .min(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
-    .max(100, { message: 'كلمة المرور يجب ألا تتجاوز 100 حرف' })
-    .regex(passwordRegex, {
-      message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص (@$!%*?&)',
-    }),
-  role: z.nativeEnum(UserRole, {
-    errorMap: () => ({ message: 'الدور مطلوب' }),
-  }),
-  branchId: z.string().optional().nullable(),
-}).refine(
-  (data) => {
-    // branchId is required if role is ACCOUNTANT
-    if (data.role === UserRole.ACCOUNTANT) {
-      return !!data.branchId;
+    branchId: z.string().optional().nullable(),
+  })
+  .refine(
+    (data) => {
+      // branchId is required if role is ACCOUNTANT
+      if (data.role === UserRole.ACCOUNTANT) {
+        return !!data.branchId;
+      }
+      return true;
+    },
+    {
+      message: 'الفرع مطلوب للمحاسبين',
+      path: ['branchId'],
     }
-    return true;
-  },
-  {
-    message: 'الفرع مطلوب للمحاسبين',
-    path: ['branchId'],
-  }
-);
+  );
 
 /**
  * Zod schema for updating a user
  * All fields optional except validation rules remain the same
  */
-const updateUserSchema = z.object({
-  role: z.nativeEnum(UserRole).optional(),
-  branchId: z.string().optional().nullable(),
-  isActive: z.boolean().optional(),
-}).refine(
-  (data) => {
-    // branchId is required if role is ACCOUNTANT
-    if (data.role === UserRole.ACCOUNTANT) {
-      return !!data.branchId;
+const updateUserSchema = z
+  .object({
+    role: z.nativeEnum(UserRole).optional(),
+    branchId: z.string().optional().nullable(),
+    isActive: z.boolean().optional(),
+  })
+  .refine(
+    (data) => {
+      // branchId is required if role is ACCOUNTANT
+      if (data.role === UserRole.ACCOUNTANT) {
+        return !!data.branchId;
+      }
+      return true;
+    },
+    {
+      message: 'الفرع مطلوب للمحاسبين',
+      path: ['branchId'],
     }
-    return true;
-  },
-  {
-    message: 'الفرع مطلوب للمحاسبين',
-    path: ['branchId'],
-  }
-);
+  );
 
 type CreateFormData = z.infer<typeof createUserSchema>;
 type UpdateFormData = z.infer<typeof updateUserSchema>;
@@ -131,13 +135,7 @@ const roleOptions: SelectOption[] = [
 // COMPONENT
 // ============================================
 
-export function UserForm({
-  mode,
-  initialData,
-  onSubmit,
-  onCancel,
-  isSubmitting,
-}: UserFormProps) {
+export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }: UserFormProps) {
   // Use appropriate schema based on mode
   const schema = mode === 'create' ? createUserSchema : updateUserSchema;
 
@@ -243,9 +241,7 @@ export function UserForm({
           <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {initialData.username}
           </div>
-          <p className="mt-1 text-xs text-[var(--text-secondary)]">
-            لا يمكن تغيير اسم المستخدم
-          </p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">لا يمكن تغيير اسم المستخدم</p>
         </div>
       )}
 
@@ -294,13 +290,9 @@ export function UserForm({
             )}
           />
           {errors.branchId && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.branchId.message as string}
-            </p>
+            <p className="mt-1 text-sm text-red-600">{errors.branchId.message as string}</p>
           )}
-          <p className="mt-1 text-xs text-[var(--text-secondary)]">
-            الفرع الذي سيعمل فيه المحاسب
-          </p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">الفرع الذي سيعمل فيه المحاسب</p>
         </div>
       )}
 
@@ -308,7 +300,8 @@ export function UserForm({
       {selectedRole === UserRole.ADMIN && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-800">
-            <strong>ملاحظة:</strong> المدير لديه صلاحيات الوصول لجميع الفروع ولا يتم تعيينه لفرع محدد.
+            <strong>ملاحظة:</strong> المدير لديه صلاحيات الوصول لجميع الفروع ولا يتم تعيينه لفرع
+            محدد.
           </p>
         </div>
       )}

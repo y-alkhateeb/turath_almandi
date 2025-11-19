@@ -16,7 +16,11 @@ import { TransactionType } from '../../types/transactions.types';
  */
 export const IncomePage = () => {
   const navigate = useNavigate();
-  const { data: transactions, isLoading, error } = useTransactions({
+  const {
+    data: transactions,
+    isLoading,
+    error,
+  } = useTransactions({
     type: TransactionType.INCOME,
   });
 
@@ -38,12 +42,7 @@ export const IncomePage = () => {
             onClick={() => navigate('/income/create')}
             className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -75,12 +74,7 @@ export const IncomePage = () => {
         <div className="bg-[var(--bg-secondary)] rounded-lg shadow p-12">
           <EmptyState
             icon={
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                className="w-full h-full"
-              >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -138,7 +132,10 @@ export const IncomePage = () => {
                       day: 'numeric',
                     })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600" dir="ltr">
+                  <td
+                    className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600"
+                    dir="ltr"
+                  >
                     {transaction.amount.toLocaleString('ar-IQ')} {transaction.currency}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
@@ -175,10 +172,7 @@ export const IncomePage = () => {
             <div>
               <p className="text-sm font-medium text-green-800">إجمالي الإيرادات</p>
               <p className="text-3xl font-bold text-green-900 mt-2" dir="ltr">
-                {transactions
-                  .reduce((sum, t) => sum + t.amount, 0)
-                  .toLocaleString('ar-IQ')}{' '}
-                IQD
+                {transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString('ar-IQ')} IQD
               </p>
             </div>
             <div className="bg-green-200 p-4 rounded-full">

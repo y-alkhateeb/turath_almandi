@@ -3,12 +3,14 @@
 ## Test Environment Setup
 
 ### Prerequisites
+
 - Application running in development mode (`npm run dev`)
 - Backend API running and accessible
 - Browser DevTools open (Console + Network tabs)
 - Access to browser localStorage/sessionStorage
 
 ### Test User Account
+
 - Have a valid test user account
 - Know the credentials for login
 
@@ -35,6 +37,7 @@
 
 3. **Manually expire the access token**
    - In DevTools Console, run:
+
    ```javascript
    // Get current auth storage
    const storage = localStorage.getItem('auth-storage') || sessionStorage.getItem('auth-storage');
@@ -86,6 +89,7 @@
 
 2. **Manually expire BOTH tokens**
    - In DevTools Console, run:
+
    ```javascript
    // Get current auth storage
    const storage = localStorage.getItem('auth-storage') || sessionStorage.getItem('auth-storage');
@@ -165,7 +169,7 @@
 3. **Simulate network failure**
    - Open DevTools → Network tab
    - Enable "Offline" mode (checkbox at top)
-   OR
+     OR
    - Use Network throttling → "Offline"
 
 4. **Make an API request**
@@ -197,11 +201,12 @@
 
 2. **Configure backend to return 500 on /auth/refresh**
    - OR use browser DevTools to block the refresh endpoint:
+
    ```javascript
    // In Console, before expiring token
    // This will prevent refresh from succeeding
    const originalFetch = window.fetch;
-   window.fetch = function(...args) {
+   window.fetch = function (...args) {
      if (args[0].includes('/auth/refresh')) {
        return Promise.reject(new Error('Server error'));
      }
@@ -420,14 +425,20 @@ function checkAuthStorage() {
     const parsed = JSON.parse(local);
     console.log('\nTokens in localStorage:');
     console.log('- Access Token:', parsed.state?.userToken?.accessToken?.substring(0, 20) + '...');
-    console.log('- Refresh Token:', parsed.state?.userToken?.refreshToken?.substring(0, 20) + '...');
+    console.log(
+      '- Refresh Token:',
+      parsed.state?.userToken?.refreshToken?.substring(0, 20) + '...'
+    );
   }
 
   if (session) {
     const parsed = JSON.parse(session);
     console.log('\nTokens in sessionStorage:');
     console.log('- Access Token:', parsed.state?.userToken?.accessToken?.substring(0, 20) + '...');
-    console.log('- Refresh Token:', parsed.state?.userToken?.refreshToken?.substring(0, 20) + '...');
+    console.log(
+      '- Refresh Token:',
+      parsed.state?.userToken?.refreshToken?.substring(0, 20) + '...'
+    );
   }
 }
 
@@ -458,22 +469,23 @@ Use this template to record test results:
 **Environment**: [Development/Staging/Production]
 **Browser**: [Chrome/Firefox/Safari/Edge]
 
-| Test Case | Status | Notes |
-|-----------|--------|-------|
-| 1. Successful Token Refresh | ⬜ PASS / ⬜ FAIL | |
-| 2. Refresh Token Expired | ⬜ PASS / ⬜ FAIL | |
-| 3. Multiple Simultaneous 401s | ⬜ PASS / ⬜ FAIL | |
-| 4. Network Error During Refresh | ⬜ PASS / ⬜ FAIL | |
-| 5. Server Error During Refresh | ⬜ PASS / ⬜ FAIL | |
-| 6. Auth Storage Cleanup | ⬜ PASS / ⬜ FAIL | |
-| 7. Correct Toast Message | ⬜ PASS / ⬜ FAIL | |
-| 8. Redirect to Login | ⬜ PASS / ⬜ FAIL | |
-| 9. Remember Me vs Session | ⬜ PASS / ⬜ FAIL | |
-| 10. Token Refresh During Form | ⬜ PASS / ⬜ FAIL | |
+| Test Case                       | Status            | Notes |
+| ------------------------------- | ----------------- | ----- |
+| 1. Successful Token Refresh     | ⬜ PASS / ⬜ FAIL |       |
+| 2. Refresh Token Expired        | ⬜ PASS / ⬜ FAIL |       |
+| 3. Multiple Simultaneous 401s   | ⬜ PASS / ⬜ FAIL |       |
+| 4. Network Error During Refresh | ⬜ PASS / ⬜ FAIL |       |
+| 5. Server Error During Refresh  | ⬜ PASS / ⬜ FAIL |       |
+| 6. Auth Storage Cleanup         | ⬜ PASS / ⬜ FAIL |       |
+| 7. Correct Toast Message        | ⬜ PASS / ⬜ FAIL |       |
+| 8. Redirect to Login            | ⬜ PASS / ⬜ FAIL |       |
+| 9. Remember Me vs Session       | ⬜ PASS / ⬜ FAIL |       |
+| 10. Token Refresh During Form   | ⬜ PASS / ⬜ FAIL |       |
 
 **Overall Result**: ⬜ ALL PASS / ⬜ SOME FAILURES
 
 **Issues Found**:
+
 1. [Description]
 2. [Description]
 
@@ -486,18 +498,23 @@ Use this template to record test results:
 ## Common Issues During Testing
 
 ### Issue: "Auth storage not found"
+
 **Solution**: Make sure you're logged in first
 
 ### Issue: Refresh actually succeeds
+
 **Solution**: Make sure backend token validation is working. Use truly expired/invalid tokens.
 
 ### Issue: Toast doesn't appear
+
 **Solution**: Check browser console for errors. Ensure Sonner toast provider is mounted.
 
 ### Issue: Redirect doesn't work
+
 **Solution**: Check browser console. Verify no JavaScript errors blocking execution.
 
 ### Issue: Storage not cleared
+
 **Solution**: Check both localStorage AND sessionStorage. Refresh DevTools if needed.
 
 ---
@@ -534,6 +551,7 @@ describe('API Client 401 Handling', () => {
 ✅ All test cases should **PASS** with the current implementation in `apiClient.ts`.
 
 If any test fails, check:
+
 1. Backend API is running correctly
 2. Tokens are truly expired (not just modified)
 3. Network tab for actual responses

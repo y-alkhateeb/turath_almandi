@@ -15,7 +15,7 @@ import { ErrorAlert } from '@/components/layouts';
 export const EditInventoryPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: items = [], isLoading, error, refetch } = useInventory();
+  const { data: items = [], isLoading, refetch } = useInventory();
 
   // Find the item to edit
   const item = items.find((i) => i.id === id);
@@ -48,7 +48,6 @@ export const EditInventoryPage = () => {
     <PageLayout
       title="تعديل صنف"
       description={`تعديل بيانات ${item.name}`}
-      error={error}
       onRetry={() => refetch()}
       actions={
         <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
@@ -59,11 +58,7 @@ export const EditInventoryPage = () => {
     >
       {/* Form Card */}
       <Card padding="lg">
-        <InventoryForm
-          item={item}
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-        />
+        <InventoryForm item={item} onSuccess={handleSuccess} onCancel={handleCancel} />
       </Card>
     </PageLayout>
   );

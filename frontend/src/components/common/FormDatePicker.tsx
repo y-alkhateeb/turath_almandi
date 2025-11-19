@@ -52,7 +52,7 @@ export function FormDatePicker<T extends FieldValues>({
     <Controller
       name={name}
       control={control}
-      defaultValue={defaultValue as any}
+      defaultValue={defaultValue as unknown}
       render={({ field }) => (
         <DatePicker
           {...datePickerProps}

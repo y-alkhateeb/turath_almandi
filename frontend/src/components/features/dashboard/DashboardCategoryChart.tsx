@@ -5,15 +5,7 @@
  * Pure component with no business logic.
  */
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  TooltipProps,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/ui/card';
 import { formatCurrency } from '@/utils/formatters';
 import type { CategoryDataPoint } from '#/entity';

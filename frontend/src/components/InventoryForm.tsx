@@ -140,12 +140,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Branch Selection - Only show in create mode */}
       {!isEditMode && (
-        <BranchSelector
-          name="branchId"
-          register={register}
-          error={errors.branchId}
-          required
-        />
+        <BranchSelector name="branchId" register={register} error={errors.branchId} required />
       )}
 
       {/* Item Name */}
@@ -162,16 +157,17 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           }`}
           placeholder="مثال: طحين، سكر، زيت"
         />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-        )}
+        {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
       </div>
 
       {/* Quantity and Unit Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Quantity */}
         <div>
-          <label htmlFor="quantity" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          <label
+            htmlFor="quantity"
+            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+          >
             الكمية <span className="text-red-500">*</span>
           </label>
           <input
@@ -191,7 +187,10 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
         {/* Unit */}
         <div>
-          <label htmlFor="unit" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          <label
+            htmlFor="unit"
+            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+          >
             الوحدة <span className="text-red-500">*</span>
           </label>
           <select
@@ -207,15 +206,16 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
               </option>
             ))}
           </select>
-          {errors.unit && (
-            <p className="mt-1 text-sm text-red-500">{errors.unit.message}</p>
-          )}
+          {errors.unit && <p className="mt-1 text-sm text-red-500">{errors.unit.message}</p>}
         </div>
       </div>
 
       {/* Cost Per Unit */}
       <div>
-        <label htmlFor="costPerUnit" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+        <label
+          htmlFor="costPerUnit"
+          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+        >
           سعر الوحدة <span className="text-red-500">*</span>
         </label>
         <input
@@ -235,7 +235,10 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
       {/* Notes */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+        <label
+          htmlFor="notes"
+          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+        >
           ملاحظات
         </label>
         <textarea
@@ -263,11 +266,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           disabled={isSubmitting}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isSubmitting
-            ? 'جاري الحفظ...'
-            : isEditMode
-            ? 'تحديث'
-            : 'إضافة'}
+          {isSubmitting ? 'جاري الحفظ...' : isEditMode ? 'تحديث' : 'إضافة'}
         </button>
       </div>
     </form>

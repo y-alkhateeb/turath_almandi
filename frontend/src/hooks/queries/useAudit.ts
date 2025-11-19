@@ -95,7 +95,7 @@ export const useAuditLogs = (
   filters?: AuditLogQueryFilters,
   options?: {
     enabled?: boolean;
-  },
+  }
 ) => {
   const { isAdmin } = useAuth();
 
@@ -172,11 +172,11 @@ export const useEntityHistory = (
   additionalFilters?: Omit<AuditLogQueryFilters, 'entityType' | 'entityId'>,
   options?: {
     enabled?: boolean;
-  },
+  }
 ) => {
   const { isAdmin } = useAuth();
 
-  const filters: AuditLogQueryFilters = {
+  const _filters: AuditLogQueryFilters = {
     ...additionalFilters,
     entityType,
     entityId,
@@ -248,7 +248,7 @@ export const useUserActions = (
   additionalFilters?: Omit<AuditLogQueryFilters, 'userId'>,
   options?: {
     enabled?: boolean;
-  },
+  }
 ) => {
   const { isAdmin } = useAuth();
 
@@ -343,25 +343,18 @@ export const useUserActions = (
  * }
  * ```
  */
-export const useAuditFilters = (
-  initialFilters?: Partial<AuditLogQueryFilters>,
-) => {
-  const [filters, setFiltersState] = useState<AuditLogQueryFilters>(
-    initialFilters || {},
-  );
+export const useAuditFilters = (initialFilters?: Partial<AuditLogQueryFilters>) => {
+  const [filters, setFiltersState] = useState<AuditLogQueryFilters>(initialFilters || {});
 
   const setFilters = useCallback((newFilters: Partial<AuditLogQueryFilters>) => {
     setFiltersState((prev) => ({ ...prev, ...newFilters }));
   }, []);
 
   const setFilter = useCallback(
-    <K extends keyof AuditLogQueryFilters>(
-      key: K,
-      value: AuditLogQueryFilters[K],
-    ) => {
+    <K extends keyof AuditLogQueryFilters>(key: K, value: AuditLogQueryFilters[K]) => {
       setFiltersState((prev) => ({ ...prev, [key]: value }));
     },
-    [],
+    []
   );
 
   const resetFilters = useCallback(() => {
@@ -380,12 +373,9 @@ export const useAuditFilters = (
     setFiltersState((prev) => ({ ...prev, userId, page: 1 }));
   }, []);
 
-  const setDateRange = useCallback(
-    (startDate: string | undefined, endDate: string | undefined) => {
-      setFiltersState((prev) => ({ ...prev, startDate, endDate, page: 1 }));
-    },
-    [],
-  );
+  const setDateRange = useCallback((startDate: string | undefined, endDate: string | undefined) => {
+    setFiltersState((prev) => ({ ...prev, startDate, endDate, page: 1 }));
+  }, []);
 
   const setPage = useCallback((page: number) => {
     setFiltersState((prev) => ({ ...prev, page }));
@@ -421,7 +411,7 @@ export const useAuditFilters = (
  * @returns Query result with today's audit logs
  */
 export const useTodayAuditLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>
 ) => {
   const today = new Date().toISOString().split('T')[0];
 
@@ -442,7 +432,7 @@ export const useTodayAuditLogs = (
  */
 export const useRecentAuditLogs = (
   days: number = 7,
-  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'startDate' | 'endDate'>
 ) => {
   const today = new Date();
   const nDaysAgo = new Date(today);
@@ -462,9 +452,7 @@ export const useRecentAuditLogs = (
  * @param additionalFilters - Optional additional filters
  * @returns Query result with user audit logs
  */
-export const useUserAuditLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>,
-) => {
+export const useUserAuditLogs = (additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>) => {
   return useAuditLogs({
     ...additionalFilters,
     entityType: 'USER',
@@ -479,7 +467,7 @@ export const useUserAuditLogs = (
  * @returns Query result with transaction audit logs
  */
 export const useTransactionAuditLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>,
+  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>
 ) => {
   return useAuditLogs({
     ...additionalFilters,
@@ -494,9 +482,7 @@ export const useTransactionAuditLogs = (
  * @param additionalFilters - Optional additional filters
  * @returns Query result with debt audit logs
  */
-export const useDebtAuditLogs = (
-  additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>,
-) => {
+export const useDebtAuditLogs = (additionalFilters?: Omit<AuditLogQueryFilters, 'entityType'>) => {
   return useAuditLogs({
     ...additionalFilters,
     entityType: 'DEBT',

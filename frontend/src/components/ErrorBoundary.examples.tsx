@@ -5,7 +5,7 @@
  * to catch and handle React errors in your application.
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ErrorBoundary, ErrorBoundaryStandalone } from './ErrorBoundary';
 import { ErrorInfo } from 'react';
 
@@ -54,7 +54,7 @@ function RouteExample() {
  * Add custom error handling logic
  */
 function CustomHandlerExample() {
-  const handleError = (error: Error, errorInfo: ErrorInfo) => {
+  const handleError = (error: Error) => {
     // Send to analytics
     console.log('Custom error handler:', error.message);
 
@@ -79,7 +79,7 @@ function CustomHandlerExample() {
  * Integrate with error tracking service (Sentry, LogRocket, etc.)
  */
 function CustomReportingExample() {
-  const reportToSentry = (error: Error, errorInfo: ErrorInfo) => {
+  const reportToSentry = (error: Error) => {
     // Example: Sentry integration
     // Sentry.captureException(error, {
     //   contexts: {
@@ -305,25 +305,25 @@ function AppRootExample() {
       }}
       reportError={(error, errorInfo) => {
         // Additional reporting logic
-        const errorReport = {
-          message: error.message,
-          stack: error.stack,
-          componentStack: errorInfo.componentStack,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-        };
+        // Note: Example of error report structure for backend API
+        // const errorReport = {
+        //   message: error.message,
+        //   stack: error.stack,
+        //   componentStack: errorInfo.componentStack,
+        //   timestamp: new Date().toISOString(),
+        //   userAgent: navigator.userAgent,
+        //   url: window.location.href,
+        // };
 
         // Send to backend API
         // fetch('/api/errors', {
         //   method: 'POST',
         //   body: JSON.stringify(errorReport),
         // });
+        console.log('Error report:', error.message, errorInfo.componentStack);
       }}
     >
-      <div className="app">
-        {/* Your entire app */}
-      </div>
+      <div className="app">{/* Your entire app */}</div>
     </ErrorBoundary>
   );
 }
@@ -340,7 +340,7 @@ function ErrorStateExample() {
 
   return (
     <ErrorBoundary
-      onError={(error) => {
+      onError={() => {
         setHasGlobalError(true);
         // Maybe show a toast notification
         // toast.error('حدث خطأ في التطبيق');
@@ -352,9 +352,7 @@ function ErrorStateExample() {
         </div>
       )}
 
-      <div className="app">
-        {/* App content */}
-      </div>
+      <div className="app">{/* App content */}</div>
     </ErrorBoundary>
   );
 }

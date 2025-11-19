@@ -8,7 +8,10 @@ import { Logo } from '@/components/logo';
 
 export function SimpleLayout() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-primary-50 to-success-50" dir="rtl">
+    <div
+      className="min-h-screen bg-gradient-to-br from-brand-50 via-primary-50 to-success-50"
+      dir="rtl"
+    >
       {/* Logo Header */}
       <div className="absolute top-6 right-6">
         <Logo size="lg" linkTo="/" />

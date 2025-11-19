@@ -112,7 +112,7 @@ export const useAuth = (): UseAuthReturn => {
    * Auto-refetches on mount and window focus
    */
   const {
-    data: profileData,
+    data: _profileData,
     isLoading: isLoadingProfile,
     refetch: refetchProfile,
   } = useQuery<UserProfileResponse, ApiError>({
@@ -150,11 +150,7 @@ export const useAuth = (): UseAuthReturn => {
    * Login mutation
    * Handles user login and cache updates
    */
-  const loginMutation = useMutation<
-    LoginResponse,
-    ApiError,
-    LoginCredentials
-  >({
+  const loginMutation = useMutation<LoginResponse, ApiError, LoginCredentials>({
     mutationFn: authService.login,
 
     onSuccess: (data) => {

@@ -76,7 +76,8 @@ function getErrorMessage(error: Error | ApiError): {
       case 400:
         return {
           title: 'طلب غير صحيح',
-          description: error.message || 'البيانات المرسلة غير صحيحة. يرجى التحقق والمحاولة مرة أخرى.',
+          description:
+            error.message || 'البيانات المرسلة غير صحيحة. يرجى التحقق والمحاولة مرة أخرى.',
         };
 
       case 401:
@@ -182,14 +183,10 @@ export function ErrorState({ error, onRetry, className = '' }: ErrorStateProps) 
       </div>
 
       {/* Error Title */}
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-        {title}
-      </h3>
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">{title}</h3>
 
       {/* Error Description */}
-      <p className="text-sm text-[var(--text-secondary)] max-w-md mb-6">
-        {description}
-      </p>
+      <p className="text-sm text-[var(--text-secondary)] max-w-md mb-6">{description}</p>
 
       {/* Retry Button */}
       {onRetry && (

@@ -51,9 +51,7 @@ export function useDashboardData(): UseDashboardDataReturn {
 
   // State
   const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   // Determine effective branch ID (accountants can only see their branch)
   const effectiveBranchId =
@@ -64,10 +62,7 @@ export function useDashboardData(): UseDashboardDataReturn {
         : selectedBranchId;
 
   // Fetch branches for admin users
-  const {
-    data: branches,
-    isLoading: branchesLoading,
-  } = useQuery({
+  const { data: branches, isLoading: branchesLoading } = useQuery({
     queryKey: ['branches'],
     queryFn: getAllBranches,
     enabled: isAdmin,

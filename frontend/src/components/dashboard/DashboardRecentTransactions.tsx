@@ -88,13 +88,14 @@ export function DashboardRecentTransactions({
   isLoading,
 }: DashboardRecentTransactionsProps) {
   return (
-    <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6" dir="rtl">
+    <div
+      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+      dir="rtl"
+    >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-5 mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-            آخر العمليات
-          </h3>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)]">آخر العمليات</h3>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
             آخر {isLoading ? '...' : transactions.length} عملية مالية
           </p>
@@ -158,7 +159,9 @@ export function DashboardRecentTransactions({
                     {transaction.category}
                   </td>
                   <td className="py-3">
-                    <span className={`text-sm font-semibold ${getAmountColorClass(transaction.type)}`}>
+                    <span
+                      className={`text-sm font-semibold ${getAmountColorClass(transaction.type)}`}
+                    >
                       {transaction.type === TransactionType.INCOME ? '+ ' : '- '}
                       {formatCurrency(transaction.amount)}
                     </span>
@@ -172,9 +175,7 @@ export function DashboardRecentTransactions({
       {/* Empty State */}
       {!isLoading && transactions.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-sm text-[var(--text-secondary)]">
-            لا توجد عمليات حتى الآن
-          </p>
+          <p className="text-sm text-[var(--text-secondary)]">لا توجد عمليات حتى الآن</p>
           <p className="text-xs text-[var(--text-tertiary)] mt-1">
             سيتم عرض آخر العمليات المالية هنا
           </p>

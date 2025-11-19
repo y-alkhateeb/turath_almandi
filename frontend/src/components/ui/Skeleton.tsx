@@ -13,10 +13,7 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 
 export function Skeleton({ className = '', ...props }: SkeletonProps) {
   return (
-    <div
-      className={`animate-pulse rounded-md bg-[var(--bg-tertiary)] ${className}`}
-      {...props}
-    />
+    <div className={`animate-pulse rounded-md bg-[var(--bg-tertiary)] ${className}`} {...props} />
   );
 }
 

@@ -40,7 +40,7 @@ export function downloadBlob(blob: Blob, filename: string): void {
 export function downloadText(
   content: string,
   filename: string,
-  mimeType: string = 'text/plain',
+  mimeType: string = 'text/plain'
 ): void {
   const blob = new Blob([content], { type: mimeType });
   downloadBlob(blob, filename);
@@ -63,10 +63,7 @@ export function downloadJson<T = unknown>(data: T, filename: string): void {
  * @param data - Array of objects to convert to CSV
  * @param filename - Filename for download (should end with .csv)
  */
-export function downloadCSV<T extends Record<string, unknown>>(
-  data: T[],
-  filename: string,
-): void {
+export function downloadCSV<T extends Record<string, unknown>>(data: T[], filename: string): void {
   if (data.length === 0) {
     console.warn('No data to export to CSV');
     return;
@@ -118,7 +115,7 @@ export async function downloadExcel<T extends Record<string, unknown>>(
     headerStyle?: Partial<ExcelJS.Style>;
     cellStyle?: Partial<ExcelJS.Style>;
     autoWidth?: boolean;
-  },
+  }
 ): Promise<void> {
   // Default options
   const opts = {
@@ -147,9 +144,7 @@ export async function downloadExcel<T extends Record<string, unknown>>(
   workbook.lastModifiedBy = 'Turath Almandi';
 
   // Handle multiple sheets or single sheet
-  const sheets: Record<string, T[]> = Array.isArray(data)
-    ? { [opts.sheetName]: data }
-    : data;
+  const sheets: Record<string, T[]> = Array.isArray(data) ? { [opts.sheetName]: data } : data;
 
   // Create each sheet
   Object.entries(sheets).forEach(([sheetName, sheetData]) => {
@@ -261,7 +256,7 @@ export function downloadDataUrl(dataUrl: string, filename: string): void {
 export function downloadCanvas(
   canvas: HTMLCanvasElement,
   filename: string,
-  mimeType: string = 'image/png',
+  mimeType: string = 'image/png'
 ): void {
   canvas.toBlob((blob) => {
     if (blob) {
@@ -317,7 +312,7 @@ export function printReport(element: HTMLElement, title?: string): void {
         return Array.from(styleSheet.cssRules)
           .map((rule) => rule.cssText)
           .join('\n');
-      } catch (e) {
+      } catch (_e) {
         // Cross-origin stylesheets may throw error
         console.warn('Unable to access stylesheet:', styleSheet.href);
         // Try to link external stylesheet instead
@@ -437,7 +432,7 @@ export function printPreview(element: HTMLElement, title?: string): void {
         return Array.from(styleSheet.cssRules)
           .map((rule) => rule.cssText)
           .join('\n');
-      } catch (e) {
+      } catch (_e) {
         if (styleSheet.href) {
           return `@import url("${styleSheet.href}");`;
         }
@@ -500,10 +495,7 @@ export function getFileExtension(filename: string): string {
  * @param expectedExtension - Expected extension (without dot)
  * @returns Filename with correct extension
  */
-export function ensureFileExtension(
-  filename: string,
-  expectedExtension: string,
-): string {
+export function ensureFileExtension(filename: string, expectedExtension: string): string {
   const currentExtension = getFileExtension(filename);
   const normalizedExpected = expectedExtension.toLowerCase().replace(/^\./, '');
 

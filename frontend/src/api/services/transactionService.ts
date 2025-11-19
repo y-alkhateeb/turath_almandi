@@ -14,16 +14,8 @@
  */
 
 import apiClient from '../apiClient';
-import type {
-  Transaction,
-  CreateTransactionInput,
-  UpdateTransactionInput,
-} from '#/entity';
-import type {
-  PaginatedResponse,
-  TransactionQueryFilters,
-  TransactionStatsResponse,
-} from '#/api';
+import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
+import type { PaginatedResponse, TransactionQueryFilters, TransactionStatsResponse } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -34,12 +26,9 @@ import type {
  * Centralized endpoint definitions
  */
 export enum TransactionApiEndpoints {
-  GetAll = '/transactions',
-  GetOne = '/transactions/:id',
-  Create = '/transactions',
-  Update = '/transactions/:id',
-  Delete = '/transactions/:id',
-  GetSummary = '/transactions/summary',
+  Base = '/transactions',
+  ById = '/transactions/:id',
+  Summary = '/transactions/summary',
 }
 
 // ============================================
@@ -73,10 +62,10 @@ export enum TransactionApiEndpoints {
  * @throws ApiError on 401 (not authenticated)
  */
 export const getAll = (
-  filters?: TransactionQueryFilters,
+  filters?: TransactionQueryFilters
 ): Promise<PaginatedResponse<Transaction>> => {
   return apiClient.get<PaginatedResponse<Transaction>>({
-    url: TransactionApiEndpoints.GetAll,
+    url: TransactionApiEndpoints.Base,
     params: filters,
   });
 };
@@ -128,7 +117,7 @@ export const getOne = (id: string): Promise<Transaction> => {
  */
 export const create = (data: CreateTransactionInput): Promise<Transaction> => {
   return apiClient.post<Transaction>({
-    url: TransactionApiEndpoints.Create,
+    url: TransactionApiEndpoints.Base,
     data,
   });
 };
@@ -217,10 +206,10 @@ export const deleteTransaction = (id: string): Promise<void> => {
  * @throws ApiError on 401 (not authenticated)
  */
 export const getSummary = (
-  filters?: TransactionQueryFilters,
+  filters?: TransactionQueryFilters
 ): Promise<TransactionStatsResponse> => {
   return apiClient.get<TransactionStatsResponse>({
-    url: TransactionApiEndpoints.GetSummary,
+    url: TransactionApiEndpoints.Summary,
     params: filters,
   });
 };
@@ -241,11 +230,11 @@ export const getSummary = (
  * @throws ApiError on 401
  */
 export const getAllUnpaginated = (
-  filters?: Omit<TransactionQueryFilters, 'page' | 'limit'>,
+  filters?: Omit<TransactionQueryFilters, 'page' | 'limit'>
 ): Promise<Transaction[]> => {
   return apiClient
     .get<PaginatedResponse<Transaction>>({
-      url: TransactionApiEndpoints.GetAll,
+      url: TransactionApiEndpoints.Base,
       params: { ...filters, limit: 10000 },
     })
     .then((response) => {
@@ -286,7 +275,7 @@ export const getTodayTransactions = (): Promise<PaginatedResponse<Transaction>> 
 export const getByDateRange = (
   startDate: string,
   endDate: string,
-  additionalFilters?: Omit<TransactionQueryFilters, 'startDate' | 'endDate'>,
+  additionalFilters?: Omit<TransactionQueryFilters, 'startDate' | 'endDate'>
 ): Promise<PaginatedResponse<Transaction>> => {
   return getAll({
     ...additionalFilters,
@@ -306,7 +295,7 @@ export const getByDateRange = (
  * @throws ApiError on 401
  */
 export const getIncome = (
-  filters?: Omit<TransactionQueryFilters, 'type'>,
+  filters?: Omit<TransactionQueryFilters, 'type'>
 ): Promise<PaginatedResponse<Transaction>> => {
   return getAll({
     ...filters,
@@ -325,7 +314,7 @@ export const getIncome = (
  * @throws ApiError on 401
  */
 export const getExpenses = (
-  filters?: Omit<TransactionQueryFilters, 'type'>,
+  filters?: Omit<TransactionQueryFilters, 'type'>
 ): Promise<PaginatedResponse<Transaction>> => {
   return getAll({
     ...filters,

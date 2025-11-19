@@ -59,7 +59,10 @@ function StatCardSkeleton() {
 export function DebtStatsCards({ summary, isLoading }: DebtStatsCardsProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6" dir="rtl">
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+        dir="rtl"
+      >
         <StatCardSkeleton />
         <StatCardSkeleton />
         <StatCardSkeleton />
@@ -69,14 +72,7 @@ export function DebtStatsCards({ summary, isLoading }: DebtStatsCardsProps) {
     );
   }
 
-  const {
-    totalDebts,
-    activeDebts,
-    paidDebts,
-    partialDebts,
-    totalOwed,
-    overdueDebts,
-  } = summary;
+  const { totalDebts, activeDebts, paidDebts, partialDebts, totalOwed: _totalOwed, overdueDebts } = summary;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6" dir="rtl">

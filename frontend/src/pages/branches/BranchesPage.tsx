@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Building2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  useBranches,
-  useUpdateBranch,
-  useDeleteBranch,
-} from '@/hooks/useBranches';
+import { useBranches, useUpdateBranch, useDeleteBranch } from '@/hooks/useBranches';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
 import { EmptyState, Table, ConfirmModal } from '@/components/ui';
@@ -18,7 +14,7 @@ import type { Column } from '@/components/ui/Table';
 export const BranchesPage = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
-  const { data: branches = [], isLoading, error, refetch } = useBranches();
+  const { data: branches = [], isLoading, refetch } = useBranches();
   const updateBranch = useUpdateBranch();
   const deleteBranch = useDeleteBranch();
 
@@ -55,9 +51,7 @@ export const BranchesPage = () => {
     {
       key: 'managerName',
       header: 'المدير',
-      render: (branch) => (
-        <div className="text-[var(--text-primary)]">{branch.managerName}</div>
-      ),
+      render: (branch) => <div className="text-[var(--text-primary)]">{branch.managerName}</div>,
     },
     {
       key: 'phone',
@@ -93,11 +87,7 @@ export const BranchesPage = () => {
       header: 'الإجراءات',
       render: (branch) => (
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/branches/edit/${branch.id}`)}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/branches/edit/${branch.id}`)}>
             <Edit className="w-4 h-4" />
             تعديل
           </Button>
@@ -119,7 +109,6 @@ export const BranchesPage = () => {
     <PageLayout
       title="إدارة الفروع"
       description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
-      error={error}
       onRetry={() => refetch()}
       actions={
         isAdmin() ? (
@@ -130,7 +119,6 @@ export const BranchesPage = () => {
         ) : undefined
       }
     >
-
       {/* Loading State */}
       {isLoading ? (
         <PageLoading message="جاري تحميل الفروع..." />

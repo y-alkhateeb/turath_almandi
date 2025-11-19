@@ -16,7 +16,8 @@ const defaultSettings: SettingsType = {
   breadCrumb: true,
   multiTab: false,
   darkSidebar: false,
-  fontFamily: "'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+  fontFamily:
+    "'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
   fontSize: 16,
   direction: 'rtl',
 };

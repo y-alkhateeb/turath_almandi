@@ -9,13 +9,7 @@ import { Calendar, Building } from 'lucide-react';
 import { Card } from '@/ui/card';
 import { Input } from '@/ui/input';
 import { Button } from '@/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/select';
 import type { Branch } from '@/types';
 
 export interface DashboardFiltersProps {

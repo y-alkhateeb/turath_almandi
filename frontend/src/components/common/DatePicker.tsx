@@ -142,8 +142,8 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     const maxDateStr = maxDate
       ? formatDateForInput(maxDate)
       : restrictFuture
-      ? getTodayString()
-      : undefined;
+        ? getTodayString()
+        : undefined;
 
     // Current value formatted for input
     const inputValue = formatDateForInput(value);
@@ -200,9 +200,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
               ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}
             aria-invalid={error ? 'true' : 'false'}
-            aria-describedby={
-              error ? `${name}-error` : helperText ? `${name}-helper` : undefined
-            }
+            aria-describedby={error ? `${name}-error` : helperText ? `${name}-helper` : undefined}
             dir="ltr"
           />
 
@@ -240,23 +238,14 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
 
         {/* Error Message */}
         {error && (
-          <p
-            id={`${name}-error`}
-            className="mt-2 text-sm text-red-600"
-            role="alert"
-            dir="rtl"
-          >
+          <p id={`${name}-error`} className="mt-2 text-sm text-red-600" role="alert" dir="rtl">
             {error.message}
           </p>
         )}
 
         {/* Helper Text */}
         {helperText && !error && (
-          <p
-            id={`${name}-helper`}
-            className="mt-1 text-xs text-[var(--text-secondary)]"
-            dir="rtl"
-          >
+          <p id={`${name}-helper`} className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">
             {helperText}
           </p>
         )}
@@ -265,10 +254,16 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         {(minDateStr || maxDateStr) && !error && !helperText && (
           <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">
             {minDateStr && maxDateStr && (
-              <>من {formatDateArabic(minDateStr)} إلى {formatDateArabic(maxDateStr)}</>
+              <>
+                من {formatDateArabic(minDateStr)} إلى {formatDateArabic(maxDateStr)}
+              </>
             )}
-            {minDateStr && !maxDateStr && <>التاريخ يجب أن يكون من {formatDateArabic(minDateStr)}</>}
-            {!minDateStr && maxDateStr && <>التاريخ يجب أن يكون قبل {formatDateArabic(maxDateStr)}</>}
+            {minDateStr && !maxDateStr && (
+              <>التاريخ يجب أن يكون من {formatDateArabic(minDateStr)}</>
+            )}
+            {!minDateStr && maxDateStr && (
+              <>التاريخ يجب أن يكون قبل {formatDateArabic(maxDateStr)}</>
+            )}
           </p>
         )}
       </div>

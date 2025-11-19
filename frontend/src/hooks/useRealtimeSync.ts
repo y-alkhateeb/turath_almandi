@@ -16,11 +16,7 @@
  * - Returns combined state from all real-time features
  */
 
-import { useCallback } from 'react';
-import {
-  useRealtimeNotifications,
-  type NotificationSettings,
-} from './useRealtimeNotifications';
+import { useRealtimeNotifications, type NotificationSettings } from './useRealtimeNotifications';
 import { useRealtimeTransactions } from './useRealtimeTransactions';
 import { useRealtimeDebts } from './useRealtimeDebts';
 import { useWebSocket } from './useWebSocket';

@@ -33,7 +33,7 @@ type EditTransactionFormData = z.infer<typeof editTransactionSchema>;
 export const EditTransactionPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data, isLoading, error, refetch } = useTransactions();
+  const { data, isLoading, refetch } = useTransactions();
   const updateTransaction = useUpdateTransaction();
 
   const transactions = data?.data || [];
@@ -85,7 +85,7 @@ export const EditTransactionPage = () => {
         },
       });
       navigate('/transactions');
-    } catch (error) {
+    } catch (_error) {
       // Error is handled in the hook
     }
   };
@@ -114,7 +114,6 @@ export const EditTransactionPage = () => {
     <PageLayout
       title="تعديل العملية"
       description="تعديل بيانات العملية المالية"
-      error={error}
       onRetry={() => refetch()}
       actions={
         <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
@@ -123,7 +122,6 @@ export const EditTransactionPage = () => {
         </Button>
       }
     >
-
       {/* Edit Form Card */}
       <Card padding="lg">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -140,9 +138,7 @@ export const EditTransactionPage = () => {
                 <option value="INCOME">إيراد</option>
                 <option value="EXPENSE">مصروف</option>
               </select>
-              {errors.type && (
-                <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-              )}
+              {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
             </div>
 
             {/* Amount */}
@@ -172,9 +168,7 @@ export const EditTransactionPage = () => {
                 {...register('date', { valueAsDate: true })}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              {errors.date && (
-                <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
-              )}
+              {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>}
             </div>
 
             {/* Payment Method - Only for INCOME */}
@@ -211,7 +205,9 @@ export const EditTransactionPage = () => {
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفئة</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                الفئة
+              </label>
               <input
                 type="text"
                 {...register('category')}
@@ -236,7 +232,9 @@ export const EditTransactionPage = () => {
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">ملاحظات</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+              ملاحظات
+            </label>
             <textarea
               {...register('notes')}
               rows={3}

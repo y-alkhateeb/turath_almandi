@@ -33,12 +33,8 @@ export const StatCard = React.memo(function StatCard({
 
       <div className="relative flex justify-between items-start">
         <div className="flex-1">
-          <p className="text-sm text-[var(--text-secondary)] font-semibold mb-2">
-            {title}
-          </p>
-          <h3 className="text-3xl font-bold text-[var(--text-primary)] mb-2">
-            {value}
-          </h3>
+          <p className="text-sm text-[var(--text-secondary)] font-semibold mb-2">{title}</p>
+          <h3 className="text-3xl font-bold text-[var(--text-primary)] mb-2">{value}</h3>
           {change && (
             <div
               className={cn(
@@ -55,9 +51,7 @@ export const StatCard = React.memo(function StatCard({
             </div>
           )}
           {description && !change && (
-            <p className="text-sm text-[var(--text-secondary)]">
-              {description}
-            </p>
+            <p className="text-sm text-[var(--text-secondary)]">{description}</p>
           )}
         </div>
         <div className="w-14 h-14 rounded-xl bg-[var(--bg-tertiary)] flex items-center justify-center shadow-md group-hover:scale-110 group-hover:-rotate-[5deg] group-hover:bg-gradient-to-br group-hover:from-brand-gold-300 group-hover:to-brand-gold-500 transition-all">

@@ -56,9 +56,7 @@ export function NotificationBadge({ unreadCount, onClick }: NotificationBadgePro
     >
       {/* Bell Icon */}
       <Bell
-        className={`w-6 h-6 text-[var(--text-primary)] ${
-          shouldAnimate ? 'animate-bell-ring' : ''
-        }`}
+        className={`w-6 h-6 text-[var(--text-primary)] ${shouldAnimate ? 'animate-bell-ring' : ''}`}
       />
 
       {/* Unread Badge */}

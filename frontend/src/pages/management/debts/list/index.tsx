@@ -26,24 +26,12 @@
 import { useCallback, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
-import {
-  useDebts,
-  useDebtFilters,
-  useDebtSummary,
-  usePayDebt,
-  useDebt,
-} from '@/hooks/useDebts';
+import { useDebts, useDebtFilters, useDebtSummary, usePayDebt, useDebt } from '@/hooks/useDebts';
 import { useBranches } from '@/hooks/useBranches';
 import { useAuth } from '@/hooks/useAuth';
 import { DebtList } from '@/components/debts/DebtList';
 import { DebtStatsCards } from '@/components/debts/DebtStatsCards';
 import { Pagination } from '@/components/ui/Pagination';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui/dialog';
 import { PayDebtModal } from '@/components/PayDebtModal';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -69,13 +57,7 @@ export default function DebtsListPage() {
   // FILTERS & PAGINATION STATE
   // ============================================
 
-  const {
-    filters,
-    setFilter,
-    setFilters,
-    setPage,
-    resetFilters,
-  } = useDebtFilters({
+  const { filters, setFilter, setFilters: _setFilters, setPage, resetFilters } = useDebtFilters({
     page: 1,
     limit: 20, // Default 20 items per page
   });
@@ -122,7 +104,7 @@ export default function DebtsListPage() {
   /**
    * Pay debt mutation
    */
-  const payDebt = usePayDebt();
+  const _payDebt = usePayDebt();
 
   // ============================================
   // HANDLERS
@@ -248,9 +230,7 @@ export default function DebtsListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة الديون</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              تتبع وإدارة جميع الديون والمستحقات
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">تتبع وإدارة جميع الديون والمستحقات</p>
           </div>
         </div>
         <ErrorState error={error} onRetry={handleRetry} />
@@ -269,9 +249,7 @@ export default function DebtsListPage() {
         <div className="flex items-center justify-between" dir="rtl">
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة الديون</h1>
-            <p className="text-[var(--text-secondary)] mt-1">
-              تتبع وإدارة جميع الديون والمستحقات
-            </p>
+            <p className="text-[var(--text-secondary)] mt-1">تتبع وإدارة جميع الديون والمستحقات</p>
           </div>
           <button
             onClick={handleAddNew}
@@ -320,15 +298,13 @@ export default function DebtsListPage() {
       </div>
 
       {/* Stats Cards */}
-      {summary && (
-        <DebtStatsCards
-          summary={summary}
-          isLoading={isLoadingSummary}
-        />
-      )}
+      {summary && <DebtStatsCards summary={summary} isLoading={isLoadingSummary} />}
 
       {/* Filters */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4" dir="rtl">
+      <div
+        className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4"
+        dir="rtl"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Status Filter */}
           <div>
@@ -429,11 +405,7 @@ export default function DebtsListPage() {
 
       {/* Pay Debt Dialog */}
       {selectedDebt && (
-        <PayDebtModal
-          isOpen={isPayDialogOpen}
-          onClose={handleClosePayDialog}
-          debt={selectedDebt}
-        />
+        <PayDebtModal isOpen={isPayDialogOpen} onClose={handleClosePayDialog} debt={selectedDebt} />
       )}
     </div>
   );

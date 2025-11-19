@@ -117,7 +117,7 @@ const getNotificationIcon = (type: NotificationType, priority?: NotificationPrio
  */
 const getEntityNavigationPath = (
   entityType: EntityType | undefined,
-  entityId: string | undefined,
+  entityId: string | undefined
 ): string | null => {
   if (!entityType || !entityId) return null;
 
@@ -182,8 +182,8 @@ const playNotificationSound = (volume: number = 0.5): void => {
     // Play for 200ms
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.2);
-  } catch (error) {
-    console.error('[NotificationToast] Failed to play sound:', error);
+  } catch (_error) {
+    console.error('[NotificationToast] Failed to play sound:', _error);
   }
 };
 
@@ -204,7 +204,6 @@ const showDesktopNotification = (payload: NotificationPayload): void => {
 
   // Check permission
   if (Notification.permission === 'granted') {
-    const icon = getNotificationIcon(payload.type, payload.priority);
     const notification = new Notification(payload.title, {
       body: payload.message,
       icon: '/favicon.ico', // App icon
@@ -295,7 +294,7 @@ const getToastFunction = (priority?: NotificationPriority): typeof toast.info =>
  */
 const getToastAction = (
   payload: NotificationPayload,
-  customOnClick?: (payload: NotificationPayload) => void,
+  customOnClick?: (payload: NotificationPayload) => void
 ): ExternalToast['action'] | undefined => {
   const hasEntity = payload.relatedEntityType && payload.relatedEntityId;
   if (!hasEntity && !customOnClick) return undefined;
@@ -348,7 +347,7 @@ const getToastAction = (
  */
 export const showNotificationToast = (
   payload: NotificationPayload,
-  options?: NotificationToastOptions,
+  options?: NotificationToastOptions
 ): void => {
   const {
     soundEnabled = false,
@@ -358,10 +357,10 @@ export const showNotificationToast = (
   } = options || {};
 
   // Get toast configuration
-  const icon = getNotificationIcon(payload.type, payload.priority);
   const duration = getToastDuration(payload.priority);
   const toastFn = getToastFunction(payload.priority);
   const action = getToastAction(payload, onClick);
+  const icon = getNotificationIcon(payload.type, payload.priority);
 
   // Show toast
   toastFn(`${icon} ${payload.title}`, {
@@ -399,12 +398,16 @@ export const showNotificationToast = (
 export const showSimpleToast = (
   title: string,
   message?: string,
-  type: 'success' | 'error' | 'warning' | 'info' = 'info',
+  type: 'success' | 'error' | 'warning' | 'info' = 'info'
 ): void => {
-  const toastFn = type === 'success' ? toast.success :
-                  type === 'error' ? toast.error :
-                  type === 'warning' ? toast.warning :
-                  toast.info;
+  const toastFn =
+    type === 'success'
+      ? toast.success
+      : type === 'error'
+        ? toast.error
+        : type === 'warning'
+          ? toast.warning
+          : toast.info;
 
   toastFn(title, {
     description: message,

@@ -39,7 +39,6 @@ export default function TransactionModal({
     handleSubmit,
     watch,
     reset,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<EditTransactionFormData>({
     resolver: zodResolver(editTransactionSchema),
@@ -65,23 +64,19 @@ export default function TransactionModal({
   const onSubmit = async (data: EditTransactionFormData) => {
     if (!transaction || mode === 'view') return;
 
-    try {
-      await updateTransaction.mutateAsync({
-        id: transaction.id,
-        data: {
-          type: data.type,
-          amount: parseFloat(data.amount),
-          paymentMethod: data.paymentMethod,
-          category: data.category || undefined,
-          date: data.date.toISOString().split('T')[0],
-          employeeVendorName: data.employeeVendorName || undefined,
-          notes: data.notes || undefined,
-        },
-      });
-      onClose();
-    } catch (error) {
-      // Error is handled in the hook
-    }
+    await updateTransaction.mutateAsync({
+      id: transaction.id,
+      data: {
+        type: data.type,
+        amount: parseFloat(data.amount),
+        paymentMethod: data.paymentMethod,
+        category: data.category || undefined,
+        date: data.date.toISOString().split('T')[0],
+        employeeVendorName: data.employeeVendorName || undefined,
+        notes: data.notes || undefined,
+      },
+    });
+    onClose();
   };
 
   const formatDate = (dateString: string) => {
@@ -137,28 +132,36 @@ export default function TransactionModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">المبلغ</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                المبلغ
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 <span className="font-semibold">{formatAmount(transaction.amount)} IQD</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">التاريخ</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                التاريخ
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {formatDate(transaction.date)}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">طريقة الدفع</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                طريقة الدفع
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {getPaymentMethodLabel(transaction.paymentMethod)}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفئة</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                الفئة
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.category || '-'}
               </div>
@@ -174,14 +177,18 @@ export default function TransactionModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفرع</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                الفرع
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.branch?.name || '-'}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">أنشئ بواسطة</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                أنشئ بواسطة
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {transaction.creator?.username || '-'}
               </div>
@@ -204,7 +211,9 @@ export default function TransactionModal({
 
           {transaction.notes && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">ملاحظات</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                ملاحظات
+              </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md min-h-[80px]">
                 {transaction.notes}
               </div>
@@ -236,9 +245,7 @@ export default function TransactionModal({
                 <option value="INCOME">إيراد</option>
                 <option value="EXPENSE">مصروف</option>
               </select>
-              {errors.type && (
-                <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-              )}
+              {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
             </div>
 
             {/* Amount */}
@@ -268,9 +275,7 @@ export default function TransactionModal({
                 {...register('date', { valueAsDate: true })}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              {errors.date && (
-                <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
-              )}
+              {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>}
             </div>
 
             {/* Payment Method - Only for INCOME */}
@@ -307,7 +312,9 @@ export default function TransactionModal({
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">الفئة</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                الفئة
+              </label>
               <input
                 type="text"
                 {...register('category')}
@@ -332,7 +339,9 @@ export default function TransactionModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">ملاحظات</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+              ملاحظات
+            </label>
             <textarea
               {...register('notes')}
               rows={3}

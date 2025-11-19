@@ -93,9 +93,7 @@ export function Table<T>({
                     ${alignClasses[column.align || 'left']}
                   `}
                 >
-                  {column.render
-                    ? column.render(item)
-                    : String((item as any)[column.key] ?? '')}
+                  {column.render ? column.render(item) : String((item as Record<string, unknown>)[column.key] ?? '')}
                 </td>
               ))}
             </tr>

@@ -23,11 +23,7 @@ import { BranchSelector } from '@/components/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { InventoryUnit } from '@/types/enum';
 import { formatCurrency } from '@/utils/format';
-import type {
-  InventoryItem,
-  CreateInventoryInput,
-  UpdateInventoryInput,
-} from '#/entity';
+import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '#/entity';
 
 // ============================================
 // ZOD VALIDATION SCHEMAS
@@ -283,12 +279,8 @@ export function InventoryForm({
       {totalCost > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-800">
-              القيمة الإجمالية (تلقائي):
-            </span>
-            <span className="text-lg font-bold text-blue-900">
-              {formatCurrency(totalCost)}
-            </span>
+            <span className="text-sm font-medium text-blue-800">القيمة الإجمالية (تلقائي):</span>
+            <span className="text-lg font-bold text-blue-900">{formatCurrency(totalCost)}</span>
           </div>
           <p className="text-xs text-blue-700 mt-1">
             الكمية × سعر الوحدة = {quantity?.toFixed(2)} × {formatCurrency(costPerUnit || 0)}
@@ -314,9 +306,7 @@ export function InventoryForm({
       {/* Branch Display - Read-only for accountants in create mode */}
       {mode === 'create' && !isAdmin && user?.branch && (
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الفرع
-          </label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
           <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {user.branch.name}
           </div>

@@ -12,9 +12,9 @@ This document describes the React Query configuration and patterns used througho
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,                          // Retry failed queries once
-      refetchOnWindowFocus: false,       // Disabled globally
-      staleTime: 5 * 60 * 1000,         // 5 minutes default
+      retry: 1, // Retry failed queries once
+      refetchOnWindowFocus: false, // Disabled globally
+      staleTime: 5 * 60 * 1000, // 5 minutes default
     },
   },
 });
@@ -22,11 +22,11 @@ const queryClient = new QueryClient({
 
 ### Global Defaults Explained
 
-| Setting | Value | Reasoning |
-|---------|-------|-----------|
-| **retry** | `1` | Only retry once to avoid excessive server load and slow error feedback |
-| **refetchOnWindowFocus** | `false` | Disabled to prevent excessive refetches when switching browser tabs |
-| **staleTime** | `5 minutes` | Default for stable data (users, branches) |
+| Setting                  | Value       | Reasoning                                                              |
+| ------------------------ | ----------- | ---------------------------------------------------------------------- |
+| **retry**                | `1`         | Only retry once to avoid excessive server load and slow error feedback |
+| **refetchOnWindowFocus** | `false`     | Disabled to prevent excessive refetches when switching browser tabs    |
+| **staleTime**            | `5 minutes` | Default for stable data (users, branches)                              |
 
 ---
 
@@ -43,8 +43,8 @@ export const useUsers = () => {
   return useQuery<UserWithBranch[], ApiError>({
     queryKey: queryKeys.users.all,
     queryFn: () => usersService.getAll(),
-    staleTime: 5 * 60 * 1000,  // ✅ 5 minutes - users don't change often
-    gcTime: 10 * 60 * 1000,    // Cache for 10 minutes
+    staleTime: 5 * 60 * 1000, // ✅ 5 minutes - users don't change often
+    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
     retry: 1,
   });
 };
@@ -53,6 +53,7 @@ export const useUsers = () => {
 **File**: `frontend/src/hooks/useUsers.ts:35-43`
 
 **Why 5 minutes?**
+
 - Users list changes infrequently (only when admin creates/updates users)
 - Reduces unnecessary API calls
 - Real-time updates handled by WebSocket invalidation
@@ -66,8 +67,10 @@ export const useBranches = (options?: { isActive?: boolean }) => {
 
   return useQuery<Branch[], ApiError>({
     queryKey: queryKeys.branches.list(filters),
-    queryFn: async () => { /* ... */ },
-    staleTime: 5 * 60 * 1000,  // ✅ 5 minutes - branches rarely change
+    queryFn: async () => {
+      /* ... */
+    },
+    staleTime: 5 * 60 * 1000, // ✅ 5 minutes - branches rarely change
     gcTime: 10 * 60 * 1000,
     retry: 1,
   });
@@ -77,6 +80,7 @@ export const useBranches = (options?: { isActive?: boolean }) => {
 **File**: `frontend/src/hooks/useBranches.ts:48-86`
 
 **Why 5 minutes?**
+
 - Branches are rarely created/updated
 - Very stable data
 - Users typically work within one branch during a session
@@ -94,7 +98,7 @@ export const useTransactions = (filters?: TransactionQueryFilters) => {
   return useQuery<PaginatedResponse<Transaction>, ApiError>({
     queryKey: queryKeys.transactions.list(filters),
     queryFn: () => transactionService.getAll(filters),
-    staleTime: 2 * 60 * 1000,  // ✅ 2 minutes - transactions change frequently
+    staleTime: 2 * 60 * 1000, // ✅ 2 minutes - transactions change frequently
     gcTime: 5 * 60 * 1000,
     retry: 1,
   });
@@ -104,6 +108,7 @@ export const useTransactions = (filters?: TransactionQueryFilters) => {
 **File**: `frontend/src/hooks/useTransactions.ts:55-63`
 
 **Why 2 minutes?**
+
 - Transactions created frequently throughout the day
 - Multiple users may create transactions concurrently
 - Shorter staleTime ensures fresher data
@@ -123,7 +128,7 @@ export const useDebts = (filters?: DebtQueryFilters) => {
   return useQuery<PaginatedResponse<Debt>, ApiError>({
     queryKey: queryKeys.debts.list(appliedFilters),
     queryFn: () => debtService.getAll(appliedFilters),
-    staleTime: 2 * 60 * 1000,  // ✅ 2 minutes - debts updated frequently
+    staleTime: 2 * 60 * 1000, // ✅ 2 minutes - debts updated frequently
     gcTime: 5 * 60 * 1000,
     retry: 1,
   });
@@ -133,6 +138,7 @@ export const useDebts = (filters?: DebtQueryFilters) => {
 **File**: `frontend/src/hooks/useDebts.ts:58-74`
 
 **Why 2 minutes?**
+
 - Debt payments made throughout the day
 - Debt status changes frequently (ACTIVE → PARTIAL → PAID)
 - Multiple users may update debts concurrently
@@ -166,13 +172,14 @@ export const useUnreadNotificationsCount = () => {
   return useQuery({
     queryKey: ['notifications', 'unread'],
     queryFn: () => notificationService.getUnreadCount(),
-    staleTime: 0,  // Always stale
-    refetchOnWindowFocus: true,  // ✅ Override global setting
+    staleTime: 0, // Always stale
+    refetchOnWindowFocus: true, // ✅ Override global setting
   });
 };
 ```
 
 **Use Cases for Enabling**:
+
 - Notification counts (time-sensitive)
 - User balance/wallet (financial data)
 - Active session status
@@ -235,6 +242,7 @@ useMutation({
 **Problem**: Two users create/update same entity simultaneously
 
 **Solution**:
+
 ```typescript
 onMutate: async (newData) => {
   // Cancel ALL outgoing queries before optimistic update
@@ -242,7 +250,7 @@ onMutate: async (newData) => {
 
   // Now no race - our optimistic update won't be overwritten
   // by an inflight query response
-}
+};
 ```
 
 #### Race 2: Query Refetch During Mutation
@@ -250,6 +258,7 @@ onMutate: async (newData) => {
 **Problem**: Query refetches while mutation is in progress, overwriting optimistic update
 
 **Solution**:
+
 ```typescript
 onMutate: async (newData) => {
   // Cancel prevents refetch from overwriting our optimistic update
@@ -262,7 +271,7 @@ onMutate: async (newData) => {
   queryClient.setQueryData(queryKeys.users.all, (old) => [...newData, ...old]);
 
   return { previousUsers };
-}
+};
 ```
 
 #### Race 3: Multiple Simultaneous Deletes
@@ -270,6 +279,7 @@ onMutate: async (newData) => {
 **Problem**: User clicks delete on multiple items rapidly
 
 **Solution**:
+
 ```typescript
 // Each mutation cancels queries independently
 onMutate: async (deletedId) => {
@@ -312,24 +322,19 @@ export const useCreateUser = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
 
       // ✅ Snapshot for rollback
-      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(
-        queryKeys.users.all,
-      );
+      const previousUsers = queryClient.getQueryData<UserWithBranch[]>(queryKeys.users.all);
 
       // ✅ Optimistic update with temp ID
       if (previousUsers) {
-        queryClient.setQueryData<UserWithBranch[]>(
-          queryKeys.users.all,
-          (old = []) => [
-            {
-              id: `temp-${Date.now()}`,  // Temp ID prevents conflicts
-              username: newUser.username,
-              role: newUser.role,
-              // ...other fields
-            } as UserWithBranch,
-            ...old,
-          ],
-        );
+        queryClient.setQueryData<UserWithBranch[]>(queryKeys.users.all, (old = []) => [
+          {
+            id: `temp-${Date.now()}`, // Temp ID prevents conflicts
+            username: newUser.username,
+            role: newUser.role,
+            // ...other fields
+          } as UserWithBranch,
+          ...old,
+        ]);
       }
 
       return { previousUsers };
@@ -368,34 +373,24 @@ export const useUpdateBranch = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.branches.detail(id) });
 
       // ✅ Snapshot BOTH queries
-      const previousBranch = queryClient.getQueryData<Branch>(
-        queryKeys.branches.detail(id),
-      );
+      const previousBranch = queryClient.getQueryData<Branch>(queryKeys.branches.detail(id));
       const previousBranches = queryClient.getQueriesData<Branch[]>({
         queryKey: queryKeys.branches.all,
       });
 
       // ✅ Update detail query
-      queryClient.setQueryData<Branch>(
-        queryKeys.branches.detail(id),
-        (old) => {
-          if (!old) return old;
-          return { ...old, ...data, updatedAt: new Date().toISOString() };
-        },
-      );
+      queryClient.setQueryData<Branch>(queryKeys.branches.detail(id), (old) => {
+        if (!old) return old;
+        return { ...old, ...data, updatedAt: new Date().toISOString() };
+      });
 
       // ✅ Update ALL list queries (different filters)
-      queryClient.setQueriesData<Branch[]>(
-        { queryKey: queryKeys.branches.all },
-        (old) => {
-          if (!old) return old;
-          return old.map((branch) =>
-            branch.id === id
-              ? { ...branch, ...data, updatedAt: new Date().toISOString() }
-              : branch,
-          );
-        },
-      );
+      queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
+        if (!old) return old;
+        return old.map((branch) =>
+          branch.id === id ? { ...branch, ...data, updatedAt: new Date().toISOString() } : branch
+        );
+      });
 
       return { previousBranch, previousBranches };
     },
@@ -436,27 +431,32 @@ export const useUpdateBranch = () => {
    - 0 for real-time critical data (with WebSocket fallback)
 
 2. **Cancel queries before optimistic updates**:
+
    ```typescript
    await queryClient.cancelQueries({ queryKey: queryKeys.entity.all });
    ```
 
 3. **Always snapshot for rollback**:
+
    ```typescript
    const previousData = queryClient.getQueryData(queryKeys.entity.all);
    return { previousData };
    ```
 
 4. **Invalidate queries on success**:
+
    ```typescript
    queryClient.invalidateQueries({ queryKey: queryKeys.entity.all });
    ```
 
 5. **Use temp IDs for optimistic creates**:
+
    ```typescript
-   id: `temp-${Date.now()}`  // Prevents conflicts
+   id: `temp-${Date.now()}`; // Prevents conflicts
    ```
 
 6. **Handle multiple related queries**:
+
    ```typescript
    // Cancel all related queries
    await queryClient.cancelQueries({ queryKey: queryKeys.entity.all });
@@ -466,15 +466,15 @@ export const useUpdateBranch = () => {
 7. **Use `setQueriesData` for multiple cache entries**:
    ```typescript
    // Update ALL filtered lists
-   queryClient.setQueriesData<Entity[]>(
-     { queryKey: queryKeys.entity.all },
-     (old) => { /* update all matches */ }
-   );
+   queryClient.setQueriesData<Entity[]>({ queryKey: queryKeys.entity.all }, (old) => {
+     /* update all matches */
+   });
    ```
 
 ### ❌ DON'T
 
 1. **Don't skip cancelQueries**:
+
    ```typescript
    // ❌ BAD - race condition possible
    onMutate: async (newData) => {
@@ -489,6 +489,7 @@ export const useUpdateBranch = () => {
    ```
 
 2. **Don't forget rollback context**:
+
    ```typescript
    // ❌ BAD - can't rollback
    onMutate: async (newData) => {
@@ -507,12 +508,13 @@ export const useUpdateBranch = () => {
    ```
 
 3. **Don't use same ID for optimistic and real data**:
+
    ```typescript
    // ❌ BAD - ID conflict
-   id: newData.id  // Might conflict with existing ID
+   id: newData.id; // Might conflict with existing ID
 
    // ✅ GOOD - unique temp ID
-   id: `temp-${Date.now()}`
+   id: `temp-${Date.now()}`;
    ```
 
 4. **Don't enable refetchOnWindowFocus globally**:
@@ -535,9 +537,9 @@ All query keys follow a hierarchical structure:
 ```typescript
 export const queryKeys = {
   users: {
-    all: ['users'],                          // All users queries
-    list: (filters) => ['users', filters],   // Filtered users
-    detail: (id) => ['users', id],           // Single user
+    all: ['users'], // All users queries
+    list: (filters) => ['users', filters], // Filtered users
+    detail: (id) => ['users', id], // Single user
   },
 
   branches: {
@@ -558,6 +560,7 @@ export const queryKeys = {
 ```
 
 **Benefits**:
+
 - Type-safe query keys
 - Easy invalidation patterns
 - Consistent naming across app
@@ -570,11 +573,13 @@ export const queryKeys = {
 ### Scenario 1: User Creates Transaction While List is Loading
 
 **Flow**:
+
 1. User navigates to transactions page → `useTransactions()` starts fetching
 2. Before fetch completes, user clicks "Create Transaction"
 3. `useCreateTransaction.mutate()` is called
 
 **Handling**:
+
 ```typescript
 onMutate: async (newTransaction) => {
   // ✅ Cancel the inflight fetch
@@ -586,7 +591,7 @@ onMutate: async (newTransaction) => {
     if (!old) return old;
     return { ...old, data: [tempTransaction, ...old.data] };
   });
-}
+};
 ```
 
 **Result**: No race - inflight fetch is cancelled, optimistic update shows immediately
@@ -594,24 +599,27 @@ onMutate: async (newTransaction) => {
 ### Scenario 2: Multiple Users Update Same Entity
 
 **Flow**:
+
 1. User A loads branch list
 2. User B updates branch X (name change)
 3. User A's cache is now stale
 
 **Handling**:
+
 - **WebSocket**: Real-time update invalidates User A's cache
 - **staleTime**: After 5 minutes, cache marked stale, refetch on next access
 - **Manual Refresh**: User A can click refresh button
 
 **Code**:
+
 ```typescript
 // WebSocket listener (in useRealtimeSync hook)
 socket.on('branch:updated', (branchId) => {
   queryClient.invalidateQueries({
-    queryKey: queryKeys.branches.all
+    queryKey: queryKeys.branches.all,
   });
   queryClient.invalidateQueries({
-    queryKey: queryKeys.branches.detail(branchId)
+    queryKey: queryKeys.branches.detail(branchId),
   });
 });
 ```
@@ -619,11 +627,13 @@ socket.on('branch:updated', (branchId) => {
 ### Scenario 3: Rapid Deletes
 
 **Flow**:
+
 1. User selects 3 items to delete
 2. Clicks delete on all 3 rapidly
 3. 3 mutations fire concurrently
 
 **Handling**:
+
 ```typescript
 // Each mutation runs independently
 onMutate: async (deletedId) => {
@@ -710,13 +720,13 @@ describe('useCreateUser', () => {
 
 ## Configuration Summary Table
 
-| Hook | Entity | staleTime | gcTime | retry | refetchOnWindowFocus | Notes |
-|------|--------|-----------|--------|-------|----------------------|-------|
-| **useUsers** | Users | 5 min | 10 min | 1 | false (global) | Stable data |
-| **useBranches** | Branches | 5 min | 10 min | 1 | false (global) | Stable data |
-| **useTransactions** | Transactions | 2 min | 5 min | 1 | false (global) | Dynamic data |
-| **useDebts** | Debts | 2 min | 5 min | 1 | false (global) | Dynamic data |
-| **useInventory** | Inventory | 2 min | 5 min | 1 | false (global) | Dynamic data |
+| Hook                | Entity       | staleTime | gcTime | retry | refetchOnWindowFocus | Notes        |
+| ------------------- | ------------ | --------- | ------ | ----- | -------------------- | ------------ |
+| **useUsers**        | Users        | 5 min     | 10 min | 1     | false (global)       | Stable data  |
+| **useBranches**     | Branches     | 5 min     | 10 min | 1     | false (global)       | Stable data  |
+| **useTransactions** | Transactions | 2 min     | 5 min  | 1     | false (global)       | Dynamic data |
+| **useDebts**        | Debts        | 2 min     | 5 min  | 1     | false (global)       | Dynamic data |
+| **useInventory**    | Inventory    | 2 min     | 5 min  | 1     | false (global)       | Dynamic data |
 
 ---
 

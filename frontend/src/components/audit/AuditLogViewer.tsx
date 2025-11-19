@@ -13,15 +13,7 @@
  */
 
 import { useState } from 'react';
-import {
-  ChevronDown,
-  ChevronRight,
-  Calendar,
-  User,
-  Search,
-  Filter,
-  Globe,
-} from 'lucide-react';
+import { ChevronDown, ChevronRight, Calendar, User, Search, Filter, Globe } from 'lucide-react';
 import { formatDateTime } from '@/utils/format';
 import { AuditAction } from '@/types/enum';
 import type { AuditLog } from '#/entity';
@@ -116,13 +108,6 @@ const getEntityTypeLabel = (entityType: string): string => {
   return labels[entityType.toLowerCase()] || entityType;
 };
 
-/**
- * Format JSON for display
- */
-const formatJSON = (obj: Record<string, unknown>): string => {
-  return JSON.stringify(obj, null, 2);
-};
-
 // ============================================
 // LOADING SKELETON
 // ============================================
@@ -171,11 +156,7 @@ function ExpandableChanges({ changes }: { changes: Record<string, unknown> }) {
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
       >
-        {isExpanded ? (
-          <ChevronDown className="w-4 h-4" />
-        ) : (
-          <ChevronRight className="w-4 h-4" />
-        )}
+        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {isExpanded ? 'إخفاء' : 'عرض'} التغييرات
       </button>
 
@@ -192,9 +173,7 @@ function ExpandableChanges({ changes }: { changes: Record<string, unknown> }) {
               const changeValue = value as { before: unknown; after: unknown };
               return (
                 <div key={field} className="space-y-1">
-                  <div className="text-sm font-medium text-[var(--text-primary)]">
-                    {field}:
-                  </div>
+                  <div className="text-sm font-medium text-[var(--text-primary)]">{field}:</div>
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div>
                       <div className="text-[var(--text-secondary)] mb-1">قبل:</div>
@@ -216,9 +195,7 @@ function ExpandableChanges({ changes }: { changes: Record<string, unknown> }) {
             // Regular value
             return (
               <div key={field} className="space-y-1">
-                <div className="text-sm font-medium text-[var(--text-primary)]">
-                  {field}:
-                </div>
+                <div className="text-sm font-medium text-[var(--text-primary)]">{field}:</div>
                 <pre className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded p-2 overflow-x-auto text-xs text-[var(--text-primary)]">
                   {JSON.stringify(value, null, 2)}
                 </pre>
@@ -427,9 +404,7 @@ export function AuditLogViewer({
                     </td>
 
                     {/* Action */}
-                    <td className="py-3 px-4 text-center">
-                      {getActionBadge(log.action)}
-                    </td>
+                    <td className="py-3 px-4 text-center">{getActionBadge(log.action)}</td>
 
                     {/* Entity Type */}
                     <td className="py-3 px-4 text-sm text-[var(--text-primary)]">
@@ -460,9 +435,7 @@ export function AuditLogViewer({
               {!isLoading && logs.length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-12 text-center">
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      لا توجد سجلات تدقيق
-                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">لا توجد سجلات تدقيق</p>
                   </td>
                 </tr>
               )}

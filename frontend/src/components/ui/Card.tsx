@@ -51,9 +51,7 @@ export interface CardHeaderProps {
 
 export function CardHeader({ children, className = '' }: CardHeaderProps) {
   return (
-    <div className={`border-b border-[var(--border-color)] pb-4 mb-4 ${className}`}>
-      {children}
-    </div>
+    <div className={`border-b border-[var(--border-color)] pb-4 mb-4 ${className}`}>{children}</div>
   );
 }
 
@@ -64,9 +62,7 @@ export interface CardTitleProps {
 
 export function CardTitle({ children, className = '' }: CardTitleProps) {
   return (
-    <h3 className={`text-lg font-semibold text-[var(--text-primary)] ${className}`}>
-      {children}
-    </h3>
+    <h3 className={`text-lg font-semibold text-[var(--text-primary)] ${className}`}>{children}</h3>
   );
 }
 
@@ -86,8 +82,6 @@ export interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
   return (
-    <div className={`border-t border-[var(--border-color)] pt-4 mt-4 ${className}`}>
-      {children}
-    </div>
+    <div className={`border-t border-[var(--border-color)] pt-4 mt-4 ${className}`}>{children}</div>
   );
 }

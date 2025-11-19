@@ -52,6 +52,7 @@ export function FormRadioGroup<T extends FieldValues>({
                   disabled={disabled}
                   className={`
                     w-5 h-5 border
+                    bg-[var(--bg-secondary)]
                     text-primary-600 focus:ring-2 focus:ring-primary-500
                     disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
                     transition-colors duration-200

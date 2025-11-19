@@ -40,8 +40,10 @@ export function FormTextarea<T extends FieldValues>({
         maxLength={maxLength}
         className={`
           w-full px-4 py-3 border rounded-lg
+          bg-[var(--bg-secondary)] text-[var(--text-primary)]
+          placeholder:text-[var(--text-tertiary)]
           focus:ring-2 focus:ring-primary-500 focus:border-transparent
-          disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+          disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed disabled:text-[var(--text-secondary)]
           transition-colors duration-200
           resize-vertical
           ${error ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'}

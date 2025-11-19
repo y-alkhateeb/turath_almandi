@@ -128,6 +128,8 @@ export function DebtForm({
         branchId: data.branchId,
       };
       await onSubmit(submitData);
+      // Reset form after successful submission
+      reset();
     } catch (error) {
       // Error handling is done by the parent component
       console.error('Form submission error:', error);

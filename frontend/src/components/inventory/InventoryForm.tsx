@@ -205,6 +205,8 @@ export function InventoryForm({
           branchId: createData.branchId,
         };
         await onSubmit(submitData);
+        // Reset form after successful submission
+        reset();
       } else {
         const updateData = data as UpdateFormData;
         const submitData: UpdateInventoryInput = {
@@ -215,6 +217,8 @@ export function InventoryForm({
           notes: updateData.notes || undefined,
         };
         await onSubmit(submitData);
+        // Reset form after successful submission
+        reset();
       }
     } catch (error) {
       // Error handling is done by the parent component

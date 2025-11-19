@@ -166,6 +166,8 @@ export function BranchForm({
           phone: createData.phone,
         };
         await onSubmit(submitData);
+        // Reset form after successful submission
+        reset();
       } else {
         const updateData = data as UpdateFormData;
         const submitData: UpdateBranchInput = {
@@ -176,6 +178,8 @@ export function BranchForm({
           isActive: updateData.isActive,
         };
         await onSubmit(submitData);
+        // Reset form after successful submission
+        reset();
       }
     } catch (error) {
       // Error handling is done by the parent component

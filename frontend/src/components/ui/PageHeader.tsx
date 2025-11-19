@@ -66,9 +66,9 @@ export function PageHeader({
 
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-brand-gold-700 mb-2">{title}</h1>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">{title}</h1>
           {description && (
-            <p className="text-sm text-[var(--text-secondary)] max-w-3xl">{description}</p>
+            <p className="text-[var(--text-secondary)] mt-1 max-w-3xl">{description}</p>
           )}
         </div>
 

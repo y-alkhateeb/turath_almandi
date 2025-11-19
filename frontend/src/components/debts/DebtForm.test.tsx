@@ -71,7 +71,7 @@ describe('DebtForm', () => {
         />,
       );
 
-      expect(screen.getByRole('button', { name: /حفظ|submit/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /إضافة دين|add.*debt/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /إلغاء|cancel/i })).toBeInTheDocument();
     });
   });
@@ -88,7 +88,7 @@ describe('DebtForm', () => {
         />,
       );
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -111,7 +111,7 @@ describe('DebtForm', () => {
 
       await user.type(screen.getByLabelText(/اسم الدائن/i), 'John Doe');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -137,7 +137,7 @@ describe('DebtForm', () => {
       const dateInput = screen.getByLabelText(/تاريخ الدين/i);
       await user.clear(dateInput);
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -159,7 +159,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/اسم الدائن/i), 'John Doe');
       await user.type(screen.getByLabelText(/المبلغ/i), '1000');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -183,7 +183,7 @@ describe('DebtForm', () => {
       const longName = 'a'.repeat(201);
       await user.type(screen.getByLabelText(/اسم الدائن/i), longName);
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -205,7 +205,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/اسم الدائن/i), 'John Doe');
       await user.type(screen.getByLabelText(/المبلغ/i), '-100');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -227,7 +227,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/اسم الدائن/i), 'John Doe');
       await user.type(screen.getByLabelText(/المبلغ/i), '0');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -253,7 +253,7 @@ describe('DebtForm', () => {
       await user.click(notesInput);
       await user.paste(longNotes);
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -279,7 +279,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/تاريخ الدين/i), '2024-01-10');
       await user.type(screen.getByLabelText(/تاريخ الاستحقاق/i), '2024-01-05'); // Before debt date
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -308,7 +308,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/تاريخ الدين/i), '2024-01-10');
       await user.type(screen.getByLabelText(/تاريخ الاستحقاق/i), '2024-01-10'); // Same as debt date
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -333,7 +333,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/تاريخ الدين/i), '2024-01-10');
       await user.type(screen.getByLabelText(/تاريخ الاستحقاق/i), '2024-01-20'); // After debt date
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -361,7 +361,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/تاريخ الاستحقاق/i), '2024-01-31');
       await user.type(screen.getByLabelText(/ملاحظات/i), 'Test debt');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -394,7 +394,7 @@ describe('DebtForm', () => {
       await user.type(screen.getByLabelText(/تاريخ الدين/i), '2024-01-01');
       await user.type(screen.getByLabelText(/تاريخ الاستحقاق/i), '2024-01-31');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -433,7 +433,7 @@ describe('DebtForm', () => {
 
       const creditorInput = screen.getByLabelText(/اسم الدائن/i);
       const amountInput = screen.getByLabelText(/المبلغ/i);
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة دين|add.*debt/i });
 
       expect(creditorInput).toBeDisabled();
       expect(amountInput).toBeDisabled();

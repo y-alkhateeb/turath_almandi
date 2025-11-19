@@ -99,7 +99,7 @@ describe('TransactionForm', () => {
         />,
       );
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -123,7 +123,7 @@ describe('TransactionForm', () => {
       const amountInput = screen.getByLabelText(/المبلغ/i);
       await user.type(amountInput, '-100');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -146,7 +146,7 @@ describe('TransactionForm', () => {
       await user.clear(amountInput);
       await user.type(amountInput, '0');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -168,7 +168,7 @@ describe('TransactionForm', () => {
       const dateInput = screen.getByLabelText(/التاريخ/i);
       await user.clear(dateInput);
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -194,7 +194,7 @@ describe('TransactionForm', () => {
       await user.click(notesInput);
       await user.paste(longText);
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -218,7 +218,7 @@ describe('TransactionForm', () => {
       await user.type(screen.getByLabelText(/المبلغ/i), '1000');
       await user.type(screen.getByLabelText(/التاريخ/i), '2024-01-01');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -278,7 +278,7 @@ describe('TransactionForm', () => {
       );
 
       const amountInput = screen.getByLabelText(/المبلغ/i);
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
 
       expect(amountInput).toBeDisabled();
       expect(submitButton).toBeDisabled();
@@ -346,7 +346,7 @@ describe('TransactionForm', () => {
       await user.clear(amountInput);
       await user.type(amountInput, '2000');
 
-      const submitButton = screen.getByRole('button', { name: /حفظ|submit/i });
+      const submitButton = screen.getByRole('button', { name: /إضافة عملية|تحديث العملية|add.*transaction|update.*transaction/i });
       await user.click(submitButton);
 
       await waitFor(() => {

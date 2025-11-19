@@ -25,7 +25,7 @@ export class BranchAccessGuard implements CanActivate {
     const isAccountant = user.role === 'ACCOUNTANT';
 
     // If accountant, they must have a branch assigned
-    if (isAccountant && !user.branch_id) {
+    if (isAccountant && !user.branchId) {
       throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NO_ACCESS);
     }
 

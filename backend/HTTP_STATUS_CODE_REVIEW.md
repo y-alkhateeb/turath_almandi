@@ -42,7 +42,7 @@ This document reviews all API endpoints and their HTTP status codes to ensure th
 | `/auth/login` | POST | 200 | 200 | ✅ Fixed |
 | `/auth/refresh` | POST | 200 | 200 | ✅ Correct |
 | `/auth/logout` | POST | 200 | 200 | ✅ Correct |
-| `/auth/me` | GET | 200 | 200 | ✅ Correct |
+| `/auth/profile` | GET | 200 | 200 | ✅ Correct |
 
 **Notes:**
 - `register` → 201 (creates new user)

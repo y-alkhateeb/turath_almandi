@@ -43,7 +43,7 @@ export class AuthController {
     return this.authService.refreshAccessToken(refreshTokenDto);
   }
 
-  @Get('me')
+  @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@CurrentUser() user: RequestUser) {
     return user;

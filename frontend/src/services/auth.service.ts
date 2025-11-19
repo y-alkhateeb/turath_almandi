@@ -12,7 +12,7 @@ export const authService = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await axiosInstance.get<User>('/auth/me');
+    const response = await axiosInstance.get<User>('/auth/profile');
     return response.data;
   },
 

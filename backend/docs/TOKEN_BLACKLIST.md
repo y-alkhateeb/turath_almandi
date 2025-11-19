@@ -341,7 +341,7 @@ curl -X POST http://localhost:3000/auth/logout \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 
 # Try to use the same token (should fail)
-curl http://localhost:3000/auth/me \
+curl http://localhost:3000/auth/profile \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 # Expected: 401 Unauthorized
 

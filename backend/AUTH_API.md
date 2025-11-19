@@ -71,7 +71,7 @@ Authenticates a user and returns a JWT access token.
   ```
 
 ### 2. Get Current User Profile
-**GET** `/api/v1/auth/me`
+**GET** `/api/v1/auth/profile`
 
 Returns the current authenticated user's profile.
 
@@ -268,7 +268,7 @@ function createAuthAxios() {
 // Get current user profile
 async function getProfile() {
   const authAxios = createAuthAxios();
-  const response = await authAxios.get('/auth/me');
+  const response = await authAxios.get('/auth/profile');
   return response.data;
 }
 
@@ -402,7 +402,7 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
   -d '{"username":"admin","password":"password123"}'
 
 # Get profile (replace TOKEN with actual token)
-curl http://localhost:3000/api/v1/auth/me \
+curl http://localhost:3000/api/v1/auth/profile \
   -H "Authorization: Bearer TOKEN"
 
 # Register new user
@@ -432,7 +432,7 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 
 2. **Protected Request:**
    - Method: GET
-   - URL: `http://localhost:3000/api/v1/auth/me`
+   - URL: `http://localhost:3000/api/v1/auth/profile`
    - Headers:
      - Key: `Authorization`
      - Value: `Bearer <paste_token_here>`

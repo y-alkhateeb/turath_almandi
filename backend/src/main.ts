@@ -78,9 +78,14 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     // Headers that clients are allowed to send
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Accept-Language'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Accept-Language',
+      'X-Request-ID', // Request tracing (dev mode only on frontend)
+    ],
     // Headers that clients can read from responses
-    // Note: X-Request-Id is server-generated only, not accepted from clients
     exposedHeaders: ['X-Request-Id', 'X-Response-Time'],
   });
 

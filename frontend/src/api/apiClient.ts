@@ -291,8 +291,9 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Add request ID for tracing
-    if (config.headers) {
+    // Add request ID for tracing (development only to avoid CORS issues)
+    // In production, backend must have X-Request-ID in CORS allowedHeaders
+    if (config.headers && import.meta.env.DEV) {
       config.headers['X-Request-ID'] = generateRequestId();
     }
 

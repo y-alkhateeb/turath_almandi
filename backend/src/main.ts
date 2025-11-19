@@ -77,13 +77,16 @@ async function bootstrap() {
     origin: configService.get('FRONTEND_URL') || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    // Headers that clients are allowed to send
     allowedHeaders: [
       'Content-Type',
       'Authorization',
       'Accept',
       'Accept-Language',
-      'X-Request-ID',
+      'X-Request-ID', // Request tracing (dev mode only on frontend)
     ],
+    // Headers that clients can read from responses
+    exposedHeaders: ['X-Request-Id', 'X-Response-Time'],
   });
 
   // Global Prefix

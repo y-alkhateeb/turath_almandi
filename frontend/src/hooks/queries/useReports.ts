@@ -194,7 +194,7 @@ export const useExportExcel = () => {
 
     onSuccess: () => {
       // Success toast
-      toast.success('*E *5/J1 'D*B1J1 %DI Excel (F,'-');
+      toast.success('تم تصدير التقرير إلى Excel بنجاح');
     },
 
     onError: () => {
@@ -231,7 +231,7 @@ export const useExportPDF = () => {
 
     onSuccess: () => {
       // Success toast
-      toast.success('*E *5/J1 'D*B1J1 %DI PDF (F,'-');
+      toast.success('تم تصدير التقرير إلى PDF بنجاح');
     },
 
     onError: () => {

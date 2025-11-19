@@ -12,7 +12,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/utils';
 import { navData, getFilteredNavItems, isNavItemActive } from './nav/nav-data/nav-data-frontend';
-import { useUser } from '@/store/userStore';
+import { useUserInfo } from '@/store/userStore';
 import { useUnreadNotifications } from '@/hooks/queries/useNotifications';
 import type { NavItem } from '#/router';
 import { ChevronDown } from 'lucide-react';
@@ -25,7 +25,7 @@ export interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
-  const user = useUser();
+  const user = useUserInfo();
   const { data: unreadData } = useUnreadNotifications();
   const unreadCount = unreadData?.count || 0;
 

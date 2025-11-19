@@ -125,13 +125,12 @@ export async function downloadExcel<T extends Record<string, unknown>>(
     sheetName: 'Sheet1',
     autoWidth: true,
     headerStyle: {
-      font: { bold: true, size: 12 },
       fill: {
         type: 'pattern' as const,
         pattern: 'solid' as const,
         fgColor: { argb: 'FF4472C4' },
       },
-      font: { bold: true, color: { argb: 'FFFFFFFF' } },
+      font: { bold: true, size: 12, color: { argb: 'FFFFFFFF' } },
       alignment: { vertical: 'middle' as const, horizontal: 'center' as const },
     },
     cellStyle: {

@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import InventoryTable from '@/components/InventoryTable';
 import { ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
-import { Alert } from '@/ui/alert';
+import { PageLayout } from '@/components/layouts';
 import type { InventoryItem, InventoryFilters } from '@/types/inventory.types';
 
 export default function InventoryPage() {
@@ -22,7 +22,7 @@ export default function InventoryPage() {
     item: InventoryItem | null;
   }>({ isOpen: false, item: null });
 
-  const { data, isLoading } = useInventory(filters);
+  const { data, isLoading, error, refetch } = useInventory(filters);
   const deleteInventory = useDeleteInventory();
 
   const handleEdit = (item: InventoryItem) => {
@@ -53,21 +53,18 @@ export default function InventoryPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة المخزون</h1>
-          <p className="mt-2 text-[var(--text-secondary)]">
-            عرض وإدارة جميع أصناف المخزون
-          </p>
-        </div>
+    <PageLayout
+      title="إدارة المخزون"
+      description="عرض وإدارة جميع أصناف المخزون"
+      error={error}
+      onRetry={() => refetch()}
+      actions={
         <Button onClick={() => navigate('/inventory/create')}>
           <Plus className="w-5 h-5" />
           إضافة صنف جديد
         </Button>
-      </div>
-
+      }
+    >
       {/* Table */}
       <InventoryTable
         items={data?.data || []}
@@ -102,6 +99,6 @@ export default function InventoryPage() {
         variant="danger"
         isLoading={deleteInventory.isPending}
       />
-    </div>
+    </PageLayout>
   );
 }

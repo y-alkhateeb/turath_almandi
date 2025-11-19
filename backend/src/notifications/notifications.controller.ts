@@ -7,6 +7,8 @@ import {
   Param,
   Body,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { NotificationSettingsService } from './notification-settings.service';
@@ -64,8 +66,10 @@ export class NotificationsController {
 
   /**
    * Update notification settings for the current user
+   * Uses POST for upsert (create or update), returns 200 not 201
    */
   @Post('settings')
+  @HttpCode(HttpStatus.OK)
   updateSettings(@CurrentUser() user: RequestUser, @Body() updateDto: UpdateNotificationSettingsDto) {
     return this.notificationSettingsService.updateSettings(user.id, updateDto);
   }
@@ -74,6 +78,7 @@ export class NotificationsController {
    * Delete a notification setting
    */
   @Delete('settings/:notificationType')
+  @HttpCode(HttpStatus.NO_CONTENT)
   deleteSetting(@CurrentUser() user: RequestUser, @Param('notificationType') notificationType: string) {
     return this.notificationSettingsService.deleteSetting(user.id, notificationType);
   }

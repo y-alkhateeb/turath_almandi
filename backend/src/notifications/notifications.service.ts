@@ -439,4 +439,107 @@ export class NotificationsService {
 
     return notification;
   }
+
+  /**
+   * Get all notifications with pagination and filters
+   * @param filters - Query filters (branchId, isRead, type, startDate, endDate)
+   * @param page - Page number (default: 1)
+   * @param limit - Items per page (default: 50)
+   * @returns Paginated notifications
+   */
+  async getAll(
+    filters: {
+      branchId?: string;
+      isRead?: boolean;
+      type?: string;
+      startDate?: string;
+      endDate?: string;
+    } = {},
+    page: number = 1,
+    limit: number = 50,
+  ): Promise<{
+    data: NotificationWithRelations[];
+    meta: { page: number; limit: number; total: number; totalPages: number };
+  }> {
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where: Prisma.NotificationWhereInput = {};
+
+    if (filters.branchId) {
+      where.branchId = filters.branchId;
+    }
+
+    if (filters.isRead !== undefined) {
+      where.isRead = filters.isRead;
+    }
+
+    if (filters.type) {
+      where.type = filters.type;
+    }
+
+    if (filters.startDate || filters.endDate) {
+      where.createdAt = {};
+      if (filters.startDate) {
+        where.createdAt.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        where.createdAt.lte = new Date(filters.endDate);
+      }
+    }
+
+    // Get total count
+    const total = await this.prisma.notification.count({ where });
+
+    // Get notifications
+    const notifications = await this.prisma.notification.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        branch: {
+          select: BRANCH_SELECT,
+        },
+        creator: {
+          select: USER_SELECT,
+        },
+      },
+    });
+
+    return {
+      data: notifications,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Mark all unread notifications as read
+   * @param userId - User ID (optional, currently notifications are global)
+   * @returns Count of updated notifications
+   */
+  async markAllAsRead(userId?: string): Promise<{ count: number }> {
+    const where: Prisma.NotificationWhereInput = {
+      isRead: false,
+    };
+
+    const result = await this.prisma.notification.updateMany({
+      where,
+      data: {
+        isRead: true,
+        readAt: getCurrentTimestamp(),
+      },
+    });
+
+    this.logger.log(`Marked ${result.count} notifications as read`);
+
+    return { count: result.count };
+  }
 }

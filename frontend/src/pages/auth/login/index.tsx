@@ -61,10 +61,14 @@ export default function LoginPage() {
         rememberMe: data.rememberMe,
       });
 
-      // Small delay to ensure Zustand persist completes before navigation
-      setTimeout(() => {
-        router.replace(GLOBAL_CONFIG.defaultRoute);
-      }, 100);
+      // Wait for Zustand persist middleware to complete
+      // The persist middleware writes to storage synchronously after state update,
+      // but we add a small delay to ensure the storage operation completes
+      // before navigation triggers the LoginAuthGuard check
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Navigate to dashboard after ensuring tokens are persisted
+      router.replace(GLOBAL_CONFIG.defaultRoute);
     } catch (err) {
       // Handle specific error cases with Arabic messages
       if (err instanceof ApiError) {

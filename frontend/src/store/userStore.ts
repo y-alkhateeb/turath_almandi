@@ -89,6 +89,45 @@ const initialState: UserStoreState = {
 };
 
 // ============================================
+// STORAGE HELPERS
+// ============================================
+
+/**
+ * Determine which storage to use based on current state
+ * Priority: Check where data currently exists, then use rememberMe preference
+ */
+const getStorageByPreference = (rememberMe: boolean): Storage => {
+  // Check if data exists in sessionStorage
+  const hasSessionData = sessionStorage.getItem('auth-storage') !== null;
+  // Check if data exists in localStorage
+  const hasLocalData = localStorage.getItem('auth-storage') !== null;
+
+  // If data exists in sessionStorage and not in localStorage, user is in session-only mode
+  if (hasSessionData && !hasLocalData) {
+    return sessionStorage;
+  }
+
+  // If data exists in localStorage, user has Remember Me enabled
+  if (hasLocalData) {
+    return localStorage;
+  }
+
+  // No existing data - use preference from login
+  return rememberMe ? localStorage : sessionStorage;
+};
+
+/**
+ * Migrate data between storages when rememberMe changes
+ */
+const migrateStorage = (fromStorage: Storage, toStorage: Storage): void => {
+  const data = fromStorage.getItem('auth-storage');
+  if (data) {
+    toStorage.setItem('auth-storage', data);
+    fromStorage.removeItem('auth-storage');
+  }
+};
+
+// ============================================
 // STORE CREATION
 // ============================================
 
@@ -98,7 +137,7 @@ const initialState: UserStoreState = {
  */
 const useUserStore = create<UserStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
 
       actions: {
@@ -123,6 +162,15 @@ const useUserStore = create<UserStore>()(
          * Convenience method for login flow
          */
         setAuth: (user: User, tokens: AuthTokens, rememberMe = false) => {
+          const currentRememberMe = get().rememberMe;
+
+          // If rememberMe preference changed, migrate storage
+          if (currentRememberMe !== rememberMe) {
+            const fromStorage = currentRememberMe ? localStorage : sessionStorage;
+            const toStorage = rememberMe ? localStorage : sessionStorage;
+            migrateStorage(fromStorage, toStorage);
+          }
+
           set({ user, tokens, rememberMe });
         },
 
@@ -131,6 +179,9 @@ const useUserStore = create<UserStore>()(
          * Called on logout or auth failure
          */
         clearAuth: () => {
+          // Clear from both storages to be safe
+          localStorage.removeItem('auth-storage');
+          sessionStorage.removeItem('auth-storage');
           set(initialState);
         },
 
@@ -150,22 +201,47 @@ const useUserStore = create<UserStore>()(
 
       /**
        * Storage strategy based on "Remember Me"
-       * - sessionStorage: Session only (browser close = logout)
-       * - localStorage: Persistent (survives browser close)
+       * Uses custom storage getter that respects the rememberMe flag
        */
-      storage: createJSONStorage(() => {
-        // Check both storages for existing data
-        const sessionData = sessionStorage.getItem('auth-storage');
-        const localData = localStorage.getItem('auth-storage');
+      storage: createJSONStorage(() => ({
+        getItem: (name: string) => {
+          // Check both storages and return data from whichever has it
+          const sessionData = sessionStorage.getItem(name);
+          if (sessionData) return sessionData;
 
-        // If session storage has data, use session (user didn't choose "Remember Me")
-        if (sessionData && !localData) {
-          return sessionStorage;
-        }
+          const localData = localStorage.getItem(name);
+          if (localData) return localData;
 
-        // Default to localStorage (Remember Me was chosen or first time)
-        return localStorage;
-      }),
+          return null;
+        },
+
+        setItem: (name: string, value: string) => {
+          try {
+            const parsed = JSON.parse(value);
+            const rememberMe = parsed.state?.rememberMe ?? false;
+
+            // Use appropriate storage based on rememberMe preference
+            const targetStorage = rememberMe ? localStorage : sessionStorage;
+            const otherStorage = rememberMe ? sessionStorage : localStorage;
+
+            // Set in target storage
+            targetStorage.setItem(name, value);
+
+            // Remove from other storage to prevent conflicts
+            otherStorage.removeItem(name);
+          } catch (error) {
+            console.error('[UserStore] Error setting item:', error);
+            // Fallback to localStorage if parsing fails
+            localStorage.setItem(name, value);
+          }
+        },
+
+        removeItem: (name: string) => {
+          // Remove from both storages
+          localStorage.removeItem(name);
+          sessionStorage.removeItem(name);
+        },
+      })),
 
       /**
        * Partialize: only persist specific fields
@@ -176,8 +252,13 @@ const useUserStore = create<UserStore>()(
         tokens: state.tokens,
         rememberMe: state.rememberMe,
       }),
-    }
-  )
+
+      /**
+       * Version for migrations (future-proofing)
+       */
+      version: 1,
+    },
+  ),
 );
 
 // ============================================

@@ -65,7 +65,7 @@ export default function TransactionsPage() {
       description="عرض وإدارة جميع الإيرادات والمصروفات"
       onRetry={() => refetch()}
       actions={
-        <Button onClick={() => navigate('/income/create')}>
+        <Button onClick={() => navigate('/transactions/create')}>
           <Plus className="w-5 h-5" />
           إضافة عملية جديدة
         </Button>

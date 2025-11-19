@@ -17,15 +17,34 @@ export class IsNotFutureDateConstraint implements ValidatorConstraintInterface {
     }
 
     try {
+      // Parse the date string (expected format: YYYY-MM-DD or ISO 8601)
       const inputDate = new Date(dateString);
+
+      // Check if date is valid
+      if (isNaN(inputDate.getTime())) {
+        return false;
+      }
+
+      // Get today's date in local timezone
       const today = new Date();
 
-      // Reset time to compare only dates (not time)
-      inputDate.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
+      // Extract only the date parts (ignore time)
+      const inputYear = inputDate.getFullYear();
+      const inputMonth = inputDate.getMonth();
+      const inputDay = inputDate.getDate();
 
-      // Return true if date is today or in the past
-      return inputDate <= today;
+      const todayYear = today.getFullYear();
+      const todayMonth = today.getMonth();
+      const todayDay = today.getDate();
+
+      // Compare dates: allow today or past dates
+      if (inputYear < todayYear) return true;
+      if (inputYear > todayYear) return false;
+
+      if (inputMonth < todayMonth) return true;
+      if (inputMonth > todayMonth) return false;
+
+      return inputDay <= todayDay;
     } catch (error) {
       return false; // Invalid date format
     }

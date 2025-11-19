@@ -73,8 +73,8 @@ export const ViewTransactionPage = () => {
             رجوع
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)]">تفاصيل العملية</h1>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">عرض تفاصيل العملية المالية</p>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">تفاصيل العملية</h1>
+            <p className="text-[var(--text-secondary)] mt-1">عرض تفاصيل العملية المالية</p>
           </div>
         </div>
         <Button

@@ -1,29 +1,33 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { IncomeForm } from '@/components/IncomeForm';
+import { TransactionForm } from '@/components/transactions/TransactionForm';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
 import { PageLayout } from '@/components/layouts';
+import { useCreateTransaction } from '@/hooks/useTransactions';
+import type { CreateTransactionInput } from '#/entity';
 
 /**
- * Create Income Page
- * Full page for creating a new income transaction
+ * Create Transaction Page
+ * Full page for creating a new transaction (income or expense)
  */
 export const CreateIncomePage = () => {
   const navigate = useNavigate();
+  const createTransaction = useCreateTransaction();
 
-  const handleSuccess = () => {
-    navigate('/income');
+  const handleSubmit = async (data: CreateTransactionInput) => {
+    await createTransaction.mutateAsync(data);
+    navigate('/transactions/list');
   };
 
   const handleCancel = () => {
-    navigate('/income');
+    navigate('/transactions/list');
   };
 
   return (
     <PageLayout
-      title="إضافة إيراد جديد"
-      description="تسجيل إيراد جديد في النظام"
+      title="إضافة عملية جديدة"
+      description="تسجيل إيراد أو مصروف جديد في النظام"
       actions={
         <Button variant="ghost" size="sm" onClick={handleCancel} className="gap-2">
           <ArrowRight className="w-4 h-4" />
@@ -33,7 +37,12 @@ export const CreateIncomePage = () => {
     >
       {/* Form Card */}
       <Card padding="lg">
-        <IncomeForm onSuccess={handleSuccess} onCancel={handleCancel} />
+        <TransactionForm
+          mode="create"
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          isSubmitting={createTransaction.isPending}
+        />
       </Card>
     </PageLayout>
   );

@@ -29,6 +29,7 @@ import {
 } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 import { CURRENCY_CONFIG } from '../common/constants/currency.constants';
+import { normalizeCategory } from '../common/constants/transaction-categories';
 
 interface RequestUser {
   id: string;
@@ -175,7 +176,7 @@ export class TransactionsService {
       amount: createTransactionDto.amount,
       date: formatDateForDB(createTransactionDto.date),
       paymentMethod: createTransactionDto.paymentMethod || null,
-      category: createTransactionDto.category || 'General',
+      category: normalizeCategory(createTransactionDto.category) || 'General',
       employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
       notes: createTransactionDto.notes || null,
       currency: CURRENCY_CONFIG.validateOrDefault(createTransactionDto.currency),
@@ -370,7 +371,7 @@ export class TransactionsService {
     if (updateTransactionDto.paymentMethod !== undefined)
       updateData.paymentMethod = updateTransactionDto.paymentMethod;
     if (updateTransactionDto.category !== undefined)
-      updateData.category = updateTransactionDto.category;
+      updateData.category = normalizeCategory(updateTransactionDto.category);
     if (updateTransactionDto.date !== undefined)
       updateData.date = formatDateForDB(updateTransactionDto.date);
     if (updateTransactionDto.employeeVendorName !== undefined)

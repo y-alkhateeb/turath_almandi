@@ -30,36 +30,46 @@ import type { CreateDebtInput } from '#/entity';
  * Zod schema for creating a debt
  * Matches backend CreateDebtDto validation rules
  */
-const createDebtSchema = z
-  .object({
-    creditorName: z
-      .string()
-      .min(1, { message: 'اسم الدائن مطلوب' })
-      .max(200, { message: 'اسم الدائن يجب ألا يتجاوز 200 حرف' }),
-    amount: z
-      .number({
+const createDebtSchema = z.object({
+  creditorName: z
+    .string()
+    .min(1, { message: 'اسم الدائن مطلوب' })
+    .max(200, { message: 'اسم الدائن يجب ألا يتجاوز 200 حرف' }),
+  amount: z
+    .preprocess(
+      (val) => {
+        // Convert empty string to undefined for proper required validation
+        if (val === '' || val === null) return undefined;
+        // Convert string numbers to actual numbers
+        if (typeof val === 'string') {
+          const num = parseFloat(val);
+          return isNaN(num) ? undefined : num;
+        }
+        return val;
+      },
+      z.number({
         required_error: 'المبلغ مطلوب',
         invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
       })
-      .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
-      .positive({ message: 'المبلغ يجب أن يكون موجبًا' }),
-    currency: z.nativeEnum(Currency).optional(),
-    date: z.string().min(1, { message: 'تاريخ الدين مطلوب' }),
-    dueDate: z.string().min(1, { message: 'تاريخ الاستحقاق مطلوب' }),
-    notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
-    branchId: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      // dueDate must be >= date
-      if (!data.date || !data.dueDate) return true;
-      return new Date(data.dueDate) >= new Date(data.date);
-    },
-    {
-      message: 'تاريخ الاستحقاق يجب أن يكون بعد أو يساوي تاريخ الدين',
-      path: ['dueDate'],
-    }
-  );
+        .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
+        .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
+    ),
+  currency: z.nativeEnum(Currency).optional(),
+  date: z.string().min(1, { message: 'تاريخ الدين مطلوب' }),
+  dueDate: z.string().min(1, { message: 'تاريخ الاستحقاق مطلوب' }),
+  notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
+  branchId: z.string().optional(),
+}).refine(
+  (data) => {
+    // dueDate must be >= date
+    if (!data.date || !data.dueDate) return true;
+    return new Date(data.dueDate) >= new Date(data.date);
+  },
+  {
+    message: 'تاريخ الاستحقاق يجب أن يكون بعد أو يساوي تاريخ الدين',
+    path: ['dueDate'],
+  }
+);
 
 type FormData = z.infer<typeof createDebtSchema>;
 

@@ -170,7 +170,9 @@ export class DashboardService {
     const currentDate = getCurrentTimestamp();
 
     // Build base where clause
-    const baseWhere: Prisma.TransactionWhereInput = {};
+    const baseWhere: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
+    };
     if (filterBranchId) {
       baseWhere.branchId = filterBranchId;
     }
@@ -279,7 +281,9 @@ export class DashboardService {
     });
 
     // Build date range filter for transactions
-    const dateFilter: Prisma.TransactionWhereInput = {};
+    const dateFilter: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
+    };
     if (dateRange) {
       dateFilter.date = {};
       if (dateRange.startDate) {
@@ -451,7 +455,9 @@ export class DashboardService {
   ): Promise<RecentTransaction[]> {
     const filterBranchId = this.determineBranchId(user, branchId);
 
-    const baseWhere: Prisma.TransactionWhereInput = {};
+    const baseWhere: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
+    };
     if (filterBranchId) {
       baseWhere.branchId = filterBranchId;
     }
@@ -490,7 +496,9 @@ export class DashboardService {
     branchId?: string,
     transactionType?: TransactionType,
   ): Prisma.TransactionWhereInput {
-    const where: Prisma.TransactionWhereInput = {};
+    const where: Prisma.TransactionWhereInput = {
+      deletedAt: null, // Exclude soft-deleted transactions
+    };
 
     // Apply branch filtering based on user role
     const filterBranchId = this.determineBranchId(user, branchId);

@@ -75,3 +75,28 @@ export function getAllCategories(): readonly string[] {
 export function isValidCategory(category: string): category is TransactionCategory {
   return TRANSACTION_CATEGORIES.includes(category as TransactionCategory);
 }
+
+/**
+ * Helper function to normalize category
+ * Converts Arabic labels to English constants
+ * Returns English constant if valid, otherwise returns original value
+ */
+export function normalizeCategory(category: string | undefined): string | undefined {
+  if (!category) {
+    return category;
+  }
+
+  // If already an English constant, return it
+  if (TRANSACTION_CATEGORIES.includes(category as TransactionCategory)) {
+    return category;
+  }
+
+  // Try to find English constant from Arabic label
+  const entry = Object.entries(CATEGORY_LABELS_AR).find(([_, label]) => label === category);
+  if (entry) {
+    return entry[0]; // Return English constant
+  }
+
+  // Return original value
+  return category;
+}

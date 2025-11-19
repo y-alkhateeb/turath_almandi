@@ -233,12 +233,12 @@ export const notificationKeys = {
   /**
    * Notification settings: ['notifications', 'settings']
    */
-  settings: ['notifications', 'settings'] as const,
+  settings: () => ['notifications', 'settings'] as const,
 
   /**
    * Unread notifications count: ['notifications', 'unread']
    */
-  unreadCount: ['notifications', 'unread'] as const,
+  unreadCount: () => ['notifications', 'unread'] as const,
 } as const;
 
 // ============================================

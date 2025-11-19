@@ -1,3 +1,35 @@
+/**
+ * Zod Validation Schemas
+ *
+ * This file contains centralized Zod schemas matching backend DTOs for API validation.
+ *
+ * ⚠️ IMPORTANT ARCHITECTURE NOTES:
+ *
+ * 1. **When to Use These Schemas:**
+ *    - API request/response validation
+ *    - Type inference for API data
+ *    - Shared validation logic across multiple components
+ *
+ * 2. **When to Use Local Schemas (in components):**
+ *    - Forms with frontend-only fields (e.g., branchId in create forms)
+ *    - Forms requiring native TypeScript enums (z.nativeEnum vs z.enum)
+ *    - Complex conditional validation specific to UI flows
+ *    - Forms with different validation rules than backend (e.g., stricter client-side)
+ *
+ * 3. **Current Form Components:**
+ *    All form components (TransactionForm, UserForm, etc.) use LOCAL schemas because:
+ *    - They need z.nativeEnum() to work with TypeScript enums from @/types/enum
+ *    - They include UI-specific fields not in backend DTOs
+ *    - This is intentional and correct - don't try to force them to use these schemas
+ *
+ * 4. **Keeping Schemas in Sync:**
+ *    - Backend changes should be reflected here AND in form local schemas
+ *    - Run validation tests to catch discrepancies
+ *    - Document any intentional differences
+ *
+ * @see backend/src/**/dto/ - Backend DTO definitions
+ */
+
 import { z } from 'zod';
 
 // ============================================================================

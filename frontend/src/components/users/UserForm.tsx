@@ -30,12 +30,14 @@ import type { CreateUserInput, UpdateUserInput } from '#/entity';
 
 /**
  * Password validation regex
+ * Matches backend CreateUserDto validation rules exactly
  * - At least 8 characters
  * - At least one uppercase letter
  * - At least one lowercase letter
  * - At least one number
+ * - At least one special character (@$!%*?&)
  */
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
 
 /**
  * Zod schema for creating a user
@@ -54,8 +56,9 @@ const createUserSchema = z.object({
     .string()
     .min(1, { message: 'كلمة المرور مطلوبة' })
     .min(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
+    .max(100, { message: 'كلمة المرور يجب ألا تتجاوز 100 حرف' })
     .regex(passwordRegex, {
-      message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم',
+      message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص (@$!%*?&)',
     }),
   role: z.nativeEnum(UserRole, {
     errorMap: () => ({ message: 'الدور مطلوب' }),
@@ -253,7 +256,7 @@ export function UserForm({
           error={errors.password}
           required
           disabled={isSubmitting}
-          helperText="8 أحرف على الأقل، يجب أن تحتوي على حرف كبير وحرف صغير ورقم"
+          helperText="8 أحرف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص (@$!%*?&)"
         />
       )}
 

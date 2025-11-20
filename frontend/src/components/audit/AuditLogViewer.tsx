@@ -296,7 +296,7 @@ export function AuditLogViewer({
                 type="date"
                 value={localFilters.startDate || ''}
                 onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                className="w-full px-4 py-2 pr-10 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-3 pr-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
               />
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)] pointer-events-none" />
             </div>
@@ -312,7 +312,7 @@ export function AuditLogViewer({
                 type="date"
                 value={localFilters.endDate || ''}
                 onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                className="w-full px-4 py-2 pr-10 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-3 pr-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
               />
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)] pointer-events-none" />
             </div>

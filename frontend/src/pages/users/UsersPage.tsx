@@ -92,8 +92,8 @@ export const UsersPage = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => isAdmin() && handleToggleStatus(user)}
-          disabled={!isAdmin() || updateUser.isPending}
+          onClick={() => isAdmin && handleToggleStatus(user)}
+          disabled={!isAdmin || updateUser.isPending}
         >
           <Badge variant={user.isActive ? 'default' : 'destructive'}>
             {user.isActive ? 'نشط' : 'معطل'}
@@ -104,7 +104,7 @@ export const UsersPage = () => {
   ];
 
   // Add actions column if user is admin
-  if (isAdmin()) {
+  if (isAdmin) {
     columns.push({
       key: 'actions',
       header: 'الإجراءات',
@@ -135,7 +135,7 @@ export const UsersPage = () => {
       error={error}
       onRetry={() => refetch()}
       actions={
-        isAdmin() ? (
+        isAdmin ? (
           <Button onClick={() => navigate('/users/create')}>
             <Plus className="w-5 h-5" />
             إضافة مستخدم جديد
@@ -154,7 +154,7 @@ export const UsersPage = () => {
           title="لا يوجد مستخدمون"
           description="أضف مستخدمين جدد (مدراء أو محاسبين) لتمكينهم من استخدام النظام وإدارة العمليات المالية."
           actions={
-            isAdmin()
+            isAdmin
               ? {
                   primary: {
                     label: 'إضافة مستخدم جديد',

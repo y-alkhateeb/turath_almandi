@@ -395,25 +395,47 @@ export class DashboardService {
   }
 
   /**
-   * Get comprehensive dashboard statistics (legacy method for backward compatibility)
+   * Get comprehensive dashboard statistics
    * Optimized to minimize database queries
+   * Supports both single date and date range filtering
    */
-  async getDashboardStats(date?: string, branchId?: string, user?: RequestUser): Promise<DashboardStats> {
+  async getDashboardStats(
+    date?: string,
+    startDate?: string,
+    endDate?: string,
+    branchId?: string,
+    user?: RequestUser,
+  ): Promise<DashboardStats> {
     if (!user) {
       throw new ForbiddenException('User authentication required');
     }
 
-    // Determine the target date (default to today)
-    const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
+    // Determine date range:
+    // 1. If startDate/endDate provided, use them
+    // 2. Otherwise, use single date (defaults to today)
+    let dateRange: { startDate: string; endDate: string };
 
-    // Set to start and end of day for today's summary
-    const startOfDay = getStartOfDay(targetDate);
-    const endOfDay = getEndOfDay(targetDate);
-
-    const dateRange = {
-      startDate: startOfDay.toISOString(),
-      endDate: endOfDay.toISOString(),
-    };
+    if (startDate && endDate) {
+      // Use provided date range
+      dateRange = {
+        startDate: formatDateForDB(startDate).toISOString(),
+        endDate: formatDateForDB(endDate).toISOString(),
+      };
+    } else if (startDate || endDate) {
+      // If only one is provided, use it as both start and end
+      const singleDate = formatDateForDB(startDate || endDate!);
+      dateRange = {
+        startDate: getStartOfDay(singleDate).toISOString(),
+        endDate: getEndOfDay(singleDate).toISOString(),
+      };
+    } else {
+      // Use single date or default to today
+      const targetDate = date ? formatDateForDB(date) : getCurrentTimestamp();
+      dateRange = {
+        startDate: getStartOfDay(targetDate).toISOString(),
+        endDate: getEndOfDay(targetDate).toISOString(),
+      };
+    }
 
     // Execute all queries in parallel for best performance
     const [

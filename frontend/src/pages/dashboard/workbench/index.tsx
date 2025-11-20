@@ -52,11 +52,15 @@ export default function DashboardWorkbench() {
     isAdmin,
     selectedDate,
     selectedBranchId,
+    selectedStartDate,
+    selectedEndDate,
     stats,
     branches,
     isLoading,
     setSelectedDate,
     setSelectedBranchId,
+    setSelectedStartDate,
+    setSelectedEndDate,
     handleRetry,
     hasNoTransactionsEver,
     error,
@@ -223,11 +227,15 @@ export default function DashboardWorkbench() {
         filters={{
           date: selectedDate,
           branchId: isAdmin ? selectedBranchId : null,
+          startDate: selectedStartDate,
+          endDate: selectedEndDate,
         }}
         branches={branches || []}
         onChange={(filters) => {
-          if (filters.date) setSelectedDate(filters.date);
+          if (filters.date !== undefined) setSelectedDate(filters.date || '');
           if (filters.branchId !== undefined) setSelectedBranchId(filters.branchId || 'ALL');
+          if (filters.startDate !== undefined) setSelectedStartDate(filters.startDate);
+          if (filters.endDate !== undefined) setSelectedEndDate(filters.endDate);
         }}
       />
 

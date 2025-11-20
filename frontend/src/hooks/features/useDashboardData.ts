@@ -26,6 +26,8 @@ export interface UseDashboardDataReturn {
   // State
   selectedDate: string;
   selectedBranchId: string;
+  selectedStartDate: string | undefined;
+  selectedEndDate: string | undefined;
 
   // Data
   stats: DashboardStats | undefined;
@@ -38,6 +40,8 @@ export interface UseDashboardDataReturn {
   // Handlers
   setSelectedDate: (date: string) => void;
   setSelectedBranchId: (branchId: string) => void;
+  setSelectedStartDate: (date: string | undefined) => void;
+  setSelectedEndDate: (date: string | undefined) => void;
   handleTodayClick: () => void;
   handleRetry: () => void;
 
@@ -52,6 +56,8 @@ export function useDashboardData(): UseDashboardDataReturn {
   // State
   const [selectedBranchId, setSelectedBranchId] = useState<string>('ALL');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedStartDate, setSelectedStartDate] = useState<string | undefined>(undefined);
+  const [selectedEndDate, setSelectedEndDate] = useState<string | undefined>(undefined);
 
   // Determine effective branch ID (accountants can only see their branch)
   const effectiveBranchId =
@@ -76,10 +82,12 @@ export function useDashboardData(): UseDashboardDataReturn {
     error,
     refetch,
   } = useQuery<DashboardStats>({
-    queryKey: ['dashboard', 'stats', selectedDate, effectiveBranchId],
+    queryKey: ['dashboard', 'stats', selectedDate, selectedStartDate, selectedEndDate, effectiveBranchId],
     queryFn: () =>
       getDashboardStats({
         date: selectedDate,
+        startDate: selectedStartDate,
+        endDate: selectedEndDate,
         branchId: effectiveBranchId || undefined,
       }),
     refetchInterval: 30000, // Auto-refresh every 30 seconds
@@ -111,6 +119,8 @@ export function useDashboardData(): UseDashboardDataReturn {
     // State
     selectedDate,
     selectedBranchId,
+    selectedStartDate,
+    selectedEndDate,
 
     // Data
     stats,
@@ -123,6 +133,8 @@ export function useDashboardData(): UseDashboardDataReturn {
     // Handlers
     setSelectedDate,
     setSelectedBranchId,
+    setSelectedStartDate,
+    setSelectedEndDate,
     handleTodayClick,
     handleRetry,
 

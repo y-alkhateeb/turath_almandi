@@ -1,10 +1,11 @@
 /**
  * DashboardRecentTransactions - Presentational Component
- * Compact table showing recent transactions
+ * Table showing recent transactions matching main transactions page style
  *
  * Features:
- * - Table showing last 5-10 transactions
- * - Type badge (income=green, expense=red)
+ * - Full table layout matching TransactionTable design
+ * - Type badge with colors (income=green, expense=red)
+ * - All columns: date, type, amount, payment method, category, name, branch
  * - Link to full transactions page
  * - Loading skeleton
  * - Empty state
@@ -15,8 +16,9 @@
 import { ArrowRight } from 'lucide-react';
 import { formatCurrency, formatDateShort } from '@/utils/format';
 import { getCategoryLabel } from '@/constants/transactionCategories';
-import { TransactionType } from '@/types/enum';
+import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction } from '#/entity';
+import { useAuth } from '@/hooks/useAuth';
 
 // ============================================
 // TYPES
@@ -31,51 +33,66 @@ export interface DashboardRecentTransactionsProps {
 // HELPER FUNCTIONS
 // ============================================
 
-/**
- * Get type badge styling
- */
-const getTypeBadge = (type: TransactionType): React.ReactNode => {
-  const isIncome = type === TransactionType.INCOME;
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        isIncome
-          ? 'bg-green-100 text-green-800 border border-green-300'
-          : 'bg-red-100 text-red-800 border border-red-300'
-      }`}
-    >
-      {isIncome ? 'إيراد' : 'مصروف'}
-    </span>
-  );
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('ar-IQ', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
 };
 
-/**
- * Get amount color class
- */
-const getAmountColorClass = (type: TransactionType): string => {
-  return type === TransactionType.INCOME ? 'text-green-600' : 'text-red-600';
+const formatAmount = (amount: number) => {
+  return amount.toLocaleString('ar-IQ', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+};
+
+const getTypeLabel = (type: TransactionType) => {
+  return type === TransactionType.INCOME ? 'إيراد' : 'مصروف';
+};
+
+const getTypeColor = (type: TransactionType) => {
+  return type === TransactionType.INCOME
+    ? 'text-green-600 dark:text-green-400'
+    : 'text-red-600 dark:text-red-400';
+};
+
+const getPaymentMethodLabel = (method: PaymentMethod | null) => {
+  if (!method) return '-';
+  return method === PaymentMethod.CASH ? 'نقدي' : 'ماستر کارد';
 };
 
 // ============================================
 // LOADING SKELETON
 // ============================================
 
-function TableRowSkeleton() {
+function TableRowSkeleton({ isAdmin }: { isAdmin: boolean }) {
   return (
     <tr className="border-b border-[var(--border-color)]">
-      <td className="py-3">
+      <td className="px-6 py-4">
         <div className="h-4 w-20 bg-[var(--bg-tertiary)] rounded animate-pulse" />
       </td>
-      <td className="py-3">
-        <div className="h-6 w-16 bg-[var(--bg-tertiary)] rounded-full animate-pulse" />
+      <td className="px-6 py-4">
+        <div className="h-4 w-16 bg-[var(--bg-tertiary)] rounded animate-pulse" />
       </td>
-      <td className="py-3">
+      <td className="px-6 py-4">
         <div className="h-4 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
       </td>
-      <td className="py-3">
+      <td className="px-6 py-4">
+        <div className="h-4 w-20 bg-[var(--bg-tertiary)] rounded animate-pulse" />
+      </td>
+      <td className="px-6 py-4">
+        <div className="h-4 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
+      </td>
+      <td className="px-6 py-4">
         <div className="h-4 w-28 bg-[var(--bg-tertiary)] rounded animate-pulse" />
       </td>
+      {isAdmin && (
+        <td className="px-6 py-4">
+          <div className="h-4 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
+        </td>
+      )}
     </tr>
   );
 }
@@ -88,13 +105,15 @@ export function DashboardRecentTransactions({
   transactions,
   isLoading,
 }: DashboardRecentTransactionsProps) {
+  const { isAdmin } = useAuth();
+
   return (
     <div
-      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
+      className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-sm overflow-hidden"
       dir="rtl"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-5 mb-6">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)]">
         <div>
           <h3 className="text-lg font-semibold text-[var(--text-primary)]">آخر العمليات</h3>
           <p className="text-sm text-[var(--text-secondary)] mt-1">
@@ -117,32 +136,58 @@ export function DashboardRecentTransactions({
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead>
-            <tr className="border-b border-[var(--border-color)]">
-              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
+          <thead className="bg-[var(--bg-tertiary)] border-b border-[var(--border-color)]">
+            <tr>
+              <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                 التاريخ
               </th>
-              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
+              <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                 النوع
               </th>
-              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
-                الفئة
-              </th>
-              <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
+              <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                 المبلغ
               </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                طريقة الدفع
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                الفئة
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                الاسم
+              </th>
+              {isAdmin && (
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                  الفرع
+                </th>
+              )}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-[var(--bg-secondary)] divide-y divide-[var(--border-color)]">
             {/* Loading State */}
             {isLoading && (
               <>
-                <TableRowSkeleton />
-                <TableRowSkeleton />
-                <TableRowSkeleton />
-                <TableRowSkeleton />
-                <TableRowSkeleton />
+                <TableRowSkeleton isAdmin={isAdmin} />
+                <TableRowSkeleton isAdmin={isAdmin} />
+                <TableRowSkeleton isAdmin={isAdmin} />
+                <TableRowSkeleton isAdmin={isAdmin} />
+                <TableRowSkeleton isAdmin={isAdmin} />
               </>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && transactions.length === 0 && (
+              <tr>
+                <td
+                  colSpan={isAdmin ? 7 : 6}
+                  className="px-6 py-12 text-center text-[var(--text-secondary)]"
+                >
+                  <p className="text-sm">لا توجد عمليات حتى الآن</p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                    سيتم عرض آخر العمليات المالية هنا
+                  </p>
+                </td>
+              </tr>
             )}
 
             {/* Data Rows */}
@@ -150,38 +195,38 @@ export function DashboardRecentTransactions({
               transactions.map((transaction) => (
                 <tr
                   key={transaction.id}
-                  className="border-b border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] transition-colors duration-200"
+                  className="hover:bg-[var(--bg-tertiary)] transition-colors"
                 >
-                  <td className="py-3 text-sm text-[var(--text-secondary)]">
-                    {formatDateShort(transaction.date)}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                    {formatDate(transaction.date)}
                   </td>
-                  <td className="py-3">{getTypeBadge(transaction.type)}</td>
-                  <td className="py-3 text-sm text-[var(--text-primary)]">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getTypeColor(transaction.type)}`}
+                  >
+                    {getTypeLabel(transaction.type)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)] font-semibold">
+                    {formatAmount(transaction.amount)} {transaction.currency}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                    {getPaymentMethodLabel(transaction.paymentMethod)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     {getCategoryLabel(transaction.category)}
                   </td>
-                  <td className="py-3">
-                    <span
-                      className={`text-sm font-semibold ${getAmountColorClass(transaction.type)}`}
-                    >
-                      {transaction.type === TransactionType.INCOME ? '+ ' : '- '}
-                      {formatCurrency(transaction.amount)}
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                    {transaction.employeeVendorName || '-'}
                   </td>
+                  {isAdmin && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                      {transaction.branch?.name || '-'}
+                    </td>
+                  )}
                 </tr>
               ))}
           </tbody>
         </table>
       </div>
-
-      {/* Empty State */}
-      {!isLoading && transactions.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-sm text-[var(--text-secondary)]">لا توجد عمليات حتى الآن</p>
-          <p className="text-xs text-[var(--text-tertiary)] mt-1">
-            سيتم عرض آخر العمليات المالية هنا
-          </p>
-        </div>
-      )}
     </div>
   );
 }

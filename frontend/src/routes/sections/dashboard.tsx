@@ -5,7 +5,7 @@
  * Route Structure:
  * - /dashboard - Main dashboard
  * - /transactions/* - Transaction management (list, create, view, edit)
- * - /debts/* - Debt management (list, create, view)
+ * - /debts/* - Debt management (list, create, pay)
  * - /inventory/* - Inventory management (list, create, edit)
  * - /reports - Reports page
  * - /notifications - Notifications (main and settings)
@@ -36,7 +36,7 @@ const TransactionsEditPage = lazy(() => import('@/pages/transactions/EditTransac
 // Debts
 const DebtsListPage = lazy(() => import('@/pages/debts/DebtsPage'));
 const DebtsCreatePage = lazy(() => import('@/pages/debts/CreateDebtPage'));
-const DebtsViewPage = lazy(() => import('@/pages/debts/PayDebtPage'));
+const DebtsPayPage = lazy(() => import('@/pages/debts/PayDebtPage'));
 
 // Inventory
 const InventoryListPage = lazy(() => import('@/pages/inventory/Inventory'));
@@ -180,10 +180,10 @@ export const dashboardRoutes: RouteObject[] = [
                 ),
               },
               {
-                path: 'view/:id',
+                path: 'pay/:id',
                 element: (
                   <LazyPage>
-                    <DebtsViewPage />
+                    <DebtsPayPage />
                   </LazyPage>
                 ),
               },

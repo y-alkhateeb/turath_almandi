@@ -104,6 +104,7 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
   const { user, isAdmin } = useAuth();
 
   const {
+    register,
     control,
     handleSubmit,
     formState: { errors },

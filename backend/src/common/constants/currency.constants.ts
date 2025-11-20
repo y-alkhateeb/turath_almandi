@@ -5,9 +5,9 @@ import { Currency } from '@prisma/client';
  * Change this value to switch to a different currency system-wide
  *
  * Supported currencies: USD, EUR, IQD, SAR, AED
- * @default USD
+ * @default IQD
  */
-export const DEFAULT_CURRENCY: Currency = Currency.USD;
+export const DEFAULT_CURRENCY: Currency = Currency.IQD;
 
 /**
  * Allowed currencies for the application
@@ -18,7 +18,7 @@ export const DEFAULT_CURRENCY: Currency = Currency.USD;
  * 2. Ensure the currency exists in the Currency enum in schema.prisma
  * 3. Update currency validation in DTOs if needed
  */
-export const ALLOWED_CURRENCIES: Currency[] = [Currency.USD];
+export const ALLOWED_CURRENCIES: Currency[] = [Currency.USD, Currency.IQD];
 
 /**
  * Currency configuration object
@@ -54,4 +54,4 @@ export const CURRENCY_CONFIG = {
 /**
  * Error message for invalid currency
  */
-export const CURRENCY_ERROR_MESSAGE = `Only ${ALLOWED_CURRENCIES.join(', ')} currency is allowed`;
+export const CURRENCY_ERROR_MESSAGE = `Only ${ALLOWED_CURRENCIES.join(', ')} currencies are allowed`;

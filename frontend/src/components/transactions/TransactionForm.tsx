@@ -118,9 +118,9 @@ export interface TransactionFormProps {
 /**
  * Transaction type options (Arabic)
  */
-const transactionTypeOptions: RadioOption[] = [
-  { value: TransactionType.INCOME, label: 'إيراد', description: 'دخل أو إيراد مالي' },
-  { value: TransactionType.EXPENSE, label: 'مصروف', description: 'مصروف أو نفقة' },
+const transactionTypeOptions: SelectOption[] = [
+  { value: TransactionType.INCOME, label: 'إيراد' },
+  { value: TransactionType.EXPENSE, label: 'مصروف' },
 ];
 
 /**
@@ -136,7 +136,6 @@ const paymentMethodOptions: RadioOption[] = [
  * These values match backend INCOME_CATEGORIES constants
  */
 const incomeCategoryOptions: SelectOption[] = [
-  { value: '', label: 'اختر الفئة...' },
   { value: 'SALES', label: 'مبيعات' },
   { value: 'SERVICES', label: 'خدمات' },
   { value: 'DEBT_PAYMENT', label: 'سداد دين' },
@@ -148,7 +147,6 @@ const incomeCategoryOptions: SelectOption[] = [
  * These values match backend EXPENSE_CATEGORIES constants
  */
 const expenseCategoryOptions: SelectOption[] = [
-  { value: '', label: 'اختر الفئة...' },
   { value: 'SALARIES', label: 'رواتب' },
   { value: 'RENT', label: 'إيجار' },
   { value: 'UTILITIES', label: 'مرافق' },
@@ -209,7 +207,7 @@ export function TransactionForm({
             amount: undefined,
             currency: Currency.IQD,
             paymentMethod: PaymentMethod.CASH,
-            category: '',
+            category: 'SALES', // Default to first income category
             date: new Date().toISOString().split('T')[0], // Today
             employeeVendorName: '',
             notes: '',
@@ -234,6 +232,17 @@ export function TransactionForm({
 
   // Watch transaction type for conditional fields (only in create mode)
   const transactionType = watch('type' as keyof CreateFormData) as TransactionType | undefined;
+
+  // Auto-select first category when transaction type changes
+  useEffect(() => {
+    if (mode === 'create' && transactionType) {
+      const defaultCategory = transactionType === TransactionType.INCOME ? 'SALES' : 'SALARIES';
+      reset((formValues) => ({
+        ...formValues,
+        category: defaultCategory,
+      }));
+    }
+  }, [transactionType, mode, reset]);
 
   const handleFormSubmit = async (data: CreateFormData | UpdateFormData) => {
     try {
@@ -277,7 +286,7 @@ export function TransactionForm({
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
       {/* Transaction Type - Only in create mode */}
       {mode === 'create' && (
-        <FormRadioGroup
+        <FormSelect
           name="type"
           label="نوع العملية"
           options={transactionTypeOptions}
@@ -285,7 +294,6 @@ export function TransactionForm({
           error={errors.type}
           required
           disabled={isSubmitting}
-          inline
         />
       )}
 

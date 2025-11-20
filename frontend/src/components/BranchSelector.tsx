@@ -6,6 +6,8 @@ interface BranchSelectorProps {
   onChange: (branchId: string | null) => void;
   disabled?: boolean;
   className?: string;
+  required?: boolean;
+  placeholder?: string;
 }
 
 export const BranchSelector = ({
@@ -13,6 +15,8 @@ export const BranchSelector = ({
   onChange,
   disabled = false,
   className = '',
+  required = false,
+  placeholder = 'All Branches',
 }: BranchSelectorProps) => {
   const { user, isAdmin } = useAuth();
   const { data: branches = [], isLoading: loading, error } = useBranches();
@@ -40,16 +44,17 @@ export const BranchSelector = ({
         htmlFor="branch-select"
         className="block text-sm font-medium text-[var(--text-primary)] mb-1"
       >
-        Branch
+        الفرع{required && <span className="text-red-500 mr-1">*</span>}
       </label>
       <select
         id="branch-select"
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
         disabled={disabled || loading}
-        className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
+        required={required}
+        className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed bg-[var(--bg-secondary)] text-[var(--text-primary)]"
       >
-        <option value="">All Branches</option>
+        <option value="">{placeholder}</option>
         {branches
           .filter((b) => b.isActive)
           .map((branch) => (

@@ -61,7 +61,10 @@ const createTransactionSchema = z.object({
   date: z.string().min(1, { message: 'التاريخ مطلوب' }),
   employeeVendorName: z.string().optional(),
   notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
-  branchId: z.string().optional(),
+  branchId: z
+    .string()
+    .transform((val) => (val === '' ? undefined : val))
+    .optional(),
 });
 
 /**
@@ -248,6 +251,12 @@ export function TransactionForm({
     try {
       if (mode === 'create') {
         const createData = data as CreateFormData;
+
+        // Validate admin selected a branch
+        if (isAdmin && !createData.branchId) {
+          throw new Error('يجب اختيار الفرع');
+        }
+
         const submitData: CreateTransactionInput = {
           type: createData.type,
           amount: createData.amount,
@@ -323,6 +332,8 @@ export function TransactionForm({
               value={field.value || null}
               onChange={field.onChange}
               disabled={isSubmitting}
+              required
+              placeholder="اختر الفرع..."
             />
           )}
         />

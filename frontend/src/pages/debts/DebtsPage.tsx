@@ -28,7 +28,10 @@ import { formatCurrency, formatDateShort } from '@/utils/formatters';
 export const DebtsPage = () => {
   const navigate = useNavigate();
   const [expandedDebtId, setExpandedDebtId] = useState<string | null>(null);
-  const { data: debts, isLoading, error, refetch } = useDebts();
+  const { data, isLoading, error, refetch } = useDebts();
+
+  // Extract debts array from paginated response
+  const debts = data?.data || [];
 
   const toggleExpandDebt = (debtId: string) => {
     setExpandedDebtId(expandedDebtId === debtId ? null : debtId);

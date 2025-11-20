@@ -33,6 +33,11 @@ export class DebtsController {
     return this.debtsService.findAll(user, { page, limit });
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.debtsService.findOne(id, user);
+  }
+
   @Post(':id/payments')
   payDebt(
     @Param('id') id: string,

@@ -7,6 +7,7 @@ import type {
   PaginationMeta,
 } from '../types/transactions.types';
 import { useAuth } from '../hooks/useAuth';
+import { useBranches } from '../hooks/useBranches';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -30,6 +31,7 @@ export default function TransactionTable({
   isLoading = false,
 }: TransactionTableProps) {
   const { isAdmin } = useAuth();
+  const { data: branches = [] } = useBranches();
   const [searchInput, setSearchInput] = useState(filters.search || '');
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -65,7 +67,9 @@ export default function TransactionTable({
   };
 
   const getTypeColor = (type: TransactionType) => {
-    return type === 'INCOME' ? 'text-green-600' : 'text-red-600';
+    return type === 'INCOME'
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-red-600 dark:text-red-400';
   };
 
   const getPaymentMethodLabel = (method: PaymentMethod | null) => {
@@ -140,6 +144,28 @@ export default function TransactionTable({
             </select>
           </div>
 
+          {/* Branch Filter - Admin Only */}
+          {isAdmin && (
+            <div>
+              <label className="block text-sm font-medium mb-1">الفرع</label>
+              <select
+                value={filters.branchId || ''}
+                onChange={(e) => handleFilterChange('branchId', e.target.value || undefined)}
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                dir="rtl"
+              >
+                <option value="">جميع الفروع</option>
+                {branches
+                  .filter((b) => b.isActive)
+                  .map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+
           {/* Start Date */}
           <div>
             <label className="block text-sm font-medium mb-1">من تاريخ</label>
@@ -203,7 +229,7 @@ export default function TransactionTable({
                   النوع
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
-                  المبلغ (IQD)
+                  المبلغ
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   طريقة الدفع
@@ -261,7 +287,7 @@ export default function TransactionTable({
                       {getTypeLabel(transaction.type)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)] font-semibold">
-                      {formatAmount(transaction.amount)}
+                      {formatAmount(transaction.amount)} {transaction.currency}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {getPaymentMethodLabel(transaction.paymentMethod)}
@@ -281,21 +307,21 @@ export default function TransactionTable({
                       <div className="flex gap-2">
                         <button
                           onClick={() => onView(transaction)}
-                          className="text-blue-600 hover:text-blue-800 font-medium"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
                           title="عرض التفاصيل"
                         >
                           عرض
                         </button>
                         <button
                           onClick={() => onEdit(transaction)}
-                          className="text-green-600 hover:text-green-800 font-medium"
+                          className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 font-medium transition-colors"
                           title="تعديل"
                         >
                           تعديل
                         </button>
                         <button
                           onClick={() => onDelete(transaction)}
-                          className="text-red-600 hover:text-red-800 font-medium"
+                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium transition-colors"
                           title="حذف"
                         >
                           حذف

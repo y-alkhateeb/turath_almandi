@@ -18,9 +18,9 @@ const variantClasses = {
   success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300',
   danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300',
   outline:
-    'bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-brand-gold-500 hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-[var(--bg-tertiary)]',
+    'bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-brand-gold-500 hover:bg-brand-cream-100 dark:hover:bg-gray-700 focus:ring-brand-gold-500 disabled:bg-[var(--bg-tertiary)]',
   ghost:
-    'bg-transparent text-[var(--text-primary)] hover:bg-brand-cream-100 focus:ring-brand-gold-500 disabled:bg-transparent disabled:text-[var(--text-secondary)]',
+    'bg-transparent text-[var(--text-primary)] hover:bg-brand-cream-100 dark:hover:bg-gray-700 focus:ring-brand-gold-500 disabled:bg-transparent disabled:text-[var(--text-secondary)]',
 };
 
 const sizeClasses = {

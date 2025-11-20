@@ -45,13 +45,13 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-colors"
       onClick={onClose}
       aria-modal="true"
       role="dialog"
     >
       <div
-        className={`bg-[var(--bg-secondary)] rounded-xl shadow-xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto`}
+        className={`bg-[var(--bg-secondary)] rounded-xl shadow-xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

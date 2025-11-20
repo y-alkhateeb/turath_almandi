@@ -8,6 +8,7 @@ import { Alert } from '@/ui/alert';
 import { TransactionType, PaymentMethod } from '@/types/transactions.types';
 import { useState } from 'react';
 import { getCategoryLabel } from '@/constants/transactionCategories';
+import { ConfirmDeleteDialog } from '@/components/dialogs/ConfirmDeleteDialog';
 
 /**
  * View Transaction Page
@@ -234,32 +235,14 @@ export const ViewTransactionPage = () => {
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-[var(--bg-primary)] rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">تأكيد الحذف</h3>
-            <p className="text-[var(--text-secondary)] mb-6">
-              هل أنت متأكد من حذف هذه العملية؟ لا يمكن التراجع عن هذا الإجراء.
-            </p>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleteTransaction.isPending}
-              >
-                إلغاء
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={deleteTransaction.isPending}
-              >
-                {deleteTransaction.isPending ? 'جاري الحذف...' : 'حذف'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        itemName="العملية المالية"
+        itemDescription={`${getTypeLabel(transaction.type)} - ${formatAmount(transaction.amount)} ${transaction.currency} - ${formatDate(transaction.date)}`}
+        isLoading={deleteTransaction.isPending}
+      />
     </div>
   );
 };

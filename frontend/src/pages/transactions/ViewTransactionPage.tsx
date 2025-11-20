@@ -7,6 +7,7 @@ import { PageLoading } from '@/components/loading';
 import { Alert } from '@/ui/alert';
 import { TransactionType, PaymentMethod } from '@/types/transactions.types';
 import { useState } from 'react';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 
 /**
  * View Transaction Page
@@ -167,7 +168,7 @@ export const ViewTransactionPage = () => {
                 الفئة
               </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.category || '-'}
+                {getCategoryLabel(transaction.category)}
               </div>
             </div>
 

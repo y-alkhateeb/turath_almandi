@@ -23,6 +23,11 @@ import { BranchSelector } from '@/components/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { TransactionType, PaymentMethod, Currency } from '@/types/enum';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
+import {
+  INCOME_CATEGORIES,
+  EXPENSE_CATEGORIES,
+  getCategoriesByType,
+} from '@/constants/transactionCategories';
 
 // ============================================
 // ZOD VALIDATION SCHEMAS
@@ -129,33 +134,6 @@ const transactionTypeOptions: SelectOption[] = [
 const paymentMethodOptions: SelectOption[] = [
   { value: PaymentMethod.CASH, label: 'نقدي' },
   { value: PaymentMethod.MASTER, label: 'ماستر كارد' },
-];
-
-/**
- * Income category options (Arabic)
- * These values match backend INCOME_CATEGORIES constants
- */
-const incomeCategoryOptions: SelectOption[] = [
-  { value: 'SALES', label: 'مبيعات' },
-  { value: 'SERVICES', label: 'خدمات' },
-  { value: 'DEBT_PAYMENT', label: 'سداد دين' },
-  { value: 'OTHER_INCOME', label: 'إيرادات أخرى' },
-];
-
-/**
- * Expense category options (Arabic)
- * These values match backend EXPENSE_CATEGORIES constants
- */
-const expenseCategoryOptions: SelectOption[] = [
-  { value: 'SALARIES', label: 'رواتب' },
-  { value: 'RENT', label: 'إيجار' },
-  { value: 'UTILITIES', label: 'مرافق' },
-  { value: 'SUPPLIES', label: 'مستلزمات' },
-  { value: 'MAINTENANCE', label: 'صيانة' },
-  { value: 'TRANSPORTATION', label: 'مواصلات' },
-  { value: 'INVENTORY', label: 'مشتريات مخزون' },
-  { value: 'DEBT_REPAYMENT', label: 'سداد دين' },
-  { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى' },
 ];
 
 /**
@@ -390,13 +368,13 @@ export function TransactionForm({
           options={
             mode === 'edit' && initialData
               ? initialData.type === TransactionType.INCOME
-                ? incomeCategoryOptions
-                : expenseCategoryOptions
+                ? INCOME_CATEGORIES
+                : EXPENSE_CATEGORIES
               : transactionType === TransactionType.INCOME
-              ? incomeCategoryOptions
+              ? INCOME_CATEGORIES
               : transactionType === TransactionType.EXPENSE
-              ? expenseCategoryOptions
-              : incomeCategoryOptions // Default to income if not selected yet
+              ? EXPENSE_CATEGORIES
+              : INCOME_CATEGORIES // Default to income if not selected yet
           }
           register={register}
           error={errors.category}

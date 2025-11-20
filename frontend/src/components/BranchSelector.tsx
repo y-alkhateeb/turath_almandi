@@ -47,6 +47,7 @@ export const BranchSelector = ({
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
         disabled={disabled || loading}
+        dir="rtl"
         className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed bg-[var(--bg-secondary)] text-[var(--text-primary)]"
       >
         <option value="">اختر الفرع...</option>

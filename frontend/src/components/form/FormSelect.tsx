@@ -38,6 +38,7 @@ export function FormSelect<T extends FieldValues>({
         id={name}
         {...register(name)}
         disabled={disabled}
+        dir="rtl"
         className={`
           w-full px-4 py-3 border rounded-lg
           bg-[var(--bg-secondary)] text-[var(--text-primary)]

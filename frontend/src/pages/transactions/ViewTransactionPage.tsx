@@ -9,6 +9,7 @@ import { TransactionType, PaymentMethod } from '@/types/transactions.types';
 import { useState } from 'react';
 import { getCategoryLabel } from '@/constants/transactionCategories';
 import { ConfirmDeleteDialog } from '@/components/dialogs/ConfirmDeleteDialog';
+import { formatDate, formatAmount } from '@/utils/format';
 
 /**
  * View Transaction Page
@@ -34,21 +35,6 @@ export const ViewTransactionPage = () => {
       // Error is handled by the mutation
       setShowDeleteConfirm(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-IQ', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatAmount = (amount: number) => {
-    return amount.toLocaleString('ar-IQ', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
   };
 
   const getTypeLabel = (type: TransactionType) => {

@@ -76,7 +76,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
       date: new Date(),
       dueDate: new Date(),
       notes: '',
-      branchId: isAdmin() ? '' : user?.branchId,
+      branchId: isAdmin ? '' : user?.branchId,
     },
   });
 
@@ -101,7 +101,7 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         date: new Date(),
         dueDate: new Date(),
         notes: '',
-        branchId: isAdmin() ? '' : user?.branchId,
+        branchId: isAdmin ? '' : user?.branchId,
       });
 
       // Call success callback if provided

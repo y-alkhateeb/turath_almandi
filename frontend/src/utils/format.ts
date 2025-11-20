@@ -62,6 +62,22 @@ export function formatDateShort(date: string | Date): string {
 }
 
 /**
+ * Format date for table display (YYYY/MM/DD in Arabic numerals)
+ * Used in tables and lists for consistent date display
+ */
+export function formatDateTable(dateString: string | Date | null | undefined): string {
+  if (!dateString) return '-';
+  const dayjsDate = dayjs(dateString);
+  if (!dayjsDate.isValid()) return '-';
+
+  return new Date(dateString).toLocaleDateString('ar-IQ', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+
+/**
  * Format date and time
  * @param date - Date to format (returns '-' if null/undefined)
  * @param locale - Locale string (default: 'ar-IQ')
@@ -113,6 +129,20 @@ export function formatNumber(value: number | null | undefined, decimals: number 
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(value);
+}
+
+/**
+ * Format amount for table display (without currency symbol)
+ * Used in tables where currency is shown separately
+ */
+export function formatAmount(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return '0';
+  }
+  return amount.toLocaleString('ar-IQ', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 }
 
 /**

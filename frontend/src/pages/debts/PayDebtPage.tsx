@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { useDebts, usePayDebt } from '@/hooks/useDebts';
+import { useDebt, usePayDebt } from '@/hooks/useDebts';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
@@ -21,11 +21,8 @@ import type { PayDebtFormData } from '@/types/debts.types';
 export const PayDebtPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: debts = [], isLoading } = useDebts();
+  const { data: debt, isLoading, error } = useDebt(id || '');
   const payDebt = usePayDebt();
-
-  // Find the debt to pay
-  const debt = debts.find((d) => d.id === id);
 
   const createPayDebtSchema = (maxAmount: number) =>
     z.object({
@@ -89,10 +86,12 @@ export const PayDebtPage = () => {
     return <PageLoading message="جاري تحميل بيانات الدين..." />;
   }
 
-  if (!debt) {
+  if (error || !debt) {
     return (
       <div className="space-y-6">
-        <Alert variant="destructive">لم يتم العثور على الدين المطلوب</Alert>
+        <Alert variant="destructive">
+          {error?.message || 'لم يتم العثور على الدين المطلوب'}
+        </Alert>
         <Button onClick={handleCancel}>
           <ArrowRight className="w-4 h-4" />
           العودة إلى قائمة الديون

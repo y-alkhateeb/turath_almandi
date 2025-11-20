@@ -180,6 +180,7 @@ export interface CreateTransactionInput {
   date: string;
   employeeVendorName?: string;
   notes?: string;
+  branchId?: string;
 }
 
 export interface UpdateTransactionInput {

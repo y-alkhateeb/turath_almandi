@@ -257,6 +257,7 @@ export function TransactionForm({
           date: createData.date,
           employeeVendorName: createData.employeeVendorName || undefined,
           notes: createData.notes || undefined,
+          branchId: createData.branchId || undefined,
         };
         await onSubmit(submitData);
         // Reset form after successful submission

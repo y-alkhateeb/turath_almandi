@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsDateString,
   ValidateIf,
+  IsUUID,
 } from 'class-validator';
 import { Trim, Escape } from 'class-sanitizer';
 import { TransactionType, PaymentMethod, Currency } from '@prisma/client';
@@ -53,4 +54,8 @@ export class CreateTransactionDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsUUID()
+  @IsOptional()
+  branchId?: string;
 }

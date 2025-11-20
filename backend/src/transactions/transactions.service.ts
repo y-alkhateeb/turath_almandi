@@ -149,9 +149,21 @@ export class TransactionsService {
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
-    // Validate accountant has a branch assigned
-    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
-      throw new BadRequestException('Accountant must be assigned to branch');
+    // Determine branchId based on user role
+    let branchId: string;
+
+    if (user.role === UserRole.ADMIN) {
+      // Admin must provide branchId in request
+      if (!createTransactionDto.branchId) {
+        throw new BadRequestException('Admin must specify branchId for transaction');
+      }
+      branchId = createTransactionDto.branchId;
+    } else {
+      // Accountant uses their assigned branch
+      if (!user.branchId) {
+        throw new BadRequestException('Accountant must be assigned to branch');
+      }
+      branchId = user.branchId;
     }
 
     // Validate amount is positive
@@ -180,7 +192,7 @@ export class TransactionsService {
       employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
       notes: createTransactionDto.notes || null,
       currency: CURRENCY_CONFIG.validateOrDefault(createTransactionDto.currency),
-      branchId: user.branchId, // Auto-fill from logged user
+      branchId: branchId, // Use determined branchId
       createdBy: user.id,
     };
 

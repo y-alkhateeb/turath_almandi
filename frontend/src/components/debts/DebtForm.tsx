@@ -185,15 +185,13 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
         <Controller
           name="branchId"
           control={control}
-          render={({ field }) => {
-            return (
-              <BranchSelector
-                value={field.value || null}
-                onChange={field.onChange}
-                disabled={isSubmitting}
-              />
-            );
-          }}
+          render={({ field }) => (
+            <BranchSelector
+              value={field.value || null}
+              onChange={(value) => field.onChange(value)}
+              disabled={isSubmitting}
+            />
+          )}
         />
       )}
 

@@ -177,7 +177,8 @@ export const useCreateDebt = () => {
       queryClient.setQueriesData<PaginatedResponse<Debt>>(
         { queryKey: queryKeys.debts.all },
         (old) => {
-          if (!old) return old;
+          // Only update if we have a valid PaginatedResponse with data array
+          if (!old || !old.data || !Array.isArray(old.data)) return old;
 
           // Create temporary debt with optimistic ID
           const tempDebt: Debt = {
@@ -284,7 +285,8 @@ export const useUpdateDebt = () => {
       queryClient.setQueriesData<PaginatedResponse<Debt>>(
         { queryKey: queryKeys.debts.all },
         (old) => {
-          if (!old) return old;
+          // Only update if we have a valid PaginatedResponse with data array
+          if (!old || !old.data || !Array.isArray(old.data)) return old;
 
           return {
             ...old,
@@ -368,7 +370,8 @@ export const useDeleteDebt = () => {
       queryClient.setQueriesData<PaginatedResponse<Debt>>(
         { queryKey: queryKeys.debts.all },
         (old) => {
-          if (!old) return old;
+          // Only update if we have a valid PaginatedResponse with data array
+          if (!old || !old.data || !Array.isArray(old.data)) return old;
 
           return {
             ...old,
@@ -494,7 +497,8 @@ export const usePayDebt = () => {
       queryClient.setQueriesData<PaginatedResponse<Debt>>(
         { queryKey: queryKeys.debts.all },
         (old) => {
-          if (!old) return old;
+          // Only update if we have a valid PaginatedResponse with data array
+          if (!old || !old.data || !Array.isArray(old.data)) return old;
 
           return {
             ...old,

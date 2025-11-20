@@ -220,6 +220,43 @@ export class DebtsService {
   }
 
   /**
+   * Find one debt by ID with branch access control
+   * Accountants can only see debts from their branch
+   * Admins can see any debt
+   */
+  async findOne(id: string, user: RequestUser): Promise<DebtWithAllRelations> {
+    const debt = await this.prisma.debt.findUnique({
+      where: { id },
+      include: {
+        branch: {
+          select: BRANCH_SELECT,
+        },
+        creator: {
+          select: USER_SELECT,
+        },
+        payments: {
+          orderBy: { paymentDate: 'desc' },
+        },
+      },
+    });
+
+    if (!debt) {
+      throw new NotFoundException(ERROR_MESSAGES.DEBT.NOT_FOUND);
+    }
+
+    if (debt.deletedAt) {
+      throw new NotFoundException(ERROR_MESSAGES.DEBT.NOT_FOUND);
+    }
+
+    // Accountants can only access debts from their branch
+    if (user.role === UserRole.ACCOUNTANT && debt.branchId !== user.branchId) {
+      throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCESS_DENIED);
+    }
+
+    return debt;
+  }
+
+  /**
    * Pay debt (create payment and update debt)
    * Uses transaction to ensure atomicity
    * Validates: amount_paid <= remaining_amount

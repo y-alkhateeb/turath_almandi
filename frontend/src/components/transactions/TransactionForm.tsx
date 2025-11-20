@@ -285,85 +285,91 @@ export function TransactionForm({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
-      {/* Transaction Type - Only in create mode */}
-      {mode === 'create' && (
-        <FormSelect
-          name="type"
-          label="نوع العملية"
-          options={transactionTypeOptions}
+      {/* Transaction Type and Branch - Same line on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Transaction Type - Only in create mode */}
+        {mode === 'create' && (
+          <FormSelect
+            name="type"
+            label="نوع العملية"
+            options={transactionTypeOptions}
+            register={register}
+            error={errors.type}
+            required
+            disabled={isSubmitting}
+          />
+        )}
+
+        {/* Transaction Type Display - Only in edit mode */}
+        {mode === 'edit' && initialData && (
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              نوع العملية
+            </label>
+            <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
+              {initialData.type === TransactionType.INCOME ? 'إيراد' : 'مصروف'}
+            </div>
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              لا يمكن تغيير نوع العملية بعد الإنشاء
+            </p>
+          </div>
+        )}
+
+        {/* Branch Selector - Only for admins */}
+        {mode === 'create' && isAdmin && (
+          <Controller
+            name="branchId"
+            control={control}
+            render={({ field }) => (
+              <BranchSelector
+                value={field.value || null}
+                onChange={field.onChange}
+                disabled={isSubmitting}
+              />
+            )}
+          />
+        )}
+
+        {/* Branch Display - Read-only for accountants */}
+        {mode === 'create' && !isAdmin && user?.branch && (
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
+            <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
+              {user.branch.name}
+            </div>
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              يتم تعبئة الفرع تلقائيًا من حسابك
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Amount and Currency - Same line on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Amount */}
+        <FormInput
+          name="amount"
+          label="المبلغ"
+          type="number"
+          step="0.01"
+          min="0.01"
+          placeholder="أدخل المبلغ"
           register={register}
-          error={errors.type}
+          error={errors.amount}
           required
           disabled={isSubmitting}
         />
-      )}
 
-      {/* Transaction Type Display - Only in edit mode */}
-      {mode === 'edit' && initialData && (
-        <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            نوع العملية
-          </label>
-          <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
-            {initialData.type === TransactionType.INCOME ? 'إيراد' : 'مصروف'}
-          </div>
-          <p className="mt-1 text-xs text-[var(--text-secondary)]">
-            لا يمكن تغيير نوع العملية بعد الإنشاء
-          </p>
-        </div>
-      )}
-
-      {/* Branch Selector - Only for admins */}
-      {mode === 'create' && isAdmin && (
-        <Controller
-          name="branchId"
-          control={control}
-          render={({ field }) => (
-            <BranchSelector
-              value={field.value || null}
-              onChange={field.onChange}
-              disabled={isSubmitting}
-            />
-          )}
+        {/* Currency */}
+        <FormSelect
+          name="currency"
+          label="العملة"
+          options={currencyOptions}
+          register={register}
+          error={errors.currency}
+          disabled={isSubmitting}
         />
-      )}
-
-      {/* Branch Display - Read-only for accountants */}
-      {mode === 'create' && !isAdmin && user?.branch && (
-        <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
-          <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
-            {user.branch.name}
-          </div>
-          <p className="mt-1 text-xs text-[var(--text-secondary)]">
-            يتم تعبئة الفرع تلقائيًا من حسابك
-          </p>
-        </div>
-      )}
-
-      {/* Amount */}
-      <FormInput
-        name="amount"
-        label="المبلغ"
-        type="number"
-        step="0.01"
-        min="0.01"
-        placeholder="أدخل المبلغ"
-        register={register}
-        error={errors.amount}
-        required
-        disabled={isSubmitting}
-      />
-
-      {/* Currency */}
-      <FormSelect
-        name="currency"
-        label="العملة"
-        options={currencyOptions}
-        register={register}
-        error={errors.currency}
-        disabled={isSubmitting}
-      />
+      </div>
 
       {/* Payment Method */}
       <FormRadioGroup
@@ -376,36 +382,39 @@ export function TransactionForm({
         inline
       />
 
-      {/* Category - Dynamic based on transaction type */}
-      <FormSelect
-        name="category"
-        label="الفئة"
-        options={
-          mode === 'edit' && initialData
-            ? initialData.type === TransactionType.INCOME
+      {/* Category and Date - Same line on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Category - Dynamic based on transaction type */}
+        <FormSelect
+          name="category"
+          label="الفئة"
+          options={
+            mode === 'edit' && initialData
+              ? initialData.type === TransactionType.INCOME
+                ? incomeCategoryOptions
+                : expenseCategoryOptions
+              : transactionType === TransactionType.INCOME
               ? incomeCategoryOptions
-              : expenseCategoryOptions
-            : transactionType === TransactionType.INCOME
-            ? incomeCategoryOptions
-            : transactionType === TransactionType.EXPENSE
-            ? expenseCategoryOptions
-            : incomeCategoryOptions // Default to income if not selected yet
-        }
-        register={register}
-        error={errors.category}
-        disabled={isSubmitting}
-      />
+              : transactionType === TransactionType.EXPENSE
+              ? expenseCategoryOptions
+              : incomeCategoryOptions // Default to income if not selected yet
+          }
+          register={register}
+          error={errors.category}
+          disabled={isSubmitting}
+        />
 
-      {/* Date */}
-      <FormInput
-        name="date"
-        label="التاريخ"
-        type="date"
-        register={register}
-        error={errors.date}
-        required={mode === 'create'}
-        disabled={isSubmitting}
-      />
+        {/* Date */}
+        <FormInput
+          name="date"
+          label="التاريخ"
+          type="date"
+          register={register}
+          error={errors.date}
+          required={mode === 'create'}
+          disabled={isSubmitting}
+        />
+      </div>
 
       {/* Employee/Vendor Name - Show for expenses or if type not selected */}
       {(mode === 'edit' ||

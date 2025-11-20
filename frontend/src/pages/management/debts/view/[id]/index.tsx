@@ -29,6 +29,9 @@ import { DebtPaymentHistory } from '@/components/debts/DebtPaymentHistory';
 import { ErrorState } from '@/components/common/ErrorState';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { DebtStatus, Currency } from '@/types/enum';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/ui/button';
 
 // ============================================
 // HELPER FUNCTIONS
@@ -37,24 +40,27 @@ import { DebtStatus, Currency } from '@/types/enum';
 /**
  * Get status badge styling
  */
-const getStatusBadge = (status: DebtStatus): { label: string; className: string } => {
-  const badges: Record<DebtStatus, { label: string; className: string }> = {
+const getStatusBadge = (
+  status: DebtStatus
+): { label: string; variant: 'warning' | 'info' | 'success' | 'neutral' } => {
+  const badges: Record<
+    DebtStatus,
+    { label: string; variant: 'warning' | 'info' | 'success' | 'neutral' }
+  > = {
     [DebtStatus.ACTIVE]: {
       label: 'نشط',
-      className: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      variant: 'warning',
     },
     [DebtStatus.PARTIAL]: {
       label: 'دفع جزئي',
-      className: 'bg-blue-100 text-blue-800 border-blue-300',
+      variant: 'info',
     },
     [DebtStatus.PAID]: {
       label: 'مدفوع',
-      className: 'bg-green-100 text-green-800 border-green-300',
+      variant: 'success',
     },
   };
-  return (
-    badges[status] || { label: status, className: 'bg-gray-100 text-gray-800 border-gray-300' }
-  );
+  return badges[status] || { label: status, variant: 'neutral' };
 };
 
 /**
@@ -208,13 +214,10 @@ export default function ViewDebtPage() {
 
         {/* Back Button */}
         <div>
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
-          >
+          <Button variant="outline" onClick={handleBack} className="gap-2">
             <ArrowLeft className="w-4 h-4" />
             العودة إلى القائمة
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -246,19 +249,14 @@ export default function ViewDebtPage() {
         </div>
 
         {/* Not Found Message */}
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-12">
+        <Card padding="lg">
           <div className="text-center">
             <p className="text-[var(--text-secondary)] mb-4">
               لم يتم العثور على الدين المطلوب. قد يكون محذوفاً أو غير موجود.
             </p>
-            <button
-              onClick={handleBack}
-              className="px-6 py-3 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
-            >
-              العودة إلى القائمة
-            </button>
+            <Button onClick={handleBack}>العودة إلى القائمة</Button>
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -292,136 +290,147 @@ export default function ViewDebtPage() {
       </nav>
 
       {/* Page Header */}
-      <div className="flex items-center justify-between" dir="rtl">
+      <div className="flex items-center justify-between flex-wrap gap-4" dir="rtl">
         <div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">تفاصيل الدين</h1>
           <p className="text-[var(--text-secondary)] mt-1">دين: {debt.creditorName}</p>
         </div>
 
-        {/* Pay Button - Only for active/partial debts */}
-        {canPay && (
-          <button
-            onClick={handlePay}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
-          >
-            <DollarSign className="w-4 h-4" />
-            دفع دين
-          </button>
-        )}
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {/* Pay Button - Only for active/partial debts */}
+          {canPay && (
+            <Button variant="default" onClick={handlePay} className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              دفع دين
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            رجوع
+          </Button>
+        </div>
       </div>
 
       {/* Debt Details Card */}
-      <div
-        className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
-        dir="rtl"
-      >
+      <Card padding="lg" dir="rtl">
         <div className="flex items-start justify-between mb-6">
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">معلومات الدين</h2>
 
           {/* Status Badge */}
           <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusBadge.className}`}
-            >
-              {statusBadge.label}
-            </span>
+            <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
             {overdue && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-300">
+              <Badge variant="danger" className="gap-1">
                 <AlertCircle className="w-4 h-4" />
                 متأخر
-              </span>
+              </Badge>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Creditor Name */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
               اسم الدائن
             </label>
-            <p className="text-lg text-[var(--text-primary)] font-semibold">{debt.creditorName}</p>
+            <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
+              <span className="font-semibold text-[var(--text-primary)]">{debt.creditorName}</span>
+            </div>
           </div>
 
           {/* Original Amount */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
               المبلغ الأصلي
             </label>
-            <p className="text-lg text-[var(--text-primary)] font-semibold">
-              {formatCurrency(debt.originalAmount)} {getCurrencyLabel(debt.currency)}
-            </p>
+            <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
+              <span className="font-semibold text-[var(--text-primary)]">
+                {formatCurrency(debt.originalAmount)} {getCurrencyLabel(debt.currency)}
+              </span>
+            </div>
           </div>
 
           {/* Remaining Amount */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
               المبلغ المتبقي
             </label>
-            <p
-              className={`text-lg font-semibold ${debt.status === DebtStatus.PAID ? 'text-green-600' : 'text-red-600'}`}
-            >
-              {formatCurrency(debt.remainingAmount)} {getCurrencyLabel(debt.currency)}
-            </p>
+            <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
+              <span
+                className={`font-semibold ${debt.status === DebtStatus.PAID ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+              >
+                {formatCurrency(debt.remainingAmount)} {getCurrencyLabel(debt.currency)}
+              </span>
+            </div>
           </div>
 
           {/* Paid Amount */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
               المبلغ المدفوع
             </label>
-            <p className="text-lg text-green-600 font-semibold">
-              {formatCurrency(paidAmount)} {getCurrencyLabel(debt.currency)}
+            <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
+              <span className="font-semibold text-green-600 dark:text-green-400">
+                {formatCurrency(paidAmount)} {getCurrencyLabel(debt.currency)}
+              </span>
               <span className="text-sm text-[var(--text-secondary)] mr-2">
                 ({paymentPercentage.toFixed(0)}%)
               </span>
-            </p>
+            </div>
           </div>
 
           {/* Date */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
               تاريخ الدين
             </label>
-            <p className="text-lg text-[var(--text-primary)]">
-              <Calendar className="w-4 h-4 inline-block ml-2" />
-              {formatDate(debt.date)}
-            </p>
+            <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-[var(--text-secondary)]" />
+              <span className="text-[var(--text-primary)]">{formatDate(debt.date)}</span>
+            </div>
           </div>
 
           {/* Due Date */}
           {debt.dueDate && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 تاريخ الاستحقاق
               </label>
-              <p
-                className={`text-lg ${overdue ? 'text-red-600 font-semibold' : 'text-[var(--text-primary)]'}`}
-              >
-                <Calendar className="w-4 h-4 inline-block ml-2" />
-                {formatDate(debt.dueDate)}
-                {overdue && <span className="mr-2 text-sm">(متأخر)</span>}
-              </p>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[var(--text-secondary)]" />
+                <span
+                  className={`${overdue ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-[var(--text-primary)]'}`}
+                >
+                  {formatDate(debt.dueDate)}
+                  {overdue && <span className="mr-2 text-sm">(متأخر)</span>}
+                </span>
+              </div>
             </div>
           )}
 
           {/* Branch */}
           {debt.branch && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 الفرع
               </label>
-              <p className="text-lg text-[var(--text-primary)]">{debt.branch.name}</p>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
+                {debt.branch.name}
+              </div>
             </div>
           )}
 
           {/* Creator */}
           {debt.creator && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 أنشئ بواسطة
               </label>
-              <p className="text-lg text-[var(--text-primary)]">{debt.creator.username}</p>
+              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
+                {debt.creator.username}
+              </div>
             </div>
           )}
         </div>
@@ -429,33 +438,21 @@ export default function ViewDebtPage() {
         {/* Notes */}
         {debt.notes && (
           <div className="mt-6 pt-6 border-t border-[var(--border-color)]">
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
               ملاحظات
             </label>
-            <p className="text-[var(--text-primary)] whitespace-pre-wrap">{debt.notes}</p>
+            <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
+              <p className="text-[var(--text-primary)] whitespace-pre-wrap">{debt.notes}</p>
+            </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Payment History */}
-      <div
-        className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6"
-        dir="rtl"
-      >
+      <Card padding="lg" dir="rtl">
         <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">سجل الدفعات</h2>
         <DebtPaymentHistory payments={debt.payments || []} isLoading={false} />
-      </div>
-
-      {/* Back Button */}
-      <div>
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          العودة إلى القائمة
-        </button>
-      </div>
+      </Card>
 
       {/* Pay Debt Dialog */}
       {debt && <PayDebtModal isOpen={isPayDialogOpen} onClose={handleClosePayDialog} debt={debt} />}

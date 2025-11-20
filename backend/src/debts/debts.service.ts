@@ -250,7 +250,7 @@ export class DebtsService {
 
     // Accountants can only access debts from their branch
     if (user.role === UserRole.ACCOUNTANT && debt.branchId !== user.branchId) {
-      throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCESS_DENIED);
+      throw new ForbiddenException(ERROR_MESSAGES.BRANCH.CANNOT_ACCESS_OTHER);
     }
 
     return debt;

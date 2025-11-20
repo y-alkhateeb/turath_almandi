@@ -169,7 +169,8 @@ export const useCreateTransaction = () => {
       queryClient.setQueriesData<PaginatedResponse<Transaction>>(
         { queryKey: queryKeys.transactions.all },
         (old) => {
-          if (!old) return old;
+          // Only update if we have a valid PaginatedResponse with data array
+          if (!old || !old.data || !Array.isArray(old.data)) return old;
 
           // Create temporary transaction with optimistic ID
           const tempTransaction: Transaction = {
@@ -278,7 +279,8 @@ export const useUpdateTransaction = () => {
       queryClient.setQueriesData<PaginatedResponse<Transaction>>(
         { queryKey: queryKeys.transactions.all },
         (old) => {
-          if (!old) return old;
+          // Only update if we have a valid PaginatedResponse with data array
+          if (!old || !old.data || !Array.isArray(old.data)) return old;
 
           return {
             ...old,
@@ -359,7 +361,8 @@ export const useDeleteTransaction = () => {
       queryClient.setQueriesData<PaginatedResponse<Transaction>>(
         { queryKey: queryKeys.transactions.all },
         (old) => {
-          if (!old) return old;
+          // Only update if we have a valid PaginatedResponse with data array
+          if (!old || !old.data || !Array.isArray(old.data)) return old;
 
           return {
             ...old,

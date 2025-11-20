@@ -192,7 +192,7 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 type="date"
                 value={filters.startDate || ''}
                 onChange={(e) => handleFilterChange('startDate', e.target.value || undefined)}
-                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-3 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
               />
             </div>
 
@@ -209,7 +209,7 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 type="date"
                 value={filters.endDate || ''}
                 onChange={(e) => handleFilterChange('endDate', e.target.value || undefined)}
-                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-3 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
               />
             </div>
 

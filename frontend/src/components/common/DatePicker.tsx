@@ -191,11 +191,12 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
             placeholder={placeholder}
             className={`
               w-full px-4 py-3 border rounded-lg
-              bg-[var(--bg-primary)] text-[var(--text-primary)]
+              bg-[var(--bg-secondary)] text-[var(--text-primary)]
               focus:ring-2 focus:ring-primary-500 focus:border-transparent
-              disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+              disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed disabled:text-[var(--text-secondary)]
               disabled:opacity-50
               transition-colors duration-200
+              [color-scheme:light] dark:[color-scheme:dark]
               ${error ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'}
               ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
             `}

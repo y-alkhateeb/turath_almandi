@@ -14,6 +14,7 @@
 
 import { ArrowRight } from 'lucide-react';
 import { formatCurrency, formatDateShort } from '@/utils/format';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 import { TransactionType } from '@/types/enum';
 import type { Transaction } from '#/entity';
 
@@ -156,7 +157,7 @@ export function DashboardRecentTransactions({
                   </td>
                   <td className="py-3">{getTypeBadge(transaction.type)}</td>
                   <td className="py-3 text-sm text-[var(--text-primary)]">
-                    {transaction.category}
+                    {getCategoryLabel(transaction.category)}
                   </td>
                   <td className="py-3">
                     <span

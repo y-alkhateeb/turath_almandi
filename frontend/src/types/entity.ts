@@ -457,7 +457,7 @@ export interface RevenueDataPoint {
 }
 
 export interface CategoryDataPoint {
-  category: string;
+  name: string; // Category name/value (e.g., 'SALES', 'SALARIES')
   value: number;
   color?: string;
 }

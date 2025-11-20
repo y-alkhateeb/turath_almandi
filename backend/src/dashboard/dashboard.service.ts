@@ -582,8 +582,9 @@ export class DashboardService {
     });
 
     // Convert to array and assign colors
-    const categoryData: CategoryData[] = Array.from(categoryMap.entries()).map(([name, value], index) => ({
-      name,
+    // Note: Using 'category' instead of 'name' to match frontend CategoryDataPoint interface
+    const categoryData: CategoryData[] = Array.from(categoryMap.entries()).map(([category, value], index) => ({
+      name: category, // Keep 'name' for backward compatibility with existing type
       value,
       color: colors[index % colors.length],
     }));

@@ -38,7 +38,7 @@ export function BranchSelector<T extends FieldValues>({
   const { data: branches = [], isLoading: branchesLoading } = useBranches();
 
   // Admin users: Show dropdown selector
-  if (isAdmin()) {
+  if (isAdmin) {
     const options = branches.map((branch) => ({
       value: branch.id,
       label: branch.name,

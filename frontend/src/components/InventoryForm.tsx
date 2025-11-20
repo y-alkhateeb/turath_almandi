@@ -86,7 +86,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
       unit: item?.unit || InventoryUnit.KG,
       costPerUnit: item?.costPerUnit?.toString() || '',
       notes: '',
-      branchId: isAdmin() ? '' : user?.branchId,
+      branchId: isAdmin ? '' : user?.branchId,
     },
   });
 
@@ -116,7 +116,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           unit: InventoryUnit.KG,
           costPerUnit: '',
           notes: '',
-          branchId: isAdmin() ? '' : user?.branchId,
+          branchId: isAdmin ? '' : user?.branchId,
         });
       }
 

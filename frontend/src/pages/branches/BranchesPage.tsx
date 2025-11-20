@@ -69,8 +69,8 @@ export const BranchesPage = () => {
         <Button
           variant={branch.isActive ? 'success' : 'destructive'}
           size="sm"
-          onClick={() => isAdmin() && handleToggleStatus(branch)}
-          disabled={!isAdmin() || updateBranch.isPending}
+          onClick={() => isAdmin && handleToggleStatus(branch)}
+          disabled={!isAdmin || updateBranch.isPending}
         >
           <Badge variant={branch.isActive ? 'success' : 'destructive'}>
             {branch.isActive ? 'نشط' : 'غير نشط'}
@@ -81,7 +81,7 @@ export const BranchesPage = () => {
   ];
 
   // Add actions column if user is admin
-  if (isAdmin()) {
+  if (isAdmin) {
     columns.push({
       key: 'actions',
       header: 'الإجراءات',
@@ -108,10 +108,10 @@ export const BranchesPage = () => {
   return (
     <PageLayout
       title="إدارة الفروع"
-      description={isAdmin() ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
+      description={isAdmin ? 'إدارة جميع فروع المؤسسة' : 'عرض الفرع المخصص'}
       onRetry={() => refetch()}
       actions={
-        isAdmin() ? (
+        isAdmin ? (
           <Button onClick={() => navigate('/branches/create')}>
             <Plus className="w-5 h-5" />
             إضافة فرع جديد
@@ -129,12 +129,12 @@ export const BranchesPage = () => {
           icon={<Building2 className="w-full h-full" />}
           title="لا توجد فروع"
           description={
-            isAdmin()
+            isAdmin
               ? 'أنشئ أول فرع لبدء إدارة عملك عبر مواقع متعددة. يمكنك تعيين مدير ورقم هاتف لكل فرع.'
               : 'لم يتم تعيين فرع لك بعد. تواصل مع المدير لتعيين فرع لك.'
           }
           actions={
-            isAdmin()
+            isAdmin
               ? {
                   primary: {
                     label: 'إضافة فرع جديد',

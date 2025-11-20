@@ -5,7 +5,7 @@
  * Features:
  * - Full table layout matching TransactionTable design
  * - Type badge with colors (income=green, expense=red)
- * - All columns: date, type, amount, payment method, category, name, branch
+ * - Columns: date, type, amount, payment method, category, branch (admin only)
  * - Link to full transactions page
  * - Loading skeleton
  * - Empty state
@@ -85,9 +85,6 @@ function TableRowSkeleton({ isAdmin }: { isAdmin: boolean }) {
       <td className="px-6 py-4">
         <div className="h-4 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
       </td>
-      <td className="px-6 py-4">
-        <div className="h-4 w-28 bg-[var(--bg-tertiary)] rounded animate-pulse" />
-      </td>
       {isAdmin && (
         <td className="px-6 py-4">
           <div className="h-4 w-24 bg-[var(--bg-tertiary)] rounded animate-pulse" />
@@ -153,9 +150,6 @@ export function DashboardRecentTransactions({
               <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                 الفئة
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
-                الاسم
-              </th>
               {isAdmin && (
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   الفرع
@@ -179,7 +173,7 @@ export function DashboardRecentTransactions({
             {!isLoading && transactions.length === 0 && (
               <tr>
                 <td
-                  colSpan={isAdmin ? 7 : 6}
+                  colSpan={isAdmin ? 6 : 5}
                   className="px-6 py-12 text-center text-[var(--text-secondary)]"
                 >
                   <p className="text-sm">لا توجد عمليات حتى الآن</p>
@@ -213,9 +207,6 @@ export function DashboardRecentTransactions({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     {getCategoryLabel(transaction.category)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                    {transaction.employeeVendorName || '-'}
                   </td>
                   {isAdmin && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">

@@ -40,6 +40,11 @@ interface RecentTransaction {
   type: TransactionType;
   category: string;
   amount: number;
+  currency: string;
+  paymentMethod: string | null;
+  branch?: {
+    name: string;
+  };
   status: string;
 }
 
@@ -505,6 +510,9 @@ export class DashboardService {
       type: t.type,
       category: t.category,
       amount: Number(t.amount),
+      currency: t.currency,
+      paymentMethod: t.paymentMethod,
+      branch: t.branch ? { name: t.branch.name } : undefined,
       status: 'completed',
     }));
   }

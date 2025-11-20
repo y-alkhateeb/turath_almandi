@@ -205,8 +205,8 @@ export const PayDebtPage = () => {
               })}
               defaultValue={new Date().toISOString().split('T')[0]}
               className={`w-full px-4 py-3 border ${
-                errors.paymentDate ? 'border-red-500' : 'border-[var(--border-color)]'
-              } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
+                errors.paymentDate ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'
+              } rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed disabled:text-[var(--text-secondary)] [color-scheme:light] dark:[color-scheme:dark] transition-colors duration-200`}
               disabled={isSubmitting}
             />
             {errors.paymentDate && (

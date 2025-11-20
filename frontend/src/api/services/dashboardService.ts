@@ -66,7 +66,7 @@ export enum DashboardApiEndpoints {
  * @throws ApiError on 401 (not authenticated)
  */
 export const getStats = (
-  filters?: Pick<DashboardQueryFilters, 'branchId' | 'date'>
+  filters?: Pick<DashboardQueryFilters, 'branchId' | 'date' | 'startDate' | 'endDate'>
 ): Promise<DashboardStats> => {
   return apiClient.get<DashboardStats>({
     url: DashboardApiEndpoints.GetStats,

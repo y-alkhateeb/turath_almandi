@@ -23,10 +23,14 @@ export class DashboardController {
    *
    * Query Parameters:
    * - date: Optional date (YYYY-MM-DD), defaults to today
+   * - startDate: Optional start date for range filtering (YYYY-MM-DD)
+   * - endDate: Optional end date for range filtering (YYYY-MM-DD)
    * - branchId: Optional branch filter (admin only)
    *
+   * Note: If startDate/endDate are provided, they override the 'date' parameter
+   *
    * Returns:
-   * - Today's financial summary (revenue, expenses, net)
+   * - Financial summary (revenue, expenses, net)
    * - Recent transactions
    * - Monthly revenue trends (last 6 months)
    * - Category breakdown
@@ -35,9 +39,11 @@ export class DashboardController {
   @Get('stats')
   async getStats(
     @Query('date') date?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
     @Query('branchId') branchId?: string,
     @CurrentUser() user?: RequestUser,
   ) {
-    return this.dashboardService.getDashboardStats(date, branchId, user);
+    return this.dashboardService.getDashboardStats(date, startDate, endDate, branchId, user);
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type {
   Transaction,
   TransactionType,
@@ -8,6 +8,11 @@ import type {
 } from '../types/transactions.types';
 import { useAuth } from '../hooks/useAuth';
 import { useBranches } from '../hooks/useBranches';
+import {
+  ALL_CATEGORIES,
+  getCategoriesByType,
+  getCategoryLabel,
+} from '../constants/transactionCategories';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -34,6 +39,16 @@ export default function TransactionTable({
   // Only fetch branches for admins (accountants don't see branch filter)
   const { data: branches = [] } = useBranches({ enabled: isAdmin });
   const [searchInput, setSearchInput] = useState(filters.search || '');
+
+  // Get categories based on selected transaction type
+  const categoryOptions = useMemo(() => {
+    if (!filters.type) {
+      // If no type selected, show all categories
+      return ALL_CATEGORIES;
+    }
+    // Show only categories for selected type
+    return getCategoriesByType(filters.type as TransactionType);
+  }, [filters.type]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,16 +204,22 @@ export default function TransactionTable({
             />
           </div>
 
-          {/* Category Filter */}
+          {/* Category Filter - Dropdown */}
           <div>
             <label className="block text-sm font-medium mb-1">الفئة</label>
-            <input
-              type="text"
+            <select
               value={filters.category || ''}
               onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
-              placeholder="الفئة..."
-              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-[var(--bg-secondary)] text-[var(--text-primary)]"
+              dir="rtl"
+            >
+              <option value="">جميع الفئات</option>
+              {categoryOptions.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Clear Filters Button */}
@@ -294,7 +315,7 @@ export default function TransactionTable({
                       {getPaymentMethodLabel(transaction.paymentMethod)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                      {transaction.category || '-'}
+                      {getCategoryLabel(transaction.category)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {transaction.employeeVendorName || '-'}

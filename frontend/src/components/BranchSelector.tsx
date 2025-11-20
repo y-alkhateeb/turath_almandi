@@ -6,6 +6,8 @@ interface BranchSelectorProps {
   onChange: (branchId: string | null) => void;
   disabled?: boolean;
   className?: string;
+  showLabel?: boolean;
+  placeholder?: string;
 }
 
 export const BranchSelector = ({
@@ -13,6 +15,8 @@ export const BranchSelector = ({
   onChange,
   disabled = false,
   className = '',
+  showLabel = true,
+  placeholder = 'جميع الفروع',
 }: BranchSelectorProps) => {
   const { user, isAdmin } = useAuth();
   const { data: branches = [], isLoading: loading, error } = useBranches();
@@ -22,7 +26,9 @@ export const BranchSelector = ({
     const userBranch = branches.find((b) => b.id === user.branchId);
     return (
       <div className={className}>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
+        {showLabel && (
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
+        )}
         <input
           type="text"
           value={userBranch?.name || 'جاري التحميل...'}
@@ -36,12 +42,14 @@ export const BranchSelector = ({
   // Admin can select any branch
   return (
     <div className={className}>
-      <label
-        htmlFor="branch-select"
-        className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-      >
-        الفرع
-      </label>
+      {showLabel && (
+        <label
+          htmlFor="branch-select"
+          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+        >
+          الفرع
+        </label>
+      )}
       <select
         id="branch-select"
         value={value || ''}
@@ -50,7 +58,7 @@ export const BranchSelector = ({
         dir="rtl"
         className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed bg-[var(--bg-secondary)] text-[var(--text-primary)]"
       >
-        <option value="">اختر الفرع...</option>
+        <option value="">{placeholder}</option>
         {branches
           .filter((b) => b.isActive)
           .map((branch) => (

@@ -14,7 +14,7 @@
  */
 
 import { ArrowRight } from 'lucide-react';
-import { formatCurrency, formatDateShort } from '@/utils/format';
+import { formatDateTable, formatAmount } from '@/utils/format';
 import { getCategoryLabel } from '@/constants/transactionCategories';
 import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction } from '#/entity';
@@ -32,21 +32,6 @@ export interface DashboardRecentTransactionsProps {
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ar-IQ', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-};
-
-const formatAmount = (amount: number) => {
-  return amount.toLocaleString('ar-IQ', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-};
 
 const getTypeLabel = (type: TransactionType) => {
   return type === TransactionType.INCOME ? 'إيراد' : 'مصروف';
@@ -192,7 +177,7 @@ export function DashboardRecentTransactions({
                   className="hover:bg-[var(--bg-tertiary)] transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                    {formatDate(transaction.date)}
+                    {formatDateTable(transaction.date)}
                   </td>
                   <td
                     className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getTypeColor(transaction.type)}`}

@@ -13,6 +13,7 @@ import {
   getCategoriesByType,
   getCategoryLabel,
 } from '../constants/transactionCategories';
+import { formatDateTable, formatAmount } from '../utils/format';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -61,21 +62,6 @@ export default function TransactionTable({
 
   const handlePageChange = (newPage: number) => {
     onFiltersChange({ ...filters, page: newPage });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-IQ', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  };
-
-  const formatAmount = (amount: number) => {
-    return amount.toLocaleString('ar-IQ', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
   };
 
   const getTypeLabel = (type: TransactionType) => {
@@ -301,7 +287,7 @@ export default function TransactionTable({
                     className="hover:bg-[var(--bg-tertiary)] transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                      {formatDate(transaction.date)}
+                      {formatDateTable(transaction.date)}
                     </td>
                     <td
                       className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${getTypeColor(transaction.type)}`}

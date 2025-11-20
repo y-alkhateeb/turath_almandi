@@ -17,6 +17,7 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 import { PieChartIcon } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '@/utils/format';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 import type { CategoryDataPoint } from '#/entity';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
@@ -36,9 +37,12 @@ export interface DashboardCategoryChartProps {
 const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     const data = payload[0];
+    const categoryName = data.name ? String(data.name) : '';
+    const arabicLabel = getCategoryLabel(categoryName);
+
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
-        <p className="text-sm font-medium text-[var(--text-primary)] mb-1">{data.name}</p>
+        <p className="text-sm font-medium text-[var(--text-primary)] mb-1">{arabicLabel}</p>
         <p className="text-sm text-[var(--text-secondary)]">{formatCurrency(Number(data.value))}</p>
       </div>
     );
@@ -195,7 +199,7 @@ export function DashboardCategoryChart({ data, isLoading }: DashboardCategoryCha
               outerRadius={100}
               fill="#8884d8"
               dataKey="value"
-              nameKey="category"
+              nameKey="name"
             >
               {dataWithColors.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -206,10 +210,11 @@ export function DashboardCategoryChart({ data, isLoading }: DashboardCategoryCha
               wrapperStyle={{ fontSize: '14px', fontFamily: 'inherit' }}
               iconType="circle"
               formatter={(value: string) => {
-                const item = dataWithColors.find((d) => d.category === value);
+                const arabicLabel = getCategoryLabel(value);
+                const item = dataWithColors.find((d) => d.name === value);
                 return (
                   <span className="text-sm">
-                    {value} - {item ? formatCurrency(item.value) : ''}
+                    {arabicLabel} - {item ? formatCurrency(item.value) : ''}
                   </span>
                 );
               }}

@@ -6,13 +6,15 @@
  * - Branch selector (admin only)
  * - Date range picker (from - to) - always visible
  * - Quick date buttons (today, this week, this month)
+ * - Active filter summary text
  * - RTL support and dark mode
  */
 
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, Calendar, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import { BranchSelector } from '@/components/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
+import { useBranches } from '@/hooks/useBranches';
 import { toInputDate, startOfDay, startOfMonth, endOfDay } from '@/utils/format';
 import type { Branch, DashboardFilters as DashboardFiltersType } from '#/entity';
 
@@ -46,12 +48,25 @@ function startOfWeek(date: Date): Date {
   return result;
 }
 
+/**
+ * Format date to Arabic readable format
+ */
+function formatDateArabic(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('ar-SA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 // ============================================
 // COMPONENT
 // ============================================
 
 export function DashboardFilters({ filters, branches: _branches, onChange }: DashboardFiltersProps) {
   const { isAdmin } = useAuth();
+  const { data: branches = [] } = useBranches({ enabled: isAdmin });
   const [isOpen, setIsOpen] = useState(true);
 
   // Quick date options
@@ -123,21 +138,35 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
     });
   };
 
-  const handleClearFilters = () => {
-    onChange({
-      branchId: undefined,
-      date: undefined,
-      startDate: undefined,
-      endDate: undefined,
-    });
-  };
+  // Generate active filter summary text
+  const activeFilterText = useMemo(() => {
+    const parts: string[] = [];
 
-  const hasActiveFilters = !!(
-    filters.branchId ||
-    filters.date ||
-    filters.startDate ||
-    filters.endDate
-  );
+    // Branch filter
+    if (filters.branchId && isAdmin) {
+      const branch = branches.find((b) => b.id === filters.branchId);
+      if (branch) {
+        parts.push(`الفرع: ${branch.name}`);
+      }
+    }
+
+    // Date range filter
+    if (filters.startDate && filters.endDate) {
+      if (filters.startDate === filters.endDate) {
+        parts.push(`التاريخ: ${formatDateArabic(filters.startDate)}`);
+      } else {
+        parts.push(
+          `من ${formatDateArabic(filters.startDate)} إلى ${formatDateArabic(filters.endDate)}`
+        );
+      }
+    } else if (filters.startDate) {
+      parts.push(`من ${formatDateArabic(filters.startDate)}`);
+    } else if (filters.endDate) {
+      parts.push(`حتى ${formatDateArabic(filters.endDate)}`);
+    }
+
+    return parts.length > 0 ? parts.join(' • ') : 'لم يتم تطبيق فلاتر';
+  }, [filters, branches, isAdmin]);
 
   return (
     <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg overflow-hidden shadow-sm" dir="rtl">
@@ -148,26 +177,12 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
       >
         <div className="flex items-center gap-3">
           <Calendar className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">الفلاتر</h3>
-          {hasActiveFilters && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full">
-              نشط
-            </span>
-          )}
+          <div className="text-right">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">الفلاتر</h3>
+            <p className="text-sm text-[var(--text-secondary)] mt-0.5">{activeFilterText}</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          {hasActiveFilters && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleClearFilters();
-              }}
-              className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-              title="مسح الفلاتر"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
           {isOpen ? (
             <ChevronUp className="w-5 h-5 text-[var(--text-secondary)]" />
           ) : (
@@ -189,6 +204,7 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
                 value={filters.branchId || null}
                 onChange={handleBranchChange}
                 placeholder="جميع الفروع"
+                showLabel={false}
               />
             </div>
           )}

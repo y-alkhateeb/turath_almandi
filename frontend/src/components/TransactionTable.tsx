@@ -31,7 +31,8 @@ export default function TransactionTable({
   isLoading = false,
 }: TransactionTableProps) {
   const { isAdmin } = useAuth();
-  const { data: branches = [] } = useBranches();
+  // Only fetch branches for admins (accountants don't see branch filter)
+  const { data: branches = [] } = useBranches({ enabled: isAdmin });
   const [searchInput, setSearchInput] = useState(filters.search || '');
 
   const handleSearchSubmit = (e: React.FormEvent) => {

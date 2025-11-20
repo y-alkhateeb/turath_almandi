@@ -31,6 +31,7 @@ import { ApiError } from '@/api/apiClient';
  *
  * @param options - Query options
  * @param options.isActive - Optional filter for active branches (default: true for accountants, undefined for admins)
+ * @param options.enabled - Optional flag to enable/disable the query (default: true)
  * @returns Query result with branches array
  *
  * @example
@@ -43,9 +44,12 @@ import { ApiError } from '@/api/apiClient';
  *
  * // Get only active branches explicitly
  * const { data: activeBranches } = useBranches({ isActive: true });
+ *
+ * // Conditionally fetch branches (e.g., only for admins)
+ * const { data: branches } = useBranches({ enabled: isAdmin });
  * ```
  */
-export const useBranches = (options?: { isActive?: boolean }) => {
+export const useBranches = (options?: { isActive?: boolean; enabled?: boolean }) => {
   const { user, isAccountant } = useAuth();
 
   // For accountants, default to showing only active branches
@@ -78,6 +82,7 @@ export const useBranches = (options?: { isActive?: boolean }) => {
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Cache for 10 minutes
     retry: 1, // Only retry once on failure
+    enabled: options?.enabled ?? true, // Default to enabled
   });
 };
 

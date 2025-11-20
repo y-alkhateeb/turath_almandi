@@ -126,7 +126,7 @@ const transactionTypeOptions: SelectOption[] = [
 /**
  * Payment method options (Arabic)
  */
-const paymentMethodOptions: RadioOption[] = [
+const paymentMethodOptions: SelectOption[] = [
   { value: PaymentMethod.CASH, label: 'نقدي' },
   { value: PaymentMethod.MASTER, label: 'ماستر كارد' },
 ];
@@ -344,8 +344,8 @@ export function TransactionForm({
         )}
       </div>
 
-      {/* Amount and Currency - Same line on large screens */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Amount, Currency, and Payment Method - Same line on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Amount */}
         <FormInput
           name="amount"
@@ -369,18 +369,17 @@ export function TransactionForm({
           error={errors.currency}
           disabled={isSubmitting}
         />
-      </div>
 
-      {/* Payment Method */}
-      <FormRadioGroup
-        name="paymentMethod"
-        label="طريقة الدفع"
-        options={paymentMethodOptions}
-        register={register}
-        error={errors.paymentMethod}
-        disabled={isSubmitting}
-        inline
-      />
+        {/* Payment Method */}
+        <FormSelect
+          name="paymentMethod"
+          label="طريقة الدفع"
+          options={paymentMethodOptions}
+          register={register}
+          error={errors.paymentMethod}
+          disabled={isSubmitting}
+        />
+      </div>
 
       {/* Category and Date - Same line on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

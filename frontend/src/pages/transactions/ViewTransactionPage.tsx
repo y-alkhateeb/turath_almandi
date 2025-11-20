@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, Edit } from 'lucide-react';
-import { useTransactions } from '@/hooks/useTransactions';
+import { useTransaction } from '@/hooks/useTransactions';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
 import { PageLoading } from '@/components/loading';
@@ -14,10 +14,7 @@ import { TransactionType, PaymentMethod } from '@/types/transactions.types';
 export const ViewTransactionPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: transactions = [], isLoading } = useTransactions();
-
-  // Find the transaction to view
-  const transaction = transactions.find((t) => t.id === id);
+  const { data: transaction, isLoading, error } = useTransaction(id || '');
 
   const handleCancel = () => {
     navigate('/transactions');
@@ -51,10 +48,12 @@ export const ViewTransactionPage = () => {
     return <PageLoading message="جاري تحميل بيانات العملية..." />;
   }
 
-  if (!transaction) {
+  if (error || !transaction) {
     return (
       <div className="space-y-6">
-        <Alert variant="destructive">لم يتم العثور على العملية المطلوبة</Alert>
+        <Alert variant="destructive">
+          {error?.message || 'لم يتم العثور على العملية المطلوبة'}
+        </Alert>
         <Button onClick={handleCancel}>
           <ArrowRight className="w-4 h-4" />
           العودة إلى العمليات

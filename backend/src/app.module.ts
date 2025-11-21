@@ -16,6 +16,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { ReportsModule } from './reports/reports.module';
+import { SettingsModule } from './settings/settings.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
@@ -50,6 +51,7 @@ import { envValidationSchema } from './common/config/env.validation';
     DashboardModule,
     WebSocketModule,
     ReportsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [

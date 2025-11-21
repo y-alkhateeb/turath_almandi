@@ -11,12 +11,10 @@ services:
       paths:
         - frontend/**
     envVars:
+      # Note: Using actual service name (turath-almandi-server) not yaml name (turath-almandi-backend)
+      # Update this if service is renamed in Render Dashboard
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: turath-almandi-backend
-          envVarKey: RENDER_EXTERNAL_URL
-        sync: false
+        value: https://turath-almandi-server.onrender.com/api/v1
 
   # Backend Service
   - type: web
@@ -83,17 +81,9 @@ services:
 
       # CORS and Frontend
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: turath-almandi-frontend
-          envVarKey: RENDER_EXTERNAL_URL
-        sync: false
+        value: https://turath-almandi-frontend.onrender.com
       - key: CORS_ORIGIN
-        fromService:
-          type: web
-          name: turath-almandi-frontend
-          envVarKey: RENDER_EXTERNAL_URL
-        sync: false
+        value: https://turath-almandi-frontend.onrender.com
 
       # Security
       - key: BCRYPT_SALT_ROUNDS

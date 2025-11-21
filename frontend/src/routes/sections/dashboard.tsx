@@ -9,7 +9,7 @@
  * - /inventory/* - Inventory management (list, create, edit)
  * - /reports - Reports page
  * - /notifications - Notifications (main and settings)
- * - /management/system/* - System management (admin-only: users, branches, audit)
+ * - /management/system/* - System management (admin-only: users, branches, audit, currency)
  * - /profile - User profile
  */
 
@@ -60,6 +60,9 @@ const BranchesCreatePage = lazy(() => import('@/pages/management/system/branches
 const BranchesEditPage = lazy(() => import('@/pages/management/system/branches/edit/[id]'));
 
 const AuditLogPage = lazy(() => import('@/pages/management/system/audit'));
+
+// Settings
+const CurrencySettingsPage = lazy(() => import('@/pages/settings/currency'));
 
 // Profile
 const ProfilePage = lazy(() => import('@/pages/profile'));
@@ -350,6 +353,16 @@ export const dashboardRoutes: RouteObject[] = [
                 element: (
                   <LazyPage>
                     <AuditLogPage />
+                  </LazyPage>
+                ),
+              },
+
+              // Currency Settings
+              {
+                path: 'currency',
+                element: (
+                  <LazyPage>
+                    <CurrencySettingsPage />
                   </LazyPage>
                 ),
               },

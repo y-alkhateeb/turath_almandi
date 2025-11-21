@@ -10,7 +10,7 @@ import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
 import { DebtStatus, type Debt } from '@/types/debts.types';
 import type { Column } from '@/components/ui/Table';
-import { formatCurrency, formatDateShort } from '@/utils/formatters';
+import { formatAmount, formatDateTable } from '@/utils/format';
 
 /**
  * Debts Page - Debt Management
@@ -101,8 +101,8 @@ export const DebtsPage = () => {
       key: 'originalAmount',
       header: 'المبلغ الأصلي',
       render: (debt) => (
-        <div className="text-[var(--text-primary)]" dir="ltr">
-          {formatCurrency(debt.originalAmount)} IQD
+        <div className="text-[var(--text-primary)]">
+          {formatAmount(debt.originalAmount)} د.ع
         </div>
       ),
     },
@@ -112,8 +112,8 @@ export const DebtsPage = () => {
       render: (debt) => {
         const paidAmount = debt.originalAmount - debt.remainingAmount;
         return (
-          <div className="text-green-600" dir="ltr">
-            {formatCurrency(paidAmount)} IQD
+          <div className="text-green-600">
+            {formatAmount(paidAmount)} د.ع
           </div>
         );
       },
@@ -122,8 +122,8 @@ export const DebtsPage = () => {
       key: 'remainingAmount',
       header: 'المبلغ المتبقي',
       render: (debt) => (
-        <div className="text-red-600 font-medium" dir="ltr">
-          {formatCurrency(debt.remainingAmount)} IQD
+        <div className="text-red-600 font-medium">
+          {formatAmount(debt.remainingAmount)} د.ع
         </div>
       ),
     },
@@ -131,7 +131,7 @@ export const DebtsPage = () => {
       key: 'date',
       header: 'التاريخ',
       render: (debt) => (
-        <div className="text-[var(--text-primary)]">{formatDateShort(debt.date)}</div>
+        <div className="text-[var(--text-primary)]">{formatDateTable(debt.date)}</div>
       ),
     },
     {
@@ -141,7 +141,7 @@ export const DebtsPage = () => {
         const overdueFlag = isOverdue(debt.dueDate, debt.status);
         return (
           <div className={overdueFlag ? 'text-red-600 font-medium' : 'text-[var(--text-primary)]'}>
-            {formatDateShort(debt.dueDate)}
+            {formatDateTable(debt.dueDate)}
           </div>
         );
       },

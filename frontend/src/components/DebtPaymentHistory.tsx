@@ -1,4 +1,5 @@
 import type { DebtPayment } from '../types/debts.types';
+import { formatAmount, formatDateTable } from '@/utils/format';
 
 interface DebtPaymentHistoryProps {
   payments: DebtPayment[];
@@ -68,8 +69,8 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
                     <p className="text-sm font-medium text-[var(--text-secondary)]">
                       المبلغ المدفوع
                     </p>
-                    <p className="text-lg font-bold text-green-600" dir="ltr">
-                      ${payment.amountPaid.toLocaleString()}
+                    <p className="text-lg font-bold text-green-600">
+                      {formatAmount(payment.amountPaid)} د.ع
                     </p>
                   </div>
                 </div>
@@ -78,11 +79,7 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
                 <div className="mr-11">
                   <p className="text-xs text-[var(--text-secondary)]">تاريخ الدفع</p>
                   <p className="text-sm font-medium text-[var(--text-primary)]">
-                    {new Date(payment.paymentDate).toLocaleDateString('ar-SA', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    {formatDateTable(payment.paymentDate)}
                   </p>
                 </div>
 
@@ -97,14 +94,7 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
                 {/* Created At */}
                 <div className="mr-11 mt-2">
                   <p className="text-xs text-[var(--text-secondary)]">
-                    تم التسجيل:{' '}
-                    {new Date(payment.createdAt).toLocaleDateString('ar-SA', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    تم التسجيل: {formatDateTable(payment.createdAt)}
                   </p>
                 </div>
               </div>
@@ -132,8 +122,8 @@ export const DebtPaymentHistory = ({ payments }: DebtPaymentHistoryProps) => {
         </div>
         <div className="flex items-center justify-between text-sm mt-2">
           <span className="text-[var(--text-secondary)]">إجمالي المبلغ المدفوع:</span>
-          <span className="font-bold text-green-600" dir="ltr">
-            ${payments.reduce((sum, p) => sum + p.amountPaid, 0).toLocaleString()}
+          <span className="font-bold text-green-600">
+            {formatAmount(payments.reduce((sum, p) => sum + Number(p.amountPaid), 0))} د.ع
           </span>
         </div>
       </div>

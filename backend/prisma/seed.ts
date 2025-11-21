@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { seedCurrencies } from './seeds/currencies.seed';
 
 const prisma = new PrismaClient();
 
@@ -34,6 +35,9 @@ async function main() {
   });
 
   console.log('✅ Created branches');
+
+  // Seed currencies
+  await seedCurrencies(prisma);
 
   // Create admin user
   const adminPassword = 'Admin123!@#';

@@ -1,7 +1,7 @@
 services:
   # Frontend Service
   - type: web
-    name: turath-almandi-frontend
+    name: turath-almandi
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
@@ -11,14 +11,16 @@ services:
       paths:
         - frontend/**
     envVars:
-      # Note: Using actual service name (turath-almandi-server) not yaml name (turath-almandi-backend)
-      # Update this if service is renamed in Render Dashboard
       - key: VITE_API_URL
-        value: https://turath-almandi-server.onrender.com/api/v1
+        fromService:
+          type: web
+          name: turath-almandi-server
+          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
 
   # Backend Service
   - type: web
-    name: turath-almandi-backend
+    name: turath-almandi-server
     env: docker
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
@@ -81,9 +83,17 @@ services:
 
       # CORS and Frontend
       - key: FRONTEND_URL
-        value: https://turath-almandi-frontend.onrender.com
+        fromService:
+          type: web
+          name: turath-almandi
+          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
       - key: CORS_ORIGIN
-        value: https://turath-almandi-frontend.onrender.com
+        fromService:
+          type: web
+          name: turath-almandi
+          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
 
       # Security
       - key: BCRYPT_SALT_ROUNDS

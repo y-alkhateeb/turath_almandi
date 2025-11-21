@@ -8,20 +8,47 @@
 import type { CurrencySettings } from '#/settings.types';
 
 /**
+ * Default fallback currency (IQD)
+ * Used when currency is not yet loaded from settings
+ */
+const DEFAULT_CURRENCY: CurrencySettings = {
+  id: 'default',
+  code: 'IQD',
+  nameAr: 'دينار عراقي',
+  nameEn: 'Iraqi Dinar',
+  symbol: 'د.ع',
+  isDefault: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+/**
  * Format amount with currency symbol
  *
  * @param amount - The numeric amount to format
- * @param currency - The currency settings (symbol, code, etc.)
- * @returns Formatted string with currency symbol and localized number
+ * @param currency - The currency settings (shows loading state if not provided)
+ * @returns Formatted string with currency symbol and localized number, or loading indicator
  *
  * @example
  * ```ts
  * const currency = { symbol: 'د.ع', code: 'IQD', ... };
  * formatCurrency(1234.56, currency);
  * // Returns: "د.ع 1,234.56"
+ *
+ * // Without currency (loading state)
+ * formatCurrency(1234.56);
+ * // Returns: "..." (loading indicator)
  * ```
  */
-export const formatCurrency = (amount: number, currency: CurrencySettings): string => {
+export const formatCurrency = (
+  amount: number,
+  currency?: CurrencySettings | null
+): string => {
+  // Show loading indicator if currency not loaded yet
+  if (!currency) {
+    return '...';
+  }
+
   // Format number with Arabic locale for proper thousands separator
   const formattedAmount = amount.toLocaleString('ar-IQ', {
     minimumFractionDigits: 2,
@@ -36,7 +63,7 @@ export const formatCurrency = (amount: number, currency: CurrencySettings): stri
  * Format amount with currency symbol (compact version without decimals for whole numbers)
  *
  * @param amount - The numeric amount to format
- * @param currency - The currency settings (symbol, code, etc.)
+ * @param currency - The currency settings (optional, defaults to IQD)
  * @returns Formatted string with currency symbol and localized number
  *
  * @example
@@ -48,7 +75,13 @@ export const formatCurrency = (amount: number, currency: CurrencySettings): stri
  * // Returns: "د.ع 1,234.56"
  * ```
  */
-export const formatCurrencyCompact = (amount: number, currency: CurrencySettings): string => {
+export const formatCurrencyCompact = (
+  amount: number,
+  currency?: CurrencySettings | null
+): string => {
+  // Use provided currency or default to IQD
+  const curr = currency || DEFAULT_CURRENCY;
+
   // Check if amount is a whole number
   const isWholeNumber = amount % 1 === 0;
 
@@ -58,14 +91,14 @@ export const formatCurrencyCompact = (amount: number, currency: CurrencySettings
     maximumFractionDigits: 2,
   });
 
-  return `${currency.symbol} ${formattedAmount}`;
+  return `${curr.symbol} ${formattedAmount}`;
 };
 
 /**
  * Format amount with currency code
  *
  * @param amount - The numeric amount to format
- * @param currency - The currency settings (symbol, code, etc.)
+ * @param currency - The currency settings (optional, defaults to IQD)
  * @returns Formatted string with currency code and localized number
  *
  * @example
@@ -75,11 +108,17 @@ export const formatCurrencyCompact = (amount: number, currency: CurrencySettings
  * // Returns: "1,234.56 IQD"
  * ```
  */
-export const formatCurrencyWithCode = (amount: number, currency: CurrencySettings): string => {
+export const formatCurrencyWithCode = (
+  amount: number,
+  currency?: CurrencySettings | null
+): string => {
+  // Use provided currency or default to IQD
+  const curr = currency || DEFAULT_CURRENCY;
+
   const formattedAmount = amount.toLocaleString('ar-IQ', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-  return `${formattedAmount} ${currency.code}`;
+  return `${formattedAmount} ${curr.code}`;
 };

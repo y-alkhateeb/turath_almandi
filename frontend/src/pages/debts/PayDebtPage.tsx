@@ -8,6 +8,7 @@ import { PageLoading } from '@/components/loading';
 import { Alert } from '@/ui/alert';
 import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
+import { FormDatePicker } from '@/components/form/FormDatePicker';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -191,29 +192,16 @@ export const PayDebtPage = () => {
             </p>
           </div>
 
-          <div>
-            <label
-              htmlFor="paymentDate"
-              className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-            >
-              تاريخ الدفع <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              id="paymentDate"
-              {...register('paymentDate', {
-                valueAsDate: true,
-              })}
-              defaultValue={new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-3 border ${
-                errors.paymentDate ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'
-              } rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed disabled:text-[var(--text-secondary)] [color-scheme:light] dark:[color-scheme:dark] transition-colors duration-200`}
-              disabled={isSubmitting}
-            />
-            {errors.paymentDate && (
-              <p className="mt-1 text-sm text-red-600">{errors.paymentDate.message}</p>
-            )}
-          </div>
+          <FormDatePicker
+            name="paymentDate"
+            label="تاريخ الدفع"
+            register={register}
+            error={errors.paymentDate}
+            required
+            disabled={isSubmitting}
+            defaultValue={new Date().toISOString().split('T')[0]}
+            valueAsDate
+          />
 
           <FormTextarea
             name="notes"

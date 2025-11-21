@@ -6,6 +6,7 @@ import type { DebtFormData } from '../types/debts.types';
 import { useAuth } from '../hooks/useAuth';
 import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
+import { FormDatePicker } from '@/components/form/FormDatePicker';
 import { BranchSelector } from '@/components/form/BranchSelector';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Alert } from '@/components/ui/Alert';
@@ -140,47 +141,28 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
         min="0"
       />
 
-      {/* Date Picker - Note: Uses valueAsDate for Date object conversion */}
-      <div>
-        <label htmlFor="date" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-          التاريخ <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          id="date"
-          {...register('date', { valueAsDate: true })}
-          defaultValue={new Date().toISOString().split('T')[0]}
-          className={`w-full px-4 py-3 border ${
-            errors.date ? 'border-red-500' : 'border-[var(--border-color)]'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-          disabled={isSubmitting}
-        />
-        {errors.date && <p className="mt-2 text-sm text-red-600">{errors.date.message}</p>}
-      </div>
+      <FormDatePicker
+        name="date"
+        label="التاريخ"
+        register={register}
+        error={errors.date}
+        required
+        disabled={isSubmitting}
+        defaultValue={new Date().toISOString().split('T')[0]}
+        valueAsDate
+      />
 
-      {/* Due Date Picker - Note: Uses valueAsDate for Date object conversion */}
-      <div>
-        <label
-          htmlFor="dueDate"
-          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-        >
-          تاريخ الاستحقاق <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          id="dueDate"
-          {...register('dueDate', { valueAsDate: true })}
-          defaultValue={new Date().toISOString().split('T')[0]}
-          className={`w-full px-4 py-3 border ${
-            errors.dueDate ? 'border-red-500' : 'border-[var(--border-color)]'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-          disabled={isSubmitting}
-        />
-        {errors.dueDate && <p className="mt-2 text-sm text-red-600">{errors.dueDate.message}</p>}
-        <p className="mt-1 text-xs text-[var(--text-secondary)]">
-          تاريخ الاستحقاق يجب أن يكون أكبر من أو يساوي التاريخ
-        </p>
-      </div>
+      <FormDatePicker
+        name="dueDate"
+        label="تاريخ الاستحقاق"
+        register={register}
+        error={errors.dueDate}
+        required
+        disabled={isSubmitting}
+        defaultValue={new Date().toISOString().split('T')[0]}
+        valueAsDate
+        helperText="تاريخ الاستحقاق يجب أن يكون أكبر من أو يساوي التاريخ"
+      />
 
       <FormTextarea
         name="notes"

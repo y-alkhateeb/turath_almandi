@@ -19,10 +19,15 @@ export const baseInputClasses = `
 /**
  * Date input specific classes
  * Includes color-scheme for native date picker styling in dark mode
+ * Calendar icon is styled to be visible in both light and dark modes
  */
 export const dateInputClasses = `
   ${baseInputClasses}
   [color-scheme:light] dark:[color-scheme:dark]
+  [&::-webkit-calendar-picker-indicator]:cursor-pointer
+  [&::-webkit-calendar-picker-indicator]:opacity-100
+  dark:[&::-webkit-calendar-picker-indicator]:invert
+  dark:[&::-webkit-calendar-picker-indicator]:brightness-200
 `;
 
 /**

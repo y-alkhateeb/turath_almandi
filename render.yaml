@@ -12,7 +12,7 @@ services:
         - frontend/**
     envVars:
       - key: VITE_API_URL
-        value: https://turath-almandi-backend.onrender.com/api/v1
+        value: https://turath-almandi-server.onrender.com/api/v1
 
   # Backend Service
   - type: web

@@ -6,9 +6,10 @@ import { AuditLogModule } from '../common/audit-log/audit-log.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { WebSocketModule } from '../websocket/websocket.module';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
-  imports: [PrismaModule, AuditLogModule, InventoryModule, NotificationsModule, WebSocketModule],
+  imports: [PrismaModule, AuditLogModule, InventoryModule, NotificationsModule, WebSocketModule, SettingsModule],
   controllers: [TransactionsController],
   providers: [TransactionsService],
   exports: [TransactionsService],

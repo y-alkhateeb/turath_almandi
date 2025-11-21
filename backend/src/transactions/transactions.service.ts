@@ -13,6 +13,7 @@ import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
+import { SettingsService } from '../settings/settings.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {
   BRANCH_SELECT,
@@ -146,6 +147,7 @@ export class TransactionsService {
     private readonly inventoryService: InventoryService,
     private readonly notificationsService: NotificationsService,
     private readonly websocketGateway: WebSocketGatewayService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
@@ -182,6 +184,9 @@ export class TransactionsService {
       }
     }
 
+    // Get default currency from settings
+    const defaultCurrency = await this.settingsService.getDefaultCurrency();
+
     // Build transaction data
     const transactionData = {
       type: createTransactionDto.type,
@@ -191,7 +196,7 @@ export class TransactionsService {
       category: normalizeCategory(createTransactionDto.category) || 'General',
       employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
       notes: createTransactionDto.notes || null,
-      currency: CURRENCY_CONFIG.validateOrDefault(createTransactionDto.currency),
+      currency: defaultCurrency.code as Currency, // Auto-apply default currency
       branchId: branchId, // Use determined branchId
       createdBy: user.id,
     };
@@ -582,6 +587,9 @@ export class TransactionsService {
       }
     }
 
+    // Get default currency from settings
+    const defaultCurrency = await this.settingsService.getDefaultCurrency();
+
     // Use Prisma transaction to ensure both operations succeed or fail together
     return this.prisma.$transaction(async (prisma) => {
       let inventoryItemId: string | null = null;
@@ -607,7 +615,7 @@ export class TransactionsService {
           employeeVendorName: createPurchaseDto.vendorName,
           category: 'Purchase', // Category for purchase expenses
           notes: createPurchaseDto.notes || null,
-          currency: CURRENCY_CONFIG.validateOrDefault(createPurchaseDto.currency),
+          currency: defaultCurrency.code as Currency, // Auto-apply default currency
           branchId: user.branchId!,
           createdBy: user.id,
           inventoryItemId: inventoryItemId,

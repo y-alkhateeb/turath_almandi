@@ -15,7 +15,7 @@ import { ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import { BranchSelector } from '@/components/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useBranches } from '@/hooks/useBranches';
-import { toInputDate, startOfDay, startOfMonth, endOfDay } from '@/utils/format';
+import { toInputDate, startOfDay, startOfMonth, endOfDay, formatDateTable } from '@/utils/format';
 import type { Branch, DashboardFilters as DashboardFiltersType } from '#/entity';
 
 // ============================================
@@ -46,18 +46,6 @@ function startOfWeek(date: Date): Date {
   result.setDate(result.getDate() - day);
   result.setHours(0, 0, 0, 0);
   return result;
-}
-
-/**
- * Format date to Arabic readable format
- */
-function formatDateArabic(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('ar-SA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 }
 
 // ============================================
@@ -153,16 +141,16 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
     // Date range filter
     if (filters.startDate && filters.endDate) {
       if (filters.startDate === filters.endDate) {
-        parts.push(`التاريخ: ${formatDateArabic(filters.startDate)}`);
+        parts.push(`التاريخ: ${formatDateTable(filters.startDate)}`);
       } else {
         parts.push(
-          `من ${formatDateArabic(filters.startDate)} إلى ${formatDateArabic(filters.endDate)}`
+          `من ${formatDateTable(filters.startDate)} إلى ${formatDateTable(filters.endDate)}`
         );
       }
     } else if (filters.startDate) {
-      parts.push(`من ${formatDateArabic(filters.startDate)}`);
+      parts.push(`من ${formatDateTable(filters.startDate)}`);
     } else if (filters.endDate) {
-      parts.push(`حتى ${formatDateArabic(filters.endDate)}`);
+      parts.push(`حتى ${formatDateTable(filters.endDate)}`);
     }
 
     return parts.length > 0 ? parts.join(' • ') : 'لم يتم تطبيق فلاتر';
@@ -241,7 +229,7 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
                   type="date"
                   value={filters.startDate || ''}
                   onChange={(e) => handleStartDateChange(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent [color-scheme:light] dark:[color-scheme:dark] transition-all"
+                  className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent [color-scheme:light] dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:brightness-200 transition-all"
                 />
               </div>
               <div>
@@ -252,7 +240,7 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
                   type="date"
                   value={filters.endDate || ''}
                   onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent [color-scheme:light] dark:[color-scheme:dark] transition-all"
+                  className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent [color-scheme:light] dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:brightness-200 transition-all"
                 />
               </div>
             </div>

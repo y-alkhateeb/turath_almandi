@@ -5,6 +5,7 @@ import { AuditLogService } from '../common/audit-log/audit-log.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
+import { SettingsService } from '../settings/settings.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 // Mock enums to avoid Prisma client generation dependencies
@@ -67,6 +68,19 @@ describe('TransactionsService', () => {
     emitTransactionUpdate: jest.fn(),
   };
 
+  const mockSettingsService = {
+    getDefaultCurrency: jest.fn().mockResolvedValue({
+      id: 'currency-1',
+      code: 'IQD',
+      name_ar: 'دينار عراقي',
+      name_en: 'Iraqi Dinar',
+      symbol: 'د.ع',
+      is_default: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -90,6 +104,10 @@ describe('TransactionsService', () => {
         {
           provide: WebSocketGatewayService,
           useValue: mockWebSocketGateway,
+        },
+        {
+          provide: SettingsService,
+          useValue: mockSettingsService,
         },
       ],
     }).compile();
@@ -164,9 +182,9 @@ describe('TransactionsService', () => {
           type: TransactionType.INCOME,
           amount: 1000,
           category: 'Sales',
-          currency: Currency.USD,
           branchId: 'branch-1',
           createdBy: 'user-1',
+          // Note: currency is auto-applied by service from default currency settings
         }),
         include: expect.any(Object),
       });

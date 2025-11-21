@@ -11,13 +11,19 @@ import {
 } from 'recharts';
 import { Card } from '@/components/ui/Card';
 import { RevenueDataPoint } from '@/types/dashboard';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils/formatCurrency';
+import type { CurrencySettings } from '#/settings.types';
 
 interface RevenueChartProps {
   data: RevenueDataPoint[];
+  currency?: CurrencySettings | null;
 }
 
-const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  currency,
+}: TooltipProps<number, string> & { currency?: CurrencySettings | null }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
@@ -26,7 +32,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         </p>
         {payload.map((entry, index) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: {formatCurrency(entry.value as number)}
+            {entry.name}: {formatCurrency(entry.value as number, currency)}
           </p>
         ))}
       </div>
@@ -35,7 +41,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   return null;
 };
 
-export function RevenueChart({ data }: RevenueChartProps) {
+export function RevenueChart({ data, currency }: RevenueChartProps) {
   // Format Y-axis values as millions
   const formatYAxis = (value: number) => {
     return `${(value / 1000000).toFixed(0)}م`;
@@ -56,7 +62,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
             <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} tickFormatter={formatYAxis} />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip currency={currency} />} />
             <Legend wrapperStyle={{ fontSize: '14px' }} iconType="circle" />
             <Line
               type="monotone"

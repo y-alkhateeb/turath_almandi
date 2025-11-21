@@ -20,10 +20,12 @@ import {
   TrendingDown,
   Calendar,
 } from 'lucide-react';
-import { formatCurrency, formatDate, formatNumber } from '@/utils/format';
+import { formatDate, formatNumber } from '@/utils/format';
+import { formatCurrency } from '@/lib/utils/formatCurrency';
 import { Table, type Column } from '../ui/Table';
 import { StatCard } from '../ui/StatCard';
 import type { FinancialReport, DebtReport, InventoryReport, SalaryReport } from '@/types/api';
+import type { CurrencySettings } from '#/settings.types';
 
 // ============================================
 // DISCRIMINATED UNION FOR REPORT DATA
@@ -41,6 +43,7 @@ export type ReportData =
 
 export interface ReportPreviewProps {
   reportData: ReportData;
+  currency?: CurrencySettings | null;
   onPrint: () => void;
   onExportExcel: () => void;
   onExportPDF: () => void;
@@ -50,7 +53,7 @@ export interface ReportPreviewProps {
 // FINANCIAL REPORT COMPONENT
 // ============================================
 
-function FinancialReportView({ data }: { data: FinancialReport }) {
+function FinancialReportView({ data, currency }: { data: FinancialReport; currency?: CurrencySettings | null }) {
   // Table columns for income by category
   const incomeColumns: Column<{ category: string; amount: number; count: number }>[] = [
     {
@@ -71,7 +74,7 @@ function FinancialReportView({ data }: { data: FinancialReport }) {
       width: '150px',
       align: 'right',
       render: (item) => (
-        <span className="font-semibold text-green-600">{formatCurrency(item.amount)}</span>
+        <span className="font-semibold text-green-600">{formatCurrency(item.amount, currency)}</span>
       ),
     },
   ];
@@ -96,7 +99,7 @@ function FinancialReportView({ data }: { data: FinancialReport }) {
       width: '150px',
       align: 'right',
       render: (item) => (
-        <span className="font-semibold text-red-600">{formatCurrency(item.amount)}</span>
+        <span className="font-semibold text-red-600">{formatCurrency(item.amount, currency)}</span>
       ),
     },
   ];
@@ -121,21 +124,21 @@ function FinancialReportView({ data }: { data: FinancialReport }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="إجمالي الإيرادات"
-          value={formatCurrency(data.summary.totalIncome)}
+          value={formatCurrency(data.summary.totalIncome, currency)}
           icon={TrendingUp}
-          description={`نقدي: ${formatCurrency(data.summary.cashIncome)} • ماستر: ${formatCurrency(data.summary.masterIncome)}`}
+          description={`نقدي: ${formatCurrency(data.summary.cashIncome, currency)} • ماستر: ${formatCurrency(data.summary.masterIncome, currency)}`}
           className="border-r-4 border-green-500"
         />
         <StatCard
           title="إجمالي المصروفات"
-          value={formatCurrency(data.summary.totalExpenses)}
+          value={formatCurrency(data.summary.totalExpenses, currency)}
           icon={TrendingDown}
           description="إجمالي المصروفات المسجلة"
           className="border-r-4 border-red-500"
         />
         <StatCard
           title="صافي الربح"
-          value={formatCurrency(data.summary.netProfit)}
+          value={formatCurrency(data.summary.netProfit, currency)}
           icon={TrendingUp}
           description={`هامش الربح: ${((data.summary.netProfit / data.summary.totalIncome) * 100).toFixed(1)}%`}
           className={`border-r-4 ${data.summary.netProfit >= 0 ? 'border-blue-500' : 'border-orange-500'}`}
@@ -179,7 +182,7 @@ function FinancialReportView({ data }: { data: FinancialReport }) {
 // DEBT REPORT COMPONENT
 // ============================================
 
-function DebtReportView({ data }: { data: DebtReport }) {
+function DebtReportView({ data, currency }: { data: DebtReport; currency?: CurrencySettings | null }) {
   // Table columns for debts
   const debtColumns: Column<DebtReport['debts'][0]>[] = [
     {
@@ -193,7 +196,7 @@ function DebtReportView({ data }: { data: DebtReport }) {
       header: 'المبلغ الأصلي',
       width: '140px',
       align: 'right',
-      render: (debt) => formatCurrency(debt.originalAmount),
+      render: (debt) => formatCurrency(debt.originalAmount, currency),
     },
     {
       key: 'remainingAmount',
@@ -201,7 +204,7 @@ function DebtReportView({ data }: { data: DebtReport }) {
       width: '140px',
       align: 'right',
       render: (debt) => (
-        <span className="font-semibold text-red-600">{formatCurrency(debt.remainingAmount)}</span>
+        <span className="font-semibold text-red-600">{formatCurrency(debt.remainingAmount, currency)}</span>
       ),
     },
     {
@@ -271,19 +274,19 @@ function DebtReportView({ data }: { data: DebtReport }) {
         />
         <StatCard
           title="المبلغ الإجمالي"
-          value={formatCurrency(data.summary.totalAmount)}
+          value={formatCurrency(data.summary.totalAmount, currency)}
           description="مجموع المبالغ الأصلية"
           className="border-r-4 border-blue-500"
         />
         <StatCard
           title="المبلغ المدفوع"
-          value={formatCurrency(data.summary.totalPaid)}
+          value={formatCurrency(data.summary.totalPaid, currency)}
           description={`${data.summary.paidDebtsCount} دين مدفوع`}
           className="border-r-4 border-green-500"
         />
         <StatCard
           title="المبلغ المتبقي"
-          value={formatCurrency(data.summary.totalRemaining)}
+          value={formatCurrency(data.summary.totalRemaining, currency)}
           description={`${data.summary.activeDebtsCount} دين نشط • ${data.summary.overdueDebtsCount} متأخر`}
           className="border-r-4 border-red-500"
         />
@@ -311,7 +314,7 @@ function DebtReportView({ data }: { data: DebtReport }) {
 // INVENTORY REPORT COMPONENT
 // ============================================
 
-function InventoryReportView({ data }: { data: InventoryReport }) {
+function InventoryReportView({ data, currency }: { data: InventoryReport; currency?: CurrencySettings | null }) {
   // Table columns for inventory items
   const itemColumns: Column<InventoryReport['items'][0]>[] = [
     {
@@ -353,7 +356,7 @@ function InventoryReportView({ data }: { data: InventoryReport }) {
       header: 'سعر الوحدة',
       width: '120px',
       align: 'right',
-      render: (item) => formatCurrency(item.costPerUnit),
+      render: (item) => formatCurrency(item.costPerUnit, currency),
     },
     {
       key: 'totalValue',
@@ -361,7 +364,7 @@ function InventoryReportView({ data }: { data: InventoryReport }) {
       width: '140px',
       align: 'right',
       render: (item) => (
-        <span className="font-semibold text-primary-600">{formatCurrency(item.totalValue)}</span>
+        <span className="font-semibold text-primary-600">{formatCurrency(item.totalValue, currency)}</span>
       ),
     },
   ];
@@ -386,7 +389,7 @@ function InventoryReportView({ data }: { data: InventoryReport }) {
         />
         <StatCard
           title="القيمة الإجمالية"
-          value={formatCurrency(data.summary.totalValue)}
+          value={formatCurrency(data.summary.totalValue, currency)}
           description="قيمة المخزون الكلية"
           className="border-r-4 border-green-500"
         />
@@ -426,7 +429,7 @@ function InventoryReportView({ data }: { data: InventoryReport }) {
 // SALARY REPORT COMPONENT
 // ============================================
 
-function SalaryReportView({ data }: { data: SalaryReport }) {
+function SalaryReportView({ data, currency }: { data: SalaryReport; currency?: CurrencySettings | null }) {
   // Table columns for salaries
   const salaryColumns: Column<SalaryReport['salaries'][0]>[] = [
     {
@@ -448,7 +451,7 @@ function SalaryReportView({ data }: { data: SalaryReport }) {
       width: '150px',
       align: 'right',
       render: (salary) => (
-        <span className="font-semibold text-green-600">{formatCurrency(salary.totalAmount)}</span>
+        <span className="font-semibold text-green-600">{formatCurrency(salary.totalAmount, currency)}</span>
       ),
     },
     {
@@ -479,7 +482,7 @@ function SalaryReportView({ data }: { data: SalaryReport }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="إجمالي الرواتب المدفوعة"
-          value={formatCurrency(data.summary.totalSalariesPaid)}
+          value={formatCurrency(data.summary.totalSalariesPaid, currency)}
           description={`${formatNumber(data.summary.transactionCount)} دفعة`}
           className="border-r-4 border-green-500"
         />
@@ -491,7 +494,7 @@ function SalaryReportView({ data }: { data: SalaryReport }) {
         />
         <StatCard
           title="متوسط الراتب"
-          value={formatCurrency(data.summary.averageSalary)}
+          value={formatCurrency(data.summary.averageSalary, currency)}
           description="متوسط الراتب لكل موظف"
           className="border-r-4 border-purple-500"
         />
@@ -521,6 +524,7 @@ function SalaryReportView({ data }: { data: SalaryReport }) {
 
 export function ReportPreview({
   reportData,
+  currency,
   onPrint,
   onExportExcel,
   onExportPDF,
@@ -556,10 +560,10 @@ export function ReportPreview({
       </div>
 
       {/* Report Content - Discriminated Union */}
-      {reportData.type === 'financial' && <FinancialReportView data={reportData.data} />}
-      {reportData.type === 'debt' && <DebtReportView data={reportData.data} />}
-      {reportData.type === 'inventory' && <InventoryReportView data={reportData.data} />}
-      {reportData.type === 'salary' && <SalaryReportView data={reportData.data} />}
+      {reportData.type === 'financial' && <FinancialReportView data={reportData.data} currency={currency} />}
+      {reportData.type === 'debt' && <DebtReportView data={reportData.data} currency={currency} />}
+      {reportData.type === 'inventory' && <InventoryReportView data={reportData.data} currency={currency} />}
+      {reportData.type === 'salary' && <SalaryReportView data={reportData.data} currency={currency} />}
 
       {/* Generated At Footer */}
       <div className="text-center text-sm text-[var(--text-secondary)] py-4" dir="rtl">

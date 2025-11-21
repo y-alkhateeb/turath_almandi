@@ -28,6 +28,7 @@ import { Activity, RefreshCw } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import { useDashboardData } from '@/hooks/features';
 import { useWebSocketEvent } from '@/hooks/useWebSocket';
+import { useDefaultCurrency } from '@/hooks/queries/useSettings';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -45,6 +46,9 @@ import {
 export default function DashboardWorkbench() {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  // Fetch default currency for chart formatting
+  const { data: defaultCurrency } = useDefaultCurrency();
 
   // All business logic is in the hook
   const {
@@ -244,8 +248,8 @@ export default function DashboardWorkbench() {
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DashboardRevenueChart data={stats.revenueData} isLoading={false} />
-        <DashboardCategoryChart data={stats.categoryData} isLoading={false} />
+        <DashboardRevenueChart data={stats.revenueData} currency={defaultCurrency} isLoading={false} />
+        <DashboardCategoryChart data={stats.categoryData} currency={defaultCurrency} isLoading={false} />
       </div>
 
       {/* Recent Transactions */}

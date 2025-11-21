@@ -9,15 +9,17 @@ import userEvent from '@testing-library/user-event';
 import { renderWithClient } from '@/test/componentTestUtils';
 import { TransactionList } from './TransactionList';
 import type { Transaction } from '#/entity';
-import { TransactionType, PaymentMethod, Currency } from '@/types/enum';
+import { TransactionType, PaymentMethod } from '@/types/enum';
 
 describe('TransactionList', () => {
+  // Currency enum has been removed from imports
+  // Currency is now managed globally via settings, not per-transaction
   const mockTransactions: Transaction[] = [
     {
       id: 'tx-1',
       type: TransactionType.INCOME,
       amount: 1000,
-      currency: Currency.IQD,
+      currency: 'IQD',
       paymentMethod: PaymentMethod.CASH,
       category: 'SALE',
       date: '2024-01-01T00:00:00Z',
@@ -31,7 +33,7 @@ describe('TransactionList', () => {
       id: 'tx-2',
       type: TransactionType.EXPENSE,
       amount: 500,
-      currency: Currency.USD,
+      currency: 'USD',
       paymentMethod: PaymentMethod.CARD,
       category: 'EXPENSE',
       date: '2024-01-02T00:00:00Z',

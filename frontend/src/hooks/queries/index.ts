@@ -5,3 +5,4 @@
  */
 
 export * from './queryKeys';
+export * from './useSettings';

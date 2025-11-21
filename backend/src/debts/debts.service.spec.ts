@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../common/audit-log/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
+import { SettingsService } from '../settings/settings.service';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 // Mock enums to avoid Prisma client generation dependencies
@@ -55,6 +56,19 @@ describe('DebtsService', () => {
     emitDebtPayment: jest.fn(),
   };
 
+  const mockSettingsService = {
+    getDefaultCurrency: jest.fn().mockResolvedValue({
+      id: 'currency-1',
+      code: 'IQD',
+      name_ar: 'دينار عراقي',
+      name_en: 'Iraqi Dinar',
+      symbol: 'د.ع',
+      is_default: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -74,6 +88,10 @@ describe('DebtsService', () => {
         {
           provide: WebSocketGatewayService,
           useValue: mockWebSocketGateway,
+        },
+        {
+          provide: SettingsService,
+          useValue: mockSettingsService,
         },
       ],
     }).compile();

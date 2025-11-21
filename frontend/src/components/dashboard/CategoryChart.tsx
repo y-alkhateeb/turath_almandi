@@ -1,20 +1,27 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Card } from '@/components/ui/Card';
 import { CategoryDataPoint } from '@/types/dashboard';
-import { formatCurrency, formatPercentage } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils/formatCurrency';
+import { formatPercentage } from '@/lib/utils';
+import type { CurrencySettings } from '#/settings.types';
 
 interface CategoryChartProps {
   data: CategoryDataPoint[];
+  currency?: CurrencySettings | null;
 }
 
-const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  currency,
+}: TooltipProps<number, string> & { currency?: CurrencySettings | null }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
         <p className="text-sm font-medium text-[var(--text-primary)] mb-1">{data.name}</p>
         <p className="text-sm text-[var(--text-secondary)]">
-          {formatCurrency(data.value as number)}
+          {formatCurrency(data.value as number, currency)}
         </p>
       </div>
     );
@@ -58,7 +65,7 @@ const renderCustomizedLabel = ({
   );
 };
 
-export function CategoryChart({ data }: CategoryChartProps) {
+export function CategoryChart({ data, currency }: CategoryChartProps) {
   return (
     <Card className="p-6">
       <div className="border-b border-[var(--border-color)] pb-5 mb-6">
@@ -85,7 +92,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip currency={currency} />} />
             <Legend
               wrapperStyle={{ fontSize: '14px' }}
               iconType="circle"
@@ -93,7 +100,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
                 const item = data.find((d) => d.name === value);
                 return (
                   <span className="text-sm">
-                    {value} - {item ? formatCurrency(item.value) : ''}
+                    {value} - {item ? formatCurrency(item.value, currency) : ''}
                   </span>
                 );
               }}

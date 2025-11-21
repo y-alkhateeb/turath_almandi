@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { renderWithClient } from '@/test/componentTestUtils';
 import { TransactionForm } from './TransactionForm';
 import type { Transaction, CreateTransactionInput } from '#/entity';
-import { TransactionType, PaymentMethod, Currency } from '@/types/enum';
+import { TransactionType, PaymentMethod } from '@/types/enum';
 
 // Mock dependencies
 vi.mock('@/hooks/useAuth', () => ({
@@ -44,7 +44,7 @@ describe('TransactionForm', () => {
     id: 'tx-1',
     type: TransactionType.INCOME,
     amount: 1000,
-    currency: Currency.IQD,
+    currency: 'IQD',
     paymentMethod: PaymentMethod.CASH,
     category: 'SALE',
     date: '2024-01-01T00:00:00Z',
@@ -378,24 +378,26 @@ describe('TransactionForm', () => {
     });
   });
 
-  describe('Currency Selection', () => {
-    it('should allow selecting currency', async () => {
-      const user = userEvent.setup();
-
-      renderWithClient(
-        <TransactionForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          isSubmitting={false}
-        />,
-      );
-
-      const currencySelect = screen.getByLabelText(/العملة|currency/i);
-      await user.selectOptions(currencySelect, Currency.USD);
-
-      expect((currencySelect as HTMLSelectElement).value).toBe(Currency.USD);
-    });
-  });
+  // Currency Selection tests have been removed
+  // Currency is now managed globally via settings, not per-transaction
+  // describe('Currency Selection', () => {
+  //   it('should allow selecting currency', async () => {
+  //     const user = userEvent.setup();
+  //
+  //     renderWithClient(
+  //       <TransactionForm
+  //         mode="create"
+  //         onSubmit={mockOnSubmit}
+  //         isSubmitting={false}
+  //       />,
+  //     );
+  //
+  //     const currencySelect = screen.getByLabelText(/العملة|currency/i);
+  //     await user.selectOptions(currencySelect, Currency.USD);
+  //
+  //     expect((currencySelect as HTMLSelectElement).value).toBe(Currency.USD);
+  //   });
+  // });
 
   describe('Category Selection', () => {
     it('should allow selecting category', async () => {

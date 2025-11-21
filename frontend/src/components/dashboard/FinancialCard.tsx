@@ -3,6 +3,9 @@
  * Displays a financial metric with icon, title, value, and optional breakdown
  */
 
+import { formatCurrency } from '@/lib/utils/formatCurrency';
+import { useDefaultCurrency } from '@/hooks/queries/useSettings';
+
 interface FinancialCardProps {
   title: string;
   value: number;
@@ -11,16 +14,6 @@ interface FinancialCardProps {
   breakdown?: { label: string; value: number }[];
   isLoading?: boolean;
 }
-
-/**
- * Format number to Arabic locale with proper thousands separators
- */
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('ar-IQ', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(value);
-};
 
 /**
  * Color configurations for different card types
@@ -64,6 +57,8 @@ export const FinancialCard = ({
   breakdown,
   isLoading = false,
 }: FinancialCardProps) => {
+  // Fetch default currency for amount formatting
+  const { data: defaultCurrency } = useDefaultCurrency();
   const config = colorConfigs[color];
 
   if (isLoading) {
@@ -98,7 +93,9 @@ export const FinancialCard = ({
       </div>
 
       <div className={`text-3xl font-bold ${config.valueText} mb-2 font-arabic`}>
-        {formatCurrency(value)} د.ع
+        {defaultCurrency
+          ? formatCurrency(value, defaultCurrency)
+          : `${value.toLocaleString('ar-IQ')} د.ع`}
       </div>
 
       {breakdown && breakdown.length > 0 && (
@@ -107,7 +104,9 @@ export const FinancialCard = ({
             <div key={index} className="flex justify-between items-center text-sm">
               <span className="text-[var(--text-secondary)] font-arabic">{item.label}</span>
               <span className={`font-semibold ${config.text} font-arabic`}>
-                {formatCurrency(item.value)} د.ع
+                {defaultCurrency
+                  ? formatCurrency(item.value, defaultCurrency)
+                  : `${item.value.toLocaleString('ar-IQ')} د.ع`}
               </span>
             </div>
           ))}

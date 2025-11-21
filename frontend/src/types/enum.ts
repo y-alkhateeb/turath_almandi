@@ -55,12 +55,11 @@ export enum PaymentMethod {
 
 /**
  * Currency types
- * Matches backend Prisma enum: Currency
+ * NOTE: Currency enum has been REMOVED from frontend enums.
+ * Currency is now managed via global settings (CurrencySettings).
+ * The Currency enum still exists in Prisma schema for historical data integrity.
+ * For type-safety, use the Currency type from backend-generated types (#/entity).
  */
-export enum Currency {
-  USD = 'USD',
-  IQD = 'IQD',
-}
 
 /**
  * Debt status

@@ -9,7 +9,6 @@ import userEvent from '@testing-library/user-event';
 import { renderWithClient } from '@/test/componentTestUtils';
 import { DebtForm } from './DebtForm';
 import type { CreateDebtInput } from '#/entity';
-import { Currency } from '@/types/enum';
 
 // Mock dependencies
 vi.mock('@/hooks/useAuth', () => ({
@@ -441,22 +440,24 @@ describe('DebtForm', () => {
     });
   });
 
-  describe('Currency Selection', () => {
-    it('should allow selecting currency', async () => {
-      const user = userEvent.setup();
-
-      renderWithClient(
-        <DebtForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          isSubmitting={false}
-        />,
-      );
-
-      const currencySelect = screen.getByLabelText(/العملة|currency/i);
-      await user.selectOptions(currencySelect, Currency.USD);
-
-      expect((currencySelect as HTMLSelectElement).value).toBe(Currency.USD);
-    });
-  });
+  // Currency Selection tests have been removed
+  // Currency is now managed globally via settings, not per-debt
+  // describe('Currency Selection', () => {
+  //   it('should allow selecting currency', async () => {
+  //     const user = userEvent.setup();
+  //
+  //     renderWithClient(
+  //       <DebtForm
+  //         mode="create"
+  //         onSubmit={mockOnSubmit}
+  //         isSubmitting={false}
+  //       />,
+  //     );
+  //
+  //     const currencySelect = screen.getByLabelText(/العملة|currency/i);
+  //     await user.selectOptions(currencySelect, Currency.USD);
+  //
+  //     expect((currencySelect as HTMLSelectElement).value).toBe(Currency.USD);
+  //   });
+  // });
 });

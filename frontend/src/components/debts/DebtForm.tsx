@@ -15,11 +15,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormInput } from '@/components/form/FormInput';
-import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
 import { FormTextarea } from '@/components/form/FormTextarea';
 import { BranchSelector } from '@/components/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
-import { Currency } from '@/types/enum';
 import type { CreateDebtInput } from '#/entity';
 
 // ============================================
@@ -54,7 +52,6 @@ const createDebtSchema = z.object({
         .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
         .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
     ),
-  currency: z.nativeEnum(Currency).optional(),
   date: z.string().min(1, { message: 'تاريخ الدين مطلوب' }),
   dueDate: z.string().min(1, { message: 'تاريخ الاستحقاق مطلوب' }),
   notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
@@ -85,18 +82,6 @@ export interface DebtFormProps {
 }
 
 // ============================================
-// CONSTANTS
-// ============================================
-
-/**
- * Currency options (Arabic)
- */
-const currencyOptions: SelectOption[] = [
-  { value: Currency.IQD, label: 'دينار عراقي (IQD)' },
-  { value: Currency.USD, label: 'دولار أمريكي (USD)' },
-];
-
-// ============================================
 // COMPONENT
 // ============================================
 
@@ -114,7 +99,6 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
     defaultValues: {
       creditorName: '',
       amount: undefined,
-      currency: Currency.IQD,
       date: new Date().toISOString().split('T')[0], // Today
       dueDate: '',
       notes: '',
@@ -127,7 +111,6 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
       const submitData: CreateDebtInput = {
         creditorName: data.creditorName,
         amount: data.amount,
-        currency: data.currency,
         date: data.date,
         dueDate: data.dueDate,
         notes: data.notes || undefined,
@@ -167,16 +150,6 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
         register={register}
         error={errors.amount}
         required
-        disabled={isSubmitting}
-      />
-
-      {/* Currency */}
-      <FormSelect
-        name="currency"
-        label="العملة"
-        options={currencyOptions}
-        register={register}
-        error={errors.currency}
         disabled={isSubmitting}
       />
 

@@ -377,6 +377,34 @@ export const auditKeys = {
 } as const;
 
 // ============================================
+// SETTINGS QUERY KEYS
+// ============================================
+
+/**
+ * Settings query keys
+ * Used for system settings and currency configuration
+ */
+export const settingsKeys = {
+  /** Settings namespace root */
+  all: ['settings'] as const,
+
+  /**
+   * Currency namespace root
+   */
+  currency: ['settings', 'currency'] as const,
+
+  /**
+   * Default currency: ['settings', 'currency', 'default']
+   */
+  defaultCurrency: () => ['settings', 'currency', 'default'] as const,
+
+  /**
+   * All currencies list: ['settings', 'currencies', 'all']
+   */
+  allCurrencies: () => ['settings', 'currencies', 'all'] as const,
+} as const;
+
+// ============================================
 // QUERY KEYS FACTORY
 // ============================================
 
@@ -409,6 +437,7 @@ export const queryKeys = {
   dashboard: dashboardKeys,
   reports: reportKeys,
   audit: auditKeys,
+  settings: settingsKeys,
 } as const;
 
 /**

@@ -141,24 +141,19 @@ export const SalaryExpenseForm = ({ onSuccess, onCancel }: SalaryExpenseFormProp
         >
           المبلغ <span className="text-red-500">*</span>
         </label>
-        <div className="relative">
-          <input
-            type="number"
-            id="amount"
-            step="0.01"
-            min="0"
-            placeholder="0.00"
-            {...register('amount')}
-            className={`w-full px-4 py-3 border ${
-              errors.amount ? 'border-red-500' : 'border-[var(--border-color)]'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-            disabled={isSubmitting}
-            dir="ltr"
-          />
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-sm">
-            IQD
-          </div>
-        </div>
+        <input
+          type="number"
+          id="amount"
+          step="0.01"
+          min="0"
+          placeholder="0.00"
+          {...register('amount')}
+          className={`w-full px-4 py-3 border ${
+            errors.amount ? 'border-red-500' : 'border-[var(--border-color)]'
+          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
+          disabled={isSubmitting}
+          dir="ltr"
+        />
         {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>}
       </div>
 

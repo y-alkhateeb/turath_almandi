@@ -21,7 +21,7 @@ import { FormRadioGroup, type RadioOption } from '@/components/form/FormRadioGro
 import { FormTextarea } from '@/components/form/FormTextarea';
 import { BranchSelector } from '@/components/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
-import { TransactionType, PaymentMethod, Currency } from '@/types/enum';
+import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
 import {
   INCOME_CATEGORIES,
@@ -60,7 +60,6 @@ const createTransactionSchema = z.object({
         .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
         .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
     ),
-  currency: z.nativeEnum(Currency).optional(),
   paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   category: z.string().optional(),
   date: z.string().min(1, { message: 'التاريخ مطلوب' }),
@@ -93,7 +92,6 @@ const updateTransactionSchema = z.object({
         .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
         .optional()
     ),
-  currency: z.nativeEnum(Currency).optional(),
   paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   category: z.string().optional(),
   date: z.string().optional(),
@@ -136,14 +134,6 @@ const paymentMethodOptions: SelectOption[] = [
   { value: PaymentMethod.MASTER, label: 'ماستر كارد' },
 ];
 
-/**
- * Currency options (Arabic)
- */
-const currencyOptions: SelectOption[] = [
-  { value: Currency.IQD, label: 'دينار عراقي (IQD)' },
-  { value: Currency.USD, label: 'دولار أمريكي (USD)' },
-];
-
 // ============================================
 // COMPONENT
 // ============================================
@@ -173,7 +163,6 @@ export function TransactionForm({
       mode === 'edit' && initialData
         ? {
             amount: initialData.amount,
-            currency: initialData.currency,
             paymentMethod: initialData.paymentMethod || undefined,
             category: initialData.category || '',
             date: initialData.date.split('T')[0], // YYYY-MM-DD
@@ -183,7 +172,6 @@ export function TransactionForm({
         : {
             type: TransactionType.INCOME,
             amount: undefined,
-            currency: Currency.IQD,
             paymentMethod: PaymentMethod.CASH,
             category: 'SALES', // Default to first income category
             date: new Date().toISOString().split('T')[0], // Today
@@ -198,7 +186,6 @@ export function TransactionForm({
     if (mode === 'edit' && initialData) {
       reset({
         amount: initialData.amount,
-        currency: initialData.currency,
         paymentMethod: initialData.paymentMethod || undefined,
         category: initialData.category || '',
         date: initialData.date.split('T')[0],
@@ -229,7 +216,6 @@ export function TransactionForm({
         const submitData: CreateTransactionInput = {
           type: createData.type,
           amount: createData.amount,
-          currency: createData.currency,
           paymentMethod: createData.paymentMethod,
           category: createData.category || undefined,
           date: createData.date,
@@ -244,7 +230,6 @@ export function TransactionForm({
         const updateData = data as UpdateFormData;
         const submitData: UpdateTransactionInput = {
           amount: updateData.amount,
-          currency: updateData.currency,
           paymentMethod: updateData.paymentMethod,
           category: updateData.category || undefined,
           date: updateData.date,
@@ -322,8 +307,8 @@ export function TransactionForm({
         )}
       </div>
 
-      {/* Amount, Currency, and Payment Method - Same line on large screens */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Amount and Payment Method - Same line on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Amount */}
         <FormInput
           name="amount"
@@ -335,16 +320,6 @@ export function TransactionForm({
           register={register}
           error={errors.amount}
           required
-          disabled={isSubmitting}
-        />
-
-        {/* Currency */}
-        <FormSelect
-          name="currency"
-          label="العملة"
-          options={currencyOptions}
-          register={register}
-          error={errors.currency}
           disabled={isSubmitting}
         />
 

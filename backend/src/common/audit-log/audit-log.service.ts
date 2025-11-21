@@ -17,6 +17,7 @@ export enum AuditEntityType {
   DEBT = 'DEBT',
   DEBT_PAYMENT = 'DEBT_PAYMENT',
   INVENTORY_ITEM = 'INVENTORY_ITEM',
+  SETTINGS = 'SETTINGS',
 }
 
 interface AuditLogData {

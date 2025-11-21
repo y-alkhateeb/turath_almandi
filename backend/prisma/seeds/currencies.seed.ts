@@ -13,31 +13,31 @@ export async function seedCurrencies(prisma: PrismaClient) {
   const currencies = [
     {
       code: 'IQD',
-      name_ar: 'دينار عراقي',
-      name_en: 'Iraqi Dinar',
+      nameAr: 'دينار عراقي',
+      nameEn: 'Iraqi Dinar',
       symbol: 'د.ع',
-      is_default: true,
+      isDefault: true,
     },
     {
       code: 'USD',
-      name_ar: 'دولار أمريكي',
-      name_en: 'US Dollar',
+      nameAr: 'دولار أمريكي',
+      nameEn: 'US Dollar',
       symbol: '$',
-      is_default: false,
+      isDefault: false,
     },
     {
       code: 'EUR',
-      name_ar: 'يورو',
-      name_en: 'Euro',
+      nameAr: 'يورو',
+      nameEn: 'Euro',
       symbol: '€',
-      is_default: false,
+      isDefault: false,
     },
     {
       code: 'SYP',
-      name_ar: 'ليرة سورية',
-      name_en: 'Syrian Pound',
+      nameAr: 'ليرة سورية',
+      nameEn: 'Syrian Pound',
       symbol: 'ل.س',
-      is_default: false,
+      isDefault: false,
     },
   ];
 

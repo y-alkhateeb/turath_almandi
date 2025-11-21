@@ -8,7 +8,6 @@ import {
   HttpCode,
   HttpStatus
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { SettingsService } from './settings.service';
 import { CreateCurrencyDto } from './dto/create-currency.dto';
@@ -25,7 +24,6 @@ interface RequestUser {
   branchId: string | null;
 }
 
-@ApiTags('Settings')
 @Controller('settings')
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
@@ -35,18 +33,6 @@ export class SettingsController {
    */
   @Get('currency')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Get default currency',
-    description: 'Returns the default currency settings. This endpoint is public and does not require authentication.'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Default currency retrieved successfully'
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Default currency not found'
-  })
   getDefaultCurrency() {
     return this.settingsService.getDefaultCurrency();
   }
@@ -58,22 +44,6 @@ export class SettingsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Get all currencies',
-    description: 'Returns all currencies with their usage statistics (transaction counts). Admin access required.'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Currencies retrieved successfully'
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Authentication required'
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin access required'
-  })
   getAllCurrencies() {
     return this.settingsService.getAllCurrencies();
   }
@@ -85,30 +55,6 @@ export class SettingsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Set default currency',
-    description: 'Sets a currency as the default. Only one currency can be default at a time. Admin access required.'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Default currency updated successfully'
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Invalid currency code'
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Authentication required'
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin access required'
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Currency not found'
-  })
   setDefaultCurrency(
     @Body() dto: SetDefaultCurrencyDto,
     @CurrentUser() user: RequestUser,
@@ -123,30 +69,6 @@ export class SettingsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: 'Create new currency',
-    description: 'Creates a new currency in the system. The currency will not be set as default automatically. Admin access required.'
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Currency created successfully'
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Invalid data'
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Authentication required'
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin access required'
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Conflict - Currency code already exists'
-  })
   createCurrency(
     @Body() dto: CreateCurrencyDto,
     @CurrentUser() user: RequestUser,

@@ -12,7 +12,11 @@ services:
         - frontend/**
     envVars:
       - key: VITE_API_URL
-        value: https://turath-almandi-server.onrender.com/api/v1
+        fromService:
+          type: web
+          name: turath-almandi-backend
+          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
 
   # Backend Service
   - type: web
@@ -79,9 +83,17 @@ services:
 
       # CORS and Frontend
       - key: FRONTEND_URL
-        value: https://turath-almandi-frontend.onrender.com
+        fromService:
+          type: web
+          name: turath-almandi-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
       - key: CORS_ORIGIN
-        value: https://turath-almandi-frontend.onrender.com
+        fromService:
+          type: web
+          name: turath-almandi-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
 
       # Security
       - key: BCRYPT_SALT_ROUNDS

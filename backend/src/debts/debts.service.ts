@@ -7,10 +7,11 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
-import { UserRole, DebtStatus, Prisma } from '@prisma/client';
+import { UserRole, DebtStatus, Prisma, Currency } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
+import { SettingsService } from '../settings/settings.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB } from '../common/utils/date.utils';
@@ -75,6 +76,7 @@ export class DebtsService {
     private readonly auditLogService: AuditLogService,
     private readonly notificationsService: NotificationsService,
     private readonly websocketGateway: WebSocketGatewayService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   /**
@@ -116,12 +118,15 @@ export class DebtsService {
       throw new BadRequestException(ERROR_MESSAGES.DEBT.DUE_DATE_INVALID);
     }
 
+    // Get default currency from settings
+    const defaultCurrency = await this.settingsService.getDefaultCurrency();
+
     // Build debt data
     const debtData = {
       creditorName: createDebtDto.creditorName,
       originalAmount: createDebtDto.amount,
       remainingAmount: createDebtDto.amount, // Auto-set to amount
-      currency: CURRENCY_CONFIG.validateOrDefault(createDebtDto.currency),
+      currency: defaultCurrency.code as Currency, // Auto-apply default currency
       date: date,
       dueDate: dueDate,
       status: DebtStatus.ACTIVE, // Auto-set to ACTIVE
@@ -274,6 +279,9 @@ export class DebtsService {
       throw new BadRequestException(ERROR_MESSAGES.VALIDATION.PAYMENT_POSITIVE);
     }
 
+    // Get default currency from settings
+    const defaultCurrency = await this.settingsService.getDefaultCurrency();
+
     // Use Prisma transaction to ensure atomicity
     const result = await this.prisma.$transaction(async (tx) => {
       // Get the debt
@@ -330,7 +338,7 @@ export class DebtsService {
         data: {
           debtId: debtId,
           amountPaid: payDebtDto.amountPaid,
-          currency: CURRENCY_CONFIG.validateOrDefault(payDebtDto.currency),
+          currency: defaultCurrency.code as Currency, // Auto-apply default currency
           paymentDate: formatDateForDB(payDebtDto.paymentDate),
           notes: payDebtDto.notes || null,
           recordedBy: user.id,

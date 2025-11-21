@@ -161,8 +161,8 @@ export class SettingsService {
     const currency = await this.prisma.currencySettings.create({
       data: {
         code: dto.code,
-        nameAr: dto.name_ar,
-        nameEn: dto.name_en,
+        nameAr: dto.nameAr,
+        nameEn: dto.nameEn,
         symbol: dto.symbol,
         isDefault: false,
       },

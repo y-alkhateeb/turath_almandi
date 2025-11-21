@@ -1,16 +1,8 @@
 import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
 import { Trim } from 'class-sanitizer';
 import { Transform } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class SetDefaultCurrencyDto {
-  @ApiProperty({
-    description: 'ISO 4217 currency code (3 uppercase letters)',
-    example: 'IQD',
-    minLength: 3,
-    maxLength: 3,
-    pattern: '^[A-Z]{3}$',
-  })
   @Trim()
   @Transform(({ value }) => value?.toUpperCase())
   @IsString({ message: 'رمز العملة يجب أن يكون نصاً' })

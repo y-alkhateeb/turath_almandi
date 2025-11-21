@@ -25,8 +25,9 @@ import {
   TooltipProps,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { formatCurrency } from '@/utils/format';
+import { formatCurrency } from '@/lib/utils/formatCurrency';
 import type { RevenueDataPoint } from '#/entity';
+import type { CurrencySettings } from '#/settings.types';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 // ============================================
@@ -35,6 +36,7 @@ import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipCont
 
 export interface DashboardRevenueChartProps {
   data: RevenueDataPoint[];
+  currency?: CurrencySettings | null;
   isLoading: boolean;
 }
 
@@ -42,7 +44,11 @@ export interface DashboardRevenueChartProps {
 // CUSTOM TOOLTIP
 // ============================================
 
-const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  currency,
+}: TooltipProps<ValueType, NameType> & { currency?: CurrencySettings | null }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
@@ -51,7 +57,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) =
         </p>
         {payload.map((entry, index) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: {formatCurrency(Number(entry.value))}
+            {entry.name}: {formatCurrency(Number(entry.value), currency)}
           </p>
         ))}
       </div>
@@ -106,7 +112,7 @@ function EmptyState() {
 // COMPONENT
 // ============================================
 
-export function DashboardRevenueChart({ data, isLoading }: DashboardRevenueChartProps) {
+export function DashboardRevenueChart({ data, currency, isLoading }: DashboardRevenueChartProps) {
   // Loading state
   if (isLoading) {
     return <ChartSkeleton />;
@@ -153,7 +159,7 @@ export function DashboardRevenueChart({ data, isLoading }: DashboardRevenueChart
               style={{ fontSize: '12px', fontFamily: 'inherit' }}
               tickFormatter={formatYAxis}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip currency={currency} />} />
             <Legend wrapperStyle={{ fontSize: '14px', fontFamily: 'inherit' }} iconType="circle" />
             <Line
               type="monotone"

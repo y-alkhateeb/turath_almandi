@@ -21,6 +21,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { FileText } from 'lucide-react';
 import { useBranches } from '@/hooks/useBranches';
+import { useDefaultCurrency } from '@/hooks/queries/useSettings';
 import {
   useFinancialReport,
   useDebtReport,
@@ -91,6 +92,11 @@ export default function ReportsPage() {
    * Fetch branches for branch selector
    */
   const { data: branches = [] } = useBranches();
+
+  /**
+   * Fetch default currency for amount formatting
+   */
+  const { data: defaultCurrency } = useDefaultCurrency();
 
   /**
    * Financial report query (enabled: false, manual trigger)
@@ -461,6 +467,7 @@ export default function ReportsPage() {
       {!isGenerating && !error && hasGenerated && reportData && (
         <ReportPreview
           reportData={reportData}
+          currency={defaultCurrency}
           onPrint={handlePrint}
           onExportExcel={handleExportExcel}
           onExportPDF={handleExportPDF}

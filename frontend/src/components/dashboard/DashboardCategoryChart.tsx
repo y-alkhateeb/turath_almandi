@@ -16,9 +16,11 @@
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 import { PieChartIcon } from 'lucide-react';
-import { formatCurrency, formatPercentage } from '@/utils/format';
+import { formatCurrency } from '@/lib/utils/formatCurrency';
+import { formatPercentage } from '@/utils/format';
 import { getCategoryLabel } from '@/constants/transactionCategories';
 import type { CategoryDataPoint } from '#/entity';
+import type { CurrencySettings } from '#/settings.types';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 // ============================================
@@ -27,6 +29,7 @@ import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipCont
 
 export interface DashboardCategoryChartProps {
   data: CategoryDataPoint[];
+  currency?: CurrencySettings | null;
   isLoading: boolean;
 }
 
@@ -34,7 +37,11 @@ export interface DashboardCategoryChartProps {
 // CUSTOM TOOLTIP
 // ============================================
 
-const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  currency,
+}: TooltipProps<ValueType, NameType> & { currency?: CurrencySettings | null }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     const categoryName = data.name ? String(data.name) : '';
@@ -43,7 +50,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) =
     return (
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg shadow-lg p-3">
         <p className="text-sm font-medium text-[var(--text-primary)] mb-1">{arabicLabel}</p>
-        <p className="text-sm text-[var(--text-secondary)]">{formatCurrency(Number(data.value))}</p>
+        <p className="text-sm text-[var(--text-secondary)]">{formatCurrency(Number(data.value), currency)}</p>
       </div>
     );
   }
@@ -158,7 +165,7 @@ function EmptyState() {
 // COMPONENT
 // ============================================
 
-export function DashboardCategoryChart({ data, isLoading }: DashboardCategoryChartProps) {
+export function DashboardCategoryChart({ data, currency, isLoading }: DashboardCategoryChartProps) {
   // Loading state
   if (isLoading) {
     return <ChartSkeleton />;
@@ -205,7 +212,7 @@ export function DashboardCategoryChart({ data, isLoading }: DashboardCategoryCha
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip currency={currency} />} />
             <Legend
               wrapperStyle={{ fontSize: '14px', fontFamily: 'inherit' }}
               iconType="circle"
@@ -214,7 +221,7 @@ export function DashboardCategoryChart({ data, isLoading }: DashboardCategoryCha
                 const item = dataWithColors.find((d) => d.name === value);
                 return (
                   <span className="text-sm">
-                    {arabicLabel} - {item ? formatCurrency(item.value) : ''}
+                    {arabicLabel} - {item ? formatCurrency(item.value, currency) : ''}
                   </span>
                 );
               }}

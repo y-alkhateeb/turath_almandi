@@ -18,13 +18,13 @@ export interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const navigate = useNavigate();
   const userInfo = useUserInfo();
-  const { clearUserInfoAndToken } = useUserActions();
+  const { clearAuth } = useUserActions();
   const { themeMode, toggleTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
-    clearUserInfoAndToken();
+    clearAuth();
     navigate('/login', { replace: true });
   };
 

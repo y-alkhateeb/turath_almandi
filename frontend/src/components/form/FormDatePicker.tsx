@@ -5,6 +5,7 @@ import {
   labelClasses,
   errorClasses,
   fieldContainerClasses,
+  helperTextClasses,
 } from '@/styles/formInputStyles';
 
 export interface FormDatePickerProps<T extends FieldValues> {
@@ -18,6 +19,8 @@ export interface FormDatePickerProps<T extends FieldValues> {
   min?: string;
   max?: string;
   defaultValue?: string;
+  valueAsDate?: boolean;
+  helperText?: string;
 }
 
 export function FormDatePicker<T extends FieldValues>({
@@ -31,6 +34,8 @@ export function FormDatePicker<T extends FieldValues>({
   min,
   max,
   defaultValue,
+  valueAsDate = false,
+  helperText,
 }: FormDatePickerProps<T>) {
   return (
     <div className={`${fieldContainerClasses} ${className}`}>
@@ -41,7 +46,7 @@ export function FormDatePicker<T extends FieldValues>({
       <input
         id={name}
         type="date"
-        {...register(name)}
+        {...register(name, valueAsDate ? { valueAsDate: true } : undefined)}
         disabled={disabled}
         min={min}
         max={max}
@@ -58,6 +63,7 @@ export function FormDatePicker<T extends FieldValues>({
           {error.message}
         </p>
       )}
+      {helperText && !error && <p className={helperTextClasses}>{helperText}</p>}
     </div>
   );
 }

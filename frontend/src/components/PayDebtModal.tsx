@@ -5,6 +5,7 @@ import { Modal } from './Modal';
 import { usePayDebt } from '../hooks/useDebts';
 import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
+import { FormDatePicker } from '@/components/form/FormDatePicker';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import type { Debt, PayDebtFormData } from '../types/debts.types';
 import { formatAmount, formatDateTable } from '@/utils/format';
@@ -193,29 +194,16 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
         </div>
 
         {/* Payment Date Picker */}
-        <div>
-          <label
-            htmlFor="paymentDate"
-            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-          >
-            تاريخ الدفع <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            id="paymentDate"
-            {...register('paymentDate', {
-              valueAsDate: true,
-            })}
-            defaultValue={new Date().toISOString().split('T')[0]}
-            className={`w-full px-4 py-3 border ${
-              errors.paymentDate ? 'border-red-500' : 'border-[var(--border-color)]'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-            disabled={isSubmitting}
-          />
-          {errors.paymentDate && (
-            <p className="mt-1 text-sm text-red-600">{errors.paymentDate.message}</p>
-          )}
-        </div>
+        <FormDatePicker
+          name="paymentDate"
+          label="تاريخ الدفع"
+          register={register}
+          error={errors.paymentDate}
+          required
+          disabled={isSubmitting}
+          defaultValue={new Date().toISOString().split('T')[0]}
+          valueAsDate
+        />
 
         <FormTextarea
           name="notes"

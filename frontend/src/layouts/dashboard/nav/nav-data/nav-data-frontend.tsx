@@ -107,6 +107,11 @@ export const navData: NavItem[] = [
         path: '/management/system/audit',
         icon: <Icon icon="lucide:file-text" size={20} />,
       },
+      {
+        title: 'إعدادات العملات',
+        path: '/management/system/currency',
+        icon: <Icon icon="lucide:coins" size={20} />,
+      },
     ],
   },
 ];

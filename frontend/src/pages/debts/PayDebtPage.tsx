@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { PayDebtFormData } from '@/types/debts.types';
+import { formatAmount, formatDateTable } from '@/utils/format';
 
 /**
  * Pay Debt Page
@@ -71,7 +72,7 @@ export const PayDebtPage = () => {
         notes: data.notes || undefined,
       };
 
-      await payDebt.mutateAsync({ debtId: id, data: paymentData });
+      await payDebt.mutateAsync({ id, data: paymentData });
       navigate('/debts');
     } catch (error) {
       console.error('Failed to pay debt:', error);
@@ -145,15 +146,15 @@ export const PayDebtPage = () => {
 
           <div>
             <p className="text-xs text-[var(--text-secondary)]">المبلغ الأصلي</p>
-            <p className="text-sm font-medium text-[var(--text-primary)]" dir="ltr">
-              ${debt.originalAmount.toLocaleString()}
+            <p className="text-sm font-medium text-[var(--text-primary)]">
+              {formatAmount(debt.originalAmount)} د.ع
             </p>
           </div>
 
           <div>
             <p className="text-xs text-[var(--text-secondary)]">المبلغ المتبقي</p>
-            <p className="text-sm font-bold text-red-600" dir="ltr">
-              ${debt.remainingAmount.toLocaleString()}
+            <p className="text-sm font-bold text-red-600">
+              {formatAmount(debt.remainingAmount)} د.ع
             </p>
           </div>
         </div>
@@ -162,7 +163,7 @@ export const PayDebtPage = () => {
           <div className="pt-2 border-t border-[var(--border-color)] mt-3">
             <p className="text-xs text-[var(--text-secondary)]">تاريخ الاستحقاق</p>
             <p className="text-sm font-medium text-[var(--text-primary)]">
-              {new Date(debt.dueDate).toLocaleDateString('ar-SA')}
+              {formatDateTable(debt.dueDate)}
             </p>
           </div>
         )}
@@ -186,7 +187,7 @@ export const PayDebtPage = () => {
               max={debt.remainingAmount}
             />
             <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              الحد الأقصى: ${debt.remainingAmount.toLocaleString()}
+              الحد الأقصى: {formatAmount(debt.remainingAmount)} د.ع
             </p>
           </div>
 

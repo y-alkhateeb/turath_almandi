@@ -14,7 +14,9 @@
 
 import { Calendar, AlertCircle } from 'lucide-react';
 import { Table, type Column } from '../ui/Table';
-import { formatCurrency, formatDate } from '@/utils/format';
+import { formatDate } from '@/utils/format';
+import { formatCurrency } from '@/lib/utils/formatCurrency';
+import { useDefaultCurrency } from '@/hooks/queries/useSettings';
 import { DebtStatus } from '@/types/enum';
 import type { Debt } from '#/entity';
 
@@ -109,6 +111,9 @@ const getDaysOverdue = (dueDate: string | null): number => {
 // ============================================
 
 export function DebtList({ debts, isLoading, onPay, onView }: DebtListProps) {
+  // Fetch default currency for amount formatting
+  const { data: defaultCurrency } = useDefaultCurrency();
+
   // Define table columns
   const columns: Column<Debt>[] = [
     {
@@ -128,7 +133,11 @@ export function DebtList({ debts, isLoading, onPay, onView }: DebtListProps) {
       width: '140px',
       align: 'right',
       render: (debt) => (
-        <span className="font-semibold">{formatCurrency(debt.originalAmount)}</span>
+        <span className="font-semibold">
+          {defaultCurrency
+            ? formatCurrency(debt.originalAmount, defaultCurrency)
+            : `${debt.originalAmount.toLocaleString('ar-IQ')} د.ع`}
+        </span>
       ),
     },
     {
@@ -142,7 +151,9 @@ export function DebtList({ debts, isLoading, onPay, onView }: DebtListProps) {
             debt.remainingAmount > 0 ? 'text-red-600' : 'text-green-600'
           }`}
         >
-          {formatCurrency(debt.remainingAmount)}
+          {defaultCurrency
+            ? formatCurrency(debt.remainingAmount, defaultCurrency)
+            : `${debt.remainingAmount.toLocaleString('ar-IQ')} د.ع`}
         </span>
       ),
     },

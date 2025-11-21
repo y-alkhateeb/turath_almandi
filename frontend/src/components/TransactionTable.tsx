@@ -8,12 +8,14 @@ import type {
 } from '../types/transactions.types';
 import { useAuth } from '../hooks/useAuth';
 import { useBranches } from '../hooks/useBranches';
+import { useDefaultCurrency } from '@/hooks/queries/useSettings';
 import {
   ALL_CATEGORIES,
   getCategoriesByType,
   getCategoryLabel,
 } from '../constants/transactionCategories';
-import { formatDateTable, formatAmount } from '../utils/format';
+import { formatDateTable } from '../utils/format';
+import { formatCurrency } from '@/lib/utils/formatCurrency';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -39,6 +41,8 @@ export default function TransactionTable({
   const { isAdmin } = useAuth();
   // Only fetch branches for admins (accountants don't see branch filter)
   const { data: branches = [] } = useBranches({ enabled: isAdmin });
+  // Fetch default currency for amount formatting
+  const { data: defaultCurrency } = useDefaultCurrency();
   const [searchInput, setSearchInput] = useState(filters.search || '');
 
   // Get categories based on selected transaction type
@@ -295,7 +299,9 @@ export default function TransactionTable({
                       {getTypeLabel(transaction.type)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)] font-semibold">
-                      {formatAmount(transaction.amount)} {transaction.currency}
+                      {defaultCurrency
+                        ? formatCurrency(transaction.amount, defaultCurrency)
+                        : `${transaction.amount.toLocaleString('ar-IQ')} ${transaction.currency}`}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {getPaymentMethodLabel(transaction.paymentMethod)}

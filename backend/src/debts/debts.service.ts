@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
-import { UserRole, DebtStatus, Prisma, Currency } from '@prisma/client';
+import { UserRole, DebtStatus, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
@@ -16,7 +16,6 @@ import { applyBranchFilter } from '../common/utils/query-builder';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
-import { CURRENCY_CONFIG } from '../common/constants/currency.constants';
 
 interface RequestUser {
   id: string;
@@ -118,15 +117,14 @@ export class DebtsService {
       throw new BadRequestException(ERROR_MESSAGES.DEBT.DUE_DATE_INVALID);
     }
 
-    // Get default currency from settings
-    const defaultCurrency = await this.settingsService.getDefaultCurrency();
+    // Currency is now frontend-only, not needed for database
 
     // Build debt data
     const debtData = {
       creditorName: createDebtDto.creditorName,
       originalAmount: createDebtDto.amount,
       remainingAmount: createDebtDto.amount, // Auto-set to amount
-      currency: defaultCurrency.code as Currency, // Auto-apply default currency
+      // Currency removed - now frontend-only display
       date: date,
       dueDate: dueDate,
       status: DebtStatus.ACTIVE, // Auto-set to ACTIVE
@@ -338,7 +336,7 @@ export class DebtsService {
         data: {
           debtId: debtId,
           amountPaid: payDebtDto.amountPaid,
-          currency: defaultCurrency.code as Currency, // Auto-apply default currency
+          // Currency is now frontend-only, not stored in database
           paymentDate: formatDateForDB(payDebtDto.paymentDate),
           notes: payDebtDto.notes || null,
           recordedBy: user.id,

@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
-import { TransactionType, Currency, UserRole, Prisma, PaymentMethod } from '@prisma/client';
+import { TransactionType, UserRole, Prisma, PaymentMethod } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -615,7 +615,7 @@ export class TransactionsService {
           employeeVendorName: createPurchaseDto.vendorName,
           category: 'Purchase', // Category for purchase expenses
           notes: createPurchaseDto.notes || null,
-          currency: defaultCurrency.code as Currency, // Auto-apply default currency
+          // Currency is now frontend-only, not stored in database
           branchId: user.branchId!,
           createdBy: user.id,
           inventoryItemId: inventoryItemId,

@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { IsNumber, Min } from 'class-validator';
+import { IsNumber, Min, ValidationOptions } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 /**
@@ -13,11 +13,15 @@ import { Transform } from 'class-transformer';
  * Usage:
  * @IsPositiveAmount()
  * amount: number;
+ *
+ * Or with custom message:
+ * @IsPositiveAmount({ message: 'الراتب يجب أن يكون رقم موجب' })
+ * salary: number;
  */
-export function IsPositiveAmount() {
+export function IsPositiveAmount(validationOptions?: ValidationOptions) {
   return applyDecorators(
-    IsNumber({}, { message: 'Amount must be a number' }),
-    Min(0.01, { message: 'Amount must be greater than 0' }),
+    IsNumber({}, validationOptions || { message: 'Amount must be a number' }),
+    Min(0.01, validationOptions || { message: 'Amount must be greater than 0' }),
     Transform(({ value }) => parseFloat(value)),
   );
 }

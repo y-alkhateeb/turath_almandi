@@ -3,7 +3,25 @@
  */
 
 // API configuration
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+// Get base URL from environment and ensure it ends with /api/v1
+const getApiBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL;
+
+  // If no environment variable, use default
+  if (!envUrl) {
+    return 'http://localhost:3000/api/v1';
+  }
+
+  // If URL already ends with /api/v1, return as-is
+  if (envUrl.endsWith('/api/v1')) {
+    return envUrl;
+  }
+
+  // Otherwise, append /api/v1
+  return `${envUrl}/api/v1`;
+};
+
+const apiBaseUrl = getApiBaseUrl();
 
 // WebSocket configuration
 // Convert HTTP(S) URL to WS(S) URL

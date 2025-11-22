@@ -5,8 +5,7 @@ WORKDIR /app
 
 # Accept build arguments
 ARG VITE_API_URL
-# Append /api/v1 to backend URL from RENDER_EXTERNAL_URL
-ENV VITE_API_URL=${VITE_API_URL}/api/v1
+ENV VITE_API_URL=$VITE_API_URL
 
 # Copy package files
 COPY package*.json ./

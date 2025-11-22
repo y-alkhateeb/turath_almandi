@@ -11,6 +11,7 @@ services:
       paths:
         - frontend/**
     envVars:
+      # Backend URL - automatically resolved from backend service
       - key: VITE_API_URL
         fromService:
           type: web

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AuthState, User, LoginCredentials } from '../types/auth.types';
-import { authService } from '../services/auth.service';
+import authService from '@/api/services/authService';
 
 const STORAGE_KEY = 'auth-storage';
 const REMEMBER_ME_KEY = 'auth-remember-me';

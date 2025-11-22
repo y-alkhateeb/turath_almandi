@@ -12,7 +12,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { usersService } from '@/services/users.service';
+import userService from '@/api/services/userService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
 import { ApiError } from '@/api/apiClient';
@@ -35,7 +35,7 @@ import { ApiError } from '@/api/apiClient';
 export const useUsers = () => {
   return useQuery<UserWithBranch[], ApiError>({
     queryKey: queryKeys.users.all,
-    queryFn: () => usersService.getAll(),
+    queryFn: () => userService.getAllUnpaginated(),
     staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Cache for 10 minutes
     retry: 1,
@@ -57,7 +57,7 @@ export const useUsers = () => {
 export const useUser = (id: string) => {
   return useQuery<UserWithBranch, ApiError>({
     queryKey: queryKeys.users.detail(id),
-    queryFn: () => usersService.getOne(id),
+    queryFn: () => userService.getOne(id),
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -97,7 +97,7 @@ export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation<UserWithBranch, ApiError, CreateUserDto>({
-    mutationFn: (data: CreateUserDto) => usersService.create(data),
+    mutationFn: (data: CreateUserDto) => userService.create(data),
 
     // Optimistic update
     onMutate: async (newUser) => {
@@ -169,7 +169,7 @@ export const useUpdateUser = () => {
 
   return useMutation<UserWithBranch, ApiError, { id: string; data: UpdateUserDto }>({
     mutationFn: ({ id, data }: { id: string; data: UpdateUserDto }) =>
-      usersService.update(id, data),
+      userService.update(id, data),
 
     // Optimistic update
     onMutate: async ({ id, data }) => {
@@ -245,7 +245,7 @@ export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, ApiError, string>({
-    mutationFn: (id: string) => usersService.delete(id),
+    mutationFn: (id: string) => userService.delete(id),
 
     // Optimistic update
     onMutate: async (deletedId) => {

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { DashboardStats } from '@/types/dashboard';
-import { dashboardService } from '@/services/dashboard.service';
+import dashboardService from '@/api/services/dashboardService';
 import { useAuth } from './useAuth';
 
 interface UseDashboardStatsOptions {
@@ -32,7 +32,10 @@ export function useDashboardStats(options: UseDashboardStatsOptions = {}) {
   return useQuery<DashboardStats>({
     queryKey: ['dashboard', 'stats', date, effectiveBranchId],
     queryFn: async () => {
-      return await dashboardService.getDashboardStats(date, effectiveBranchId || undefined);
+      return await dashboardService.getStats({
+        date,
+        branchId: effectiveBranchId,
+      });
     },
     enabled,
     refetchInterval: 30000, // Auto-refresh every 30 seconds

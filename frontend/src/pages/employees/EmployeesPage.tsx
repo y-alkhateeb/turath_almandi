@@ -107,7 +107,7 @@ export const EmployeesPage = () => {
       header: 'الإجمالي',
       render: (employee) => (
         <div className="text-sm font-semibold text-green-600">
-          <CurrencyAmountCompact amount={employee.baseSalary + employee.allowance} />
+          <CurrencyAmountCompact amount={Number(employee.baseSalary) + Number(employee.allowance)} />
         </div>
       ),
     },

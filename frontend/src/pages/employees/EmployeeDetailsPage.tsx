@@ -356,7 +356,7 @@ export const EmployeeDetailsPage = () => {
               <span>إجمالي الراتب</span>
             </div>
             <div className="text-xl font-bold text-primary-600">
-              <CurrencyAmount amount={employee.baseSalary + employee.allowance} />
+              <CurrencyAmount amount={Number(employee.baseSalary) + Number(employee.allowance)} />
             </div>
           </div>
 

@@ -3,25 +3,24 @@
  */
 
 // API configuration
-// Get base URL from environment and ensure it ends with /api/v1
-const getApiBaseUrl = (): string => {
+const apiBaseUrl = (() => {
   const envUrl = import.meta.env.VITE_API_URL;
 
-  // If no environment variable, use default
-  if (!envUrl) {
+  // In development, allow fallback to localhost
+  if (!envUrl && import.meta.env.DEV) {
     return 'http://localhost:3000/api/v1';
   }
 
-  // If URL already ends with /api/v1, return as-is
-  if (envUrl.endsWith('/api/v1')) {
-    return envUrl;
+  // In production, require VITE_API_URL to be set
+  if (!envUrl) {
+    throw new Error(
+      'VITE_API_URL environment variable is not set. ' +
+      'Please configure the backend URL in your deployment settings.'
+    );
   }
 
-  // Otherwise, append /api/v1
-  return `${envUrl}/api/v1`;
-};
-
-const apiBaseUrl = getApiBaseUrl();
+  return envUrl;
+})();
 
 // WebSocket configuration
 // Convert HTTP(S) URL to WS(S) URL

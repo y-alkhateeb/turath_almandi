@@ -12,7 +12,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { employeeService } from '@/api/services/employeeService';
+import employeeService from '@/api/services/employeeService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import type {
   Employee,

@@ -7,6 +7,7 @@
  * - /transactions/* - Transaction management (list, create, view, edit)
  * - /debts/* - Debt management (list, create, pay)
  * - /inventory/* - Inventory management (list, create, edit)
+ * - /employees/* - Employee management (list, create, edit, view)
  * - /reports - Reports page
  * - /notifications - Notifications (main and settings)
  * - /management/system/* - System management (admin-only: users, branches, audit, currency)
@@ -42,6 +43,12 @@ const DebtsPayPage = lazy(() => import('@/pages/debts/PayDebtPage'));
 const InventoryListPage = lazy(() => import('@/pages/inventory/Inventory'));
 const InventoryCreatePage = lazy(() => import('@/pages/inventory/CreateInventoryPage'));
 const InventoryEditPage = lazy(() => import('@/pages/inventory/EditInventoryPage'));
+
+// Employees
+const EmployeesListPage = lazy(() => import('@/pages/employees/EmployeesPage'));
+const EmployeeCreatePage = lazy(() => import('@/pages/employees/CreateEmployeePage'));
+const EmployeeEditPage = lazy(() => import('@/pages/employees/EditEmployeePage'));
+const EmployeeDetailsPage = lazy(() => import('@/pages/employees/EmployeeDetailsPage'));
 
 // Reports
 const ReportsPage = lazy(() => import('@/pages/reports'));
@@ -225,6 +232,47 @@ export const dashboardRoutes: RouteObject[] = [
                 element: (
                   <LazyPage>
                     <InventoryEditPage />
+                  </LazyPage>
+                ),
+              },
+            ],
+          },
+
+          // ============================================
+          // EMPLOYEES
+          // ============================================
+          {
+            path: 'employees',
+            children: [
+              {
+                index: true,
+                element: (
+                  <LazyPage>
+                    <EmployeesListPage />
+                  </LazyPage>
+                ),
+              },
+              {
+                path: 'create',
+                element: (
+                  <LazyPage>
+                    <EmployeeCreatePage />
+                  </LazyPage>
+                ),
+              },
+              {
+                path: 'edit/:id',
+                element: (
+                  <LazyPage>
+                    <EmployeeEditPage />
+                  </LazyPage>
+                ),
+              },
+              {
+                path: 'view/:id',
+                element: (
+                  <LazyPage>
+                    <EmployeeDetailsPage />
                   </LazyPage>
                 ),
               },

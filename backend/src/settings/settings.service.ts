@@ -38,11 +38,12 @@ export class SettingsService {
   }
 
   /**
-   * Get all currencies with transaction counts
-   * @returns Array of currencies with usage statistics
+   * Get all currencies
+   * Currency is only for frontend display - not stored in transaction tables
+   * @returns Array of currencies
    */
   async getAllCurrencies() {
-    const currencies = await this.prisma.currencySettings.findMany({
+    return await this.prisma.currencySettings.findMany({
       orderBy: [
         { isDefault: 'desc' },
         { code: 'asc' },
@@ -58,35 +59,6 @@ export class SettingsService {
         updatedAt: true,
       },
     });
-
-    // Get transaction counts for each currency
-    const currenciesWithCounts = await Promise.all(
-      currencies.map(async (currency) => {
-        const [transactionCount, debtCount, paymentCount] = await Promise.all([
-          this.prisma.transaction.count({
-            where: { currency: currency.code as any },
-          }),
-          this.prisma.debt.count({
-            where: { currency: currency.code as any },
-          }),
-          this.prisma.debtPayment.count({
-            where: { currency: currency.code as any },
-          }),
-        ]);
-
-        return {
-          ...currency,
-          usageCount: {
-            transactions: transactionCount,
-            debts: debtCount,
-            payments: paymentCount,
-            total: transactionCount + debtCount + paymentCount,
-          },
-        };
-      }),
-    );
-
-    return currenciesWithCounts;
   }
 
   /**

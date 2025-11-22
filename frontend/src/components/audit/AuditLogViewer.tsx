@@ -13,7 +13,8 @@
  */
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Calendar, User, Search, Filter, Globe } from 'lucide-react';
+import { ChevronDown, ChevronRight, User, Search, Filter, Globe } from 'lucide-react';
+import { DateInput } from '@/components/form';
 import { formatDateTime } from '@/utils/format';
 import { AuditAction } from '@/types/enum';
 import type { AuditLog } from '#/entity';
@@ -287,36 +288,20 @@ export function AuditLogViewer({
           </div>
 
           {/* Start Date */}
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              من تاريخ
-            </label>
-            <div className="relative">
-              <input
-                type="date"
-                value={localFilters.startDate || ''}
-                onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                className="w-full px-4 py-3 pr-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
-              />
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)] pointer-events-none" />
-            </div>
-          </div>
+          <DateInput
+            label="من تاريخ"
+            value={localFilters.startDate || null}
+            onChange={(value) => handleFilterChange('startDate', value || '')}
+            showLabel={true}
+          />
 
           {/* End Date */}
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              إلى تاريخ
-            </label>
-            <div className="relative">
-              <input
-                type="date"
-                value={localFilters.endDate || ''}
-                onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                className="w-full px-4 py-3 pr-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
-              />
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)] pointer-events-none" />
-            </div>
-          </div>
+          <DateInput
+            label="إلى تاريخ"
+            value={localFilters.endDate || null}
+            onChange={(value) => handleFilterChange('endDate', value || '')}
+            showLabel={true}
+          />
         </div>
 
         {/* Filter Actions */}

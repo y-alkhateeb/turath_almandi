@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Dialog } from '@/components/ui/Dialog';
+import { DateInput } from '@/components/form';
 import { useRecordSalaryPayment } from '@/hooks/useEmployees';
 import type { CreateSalaryPaymentInput } from '@/types';
 
@@ -96,23 +97,16 @@ export const SalaryPaymentDialog: React.FC<SalaryPaymentDialogProps> = ({
         </div>
 
         {/* Payment Date */}
-        <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            تاريخ الدفع <span className="text-red-500">*</span>
-          </label>
-          <input
-            {...register('paymentDate')}
-            type="date"
-            disabled={recordPayment.isPending}
-            max={new Date().toISOString().split('T')[0]}
-            className={`w-full px-4 py-3 border ${
-              errors.paymentDate ? 'border-red-500' : 'border-[var(--border-color)]'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
-          />
-          {errors.paymentDate && (
-            <p className="mt-1 text-sm text-red-600">{errors.paymentDate.message}</p>
-          )}
-        </div>
+        <DateInput
+          mode="form"
+          name="paymentDate"
+          label="تاريخ الدفع"
+          register={register}
+          error={errors.paymentDate}
+          required
+          disabled={recordPayment.isPending}
+          max={new Date().toISOString().split('T')[0]}
+        />
 
         {/* Notes */}
         <div>

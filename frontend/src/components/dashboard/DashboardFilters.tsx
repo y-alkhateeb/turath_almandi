@@ -12,7 +12,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Calendar } from 'lucide-react';
-import { BranchSelector } from '@/components/form/BranchSelector';
+import { BranchSelector, DateInput } from '@/components/form';
 import { useAuth } from '@/hooks/useAuth';
 import { useBranches } from '@/hooks/useBranches';
 import { toInputDate, startOfDay, startOfMonth, endOfDay, formatDateTable } from '@/utils/format';
@@ -221,28 +221,18 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
               نطاق التاريخ
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-[var(--text-secondary)] mb-1.5">
-                  من تاريخ
-                </label>
-                <input
-                  type="date"
-                  value={filters.startDate || ''}
-                  onChange={(e) => handleStartDateChange(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent [color-scheme:light] dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:brightness-200 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[var(--text-secondary)] mb-1.5">
-                  إلى تاريخ
-                </label>
-                <input
-                  type="date"
-                  value={filters.endDate || ''}
-                  onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent [color-scheme:light] dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:brightness-200 transition-all"
-                />
-              </div>
+              <DateInput
+                label="من تاريخ"
+                value={filters.startDate}
+                onChange={handleStartDateChange}
+                showLabel={true}
+              />
+              <DateInput
+                label="إلى تاريخ"
+                value={filters.endDate}
+                onChange={handleEndDateChange}
+                showLabel={true}
+              />
             </div>
           </div>
         </div>

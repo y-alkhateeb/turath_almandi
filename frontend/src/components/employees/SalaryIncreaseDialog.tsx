@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Dialog } from '@/components/ui/Dialog';
+import { DateInput } from '@/components/form';
 import { useRecordSalaryIncrease } from '@/hooks/useEmployees';
 import type { CreateSalaryIncreaseInput } from '@/types';
 
@@ -154,23 +155,16 @@ export const SalaryIncreaseDialog: React.FC<SalaryIncreaseDialogProps> = ({
         )}
 
         {/* Effective Date */}
-        <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            تاريخ السريان <span className="text-red-500">*</span>
-          </label>
-          <input
-            {...register('effectiveDate')}
-            type="date"
-            disabled={recordIncrease.isPending}
-            max={new Date().toISOString().split('T')[0]}
-            className={`w-full px-4 py-3 border ${
-              errors.effectiveDate ? 'border-red-500' : 'border-[var(--border-color)]'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
-          />
-          {errors.effectiveDate && (
-            <p className="mt-1 text-sm text-red-600">{errors.effectiveDate.message}</p>
-          )}
-        </div>
+        <DateInput
+          mode="form"
+          name="effectiveDate"
+          label="تاريخ السريان"
+          register={register}
+          error={errors.effectiveDate}
+          required
+          disabled={recordIncrease.isPending}
+          max={new Date().toISOString().split('T')[0]}
+        />
 
         {/* Reason */}
         <div>

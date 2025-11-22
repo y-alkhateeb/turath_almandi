@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
-import { BranchSelector } from '@/components/form/BranchSelector';
+import { BranchSelector, DateInput } from '@/components/form';
 import { useAuth } from '@/hooks/useAuth';
 import type { CreateDebtInput } from '#/entity';
 
@@ -182,10 +182,10 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
       )}
 
       {/* Debt Date */}
-      <FormInput
+      <DateInput
+        mode="form"
         name="date"
         label="تاريخ الدين"
-        type="date"
         register={register}
         error={errors.date}
         required
@@ -193,10 +193,10 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
       />
 
       {/* Due Date */}
-      <FormInput
+      <DateInput
+        mode="form"
         name="dueDate"
         label="تاريخ الاستحقاق"
-        type="date"
         register={register}
         error={errors.dueDate}
         required

@@ -1,16 +1,100 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import GLOBAL_CONFIG from '@/global-config';
 
+/**
+ * Get access token from storage
+ * Matches the new auth system structure: state.tokens.accessToken
+ */
 const getToken = (): string | null => {
-  return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+  try {
+    // Check localStorage first
+    const localStore = localStorage.getItem('auth-storage');
+    if (localStore) {
+      const parsed = JSON.parse(localStore);
+      if (parsed.state?.tokens?.accessToken) {
+        return parsed.state.tokens.accessToken;
+      }
+    }
+
+    // Check sessionStorage
+    const sessionStore = sessionStorage.getItem('auth-storage');
+    if (sessionStore) {
+      const parsed = JSON.parse(sessionStore);
+      if (parsed.state?.tokens?.accessToken) {
+        return parsed.state.tokens.accessToken;
+      }
+    }
+
+    // Fallback to old token structure for backward compatibility
+    return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+  } catch (error) {
+    console.error('Error getting token:', error);
+    return null;
+  }
 };
 
+/**
+ * Get refresh token from storage
+ * Matches the new auth system structure: state.tokens.refreshToken
+ */
 const getRefreshToken = (): string | null => {
-  return localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
+  try {
+    // Check localStorage first
+    const localStore = localStorage.getItem('auth-storage');
+    if (localStore) {
+      const parsed = JSON.parse(localStore);
+      if (parsed.state?.tokens?.refreshToken) {
+        return parsed.state.tokens.refreshToken;
+      }
+    }
+
+    // Check sessionStorage
+    const sessionStore = sessionStorage.getItem('auth-storage');
+    if (sessionStore) {
+      const parsed = JSON.parse(sessionStore);
+      if (parsed.state?.tokens?.refreshToken) {
+        return parsed.state.tokens.refreshToken;
+      }
+    }
+
+    // Fallback to old token structure for backward compatibility
+    return localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
+  } catch (error) {
+    console.error('Error getting refresh token:', error);
+    return null;
+  }
 };
 
-const getStorage = () => {
-  return localStorage.getItem('auth-remember-me') === 'true' ? localStorage : sessionStorage;
+/**
+ * Determine which storage to use based on where auth data exists
+ */
+const getStorage = (): Storage => {
+  // If data exists in sessionStorage, use it
+  if (sessionStorage.getItem('auth-storage')) {
+    return sessionStorage;
+  }
+  return localStorage;
+};
+
+/**
+ * Update access token in storage
+ * Matches the new auth system structure: state.tokens.accessToken
+ */
+const updateAccessToken = (newAccessToken: string): void => {
+  const storage = getStorage();
+
+  try {
+    const storageData = storage.getItem('auth-storage');
+    if (storageData) {
+      const parsed = JSON.parse(storageData);
+      if (parsed.state?.tokens) {
+        parsed.state.tokens.accessToken = newAccessToken;
+        storage.setItem('auth-storage', JSON.stringify(parsed));
+      }
+    }
+  } catch (error) {
+    console.error('Error updating token in storage:', error);
+  }
 };
 
 // Create axios instance
@@ -60,9 +144,27 @@ axiosInstance.interceptors.response.use(
             { refresh_token: refreshToken }
           );
 
-          const { access_token } = response.data;
-          const storage = getStorage();
-          storage.setItem('access_token', access_token);
+          const { access_token, refresh_token: newRefreshToken } = response.data;
+
+          // Update tokens in storage
+          updateAccessToken(access_token);
+
+          // Update refresh token if provided
+          if (newRefreshToken) {
+            const storage = getStorage();
+            try {
+              const storageData = storage.getItem('auth-storage');
+              if (storageData) {
+                const parsed = JSON.parse(storageData);
+                if (parsed.state?.tokens) {
+                  parsed.state.tokens.refreshToken = newRefreshToken;
+                  storage.setItem('auth-storage', JSON.stringify(parsed));
+                }
+              }
+            } catch (storageError) {
+              console.error('Error updating refresh token in storage:', storageError);
+            }
+          }
 
           // Retry original request with new token
           if (originalRequest.headers) {
@@ -71,13 +173,16 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, logout user
+        // Refresh failed, logout user - clear all auth data
+        localStorage.removeItem('auth-storage');
+        sessionStorage.removeItem('auth-storage');
+        // Also clear old token structure for backward compatibility
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        localStorage.removeItem('auth-remember-me');
         sessionStorage.removeItem('access_token');
         sessionStorage.removeItem('refresh_token');
-        localStorage.removeItem('auth-storage');
+        localStorage.removeItem('auth-remember-me');
+
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

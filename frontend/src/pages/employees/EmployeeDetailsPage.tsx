@@ -513,7 +513,7 @@ export const EmployeeDetailsPage = () => {
         title="تسجيل دفعة راتب"
         confirmText="تسجيل"
         cancelText="إلغاء"
-        variant="primary"
+        variant="success"
         isLoading={recordPayment.isPending}
       >
         <div className="space-y-4">
@@ -584,7 +584,7 @@ export const EmployeeDetailsPage = () => {
         title="تسجيل زيادة راتب"
         confirmText="تسجيل"
         cancelText="إلغاء"
-        variant="primary"
+        variant="success"
         isLoading={recordIncrease.isPending}
       >
         <div className="space-y-4">

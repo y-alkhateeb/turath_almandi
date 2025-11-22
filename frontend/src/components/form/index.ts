@@ -8,6 +8,8 @@ export type { FormSelectProps, SelectOption } from './FormSelect';
 export { FormDatePicker } from './FormDatePicker';
 export type { FormDatePickerProps } from './FormDatePicker';
 
+export { DateInput } from './DateInput';
+
 export { FormTextarea } from './FormTextarea';
 export type { FormTextareaProps } from './FormTextarea';
 

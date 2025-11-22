@@ -6,6 +6,7 @@ import type { Employee, CreateEmployeeInput } from '@/types';
 import { useBranches } from '@/hooks/useBranches';
 import { useAuth } from '@/hooks/useAuth';
 import { EmployeeStatus } from '@/types';
+import { DateInput } from '@/components/form';
 
 // Zod schema with Arabic validation messages
 const employeeSchema = z.object({
@@ -185,21 +186,16 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
       {/* Hire Date and Branch Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Hire Date */}
-        <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            تاريخ التوظيف <span className="text-red-500">*</span>
-          </label>
-          <input
-            {...register('hireDate')}
-            type="date"
-            disabled={isLoading}
-            max={new Date().toISOString().split('T')[0]}
-            className={`w-full px-4 py-3 border ${
-              errors.hireDate ? 'border-red-500' : 'border-[var(--border-color)]'
-            } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}
-          />
-          {errors.hireDate && <p className="mt-1 text-sm text-red-600">{errors.hireDate.message}</p>}
-        </div>
+        <DateInput
+          mode="form"
+          name="hireDate"
+          label="تاريخ التوظيف"
+          register={register}
+          error={errors.hireDate}
+          required={true}
+          disabled={isLoading}
+          max={new Date().toISOString().split('T')[0]}
+        />
 
         {/* Branch - Admin only */}
         {isAdmin && (

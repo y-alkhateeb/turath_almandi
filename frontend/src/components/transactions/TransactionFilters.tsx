@@ -13,6 +13,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, X, Filter } from 'lucide-react';
+import { DateInput } from '@/components/form';
 import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { TransactionFilters as TransactionFiltersType } from '#/entity';
 import type { Branch } from '#/entity';
@@ -180,38 +181,20 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
             )}
 
             {/* Start Date */}
-            <div>
-              <label
-                htmlFor="filter-start-date"
-                className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-              >
-                من تاريخ
-              </label>
-              <input
-                id="filter-start-date"
-                type="date"
-                value={filters.startDate || ''}
-                onChange={(e) => handleFilterChange('startDate', e.target.value || undefined)}
-                className="w-full px-4 py-3 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
-              />
-            </div>
+            <DateInput
+              label="من تاريخ"
+              value={filters.startDate || null}
+              onChange={(value) => handleFilterChange('startDate', value || undefined)}
+              showLabel={true}
+            />
 
             {/* End Date */}
-            <div>
-              <label
-                htmlFor="filter-end-date"
-                className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-              >
-                إلى تاريخ
-              </label>
-              <input
-                id="filter-end-date"
-                type="date"
-                value={filters.endDate || ''}
-                onChange={(e) => handleFilterChange('endDate', e.target.value || undefined)}
-                className="w-full px-4 py-3 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
-              />
-            </div>
+            <DateInput
+              label="إلى تاريخ"
+              value={filters.endDate || null}
+              onChange={(value) => handleFilterChange('endDate', value || undefined)}
+              showLabel={true}
+            />
 
             {/* Search */}
             <div>

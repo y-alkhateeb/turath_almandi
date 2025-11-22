@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { DateInput } from '@/components/form';
 import { useCreateTransaction } from '../hooks/useTransactions';
 import { TransactionType, PaymentMethod } from '../types/transactions.types';
 import type { IncomeFormData } from '../types/transactions.types';
@@ -12,7 +13,7 @@ import { useAuth } from '../hooks/useAuth';
  * Matches backend validation rules: amount must be >= 0.01
  */
 const incomeSchema = z.object({
-  date: z.date({ message: 'التاريخ مطلوب' }),
+  date: z.string().min(1, { message: 'التاريخ مطلوب' }),
   amount: z
     .string()
     .min(1, { message: 'المبلغ مطلوب' })
@@ -26,7 +27,7 @@ const incomeSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod, { message: 'طريقة الدفع مطلوبة' }),
   category: z.string(),
   notes: z.string(),
-}) satisfies z.ZodType<IncomeFormData>;
+});
 
 interface IncomeFormProps {
   onSuccess?: () => void;
@@ -60,7 +61,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
   } = useForm<IncomeFormData>({
     resolver: zodResolver(incomeSchema),
     defaultValues: {
-      date: new Date(),
+      date: new Date().toISOString().split('T')[0],
       amount: '',
       paymentMethod: PaymentMethod.CASH,
       category: '',
@@ -78,7 +79,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
         amount: parseFloat(data.amount),
         paymentMethod: data.paymentMethod,
         category: data.category || undefined,
-        date: data.date.toISOString().split('T')[0], // Format: YYYY-MM-DD
+        date: data.date, // Already in YYYY-MM-DD format
         notes: data.notes || undefined,
       };
 
@@ -86,7 +87,7 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
 
       // Reset form on success
       reset({
-        date: new Date(),
+        date: new Date().toISOString().split('T')[0],
         amount: '',
         paymentMethod: PaymentMethod.CASH,
         category: '',
@@ -116,25 +117,16 @@ export const IncomeForm = ({ onSuccess, onCancel }: IncomeFormProps) => {
         </div>
       )}
 
-      {/* Date Picker */}
-      <div>
-        <label htmlFor="date" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-          التاريخ <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          id="date"
-          {...register('date', {
-            valueAsDate: true,
-          })}
-          defaultValue={new Date().toISOString().split('T')[0]}
-          className={`w-full px-4 py-3 border ${
-            errors.date ? 'border-red-500' : 'border-[var(--border-color)]'
-          } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
-          disabled={isSubmitting}
-        />
-        {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>}
-      </div>
+      {/* Date */}
+      <DateInput
+        mode="form"
+        name="date"
+        label="التاريخ"
+        register={register}
+        error={errors.date}
+        required
+        disabled={isSubmitting}
+      />
 
       {/* Amount Input */}
       <div>

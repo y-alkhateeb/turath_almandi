@@ -5,7 +5,7 @@ import { Modal } from './Modal';
 import { usePayDebt } from '../hooks/useDebts';
 import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
-import { FormDatePicker } from '@/components/form/FormDatePicker';
+import { DateInput } from '@/components/form';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import type { Debt, PayDebtFormData } from '../types/debts.types';
 import { formatAmount, formatDateTable } from '@/utils/format';
@@ -33,7 +33,7 @@ const createPayDebtSchema = (maxAmount: number) =>
         },
         { message: `المبلغ المدفوع لا يمكن أن يتجاوز المبلغ المتبقي (${maxAmount})` }
       ),
-    paymentDate: z.date({ message: 'تاريخ الدفع مطلوب' }),
+    paymentDate: z.string().min(1, { message: 'تاريخ الدفع مطلوب' }),
     notes: z.string(),
   });
 
@@ -69,7 +69,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
     resolver: debt ? zodResolver(createPayDebtSchema(debt.remainingAmount)) : undefined,
     defaultValues: {
       amountPaid: '',
-      paymentDate: new Date(),
+      paymentDate: new Date().toISOString().split('T')[0],
       notes: '',
     },
   });
@@ -81,7 +81,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
       // Convert form data to API format
       const paymentData = {
         amountPaid: parseFloat(data.amountPaid),
-        paymentDate: data.paymentDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
+        paymentDate: data.paymentDate, // Already in YYYY-MM-DD format
         notes: data.notes || undefined,
       };
 
@@ -90,7 +90,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
       // Reset form and close modal on success
       reset({
         amountPaid: '',
-        paymentDate: new Date(),
+        paymentDate: new Date().toISOString().split('T')[0],
         notes: '',
       });
       onClose();
@@ -103,7 +103,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
   const handleClose = () => {
     reset({
       amountPaid: '',
-      paymentDate: new Date(),
+      paymentDate: new Date().toISOString().split('T')[0],
       notes: '',
     });
     onClose();
@@ -193,16 +193,15 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
           </p>
         </div>
 
-        {/* Payment Date Picker */}
-        <FormDatePicker
+        {/* Payment Date */}
+        <DateInput
+          mode="form"
           name="paymentDate"
           label="تاريخ الدفع"
           register={register}
           error={errors.paymentDate}
           required
           disabled={isSubmitting}
-          defaultValue={new Date().toISOString().split('T')[0]}
-          valueAsDate
         />
 
         <FormTextarea

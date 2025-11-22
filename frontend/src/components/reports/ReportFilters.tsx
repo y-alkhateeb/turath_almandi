@@ -12,8 +12,8 @@
  * - No business logic
  */
 
-import { Calendar, Filter, RefreshCw, FileText } from 'lucide-react';
-import { BranchSelector } from '@/components/form/BranchSelector';
+import { Filter, RefreshCw, FileText } from 'lucide-react';
+import { BranchSelector, DateInput } from '@/components/form';
 import type { SelectOption } from '@/components/form/FormSelect';
 import { useAuth } from '@/hooks/useAuth';
 import { toInputDate, startOfMonth } from '@/utils/format';
@@ -236,34 +236,18 @@ export function ReportFilters({
           {/* Date Range - Financial & Salary Reports */}
           {(filters.type === 'financial' || filters.type === 'salary') && (
             <>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  من تاريخ
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={filters.startDate}
-                    onChange={(e) => handleDateChange('startDate', e.target.value)}
-                    className="w-full px-4 py-3 pr-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
-                  />
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)] pointer-events-none" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  إلى تاريخ
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={filters.endDate}
-                    onChange={(e) => handleDateChange('endDate', e.target.value)}
-                    className="w-full px-4 py-3 pr-10 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 [color-scheme:light] dark:[color-scheme:dark]"
-                  />
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)] pointer-events-none" />
-                </div>
-              </div>
+              <DateInput
+                label="من تاريخ"
+                value={filters.startDate}
+                onChange={(value) => handleDateChange('startDate', value || '')}
+                showLabel={true}
+              />
+              <DateInput
+                label="إلى تاريخ"
+                value={filters.endDate}
+                onChange={(value) => handleDateChange('endDate', value || '')}
+                showLabel={true}
+              />
             </>
           )}
 

@@ -17,6 +17,8 @@ import type {
   CurrencyWithUsage,
   CreateCurrencyInput,
   SetDefaultCurrencyInput,
+  AppSettings,
+  UpdateAppSettingsInput,
 } from '#/settings.types';
 
 // ============================================
@@ -31,6 +33,7 @@ export enum SettingsApiEndpoints {
   DefaultCurrency = '/settings/currency',
   Currencies = '/settings/currencies',
   SetDefault = '/settings/currency/default',
+  AppSettings = '/settings/app',
 }
 
 // ============================================
@@ -117,6 +120,43 @@ export const createCurrency = (data: CreateCurrencyInput): Promise<CurrencySetti
   });
 };
 
+/**
+ * Get app settings
+ * GET /settings/app
+ *
+ * Public endpoint - no authentication required
+ * Returns app-wide settings like login background image
+ * Needed for login page to fetch background image
+ *
+ * @returns AppSettings - The app settings
+ */
+export const getAppSettings = (): Promise<AppSettings> => {
+  return apiClient.get<AppSettings>({
+    url: SettingsApiEndpoints.AppSettings,
+  });
+};
+
+/**
+ * Update app settings
+ * PATCH /settings/app
+ *
+ * Admin only endpoint
+ * Updates app-wide settings
+ *
+ * Backend validation (from UpdateAppSettingsDto):
+ * - loginBackgroundUrl: Optional, must be valid URL, max 2000 characters
+ *
+ * @param data - UpdateAppSettingsInput with settings to update
+ * @returns AppSettings - The updated app settings
+ * @throws ApiError on 400 (validation error), 401 (not authenticated), 403 (not admin)
+ */
+export const updateAppSettings = (data: UpdateAppSettingsInput): Promise<AppSettings> => {
+  return apiClient.patch<AppSettings>({
+    url: SettingsApiEndpoints.AppSettings,
+    data,
+  });
+};
+
 // ============================================
 // EXPORTS
 // ============================================
@@ -130,6 +170,8 @@ const settingsService = {
   getAllCurrencies,
   setDefaultCurrency,
   createCurrency,
+  getAppSettings,
+  updateAppSettings,
 };
 
 export default settingsService;

@@ -53,3 +53,26 @@ export interface CreateCurrencyInput {
 export interface SetDefaultCurrencyInput {
   code: string;
 }
+
+// ============================================
+// APP SETTINGS
+// ============================================
+
+/**
+ * App settings entity
+ * Represents general application settings
+ */
+export interface AppSettings {
+  id: string;
+  loginBackgroundUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Input type for updating app settings
+ * PATCH /settings/app
+ */
+export interface UpdateAppSettingsInput {
+  loginBackgroundUrl?: string;
+}

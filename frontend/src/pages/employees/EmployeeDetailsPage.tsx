@@ -28,6 +28,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
 import { Table, ConfirmModal } from '@/components/ui';
+import { DateInput } from '@/components/form';
 import { CurrencyAmount, CurrencyAmountCompact } from '@/components/currency';
 import { formatDateShort } from '@/utils/formatters';
 import { EmployeeStatus } from '@/types';
@@ -356,7 +357,7 @@ export const EmployeeDetailsPage = () => {
               <span>إجمالي الراتب</span>
             </div>
             <div className="text-xl font-bold text-primary-600">
-              <CurrencyAmount amount={employee.baseSalary + employee.allowance} />
+              <CurrencyAmount amount={Number(employee.baseSalary) + Number(employee.allowance)} />
             </div>
           </div>
 
@@ -470,18 +471,13 @@ export const EmployeeDetailsPage = () => {
           <p className="text-[var(--text-secondary)]">
             سيتم تحديث حالة الموظف إلى "مستقيل" ولن يظهر في قائمة الموظفين النشطين.
           </p>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              تاريخ الاستقالة <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={resignDate}
-              onChange={(e) => setResignDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
+          <DateInput
+            label="تاريخ الاستقالة"
+            value={resignDate}
+            onChange={(value) => setResignDate(value || '')}
+            max={new Date().toISOString().split('T')[0]}
+            showLabel={true}
+          />
         </div>
       </ConfirmModal>
 
@@ -513,7 +509,7 @@ export const EmployeeDetailsPage = () => {
         title="تسجيل دفعة راتب"
         confirmText="تسجيل"
         cancelText="إلغاء"
-        variant="primary"
+        variant="success"
         isLoading={recordPayment.isPending}
       >
         <div className="space-y-4">
@@ -521,18 +517,13 @@ export const EmployeeDetailsPage = () => {
             سيتم تسجيل دفعة راتب جديدة للموظف <strong>{employee?.name}</strong>
           </p>
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              تاريخ الدفع <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={paymentData.paymentDate}
-              onChange={(e) => setPaymentData({ ...paymentData, paymentDate: e.target.value })}
-              max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
+          <DateInput
+            label="تاريخ الدفع"
+            value={paymentData.paymentDate}
+            onChange={(value) => setPaymentData({ ...paymentData, paymentDate: value || '' })}
+            max={new Date().toISOString().split('T')[0]}
+            showLabel={true}
+          />
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
@@ -584,7 +575,7 @@ export const EmployeeDetailsPage = () => {
         title="تسجيل زيادة راتب"
         confirmText="تسجيل"
         cancelText="إلغاء"
-        variant="primary"
+        variant="success"
         isLoading={recordIncrease.isPending}
       >
         <div className="space-y-4">
@@ -592,17 +583,12 @@ export const EmployeeDetailsPage = () => {
             سيتم تسجيل زيادة راتب للموظف <strong>{employee?.name}</strong>
           </p>
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              تاريخ السريان <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={increaseData.effectiveDate}
-              onChange={(e) => setIncreaseData({ ...increaseData, effectiveDate: e.target.value })}
-              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
+          <DateInput
+            label="تاريخ السريان"
+            value={increaseData.effectiveDate}
+            onChange={(value) => setIncreaseData({ ...increaseData, effectiveDate: value || '' })}
+            showLabel={true}
+          />
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">

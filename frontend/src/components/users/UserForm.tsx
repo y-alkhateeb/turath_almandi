@@ -19,7 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormInput } from '@/components/form/FormInput';
 import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
-import { BranchSelector } from '@/components/BranchSelector';
+import { BranchSelector } from '@/components/form/BranchSelector';
 import { UserRole } from '@/types/enum';
 import type { User } from '@/types/auth.types';
 import type { CreateUserInput, UpdateUserInput } from '#/entity';

@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
-import { BranchSelector } from '@/components/BranchSelector';
+import { BranchSelector } from '@/components/form/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
 import type { CreateDebtInput } from '#/entity';
 

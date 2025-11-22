@@ -15,6 +15,7 @@ import type {
   InventoryUnit,
   NotificationSeverity,
   DisplayMethod,
+  EmployeeStatus,
 } from './enum';
 
 // ============================================
@@ -488,4 +489,136 @@ export interface UpdateUserInput {
   role?: UserRole;
   branchId?: string | null;
   isActive?: boolean;
+}
+
+// ============================================
+// EMPLOYEE & HR ENTITIES
+// ============================================
+
+/**
+ * Employee entity
+ * Matches backend Employee model and service responses
+ */
+export interface Employee {
+  id: string;
+  branchId: string;
+  name: string;
+  status: EmployeeStatus;
+  position: string;
+  baseSalary: number; // Prisma Decimal is number in frontend
+  allowance: number;
+  hireDate: string; // ISO date string
+  resignDate: string | null;
+  createdBy: string;
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
+  deletedAt: string | null;
+  // Optional relations
+  branch?: BranchRelation;
+  creator?: UserRelation;
+  salaryPayments?: SalaryPayment[];
+  salaryIncreases?: SalaryIncrease[];
+}
+
+/**
+ * Salary Payment entity
+ * Matches backend SalaryPayment model
+ */
+export interface SalaryPayment {
+  id: string;
+  employeeId: string;
+  amount: number;
+  paymentDate: string; // ISO date string
+  notes: string | null;
+  transactionId: string | null;
+  recordedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  // Optional relations
+  employee?: Employee;
+  transaction?: Transaction;
+  recorder?: UserRelation;
+}
+
+/**
+ * Salary Increase entity
+ * Matches backend SalaryIncrease model
+ */
+export interface SalaryIncrease {
+  id: string;
+  employeeId: string;
+  oldSalary: number;
+  newSalary: number;
+  increaseAmount: number;
+  effectiveDate: string; // ISO date string
+  reason: string | null;
+  recordedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  // Optional relations
+  employee?: Employee;
+  recorder?: UserRelation;
+}
+
+// ============================================
+// EMPLOYEE INPUT TYPES
+// ============================================
+
+export interface CreateEmployeeInput {
+  name: string;
+  position: string;
+  baseSalary: number;
+  allowance?: number;
+  hireDate: string;
+  branchId?: string;
+  status?: EmployeeStatus;
+}
+
+export interface UpdateEmployeeInput {
+  name?: string;
+  position?: string;
+  baseSalary?: number;
+  allowance?: number;
+  hireDate?: string;
+  status?: EmployeeStatus;
+}
+
+export interface CreateSalaryPaymentInput {
+  amount: number;
+  paymentDate: string;
+  notes?: string;
+}
+
+export interface RecordSalaryIncreaseInput {
+  newSalary: number;
+  effectiveDate: string;
+  reason?: string;
+}
+
+export interface ResignEmployeeInput {
+  resignDate: string;
+}
+
+// ============================================
+// EMPLOYEE FILTERS & RESPONSES
+// ============================================
+
+export interface EmployeeFilters {
+  status?: EmployeeStatus;
+  branchId?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PayrollSummary {
+  totalPaid: number;
+  count: number;
+  breakdown: Array<{
+    employeeId: string;
+    employeeName: string;
+    totalAmount: number;
+    paymentCount: number;
+  }>;
 }

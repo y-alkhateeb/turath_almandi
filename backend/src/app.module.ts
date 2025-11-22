@@ -17,6 +17,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { ReportsModule } from './reports/reports.module';
 import { SettingsModule } from './settings/settings.module';
+import { EmployeesModule } from './employees/employees.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
@@ -52,6 +53,7 @@ import { envValidationSchema } from './common/config/env.validation';
     WebSocketModule,
     ReportsModule,
     SettingsModule,
+    EmployeesModule,
   ],
   controllers: [AppController],
   providers: [

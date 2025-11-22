@@ -1,0 +1,16 @@
+import { Module } from '@nestjs/common';
+import { EmployeesController } from './employees.controller';
+import { EmployeesService } from './employees.service';
+import { SalaryPaymentsService } from './salary-payments.service';
+import { SalaryIncreasesService } from './salary-increases.service';
+import { PrismaModule } from '../prisma/prisma.module';
+import { AuditLogModule } from '../common/audit-log/audit-log.module';
+import { SettingsModule } from '../settings/settings.module';
+
+@Module({
+  imports: [PrismaModule, AuditLogModule, SettingsModule],
+  controllers: [EmployeesController],
+  providers: [EmployeesService, SalaryPaymentsService, SalaryIncreasesService],
+  exports: [EmployeesService, SalaryPaymentsService, SalaryIncreasesService],
+})
+export class EmployeesModule {}

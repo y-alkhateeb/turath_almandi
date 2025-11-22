@@ -83,6 +83,15 @@ export enum InventoryUnit {
 }
 
 /**
+ * Employee status
+ * Matches backend Prisma enum: EmployeeStatus
+ */
+export enum EmployeeStatus {
+  ACTIVE = 'ACTIVE',
+  RESIGNED = 'RESIGNED',
+}
+
+/**
  * Notification severity levels
  * Matches backend Prisma enum: NotificationSeverity
  */
@@ -147,6 +156,9 @@ export enum AuditEntityType {
   DEBT_PAYMENT = 'DEBT_PAYMENT',
   INVENTORY_ITEM = 'INVENTORY_ITEM',
   INVENTORY = 'INVENTORY',
+  EMPLOYEE = 'EMPLOYEE',
+  SALARY_PAYMENT = 'SALARY_PAYMENT',
+  SALARY_INCREASE = 'SALARY_INCREASE',
 }
 
 // ============================================

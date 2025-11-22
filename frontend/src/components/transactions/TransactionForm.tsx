@@ -19,7 +19,7 @@ import { FormInput } from '@/components/form/FormInput';
 import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
 import { FormRadioGroup, type RadioOption } from '@/components/form/FormRadioGroup';
 import { FormTextarea } from '@/components/form/FormTextarea';
-import { BranchSelector } from '@/components/BranchSelector';
+import { BranchSelector } from '@/components/form/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';

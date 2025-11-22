@@ -13,7 +13,7 @@
  */
 
 import { Calendar, Filter, RefreshCw, FileText } from 'lucide-react';
-import { BranchSelector } from '@/components/BranchSelector';
+import { BranchSelector } from '@/components/form/BranchSelector';
 import type { SelectOption } from '@/components/form/FormSelect';
 import { useAuth } from '@/hooks/useAuth';
 import { toInputDate, startOfMonth } from '@/utils/format';

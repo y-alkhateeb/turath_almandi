@@ -12,7 +12,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Calendar } from 'lucide-react';
-import { BranchSelector } from '@/components/BranchSelector';
+import { BranchSelector } from '@/components/form/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useBranches } from '@/hooks/useBranches';
 import { toInputDate, startOfDay, startOfMonth, endOfDay, formatDateTable } from '@/utils/format';

@@ -3,7 +3,7 @@
  * Authentication page for user login
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Icon } from '@/components/icon';
 import GLOBAL_CONFIG from '@/global-config';
 import { ApiError } from '@/api/apiClient';
+import { getAppSettings } from '@/api/services/settingsService';
 
 // Validation schema - matches backend validation rules
 const loginSchema = z.object({
@@ -32,6 +33,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [error, setError] = useState('');
+  const [loginBackgroundUrl, setLoginBackgroundUrl] = useState<string | null>(null);
   const router = useRouter();
   const { login, isLoggingIn } = useAuth();
 
@@ -43,6 +45,22 @@ export default function LoginPage() {
       rememberMe: false,
     },
   });
+
+  // Fetch app settings on mount to get login background image
+  useEffect(() => {
+    const fetchAppSettings = async () => {
+      try {
+        const settings = await getAppSettings();
+        setLoginBackgroundUrl(settings.loginBackgroundUrl);
+      } catch (err) {
+        // If settings fetch fails, use fallback gradient
+        console.error('Failed to fetch app settings:', err);
+        setLoginBackgroundUrl(null);
+      }
+    };
+
+    fetchAppSettings();
+  }, []);
 
   const onSubmit = async (data: LoginFormData) => {
     setError('');
@@ -203,10 +221,10 @@ export default function LoginPage() {
       {/* Right Side - Image/Gradient */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden">
         {/* Background Image or Gradient */}
-        {!GLOBAL_CONFIG.useFallbackGradient ? (
+        {loginBackgroundUrl ? (
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${GLOBAL_CONFIG.loginBackgroundImage})` }}
+            style={{ backgroundImage: `url(${loginBackgroundUrl})` }}
           />
         ) : (
           <>

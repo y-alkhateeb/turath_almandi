@@ -13,7 +13,6 @@
  */
 
 import { Calendar, Filter, RefreshCw, FileText } from 'lucide-react';
-import { BranchSelector } from '@/components/form/BranchSelector';
 import type { SelectOption } from '@/components/form/FormSelect';
 import { useAuth } from '@/hooks/useAuth';
 import { toInputDate, startOfMonth } from '@/utils/format';
@@ -230,11 +229,18 @@ export function ReportFilters({
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                 الفرع
               </label>
-              <BranchSelector
-                value={filters.branchId}
-                onChange={handleBranchChange}
-                placeholder="جميع الفروع"
-              />
+              <select
+                value={filters.branchId || ''}
+                onChange={(e) => handleBranchChange(e.target.value || null)}
+                className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">جميع الفروع</option>
+                {_branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 

@@ -57,6 +57,38 @@ export const ERROR_MESSAGES = {
     UNIT_REQUIRED: 'unitRequiredWhenAddingToInventory',
   },
 
+  // Employee-related errors
+  EMPLOYEE: {
+    NOT_FOUND: 'employeeNotFound',
+    BRANCH_REQUIRED: 'adminMustSpecifyBranchIdForEmployee',
+    ACCOUNTANT_NO_BRANCH: 'accountantMustBeAssignedToBranch',
+    SALARY_POSITIVE: 'baseSalaryMustBeGreaterThan0',
+    ALLOWANCE_POSITIVE: 'allowanceMustBeGreaterThanOrEqualTo0',
+    ALREADY_RESIGNED: 'employeeAlreadyResigned',
+  },
+
+  // Salary Payment-related errors
+  SALARY_PAYMENT: {
+    NOT_FOUND: 'salaryPaymentNotFound',
+    EMPLOYEE_NOT_FOUND: 'employeeNotFoundForSalaryPayment',
+    AMOUNT_POSITIVE: 'salaryPaymentAmountMustBeGreaterThan0',
+    TRANSACTION_CREATION_FAILED: 'failedToCreateTransactionForSalaryPayment',
+  },
+
+  // Salary Increase-related errors
+  SALARY_INCREASE: {
+    NOT_FOUND: 'salaryIncreaseNotFound',
+    EMPLOYEE_NOT_FOUND: 'employeeNotFoundForSalaryIncrease',
+    NEW_SALARY_POSITIVE: 'newSalaryMustBeGreaterThan0',
+    NEW_SALARY_LESS_THAN_OLD: 'newSalaryCannotBeLessThanOldSalary',
+  },
+
+  // Permission errors
+  PERMISSION: {
+    BRANCH_ACCESS: 'cannotAccessOtherBranches',
+    ADMIN_ONLY: 'onlyAdminsCanPerformThisAction',
+  },
+
   // Validation errors
   VALIDATION: {
     AMOUNT_POSITIVE: 'amountMustBeGreaterThan0',

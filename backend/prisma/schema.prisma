@@ -78,6 +78,13 @@ enum DisplayMethod {
   @@map("display_method")
 }
 
+enum EmployeeStatus {
+  ACTIVE
+  RESIGNED
+
+  @@map("employee_status")
+}
+
 // ============================================================================
 // MODELS
 // ============================================================================
@@ -105,6 +112,9 @@ model User {
   createdNotifications     Notification[]           @relation("NotificationCreator")
   notificationSettings     NotificationSetting[]
   auditLogs                AuditLog[]
+  createdEmployees         Employee[]               @relation("EmployeeCreator")
+  recordedSalaryPayments   SalaryPayment[]          @relation("SalaryPaymentRecorder")
+  recordedSalaryIncreases  SalaryIncrease[]         @relation("SalaryIncreaseRecorder")
 
   @@index([branchId])
   @@index([role])
@@ -150,6 +160,7 @@ model Branch {
   inventoryItems        InventoryItem[]
   inventoryConsumptions InventoryConsumption[]
   notifications         Notification[]
+  employees             Employee[]
 
   @@index([isActive])
   @@index([name])
@@ -175,9 +186,10 @@ model Transaction {
   deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz
 
   // Relations
-  branch        Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  creator       User           @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator        User            @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  salaryPayments SalaryPayment[]
 
   @@index([branchId])
   @@index([type])
@@ -385,4 +397,87 @@ model CurrencySettings {
 
   @@index([isDefault])
   @@map("currency_settings")
+}
+
+// 12. Employees Table
+model Employee {
+  id             String         @id @default(uuid()) @db.Uuid
+  branchId       String         @map("branch_id") @db.Uuid
+  name           String         @db.VarChar(200)
+  status         EmployeeStatus @default(ACTIVE)
+  position       String         @db.VarChar(100)
+  baseSalary     Decimal        @map("base_salary") @db.Decimal(15, 2)
+  allowance      Decimal        @default(0) @db.Decimal(15, 2)
+  hireDate       DateTime       @map("hire_date") @db.Date
+  resignDate     DateTime?      @map("resign_date") @db.Date
+  createdBy      String         @map("created_by") @db.Uuid
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime?      @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  branch          Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator         User             @relation("EmployeeCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  salaryPayments  SalaryPayment[]
+  salaryIncreases SalaryIncrease[]
+
+  @@index([branchId])
+  @@index([status])
+  @@index([hireDate])
+  @@index([resignDate])
+  @@index([deletedAt])
+  @@index([createdBy])
+  @@index([branchId, status])
+  @@map("employees")
+}
+
+// 13. Salary Payments Table
+model SalaryPayment {
+  id            String    @id @default(uuid()) @db.Uuid
+  employeeId    String    @map("employee_id") @db.Uuid
+  amount        Decimal   @db.Decimal(15, 2)
+  paymentDate   DateTime  @map("payment_date") @db.Date
+  notes         String?   @db.Text
+  transactionId String?   @unique @map("transaction_id") @db.Uuid
+  recordedBy    String    @map("recorded_by") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  employee    Employee     @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  recorder    User         @relation("SalaryPaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+
+  @@index([employeeId])
+  @@index([paymentDate])
+  @@index([recordedBy])
+  @@index([transactionId])
+  @@index([deletedAt])
+  @@index([employeeId, paymentDate])
+  @@map("salary_payments")
+}
+
+// 14. Salary Increases Table
+model SalaryIncrease {
+  id             String   @id @default(uuid()) @db.Uuid
+  employeeId     String   @map("employee_id") @db.Uuid
+  oldSalary      Decimal  @map("old_salary") @db.Decimal(15, 2)
+  newSalary      Decimal  @map("new_salary") @db.Decimal(15, 2)
+  increaseAmount Decimal  @map("increase_amount") @db.Decimal(15, 2)
+  effectiveDate  DateTime @map("effective_date") @db.Date
+  reason         String?  @db.Text
+  recordedBy     String   @map("recorded_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  recorder User     @relation("SalaryIncreaseRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+
+  @@index([employeeId])
+  @@index([effectiveDate])
+  @@index([recordedBy])
+  @@index([employeeId, effectiveDate])
+  @@map("salary_increases")
 }

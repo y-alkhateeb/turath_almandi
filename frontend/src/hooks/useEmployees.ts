@@ -44,7 +44,10 @@ import { ApiError } from '@/api/apiClient';
 export const useEmployees = () => {
   return useQuery<Employee[], ApiError>({
     queryKey: queryKeys.employees.all,
-    queryFn: () => employeeService.getAll(),
+    queryFn: async () => {
+      const response = await employeeService.getAll();
+      return response.data; // Extract data array from paginated response
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 1,

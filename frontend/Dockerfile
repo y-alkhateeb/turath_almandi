@@ -4,9 +4,17 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Accept build arguments
-ARG VITE_API_URL
-# Append /api/v1 to backend URL from RENDER_EXTERNAL_URL
-ENV VITE_API_URL=${VITE_API_URL}/api/v1
+ARG VITE_BACKEND_URL
+
+# Validate required build argument
+RUN if [ -z "$VITE_BACKEND_URL" ]; then \
+      echo "ERROR: VITE_BACKEND_URL build argument is required"; \
+      echo "Usage: docker build --build-arg VITE_BACKEND_URL=https://your-backend-url.com ."; \
+      exit 1; \
+    fi
+
+# Construct full API URL with /api/v1 suffix
+ENV VITE_API_URL=${VITE_BACKEND_URL}/api/v1
 
 # Copy package files
 COPY package*.json ./
@@ -31,6 +39,10 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
 EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]

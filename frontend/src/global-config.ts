@@ -3,7 +3,24 @@
  */
 
 // API configuration
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+const apiBaseUrl = (() => {
+  const envUrl = import.meta.env.VITE_API_URL;
+
+  // In development, allow fallback to localhost
+  if (!envUrl && import.meta.env.DEV) {
+    return 'http://localhost:3000/api/v1';
+  }
+
+  // In production, require VITE_API_URL to be set
+  if (!envUrl) {
+    throw new Error(
+      'VITE_API_URL environment variable is not set. ' +
+      'Please configure the backend URL in your deployment settings.'
+    );
+  }
+
+  return envUrl;
+})();
 
 // WebSocket configuration
 // Convert HTTP(S) URL to WS(S) URL

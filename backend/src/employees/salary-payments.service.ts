@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSalaryPaymentDto } from './dto/create-salary-payment.dto';
-import { TransactionType, UserRole, Prisma } from '@prisma/client';
+import { TransactionType, UserRole, Currency, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { SettingsService } from '../settings/settings.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
@@ -103,7 +103,7 @@ export class SalaryPaymentsService {
         data: {
           type: TransactionType.EXPENSE,
           amount: createSalaryPaymentDto.amount,
-          currency: defaultCurrency.code,
+          currency: defaultCurrency.code as Currency,
           paymentMethod: null, // Salary payments don't have payment method
           category: 'salaries',
           date: formatDateForDB(createSalaryPaymentDto.paymentDate),

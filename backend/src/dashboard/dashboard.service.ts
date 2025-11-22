@@ -510,7 +510,7 @@ export class DashboardService {
       type: t.type,
       category: t.category,
       amount: Number(t.amount),
-      currency: t.currency,
+      // Currency is now frontend-only, not stored in database
       paymentMethod: t.paymentMethod,
       branch: t.branch ? { name: t.branch.name } : undefined,
       status: 'completed',

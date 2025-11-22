@@ -75,7 +75,7 @@ export class ExcelExportService {
       { header: 'Type', key: 'type', width: 12 },
       { header: 'Category', key: 'category', width: 15 },
       { header: 'Amount', key: 'amount', width: 12 },
-      { header: 'Currency', key: 'currency', width: 10 },
+      // Currency removed - now frontend-only display
       { header: 'Date', key: 'date', width: 12 },
       { header: 'Payment Method', key: 'paymentMethod', width: 15 },
       { header: 'Employee/Vendor', key: 'employeeVendorName', width: 20 },
@@ -100,7 +100,7 @@ export class ExcelExportService {
         type: transaction.type,
         category: transaction.category,
         amount: Number(transaction.amount),
-        currency: transaction.currency,
+        // Currency is now frontend-only, not stored in database
         date: formatToISODate(transaction.date),
         paymentMethod: transaction.paymentMethod || 'N/A',
         employeeVendorName: transaction.employeeVendorName || 'N/A',

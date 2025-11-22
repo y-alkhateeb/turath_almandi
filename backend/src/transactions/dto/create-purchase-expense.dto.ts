@@ -11,8 +11,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { InventoryUnit, Currency } from '@prisma/client';
-import { IsAllowedCurrency } from '../../common/decorators/is-allowed-currency.decorator';
+import { InventoryUnit } from '@prisma/client';
 
 export class CreatePurchaseExpenseDto {
   @IsDateString()
@@ -24,10 +23,7 @@ export class CreatePurchaseExpenseDto {
   @Transform(({ value }) => parseFloat(value))
   amount: number;
 
-  @IsEnum(Currency)
-  @IsOptional()
-  @IsAllowedCurrency()
-  currency?: Currency;
+  // Currency removed - now frontend-only display
 
   @IsString()
   @IsNotEmpty()

@@ -6,8 +6,11 @@ import {
   IsDateString,
   IsUUID,
   MaxLength,
+  IsNumber,
+  Min,
 } from 'class-validator';
 import { Trim, Escape } from 'class-sanitizer';
+import { Transform } from 'class-transformer';
 import { EmployeeStatus } from '@prisma/client';
 import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 import { IsNotFutureDate } from '../../common/decorators/is-not-future-date.decorator';
@@ -30,7 +33,9 @@ export class CreateEmployeeDto {
   @IsPositiveAmount({ message: 'الراتب الأساسي يجب أن يكون رقم موجب' })
   baseSalary: number;
 
-  @IsPositiveAmount({ message: 'البدل يجب أن يكون رقم موجب' })
+  @IsNumber({}, { message: 'البدل يجب أن يكون رقم' })
+  @Min(0, { message: 'البدل يجب أن يكون صفر أو رقم موجب' })
+  @Transform(({ value }) => (value === '' || value === null || value === undefined ? 0 : parseFloat(value)))
   @IsOptional()
   allowance?: number;
 
@@ -46,4 +51,11 @@ export class CreateEmployeeDto {
   @IsEnum(EmployeeStatus, { message: 'حالة الموظف يجب أن تكون: ACTIVE أو RESIGNED' })
   @IsOptional()
   status?: EmployeeStatus;
+
+  @Trim()
+  @Escape()
+  @IsString({ message: 'الملاحظات يجب أن تكون نص' })
+  @MaxLength(1000, { message: 'الملاحظات يجب أن لا تتجاوز 1000 حرف' })
+  @IsOptional()
+  notes?: string;
 }

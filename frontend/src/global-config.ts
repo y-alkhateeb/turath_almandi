@@ -2,24 +2,38 @@
  * Global configuration for the application
  */
 
+// Extend Window interface to include runtime environment
+declare global {
+  interface Window {
+    ENV?: {
+      VITE_API_URL?: string;
+    };
+  }
+}
+
 // API configuration
 const apiBaseUrl = (() => {
-  const envUrl = import.meta.env.VITE_API_URL;
+  // In production (Docker), use runtime environment from env-config.js
+  if (window.ENV?.VITE_API_URL) {
+    return window.ENV.VITE_API_URL;
+  }
 
-  // In development, allow fallback to localhost
-  if (!envUrl && import.meta.env.DEV) {
+  // In development, use Vite's build-time env or default to localhost
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+
+  // Fallback for local development
+  if (import.meta.env.DEV) {
     return 'http://localhost:3000/api/v1';
   }
 
-  // In production, require VITE_API_URL to be set
-  if (!envUrl) {
-    throw new Error(
-      'VITE_API_URL environment variable is not set. ' +
-      'Please configure the backend URL in your deployment settings.'
-    );
-  }
-
-  return envUrl;
+  // Production without config - fail fast
+  throw new Error(
+    'VITE_API_URL is not configured. ' +
+    'Ensure env-config.js is loaded or VITE_API_URL is set in environment.'
+  );
 })();
 
 // WebSocket configuration

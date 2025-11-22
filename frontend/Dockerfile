@@ -4,8 +4,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Accept build arguments
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_BACKEND_URL
+# Construct full API URL with /api/v1 suffix
+ENV VITE_API_URL=${VITE_BACKEND_URL}/api/v1
 
 # Copy package files
 COPY package*.json ./

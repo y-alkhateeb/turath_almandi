@@ -11,10 +11,11 @@ services:
       paths:
         - frontend/**
     envVars:
-      # Backend API URL - must include /api/v1 suffix
-      # Set this manually in Render Dashboard Environment settings
-      - key: VITE_API_URL
-        value: https://turath-almandi-server.onrender.com/api/v1
+      - key: VITE_BACKEND_URL
+        fromService:
+          type: web
+          name: turath-almandi-server
+          envVarKey: RENDER_EXTERNAL_URL
 
   # Backend Service
   - type: web
@@ -80,11 +81,16 @@ services:
         value: 7d
 
       # CORS and Frontend
-      # Set these to match your actual deployed frontend URL
       - key: FRONTEND_URL
-        value: https://turath-almandi.onrender.com
+        fromService:
+          type: web
+          name: turath-almandi
+          envVarKey: RENDER_EXTERNAL_URL
       - key: CORS_ORIGIN
-        value: https://turath-almandi.onrender.com
+        fromService:
+          type: web
+          name: turath-almandi
+          envVarKey: RENDER_EXTERNAL_URL
 
       # Security
       - key: BCRYPT_SALT_ROUNDS

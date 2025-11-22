@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTransactions } from '../../hooks/useTransactions';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { EmptyState } from '@/components/common/EmptyState';
 import { Alert } from '@/components/ui/Alert';
 import { TransactionType } from '../../types/transactions.types';
 

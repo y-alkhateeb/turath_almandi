@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { transactionsService } from '../services/transactions.service';
+import transactionService from '@/api/services/transactionService';
 import type { DashboardSummary, DashboardSummaryFilters } from '../types/transactions.types';
 
 /**
@@ -39,7 +39,7 @@ export const useDashboardSummary = (
 ) => {
   return useQuery<DashboardSummary, Error>({
     queryKey: dashboardKeys.summary(filters),
-    queryFn: () => transactionsService.getSummary(filters),
+    queryFn: () => transactionService.getSummary(filters),
     enabled: options?.enabled,
     refetchInterval: options?.refetchInterval,
     // Keep previous data while fetching new data (prevents layout shift)

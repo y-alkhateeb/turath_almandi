@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { usersService } from '@services/users.service';
-import { branchesService } from '@services/branches.service';
+import userService from '@/api/services/userService';
+import branchService from '@/api/services/branchService';
 import type { User } from '@/types/auth.types';
 import type { Branch } from '@/types/branches.types';
 import { ConditionalRender } from './ConditionalRender';
@@ -20,8 +20,8 @@ export const UserBranchAssignment = () => {
     try {
       setLoading(true);
       const [usersData, branchesData] = await Promise.all([
-        usersService.getAll(),
-        branchesService.getAll(),
+        userService.getAllUnpaginated(),
+        branchService.getAll(),
       ]);
       setUsers(usersData);
       setBranches(branchesData);
@@ -37,7 +37,7 @@ export const UserBranchAssignment = () => {
   const handleAssignBranch = async (userId: string, branchId: string | null) => {
     try {
       setSaving(userId);
-      const updatedUser = await usersService.assignBranch(userId, branchId);
+      const updatedUser = await userService.assignBranch(userId, branchId);
       setUsers((prev) => prev.map((u) => (u.id === userId ? updatedUser : u)));
     } catch (err) {
       console.error('Error assigning branch:', err);

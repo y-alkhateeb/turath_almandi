@@ -81,12 +81,14 @@ export function CurrencyList({
       render: (item) => (
         <div className="text-sm">
           <p className="text-[var(--text-primary)]">
-            {item.usageCount.transactions + item.usageCount.debts + item.usageCount.debtPayments}{' '}
+            {(item.usageCount?.transactions || 0) +
+             (item.usageCount?.debts || 0) +
+             (item.usageCount?.debtPayments || 0)}{' '}
             معاملة
           </p>
           <p className="text-xs text-[var(--text-secondary)]">
-            {item.usageCount.transactions} عملية، {item.usageCount.debts} دين،{' '}
-            {item.usageCount.debtPayments} دفعة
+            {item.usageCount?.transactions || 0} عملية، {item.usageCount?.debts || 0} دين،{' '}
+            {item.usageCount?.debtPayments || 0} دفعة
           </p>
         </div>
       ),

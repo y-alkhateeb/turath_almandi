@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import GLOBAL_CONFIG from '@/global-config';
 
 const getToken = (): string | null => {
   return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
@@ -14,7 +15,7 @@ const getStorage = () => {
 
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1',
+  baseURL: GLOBAL_CONFIG.apiBaseUrl,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ axiosInstance.interceptors.response.use(
 
         if (refreshToken) {
           const response = await axios.post(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/auth/refresh`,
+            `${GLOBAL_CONFIG.apiBaseUrl}/auth/refresh`,
             { refresh_token: refreshToken }
           );
 

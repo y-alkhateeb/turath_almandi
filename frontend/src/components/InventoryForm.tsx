@@ -140,7 +140,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Branch Selection - Only show in create mode */}
       {!isEditMode && (
-        <BranchSelector name="branchId" register={register} error={errors.branchId} required />
+        <BranchSelector mode="form" name="branchId" register={register} error={errors.branchId} required />
       )}
 
       {/* Item Name */}

@@ -34,10 +34,10 @@ const TransactionsCreatePage = lazy(() => import('@/pages/transactions/CreateInc
 const TransactionsViewPage = lazy(() => import('@/pages/transactions/ViewTransactionPage'));
 const TransactionsEditPage = lazy(() => import('@/pages/transactions/EditTransactionPage'));
 
-// Debts
-const DebtsListPage = lazy(() => import('@/pages/debts/DebtsPage'));
-const DebtsCreatePage = lazy(() => import('@/pages/debts/CreateDebtPage'));
-const DebtsPayPage = lazy(() => import('@/pages/debts/PayDebtPage'));
+// Debts (management section)
+const DebtsListPage = lazy(() => import('@/pages/management/debts/list'));
+const DebtsCreatePage = lazy(() => import('@/pages/management/debts/create'));
+const DebtsViewPage = lazy(() => import('@/pages/management/debts/view/[id]'));
 
 // Inventory
 const InventoryListPage = lazy(() => import('@/pages/inventory/Inventory'));
@@ -190,10 +190,10 @@ export const dashboardRoutes: RouteObject[] = [
                 ),
               },
               {
-                path: 'pay/:id',
+                path: 'view/:id',
                 element: (
                   <LazyPage>
-                    <DebtsPayPage />
+                    <DebtsViewPage />
                   </LazyPage>
                 ),
               },

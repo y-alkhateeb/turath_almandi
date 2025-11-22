@@ -19,6 +19,8 @@ import {
   useSalaryPaymentHistory,
   useSalaryIncreaseHistory,
   useDeleteSalaryPayment,
+  useRecordSalaryPayment,
+  useRecordSalaryIncrease,
 } from '@/hooks/useEmployees';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
@@ -43,11 +45,29 @@ export const EmployeeDetailsPage = () => {
 
   const resignEmployee = useResignEmployee();
   const deletePayment = useDeleteSalaryPayment();
+  const recordPayment = useRecordSalaryPayment();
+  const recordIncrease = useRecordSalaryIncrease();
 
   const [activeTab, setActiveTab] = useState<'info' | 'payments' | 'increases'>('info');
   const [showResignModal, setShowResignModal] = useState(false);
   const [resignDate, setResignDate] = useState('');
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
+
+  // Payment modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentData, setPaymentData] = useState({
+    paymentDate: new Date().toISOString().split('T')[0],
+    amount: '',
+    notes: '',
+  });
+
+  // Increase modal state
+  const [showIncreaseModal, setShowIncreaseModal] = useState(false);
+  const [increaseData, setIncreaseData] = useState({
+    effectiveDate: new Date().toISOString().split('T')[0],
+    newSalary: '',
+    reason: '',
+  });
 
   const handleResign = async () => {
     if (!id || !resignDate) return;
@@ -60,6 +80,42 @@ export const EmployeeDetailsPage = () => {
     if (!id || !deletingPaymentId) return;
     await deletePayment.mutateAsync({ employeeId: id, paymentId: deletingPaymentId });
     setDeletingPaymentId(null);
+  };
+
+  const handleRecordPayment = async () => {
+    if (!id || !paymentData.amount) return;
+    await recordPayment.mutateAsync({
+      employeeId: id,
+      data: {
+        paymentDate: paymentData.paymentDate,
+        amount: parseFloat(paymentData.amount),
+        notes: paymentData.notes || undefined,
+      },
+    });
+    setShowPaymentModal(false);
+    setPaymentData({
+      paymentDate: new Date().toISOString().split('T')[0],
+      amount: '',
+      notes: '',
+    });
+  };
+
+  const handleRecordIncrease = async () => {
+    if (!id || !increaseData.newSalary) return;
+    await recordIncrease.mutateAsync({
+      employeeId: id,
+      data: {
+        effectiveDate: increaseData.effectiveDate,
+        newSalary: parseFloat(increaseData.newSalary),
+        reason: increaseData.reason || undefined,
+      },
+    });
+    setShowIncreaseModal(false);
+    setIncreaseData({
+      effectiveDate: new Date().toISOString().split('T')[0],
+      newSalary: '',
+      reason: '',
+    });
   };
 
   // Salary Payments Table Columns
@@ -358,6 +414,12 @@ export const EmployeeDetailsPage = () => {
         <Card padding="lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">دفعات الرواتب</h3>
+            {employee.status === EmployeeStatus.ACTIVE && (
+              <Button size="sm" onClick={() => setShowPaymentModal(true)}>
+                <DollarSign className="w-4 h-4" />
+                تسجيل دفعة راتب
+              </Button>
+            )}
           </div>
           {payments.length === 0 ? (
             <div className="text-center text-[var(--text-secondary)] py-8">
@@ -373,6 +435,12 @@ export const EmployeeDetailsPage = () => {
         <Card padding="lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">سجل الزيادات</h3>
+            {employee.status === EmployeeStatus.ACTIVE && (
+              <Button size="sm" onClick={() => setShowIncreaseModal(true)}>
+                <TrendingUp className="w-4 h-4" />
+                تسجيل زيادة
+              </Button>
+            )}
           </div>
           {increases.length === 0 ? (
             <div className="text-center text-[var(--text-secondary)] py-8">
@@ -429,6 +497,162 @@ export const EmployeeDetailsPage = () => {
         variant="danger"
         isLoading={deletePayment.isPending}
       />
+
+      {/* Record Payment Modal */}
+      <ConfirmModal
+        isOpen={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setPaymentData({
+            paymentDate: new Date().toISOString().split('T')[0],
+            amount: '',
+            notes: '',
+          });
+        }}
+        onConfirm={handleRecordPayment}
+        title="تسجيل دفعة راتب"
+        confirmText="تسجيل"
+        cancelText="إلغاء"
+        variant="primary"
+        isLoading={recordPayment.isPending}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[var(--text-secondary)]">
+            سيتم تسجيل دفعة راتب جديدة للموظف <strong>{employee?.name}</strong>
+          </p>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              تاريخ الدفع <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={paymentData.paymentDate}
+              onChange={(e) => setPaymentData({ ...paymentData, paymentDate: e.target.value })}
+              max={new Date().toISOString().split('T')[0]}
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              المبلغ <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={paymentData.amount}
+              onChange={(e) => setPaymentData({ ...paymentData, amount: e.target.value })}
+              placeholder="0.00"
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+            {employee && (
+              <p className="text-xs text-[var(--text-secondary)] mt-1">
+                الراتب الكامل: <CurrencyAmountCompact amount={employee.baseSalary + employee.allowance} />
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              ملاحظات (اختياري)
+            </label>
+            <textarea
+              value={paymentData.notes}
+              onChange={(e) => setPaymentData({ ...paymentData, notes: e.target.value })}
+              rows={3}
+              placeholder="أي ملاحظات إضافية..."
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+        </div>
+      </ConfirmModal>
+
+      {/* Record Increase Modal */}
+      <ConfirmModal
+        isOpen={showIncreaseModal}
+        onClose={() => {
+          setShowIncreaseModal(false);
+          setIncreaseData({
+            effectiveDate: new Date().toISOString().split('T')[0],
+            newSalary: '',
+            reason: '',
+          });
+        }}
+        onConfirm={handleRecordIncrease}
+        title="تسجيل زيادة راتب"
+        confirmText="تسجيل"
+        cancelText="إلغاء"
+        variant="primary"
+        isLoading={recordIncrease.isPending}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[var(--text-secondary)]">
+            سيتم تسجيل زيادة راتب للموظف <strong>{employee?.name}</strong>
+          </p>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              تاريخ السريان <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={increaseData.effectiveDate}
+              onChange={(e) => setIncreaseData({ ...increaseData, effectiveDate: e.target.value })}
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              الراتب الجديد (الراتب الأساسي) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={increaseData.newSalary}
+              onChange={(e) => setIncreaseData({ ...increaseData, newSalary: e.target.value })}
+              placeholder="0.00"
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+            {employee && increaseData.newSalary && (
+              <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded text-sm">
+                <p className="text-[var(--text-secondary)]">
+                  الراتب الحالي: <CurrencyAmountCompact amount={employee.baseSalary} />
+                </p>
+                <p className="text-green-600 font-medium">
+                  الزيادة: +
+                  <CurrencyAmountCompact
+                    amount={parseFloat(increaseData.newSalary) - employee.baseSalary}
+                  />{' '}
+                  (
+                  {(
+                    ((parseFloat(increaseData.newSalary) - employee.baseSalary) /
+                      employee.baseSalary) *
+                    100
+                  ).toFixed(1)}
+                  %)
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              سبب الزيادة (اختياري)
+            </label>
+            <textarea
+              value={increaseData.reason}
+              onChange={(e) => setIncreaseData({ ...increaseData, reason: e.target.value })}
+              rows={3}
+              placeholder="مثال: أداء متميز، ترقية، ..."
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+        </div>
+      </ConfirmModal>
     </PageLayout>
   );
 };

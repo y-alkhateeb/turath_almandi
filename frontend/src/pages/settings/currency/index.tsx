@@ -202,9 +202,9 @@ export default function CurrencySettingsPage() {
   const totalTransactionCount = currencies.reduce(
     (sum, currency) =>
       sum +
-      currency.usageCount.transactions +
-      currency.usageCount.debts +
-      currency.usageCount.debtPayments,
+      (currency.usageCount?.transactions || 0) +
+      (currency.usageCount?.debts || 0) +
+      (currency.usageCount?.debtPayments || 0),
     0
   );
 

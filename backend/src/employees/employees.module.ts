@@ -5,10 +5,9 @@ import { SalaryPaymentsService } from './salary-payments.service';
 import { SalaryIncreasesService } from './salary-increases.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuditLogModule } from '../common/audit-log/audit-log.module';
-import { SettingsModule } from '../settings/settings.module';
 
 @Module({
-  imports: [PrismaModule, AuditLogModule, SettingsModule],
+  imports: [PrismaModule, AuditLogModule],
   controllers: [EmployeesController],
   providers: [EmployeesService, SalaryPaymentsService, SalaryIncreasesService],
   exports: [EmployeesService, SalaryPaymentsService, SalaryIncreasesService],

@@ -6,9 +6,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSalaryPaymentDto } from './dto/create-salary-payment.dto';
-import { TransactionType, UserRole, Currency, Prisma } from '@prisma/client';
+import { TransactionType, UserRole, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
-import { SettingsService } from '../settings/settings.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB, getStartOfDay, getEndOfDay } from '../common/utils/date.utils';
@@ -57,7 +56,6 @@ export class SalaryPaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogService: AuditLogService,
-    private readonly settingsService: SettingsService,
   ) {}
 
   /**
@@ -93,9 +91,6 @@ export class SalaryPaymentsService {
       }
     }
 
-    // Get default currency from settings
-    const defaultCurrency = await this.settingsService.getDefaultCurrency();
-
     // Use Prisma transaction to ensure atomicity
     const result = await this.prisma.$transaction(async (prisma) => {
       // Create transaction record for salary payment
@@ -103,7 +98,6 @@ export class SalaryPaymentsService {
         data: {
           type: TransactionType.EXPENSE,
           amount: createSalaryPaymentDto.amount,
-          currency: defaultCurrency.code as Currency,
           paymentMethod: null, // Salary payments don't have payment method
           category: 'salaries',
           date: formatDateForDB(createSalaryPaymentDto.paymentDate),

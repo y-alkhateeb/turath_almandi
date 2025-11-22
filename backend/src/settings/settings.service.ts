@@ -64,13 +64,13 @@ export class SettingsService {
       currencies.map(async (currency) => {
         const [transactionCount, debtCount, paymentCount] = await Promise.all([
           this.prisma.transaction.count({
-            where: { currency: currency.code as any },
+            where: { currency: currency.code },
           }),
           this.prisma.debt.count({
-            where: { currency: currency.code as any },
+            where: { currency: currency.code },
           }),
           this.prisma.debtPayment.count({
-            where: { currency: currency.code as any },
+            where: { currency: currency.code },
           }),
         ]);
 

@@ -210,6 +210,67 @@ export const inventoryKeys = {
 } as const;
 
 // ============================================
+// EMPLOYEE QUERY KEYS
+// ============================================
+
+/**
+ * Employee query keys
+ * Used for employee queries, salary payments, and salary increases
+ */
+export const employeeKeys = {
+  /** Employees namespace root */
+  all: ['employees'] as const,
+
+  /**
+   * Employees list
+   * @returns ['employees']
+   */
+  list: () => ['employees'] as const,
+
+  /**
+   * Single employee by ID
+   * @param id - Employee UUID
+   * @returns ['employees', id]
+   */
+  detail: (id: string) => ['employees', id] as const,
+
+  /**
+   * Active employees only (status = ACTIVE)
+   * @returns ['employees', 'active']
+   */
+  active: ['employees', 'active'] as const,
+
+  /**
+   * Payroll summary for a month/year
+   * @param month - Month (1-12)
+   * @param year - Year (e.g., 2025)
+   * @returns ['employees', 'payroll', month, year]
+   */
+  payroll: (month: number, year: number) => ['employees', 'payroll', month, year] as const,
+
+  /**
+   * Salary payments for an employee
+   * @param employeeId - Employee UUID
+   * @returns ['employees', employeeId, 'payments']
+   */
+  salaryPayments: (employeeId: string) => ['employees', employeeId, 'payments'] as const,
+
+  /**
+   * Salary increases for an employee
+   * @param employeeId - Employee UUID
+   * @returns ['employees', employeeId, 'increases']
+   */
+  salaryIncreases: (employeeId: string) => ['employees', employeeId, 'increases'] as const,
+
+  /**
+   * Recent salary increases across all employees
+   * @param limit - Optional limit
+   * @returns ['employees', 'recent-increases', limit]
+   */
+  recentIncreases: (limit?: number) => ['employees', 'recent-increases', limit] as const,
+} as const;
+
+// ============================================
 // NOTIFICATION QUERY KEYS
 // ============================================
 
@@ -433,6 +494,7 @@ export const queryKeys = {
   transactions: transactionKeys,
   debts: debtKeys,
   inventory: inventoryKeys,
+  employees: employeeKeys,
   notifications: notificationKeys,
   dashboard: dashboardKeys,
   reports: reportKeys,

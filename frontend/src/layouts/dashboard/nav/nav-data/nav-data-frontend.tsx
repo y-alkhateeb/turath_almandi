@@ -74,6 +74,22 @@ export const navData: NavItem[] = [
     ],
   },
   {
+    title: 'الموظفون',
+    path: '/employees',
+    icon: <Icon icon="lucide:users" size={24} />,
+    caption: 'إدارة الموظفين والرواتب',
+    children: [
+      {
+        title: 'قائمة الموظفين',
+        path: '/employees',
+      },
+      {
+        title: 'إضافة موظف',
+        path: '/employees/create',
+      },
+    ],
+  },
+  {
     title: 'التقارير',
     path: '/reports',
     icon: <Icon icon="lucide:file-bar-chart" size={24} />,

@@ -30,10 +30,6 @@ export type { TableProps, Column } from './Table';
 export { LoadingSpinner, LoadingOverlay } from './LoadingSpinner';
 export type { LoadingSpinnerProps, LoadingOverlayProps } from './LoadingSpinner';
 
-// EmptyState component
-export { EmptyState, EmptyStateIcon } from './EmptyState';
-export type { EmptyStateProps } from './EmptyState';
-
 // Alert component
 export { Alert } from './Alert';
 export type { AlertProps } from './Alert';

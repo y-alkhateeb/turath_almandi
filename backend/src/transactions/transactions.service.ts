@@ -29,7 +29,7 @@ import {
   formatToISODate,
 } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
-import { CURRENCY_CONFIG } from '../common/constants/currency.constants';
+// Currency constants removed - currency is now frontend-only
 import { normalizeCategory } from '../common/constants/transaction-categories';
 
 interface RequestUser {
@@ -196,7 +196,7 @@ export class TransactionsService {
       category: normalizeCategory(createTransactionDto.category) || 'General',
       employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
       notes: createTransactionDto.notes || null,
-      currency: defaultCurrency.code as Currency, // Auto-apply default currency
+      // Currency removed - now frontend-only display
       branchId: branchId, // Use determined branchId
       createdBy: user.id,
     };

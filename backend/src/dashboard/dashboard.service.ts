@@ -40,7 +40,7 @@ interface RecentTransaction {
   type: TransactionType;
   category: string;
   amount: number;
-  currency: string;
+  // Currency removed - now frontend-only display
   paymentMethod: string | null;
   branch?: {
     name: string;

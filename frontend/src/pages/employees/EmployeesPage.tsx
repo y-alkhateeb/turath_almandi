@@ -9,8 +9,7 @@ import { EmptyState, Table, ConfirmModal } from '@/components/ui';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
 import { CurrencyAmountCompact } from '@/components/currency';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { formatDateShort } from '@/utils/formatters';
 import type { Employee } from '@/types';
 import type { Column } from '@/components/ui/Table';
 import { EmployeeStatus } from '@/types';
@@ -116,7 +115,7 @@ export const EmployeesPage = () => {
       header: 'تاريخ التوظيف',
       render: (employee) => (
         <div className="text-sm text-[var(--text-primary)]">
-          {format(new Date(employee.hireDate), 'dd/MM/yyyy', { locale: ar })}
+          {formatDateShort(employee.hireDate)}
         </div>
       ),
     },

@@ -27,8 +27,7 @@ import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
 import { Table, ConfirmModal } from '@/components/ui';
 import { CurrencyAmount, CurrencyAmountCompact } from '@/components/currency';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { formatDateShort } from '@/utils/formatters';
 import { EmployeeStatus } from '@/types';
 import type { SalaryPayment, SalaryIncrease } from '@/types';
 import type { Column } from '@/components/ui/Table';
@@ -70,7 +69,7 @@ export const EmployeeDetailsPage = () => {
       header: 'تاريخ الدفع',
       render: (payment) => (
         <div className="text-sm">
-          {format(new Date(payment.paymentDate), 'dd/MM/yyyy', { locale: ar })}
+          {formatDateShort(payment.paymentDate)}
         </div>
       ),
     },
@@ -127,7 +126,7 @@ export const EmployeeDetailsPage = () => {
       header: 'تاريخ الزيادة',
       render: (increase) => (
         <div className="text-sm">
-          {format(new Date(increase.effectiveDate), 'dd/MM/yyyy', { locale: ar })}
+          {formatDateShort(increase.effectiveDate)}
         </div>
       ),
     },
@@ -268,7 +267,7 @@ export const EmployeeDetailsPage = () => {
               <span>تاريخ التوظيف</span>
             </div>
             <div className="text-lg font-semibold text-[var(--text-primary)]">
-              {format(new Date(employee.hireDate), 'dd/MM/yyyy', { locale: ar })}
+              {formatDateShort(employee.hireDate)}
             </div>
           </div>
 
@@ -313,7 +312,7 @@ export const EmployeeDetailsPage = () => {
                 <span>تاريخ الاستقالة</span>
               </div>
               <div className="text-lg font-semibold text-red-600">
-                {format(new Date(employee.resignDate), 'dd/MM/yyyy', { locale: ar })}
+                {formatDateShort(employee.resignDate)}
               </div>
             </div>
           )}

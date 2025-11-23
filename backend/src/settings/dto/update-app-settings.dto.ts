@@ -1,9 +1,11 @@
-import { IsString, IsOptional, IsUrl, MaxLength } from 'class-validator';
+import { IsString, IsOptional, MaxLength, Matches } from 'class-validator';
 
 export class UpdateAppSettingsDto {
   @IsOptional()
   @IsString({ message: 'رابط صورة تسجيل الدخول يجب أن يكون نص' })
-  @IsUrl({}, { message: 'رابط صورة تسجيل الدخول يجب أن يكون رابط صحيح' })
+  @Matches(/^(\/uploads\/|https?:\/\/)/, {
+    message: 'رابط صورة تسجيل الدخول يجب أن يكون رابط صحيح (يبدأ بـ /uploads/ أو http)',
+  })
   @MaxLength(2000, { message: 'رابط صورة تسجيل الدخول يجب ألا يتجاوز 2000 حرف' })
   loginBackgroundUrl?: string;
 
@@ -14,7 +16,9 @@ export class UpdateAppSettingsDto {
 
   @IsOptional()
   @IsString({ message: 'رابط أيقونة التطبيق يجب أن يكون نص' })
-  @IsUrl({}, { message: 'رابط أيقونة التطبيق يجب أن يكون رابط صحيح' })
+  @Matches(/^(\/uploads\/|https?:\/\/)/, {
+    message: 'رابط أيقونة التطبيق يجب أن يكون رابط صحيح (يبدأ بـ /uploads/ أو http)',
+  })
   @MaxLength(2000, { message: 'رابط أيقونة التطبيق يجب ألا يتجاوز 2000 حرف' })
   appIconUrl?: string;
 }

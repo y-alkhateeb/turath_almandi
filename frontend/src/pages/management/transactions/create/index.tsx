@@ -20,9 +20,8 @@
 import { useCallback } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
-import { useCreateTransaction } from '@/hooks/useTransactions';
-import { TransactionForm } from '@/components/transactions/TransactionForm';
-import type { CreateTransactionInput } from '#/entity';
+import { TransactionFormWithInventory } from '@/components/transactions/TransactionFormWithInventory';
+import type { Transaction } from '#/entity';
 
 // ============================================
 // PAGE COMPONENT
@@ -32,36 +31,20 @@ export default function CreateTransactionPage() {
   const router = useRouter();
 
   // ============================================
-  // MUTATIONS
-  // ============================================
-
-  /**
-   * Create transaction mutation
-   */
-  const createTransaction = useCreateTransaction();
-
-  // ============================================
   // HANDLERS
   // ============================================
 
   /**
-   * Handle form submission
-   * Creates transaction and navigates to list on success
+   * Handle successful transaction creation
+   * Navigate to list on success
    */
-  const handleSubmit = useCallback(
-    async (data: CreateTransactionInput) => {
-      try {
-        await createTransaction.mutateAsync(data);
-        // Success toast shown by mutation
-        // Navigate to transactions list
-        router.push('/management/transactions/list');
-      } catch (error) {
-        // Error toast shown by global API interceptor
-        // Error is re-thrown so form can handle it if needed
-        throw error;
-      }
+  const handleSuccess = useCallback(
+    (_transaction: Transaction) => {
+      // Success toast shown by form component
+      // Navigate to transactions list
+      router.push('/management/transactions/list');
     },
-    [createTransaction, router]
+    [router]
   );
 
   /**
@@ -100,11 +83,9 @@ export default function CreateTransactionPage() {
 
       {/* Form Card */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
-        <TransactionForm
-          mode="create"
-          onSubmit={handleSubmit}
+        <TransactionFormWithInventory
+          onSuccess={handleSuccess}
           onCancel={handleCancel}
-          isSubmitting={createTransaction.isPending}
         />
       </div>
     </div>

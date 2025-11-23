@@ -192,7 +192,7 @@ export const EmployeeDetailsPage = () => {
       header: 'الراتب السابق',
       render: (increase) => (
         <div className="text-sm">
-          <CurrencyAmountCompact amount={increase.previousSalary} />
+          <CurrencyAmountCompact amount={increase.oldSalary} />
         </div>
       ),
     },
@@ -209,9 +209,9 @@ export const EmployeeDetailsPage = () => {
       key: 'increase',
       header: 'مقدار الزيادة',
       render: (increase) => {
-        const increaseAmount = increase.newSalary - increase.previousSalary;
+        const increaseAmount = increase.newSalary - increase.oldSalary;
         const increasePercentage = (
-          (increaseAmount / increase.previousSalary) *
+          (increaseAmount / increase.oldSalary) *
           100
         ).toFixed(1);
         return (

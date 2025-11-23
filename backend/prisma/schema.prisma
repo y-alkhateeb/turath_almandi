@@ -111,6 +111,7 @@ model User {
   createdEmployees         Employee[]               @relation("EmployeeCreator")
   recordedSalaryPayments   SalaryPayment[]          @relation("SalaryPaymentRecorder")
   recordedSalaryIncreases  SalaryIncrease[]         @relation("SalaryIncreaseRecorder")
+  recordedBonuses          Bonus[]                  @relation("BonusRecorder")
 
   @@index([branchId])
   @@index([role])
@@ -185,6 +186,7 @@ model Transaction {
   creator        User            @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
   salaryPayments SalaryPayment[]
+  bonuses        Bonus[]
 
   @@index([branchId])
   @@index([type])
@@ -424,6 +426,7 @@ model Employee {
   creator         User             @relation("EmployeeCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   salaryPayments  SalaryPayment[]
   salaryIncreases SalaryIncrease[]
+  bonuses         Bonus[]
 
   @@index([branchId])
   @@index([status])
@@ -484,4 +487,31 @@ model SalaryIncrease {
   @@index([recordedBy])
   @@index([employeeId, effectiveDate])
   @@map("salary_increases")
+}
+
+// 16. Bonuses Table
+model Bonus {
+  id            String    @id @default(uuid()) @db.Uuid
+  employeeId    String    @map("employee_id") @db.Uuid
+  amount        Decimal   @db.Decimal(15, 2)
+  bonusDate     DateTime  @map("bonus_date") @db.Date
+  reason        String?   @db.Text
+  transactionId String?   @unique @map("transaction_id") @db.Uuid
+  recordedBy    String    @map("recorded_by") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  employee    Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  recorder    User         @relation("BonusRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+
+  @@index([employeeId])
+  @@index([bonusDate])
+  @@index([recordedBy])
+  @@index([transactionId])
+  @@index([deletedAt])
+  @@index([employeeId, bonusDate])
+  @@map("bonuses")
 }

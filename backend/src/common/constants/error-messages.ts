@@ -83,6 +83,14 @@ export const ERROR_MESSAGES = {
     NEW_SALARY_LESS_THAN_OLD: 'newSalaryCannotBeLessThanOldSalary',
   },
 
+  // Bonus-related errors
+  BONUS: {
+    NOT_FOUND: 'bonusNotFound',
+    EMPLOYEE_NOT_FOUND: 'employeeNotFoundForBonus',
+    AMOUNT_POSITIVE: 'bonusAmountMustBeGreaterThan0',
+    TRANSACTION_CREATION_FAILED: 'failedToCreateTransactionForBonus',
+  },
+
   // Permission errors
   PERMISSION: {
     BRANCH_ACCESS: 'cannotAccessOtherBranches',

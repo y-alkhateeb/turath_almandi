@@ -12,10 +12,12 @@ import {
 import { EmployeesService } from './employees.service';
 import { SalaryPaymentsService } from './salary-payments.service';
 import { SalaryIncreasesService } from './salary-increases.service';
+import { BonusesService } from './bonuses.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { CreateSalaryPaymentDto } from './dto/create-salary-payment.dto';
 import { RecordSalaryIncreaseDto } from './dto/record-salary-increase.dto';
+import { CreateBonusDto } from './dto/create-bonus.dto';
 import { ResignEmployeeDto } from './dto/resign-employee.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
@@ -36,6 +38,7 @@ export class EmployeesController {
     private readonly employeesService: EmployeesService,
     private readonly salaryPaymentsService: SalaryPaymentsService,
     private readonly salaryIncreasesService: SalaryIncreasesService,
+    private readonly bonusesService: BonusesService,
   ) {}
 
   // Employee endpoints
@@ -143,6 +146,36 @@ export class EmployeesController {
   @Get(':id/salary-increases')
   getSalaryIncreases(@Param('id') employeeId: string, @CurrentUser() user: RequestUser) {
     return this.salaryIncreasesService.findByEmployee(employeeId, user);
+  }
+
+  // Bonus endpoints
+  @Post(':id/bonuses')
+  createBonus(
+    @Param('id') employeeId: string,
+    @Body() createBonusDto: CreateBonusDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    return this.bonusesService.create(employeeId, createBonusDto, user);
+  }
+
+  @Get(':id/bonuses')
+  getBonuses(
+    @Param('id') employeeId: string,
+    @CurrentUser() user: RequestUser,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const filters = {
+      startDate,
+      endDate,
+    };
+
+    return this.bonusesService.findByEmployee(employeeId, filters, user);
+  }
+
+  @Delete('bonuses/:id')
+  deleteBonus(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.bonusesService.remove(id, user);
   }
 
   // Branch payroll summary

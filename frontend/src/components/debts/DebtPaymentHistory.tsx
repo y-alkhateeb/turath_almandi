@@ -40,8 +40,8 @@ export function DebtPaymentHistory({ payments, isLoading }: DebtPaymentHistoryPr
     (a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
   );
 
-  // Calculate total paid (defensive: handle undefined amountPaid)
-  const totalPaid = payments.reduce((sum, payment) => sum + (payment.amountPaid || 0), 0);
+  // Calculate total paid (defensive: handle undefined amountPaid, convert to number)
+  const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amountPaid || 0), 0);
 
   // Define table columns
   const columns: Column<DebtPayment>[] = [

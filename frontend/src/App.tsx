@@ -14,9 +14,13 @@
 import { useRoutes } from 'react-router-dom';
 import { routes } from '@/routes';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import { OfflineBanner } from '@/components/common/OfflineBanner';
 
 function App() {
+  // Initialize app settings (updates document title and favicon)
+  useAppSettings();
+
   // Initialize real-time synchronization
   // This hook automatically:
   // - Connects WebSocket when user is authenticated

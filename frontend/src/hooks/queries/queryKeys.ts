@@ -268,6 +268,16 @@ export const employeeKeys = {
    * @returns ['employees', 'recent-increases', limit]
    */
   recentIncreases: (limit?: number) => ['employees', 'recent-increases', limit] as const,
+
+  /**
+   * Bonus history for a specific employee
+   * @param employeeId - Employee UUID
+   * @param startDate - Optional start date filter
+   * @param endDate - Optional end date filter
+   * @returns ['employees', employeeId, 'bonuses', startDate, endDate]
+   */
+  bonuses: (employeeId: string, startDate?: string, endDate?: string) =>
+    ['employees', employeeId, 'bonuses', startDate, endDate] as const,
 } as const;
 
 // ============================================

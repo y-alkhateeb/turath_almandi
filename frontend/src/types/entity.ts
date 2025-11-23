@@ -561,6 +561,23 @@ export interface SalaryIncrease {
   recorder?: UserRelation;
 }
 
+export interface Bonus {
+  id: string;
+  employeeId: string;
+  amount: number;
+  bonusDate: string; // ISO date string
+  reason: string | null;
+  transactionId: string | null;
+  recordedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  // Optional relations
+  employee?: Employee;
+  transaction?: Transaction;
+  recorder?: UserRelation;
+}
+
 // ============================================
 // EMPLOYEE INPUT TYPES
 // ============================================
@@ -593,6 +610,12 @@ export interface CreateSalaryPaymentInput {
 export interface RecordSalaryIncreaseInput {
   newSalary: number;
   effectiveDate: string;
+  reason?: string;
+}
+
+export interface CreateBonusInput {
+  amount: number;
+  bonusDate: string;
   reason?: string;
 }
 

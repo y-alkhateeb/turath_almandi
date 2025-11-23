@@ -89,6 +89,10 @@ COPY --chown=nestjs:nodejs scripts/start.sh ./scripts/start.sh
 # Copy package.json (metadata and version info)
 COPY --chown=nestjs:nodejs package.json ./
 
+# Create uploads directory structure
+RUN mkdir -p uploads/app-assets && \
+    chown -R nestjs:nodejs uploads
+
 # Make startup script executable
 RUN chmod +x ./scripts/start.sh
 

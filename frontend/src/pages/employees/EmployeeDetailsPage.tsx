@@ -11,6 +11,7 @@ import {
   Briefcase,
   User,
   Trash2,
+  Gift,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -18,9 +19,12 @@ import {
   useResignEmployee,
   useSalaryPaymentHistory,
   useSalaryIncreaseHistory,
+  useBonusHistory,
   useDeleteSalaryPayment,
   useRecordSalaryPayment,
   useRecordSalaryIncrease,
+  useCreateBonus,
+  useDeleteBonus,
 } from '@/hooks/useEmployees';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
@@ -32,7 +36,7 @@ import { DateInput } from '@/components/form';
 import { CurrencyAmount, CurrencyAmountCompact } from '@/components/currency';
 import { formatDateShort } from '@/utils/formatters';
 import { EmployeeStatus } from '@/types';
-import type { SalaryPayment, SalaryIncrease } from '@/types';
+import type { SalaryPayment, SalaryIncrease, Bonus } from '@/types';
 import type { Column } from '@/components/ui/Table';
 
 export const EmployeeDetailsPage = () => {
@@ -43,13 +47,16 @@ export const EmployeeDetailsPage = () => {
   const { data: employee, isLoading, error } = useEmployee(id!);
   const { data: payments = [] } = useSalaryPaymentHistory(id!);
   const { data: increases = [] } = useSalaryIncreaseHistory(id!);
+  const { data: bonuses = [] } = useBonusHistory(id!);
 
   const resignEmployee = useResignEmployee();
   const deletePayment = useDeleteSalaryPayment();
   const recordPayment = useRecordSalaryPayment();
   const recordIncrease = useRecordSalaryIncrease();
+  const createBonus = useCreateBonus();
+  const deleteBonus = useDeleteBonus();
 
-  const [activeTab, setActiveTab] = useState<'info' | 'payments' | 'increases'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'payments' | 'increases' | 'bonuses'>('info');
   const [showResignModal, setShowResignModal] = useState(false);
   const [resignDate, setResignDate] = useState('');
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
@@ -66,9 +73,18 @@ export const EmployeeDetailsPage = () => {
   const [showIncreaseModal, setShowIncreaseModal] = useState(false);
   const [increaseData, setIncreaseData] = useState({
     effectiveDate: new Date().toISOString().split('T')[0],
-    newSalary: '',
+    increaseAmount: '',
     reason: '',
   });
+
+  // Bonus modal state
+  const [showBonusModal, setShowBonusModal] = useState(false);
+  const [bonusData, setBonusData] = useState({
+    bonusDate: new Date().toISOString().split('T')[0],
+    amount: '',
+    reason: '',
+  });
+  const [deletingBonusId, setDeletingBonusId] = useState<string | null>(null);
 
   const handleResign = async () => {
     if (!id || !resignDate) return;
@@ -102,21 +118,46 @@ export const EmployeeDetailsPage = () => {
   };
 
   const handleRecordIncrease = async () => {
-    if (!id || !increaseData.newSalary) return;
+    if (!id || !increaseData.increaseAmount || !employee) return;
+    const newSalary = employee.baseSalary + parseFloat(increaseData.increaseAmount);
     await recordIncrease.mutateAsync({
       employeeId: id,
       data: {
         effectiveDate: increaseData.effectiveDate,
-        newSalary: parseFloat(increaseData.newSalary),
+        newSalary: newSalary,
         reason: increaseData.reason || undefined,
       },
     });
     setShowIncreaseModal(false);
     setIncreaseData({
       effectiveDate: new Date().toISOString().split('T')[0],
-      newSalary: '',
+      increaseAmount: '',
       reason: '',
     });
+  };
+
+  const handleCreateBonus = async () => {
+    if (!id || !bonusData.amount) return;
+    await createBonus.mutateAsync({
+      employeeId: id,
+      data: {
+        bonusDate: bonusData.bonusDate,
+        amount: parseFloat(bonusData.amount),
+        reason: bonusData.reason || undefined,
+      },
+    });
+    setShowBonusModal(false);
+    setBonusData({
+      bonusDate: new Date().toISOString().split('T')[0],
+      amount: '',
+      reason: '',
+    });
+  };
+
+  const handleDeleteBonus = async () => {
+    if (!id || !deletingBonusId) return;
+    await deleteBonus.mutateAsync({ id: deletingBonusId, employeeId: id });
+    setDeletingBonusId(null);
   };
 
   // Salary Payments Table Columns
@@ -192,7 +233,7 @@ export const EmployeeDetailsPage = () => {
       header: 'الراتب السابق',
       render: (increase) => (
         <div className="text-sm">
-          <CurrencyAmountCompact amount={increase.previousSalary} />
+          <CurrencyAmountCompact amount={increase.oldSalary} />
         </div>
       ),
     },
@@ -209,9 +250,9 @@ export const EmployeeDetailsPage = () => {
       key: 'increase',
       header: 'مقدار الزيادة',
       render: (increase) => {
-        const increaseAmount = increase.newSalary - increase.previousSalary;
+        const increaseAmount = increase.newSalary - increase.oldSalary;
         const increasePercentage = (
-          (increaseAmount / increase.previousSalary) *
+          (increaseAmount / increase.oldSalary) *
           100
         ).toFixed(1);
         return (
@@ -232,6 +273,63 @@ export const EmployeeDetailsPage = () => {
       ),
     },
   ];
+
+  // Bonuses Table Columns
+  const bonusColumns: Column<Bonus>[] = [
+    {
+      key: 'bonusDate',
+      header: 'تاريخ المكافأة',
+      render: (bonus) => (
+        <div className="text-sm">
+          {formatDateShort(bonus.bonusDate)}
+        </div>
+      ),
+    },
+    {
+      key: 'amount',
+      header: 'المبلغ',
+      render: (bonus) => (
+        <div className="text-sm font-medium text-green-600">
+          <CurrencyAmountCompact amount={bonus.amount} />
+        </div>
+      ),
+    },
+    {
+      key: 'reason',
+      header: 'السبب',
+      render: (bonus) => (
+        <div className="text-sm text-[var(--text-secondary)]">{bonus.reason || '-'}</div>
+      ),
+    },
+    {
+      key: 'recordedBy',
+      header: 'سجل بواسطة',
+      render: (bonus) => (
+        <div className="text-sm text-[var(--text-secondary)]">
+          {bonus.recorder?.username || '-'}
+        </div>
+      ),
+    },
+  ];
+
+  // Add delete action column for bonuses if employee is active
+  if (employee?.status === EmployeeStatus.ACTIVE) {
+    bonusColumns.push({
+      key: 'actions',
+      header: 'إجراءات',
+      render: (bonus) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setDeletingBonusId(bonus.id)}
+          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        >
+          <Trash2 className="w-4 h-4" />
+          حذف
+        </Button>
+      ),
+    });
+  }
 
   if (isLoading) {
     return <PageLoading message="جاري تحميل بيانات الموظف..." />;
@@ -408,6 +506,17 @@ export const EmployeeDetailsPage = () => {
           <TrendingUp className="w-4 h-4 inline ml-2" />
           الزيادات ({increases.length})
         </button>
+        <button
+          onClick={() => setActiveTab('bonuses')}
+          className={`px-4 py-2 font-medium transition-colors relative ${
+            activeTab === 'bonuses'
+              ? 'text-primary-600 border-b-2 border-primary-600'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <Gift className="w-4 h-4 inline ml-2" />
+          المكافآت ({bonuses.length})
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -449,6 +558,27 @@ export const EmployeeDetailsPage = () => {
             </div>
           ) : (
             <Table columns={increaseColumns} data={increases} keyExtractor={(i) => i.id} />
+          )}
+        </Card>
+      )}
+
+      {activeTab === 'bonuses' && (
+        <Card padding="lg">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">سجل المكافآت</h3>
+            {employee.status === EmployeeStatus.ACTIVE && (
+              <Button size="sm" onClick={() => setShowBonusModal(true)}>
+                <Gift className="w-4 h-4" />
+                إضافة مكافأة
+              </Button>
+            )}
+          </div>
+          {bonuses.length === 0 ? (
+            <div className="text-center text-[var(--text-secondary)] py-8">
+              لا توجد مكافآت مسجلة
+            </div>
+          ) : (
+            <Table columns={bonusColumns} data={bonuses} keyExtractor={(b) => b.id} />
           )}
         </Card>
       )}
@@ -567,7 +697,7 @@ export const EmployeeDetailsPage = () => {
           setShowIncreaseModal(false);
           setIncreaseData({
             effectiveDate: new Date().toISOString().split('T')[0],
-            newSalary: '',
+            increaseAmount: '',
             reason: '',
           });
         }}
@@ -592,31 +722,30 @@ export const EmployeeDetailsPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              الراتب الجديد (الراتب الأساسي) <span className="text-red-500">*</span>
+              مقدار الزيادة <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               step="0.01"
               min="0"
-              value={increaseData.newSalary}
-              onChange={(e) => setIncreaseData({ ...increaseData, newSalary: e.target.value })}
+              value={increaseData.increaseAmount}
+              onChange={(e) => setIncreaseData({ ...increaseData, increaseAmount: e.target.value })}
               placeholder="0.00"
               className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
             />
-            {employee && increaseData.newSalary && (
+            {employee && increaseData.increaseAmount && (
               <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded text-sm">
                 <p className="text-[var(--text-secondary)]">
                   الراتب الحالي: <CurrencyAmountCompact amount={employee.baseSalary} />
                 </p>
                 <p className="text-green-600 font-medium">
-                  الزيادة: +
+                  الراتب الجديد:{' '}
                   <CurrencyAmountCompact
-                    amount={parseFloat(increaseData.newSalary) - employee.baseSalary}
+                    amount={employee.baseSalary + parseFloat(increaseData.increaseAmount)}
                   />{' '}
-                  (
+                  (+
                   {(
-                    ((parseFloat(increaseData.newSalary) - employee.baseSalary) /
-                      employee.baseSalary) *
+                    (parseFloat(increaseData.increaseAmount) / employee.baseSalary) *
                     100
                   ).toFixed(1)}
                   %)
@@ -634,6 +763,80 @@ export const EmployeeDetailsPage = () => {
               onChange={(e) => setIncreaseData({ ...increaseData, reason: e.target.value })}
               rows={3}
               placeholder="مثال: أداء متميز، ترقية، ..."
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+        </div>
+      </ConfirmModal>
+
+      {/* Delete Bonus Modal */}
+      <ConfirmModal
+        isOpen={!!deletingBonusId}
+        onClose={() => setDeletingBonusId(null)}
+        onConfirm={handleDeleteBonus}
+        title="تأكيد حذف المكافأة"
+        message="هل أنت متأكد من حذف هذه المكافأة؟ سيتم أيضاً حذف المعاملة المالية المرتبطة بها. لا يمكن التراجع عن هذا الإجراء."
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+        isLoading={deleteBonus.isPending}
+      />
+
+      {/* Create Bonus Modal */}
+      <ConfirmModal
+        isOpen={showBonusModal}
+        onClose={() => {
+          setShowBonusModal(false);
+          setBonusData({
+            bonusDate: new Date().toISOString().split('T')[0],
+            amount: '',
+            reason: '',
+          });
+        }}
+        onConfirm={handleCreateBonus}
+        title="إضافة مكافأة"
+        confirmText="إضافة"
+        cancelText="إلغاء"
+        variant="success"
+        isLoading={createBonus.isPending}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[var(--text-secondary)]">
+            سيتم إضافة مكافأة للموظف <strong>{employee?.name}</strong>
+          </p>
+
+          <DateInput
+            label="تاريخ المكافأة"
+            value={bonusData.bonusDate}
+            onChange={(value) => setBonusData({ ...bonusData, bonusDate: value || '' })}
+            max={new Date().toISOString().split('T')[0]}
+            showLabel={true}
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              مبلغ المكافأة <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={bonusData.amount}
+              onChange={(e) => setBonusData({ ...bonusData, amount: e.target.value })}
+              placeholder="0.00"
+              className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              سبب المكافأة (اختياري)
+            </label>
+            <textarea
+              value={bonusData.reason}
+              onChange={(e) => setBonusData({ ...bonusData, reason: e.target.value })}
+              rows={3}
+              placeholder="مثال: أداء متميز، إنجاز خاص، ..."
               className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
             />
           </div>

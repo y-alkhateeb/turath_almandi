@@ -25,9 +25,11 @@ import type {
   UpdateEmployeeInput,
   CreateSalaryPaymentInput,
   RecordSalaryIncreaseInput,
+  CreateBonusInput,
   ResignEmployeeInput,
   SalaryPayment,
   SalaryIncrease,
+  Bonus,
   PayrollSummary,
   EmployeeFilters,
 } from '#/entity';
@@ -338,6 +340,87 @@ export const recordSalaryIncrease = (
 export const getIncreaseHistory = (employeeId: string): Promise<SalaryIncrease[]> => {
   return apiClient.get<SalaryIncrease[]>({
     url: `/employees/${employeeId}/salary-increases`,
+  });
+};
+
+/**
+ * Record a bonus for employee
+ * POST /employees/:id/bonuses
+ *
+ * Request body:
+ * - amount: Required, number > 0
+ * - bonusDate: Required, ISO date string
+ * - reason: Optional, text
+ *
+ * Backend behavior:
+ * - Creates Bonus record
+ * - Auto-creates linked Transaction (EXPENSE, category='bonuses')
+ * - Uses Prisma transaction for atomicity
+ * - Creates audit log entry
+ *
+ * @param employeeId - Employee UUID
+ * @param data - CreateBonusInput
+ * @returns Created Bonus with employee, transaction, and recorder relations
+ * @throws ApiError on 400 (amount <= 0), 401, 403, 404
+ */
+export const createBonus = (
+  employeeId: string,
+  data: CreateBonusInput,
+): Promise<Bonus> => {
+  return apiClient.post<Bonus>({
+    url: `/employees/${employeeId}/bonuses`,
+    data,
+  });
+};
+
+/**
+ * Get bonus history for employee
+ * GET /employees/:id/bonuses?startDate&endDate
+ *
+ * Supports filtering by:
+ * - startDate: ISO date string (inclusive)
+ * - endDate: ISO date string (inclusive)
+ *
+ * Backend behavior:
+ * - Returns bonuses ordered by bonusDate DESC
+ * - Excludes soft-deleted bonuses
+ * - Accountants can only access employees from their branch
+ *
+ * @param employeeId - Employee UUID
+ * @param startDate - Optional start date filter
+ * @param endDate - Optional end date filter
+ * @returns Array of Bonus with relations
+ * @throws ApiError on 401, 403, 404
+ */
+export const getBonusHistory = (
+  employeeId: string,
+  startDate?: string,
+  endDate?: string,
+): Promise<Bonus[]> => {
+  return apiClient.get<Bonus[]>({
+    url: `/employees/${employeeId}/bonuses`,
+    params: { startDate, endDate },
+  });
+};
+
+/**
+ * Delete a bonus
+ * DELETE /employees/bonuses/:id
+ *
+ * Backend behavior:
+ * - Soft deletes bonus (sets deletedAt)
+ * - Soft deletes linked transaction (if exists)
+ * - Uses Prisma transaction for atomicity
+ * - Creates audit log entry
+ * - Accountants can only delete bonuses from their branch
+ *
+ * @param id - Bonus UUID
+ * @returns void
+ * @throws ApiError on 401, 403 (wrong branch), 404 (not found or already deleted)
+ */
+export const deleteBonus = (id: string): Promise<void> => {
+  return apiClient.delete<void>({
+    url: `/employees/bonuses/${id}`,
   });
 };
 

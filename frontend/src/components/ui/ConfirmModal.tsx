@@ -1,3 +1,4 @@
+import React from 'react';
 import { Modal } from '../Modal';
 import { Button } from './Button';
 import { AlertTriangle, Info, CheckCircle, XCircle } from 'lucide-react';
@@ -7,11 +8,12 @@ export interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message?: string;
   confirmText?: string;
   cancelText?: string;
   variant?: 'danger' | 'warning' | 'info' | 'success';
   isLoading?: boolean;
+  children?: React.ReactNode;
 }
 
 const variantConfig = {
@@ -51,6 +53,7 @@ export function ConfirmModal({
   cancelText = 'إلغاء',
   variant = 'danger',
   isLoading = false,
+  children,
 }: ConfirmModalProps) {
   const config = variantConfig[variant];
   const Icon = config.icon;
@@ -58,17 +61,27 @@ export function ConfirmModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-6">
-        {/* Icon */}
-        <div className="flex justify-center">
-          <div
-            className={`w-16 h-16 ${config.iconBg} rounded-full flex items-center justify-center`}
-          >
-            <Icon className={`w-8 h-8 ${config.iconColor}`} />
-          </div>
-        </div>
+        {/* Show icon and message only if no children provided */}
+        {!children && (
+          <>
+            {/* Icon */}
+            <div className="flex justify-center">
+              <div
+                className={`w-16 h-16 ${config.iconBg} rounded-full flex items-center justify-center`}
+              >
+                <Icon className={`w-8 h-8 ${config.iconColor}`} />
+              </div>
+            </div>
 
-        {/* Message */}
-        <p className="text-center text-[var(--text-primary)] text-lg">{message}</p>
+            {/* Message */}
+            {message && (
+              <p className="text-center text-[var(--text-primary)] text-lg">{message}</p>
+            )}
+          </>
+        )}
+
+        {/* Render children if provided */}
+        {children}
 
         {/* Actions */}
         <div className="flex gap-3 justify-end">

@@ -65,6 +65,8 @@ export interface SetDefaultCurrencyInput {
 export interface AppSettings {
   id: string;
   loginBackgroundUrl: string | null;
+  appName: string | null;
+  appIconUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -75,4 +77,6 @@ export interface AppSettings {
  */
 export interface UpdateAppSettingsInput {
   loginBackgroundUrl?: string;
+  appName?: string;
+  appIconUrl?: string;
 }

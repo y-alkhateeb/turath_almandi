@@ -395,6 +395,8 @@ model CurrencySettings {
 model AppSettings {
   id                  String   @id @default(uuid()) @db.Uuid
   loginBackgroundUrl  String?  @map("login_background_url") @db.Text
+  appName             String?  @map("app_name") @db.VarChar(200)
+  appIconUrl          String?  @map("app_icon_url") @db.Text
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
 

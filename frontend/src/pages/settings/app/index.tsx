@@ -25,6 +25,17 @@ const appSettingsSchema = z.object({
     .max(2000, { message: 'الرابط طويل جداً (الحد الأقصى 2000 حرف)' })
     .optional()
     .or(z.literal('')),
+  appName: z
+    .string()
+    .max(200, { message: 'اسم التطبيق طويل جداً (الحد الأقصى 200 حرف)' })
+    .optional()
+    .or(z.literal('')),
+  appIconUrl: z
+    .string()
+    .url({ message: 'يجب أن يكون رابط صحيح' })
+    .max(2000, { message: 'الرابط طويل جداً (الحد الأقصى 2000 حرف)' })
+    .optional()
+    .or(z.literal('')),
 });
 
 type AppSettingsFormData = z.infer<typeof appSettingsSchema>;
@@ -47,10 +58,13 @@ export default function AppSettingsPage() {
     resolver: zodResolver(appSettingsSchema),
     defaultValues: {
       loginBackgroundUrl: '',
+      appName: '',
+      appIconUrl: '',
     },
   });
 
   const loginBackgroundUrl = watch('loginBackgroundUrl');
+  const appIconUrl = watch('appIconUrl');
 
   // Fetch app settings on mount
   useEffect(() => {
@@ -60,6 +74,8 @@ export default function AppSettingsPage() {
         setCurrentSettings(settings);
         reset({
           loginBackgroundUrl: settings.loginBackgroundUrl || '',
+          appName: settings.appName || '',
+          appIconUrl: settings.appIconUrl || '',
         });
       } catch (err) {
         setErrorMessage('فشل تحميل الإعدادات');
@@ -81,6 +97,8 @@ export default function AppSettingsPage() {
     try {
       const input: UpdateAppSettingsInput = {
         loginBackgroundUrl: data.loginBackgroundUrl || undefined,
+        appName: data.appName || undefined,
+        appIconUrl: data.appIconUrl || undefined,
       };
 
       const updated = await updateAppSettings(input);
@@ -119,7 +137,7 @@ export default function AppSettingsPage() {
 
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
         <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">
-          صورة خلفية تسجيل الدخول
+          إعدادات التطبيق العامة
         </h2>
 
         {isLoading ? (
@@ -143,13 +161,87 @@ export default function AppSettingsPage() {
               </div>
             )}
 
-            {/* URL Input */}
+            {/* App Name */}
+            <div>
+              <label
+                htmlFor="appName"
+                className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+              >
+                اسم التطبيق
+              </label>
+              <input
+                id="appName"
+                type="text"
+                {...register('appName')}
+                placeholder="تراث المندي"
+                className={`w-full px-4 py-3 border ${
+                  errors.appName ? 'border-red-500' : 'border-[var(--border-color)]'
+                } rounded-lg text-[var(--text-primary)] bg-[var(--bg-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                disabled={isSaving}
+              />
+              {errors.appName && (
+                <p className="mt-1 text-sm text-red-600">{errors.appName.message}</p>
+              )}
+              <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                اسم التطبيق الذي سيظهر في عنوان الصفحة والمتصفح
+              </p>
+            </div>
+
+            {/* App Icon URL */}
+            <div>
+              <label
+                htmlFor="appIconUrl"
+                className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+              >
+                رابط أيقونة التطبيق (Favicon)
+              </label>
+              <input
+                id="appIconUrl"
+                type="url"
+                {...register('appIconUrl')}
+                placeholder="https://example.com/icon.png"
+                className={`w-full px-4 py-3 border ${
+                  errors.appIconUrl ? 'border-red-500' : 'border-[var(--border-color)]'
+                } rounded-lg text-[var(--text-primary)] bg-[var(--bg-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                disabled={isSaving}
+                dir="ltr"
+              />
+              {errors.appIconUrl && (
+                <p className="mt-1 text-sm text-red-600">{errors.appIconUrl.message}</p>
+              )}
+              <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                رابط أيقونة التطبيق التي ستظهر في تبويب المتصفح
+              </p>
+            </div>
+
+            {/* Icon Preview */}
+            {appIconUrl && (
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  معاينة الأيقونة
+                </label>
+                <div className="flex items-center gap-4 p-4 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)]">
+                  <img
+                    src={appIconUrl}
+                    alt="معاينة أيقونة التطبيق"
+                    className="w-16 h-16 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src = '';
+                      e.currentTarget.alt = 'فشل تحميل الأيقونة';
+                    }}
+                  />
+                  <span className="text-sm text-[var(--text-secondary)]">حجم الأيقونة الموصى به: 512x512 بكسل</span>
+                </div>
+              </div>
+            )}
+
+            {/* Login Background URL Input */}
             <div>
               <label
                 htmlFor="loginBackgroundUrl"
                 className="block text-sm font-medium text-[var(--text-primary)] mb-2"
               >
-                رابط صورة الخلفية
+                رابط صورة خلفية تسجيل الدخول
               </label>
               <input
                 id="loginBackgroundUrl"

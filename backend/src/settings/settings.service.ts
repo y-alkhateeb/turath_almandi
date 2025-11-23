@@ -189,6 +189,8 @@ export class SettingsService {
       settings = await this.prisma.appSettings.create({
         data: {
           loginBackgroundUrl: dto.loginBackgroundUrl || null,
+          appName: dto.appName || null,
+          appIconUrl: dto.appIconUrl || null,
         },
       });
 
@@ -209,6 +211,8 @@ export class SettingsService {
         where: { id: settings.id },
         data: {
           loginBackgroundUrl: dto.loginBackgroundUrl !== undefined ? dto.loginBackgroundUrl : settings.loginBackgroundUrl,
+          appName: dto.appName !== undefined ? dto.appName : settings.appName,
+          appIconUrl: dto.appIconUrl !== undefined ? dto.appIconUrl : settings.appIconUrl,
         },
       });
 

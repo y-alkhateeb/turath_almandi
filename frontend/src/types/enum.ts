@@ -159,6 +159,7 @@ export enum AuditEntityType {
   EMPLOYEE = 'EMPLOYEE',
   SALARY_PAYMENT = 'SALARY_PAYMENT',
   SALARY_INCREASE = 'SALARY_INCREASE',
+  BONUS = 'BONUS',
 }
 
 // ============================================

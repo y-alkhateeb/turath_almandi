@@ -11,10 +11,6 @@ echo "🚀 Starting تراث المندي Backend..."
 echo "📦 Generating Prisma Client..."
 npx prisma generate
 
-# Clean up any failed migrations
-echo "🧹 Cleaning up failed migrations..."
-node scripts/clean-failed-migrations.js
-
 # Run database migrations
 echo "🔄 Running database migrations..."
 npx prisma migrate deploy

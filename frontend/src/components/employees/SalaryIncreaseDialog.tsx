@@ -77,8 +77,8 @@ export const SalaryIncreaseDialog: React.FC<SalaryIncreaseDialogProps> = ({
   };
 
   // Calculate increase amount and percentage
-  const increaseAmount = (watchNewSalary || currentSalary) - currentSalary;
-  const increasePercentage = currentSalary > 0 ? (increaseAmount / currentSalary) * 100 : 0;
+  const increaseAmount = Number(watchNewSalary || currentSalary) - Number(currentSalary);
+  const increasePercentage = Number(currentSalary) > 0 ? (increaseAmount / Number(currentSalary)) * 100 : 0;
 
   return (
     <Dialog

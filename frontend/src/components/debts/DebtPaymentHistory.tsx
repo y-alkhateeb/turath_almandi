@@ -40,8 +40,8 @@ export function DebtPaymentHistory({ payments, isLoading }: DebtPaymentHistoryPr
     (a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
   );
 
-  // Calculate total paid
-  const totalPaid = payments.reduce((sum, payment) => sum + payment.amountPaid, 0);
+  // Calculate total paid (defensive: handle undefined amountPaid, convert to number)
+  const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amountPaid || 0), 0);
 
   // Define table columns
   const columns: Column<DebtPayment>[] = [
@@ -56,13 +56,17 @@ export function DebtPaymentHistory({ payments, isLoading }: DebtPaymentHistoryPr
       header: 'المبلغ المدفوع',
       width: '150px',
       align: 'right',
-      render: (payment) => (
-        <span className="font-semibold text-green-600">
-          {defaultCurrency
-            ? formatCurrency(payment.amountPaid, defaultCurrency)
-            : `${payment.amountPaid.toLocaleString('ar-IQ')} د.ع`}
-        </span>
-      ),
+      render: (payment) => {
+        // Defensive: handle undefined/null amountPaid
+        const amount = payment.amountPaid ?? 0;
+        return (
+          <span className="font-semibold text-green-600">
+            {defaultCurrency
+              ? formatCurrency(amount, defaultCurrency)
+              : `${amount.toLocaleString('ar-IQ')} د.ع`}
+          </span>
+        );
+      },
     },
     {
       key: 'notes',

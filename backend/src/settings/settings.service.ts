@@ -2,8 +2,7 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCurrencyDto } from './dto/create-currency.dto';
 import { SetDefaultCurrencyDto } from './dto/set-default-currency.dto';
-// TEMPORARILY COMMENTED OUT DUE TO PRISMA CLIENT GENERATION ISSUES
-// import { UpdateAppSettingsDto } from './dto/update-app-settings.dto';
+import { UpdateAppSettingsDto } from './dto/update-app-settings.dto';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 
 @Injectable()
@@ -155,77 +154,76 @@ export class SettingsService {
     return currency;
   }
 
-  // TEMPORARILY COMMENTED OUT DUE TO PRISMA CLIENT GENERATION ISSUES
-  // /**
-  //  * Get app settings
-  //  * Returns the first settings record or creates one if none exists
-  //  * @returns The app settings
-  //  */
-  // async getAppSettings() {
-  //   let settings = await this.prisma.appSettings.findFirst();
+  /**
+   * Get app settings
+   * Returns the first settings record or creates one if none exists
+   * @returns The app settings
+   */
+  async getAppSettings() {
+    let settings = await this.prisma.appSettings.findFirst();
 
-  //   // If no settings exist, create default settings
-  //   if (!settings) {
-  //     settings = await this.prisma.appSettings.create({
-  //       data: {
-  //         loginBackgroundUrl: null,
-  //       },
-  //     });
-  //   }
+    // If no settings exist, create default settings
+    if (!settings) {
+      settings = await this.prisma.appSettings.create({
+        data: {
+          loginBackgroundUrl: null,
+        },
+      });
+    }
 
-  //   return settings;
-  // }
+    return settings;
+  }
 
-  // /**
-  //  * Update app settings
-  //  * @param dto - App settings data to update
-  //  * @param currentUserId - User ID for audit logging
-  //  * @returns The updated app settings
-  //  */
-  // async updateAppSettings(dto: UpdateAppSettingsDto, currentUserId?: string) {
-  //   // Get existing settings or create if none exist
-  //   let settings = await this.prisma.appSettings.findFirst();
+  /**
+   * Update app settings
+   * @param dto - App settings data to update
+   * @param currentUserId - User ID for audit logging
+   * @returns The updated app settings
+   */
+  async updateAppSettings(dto: UpdateAppSettingsDto, currentUserId?: string) {
+    // Get existing settings or create if none exist
+    let settings = await this.prisma.appSettings.findFirst();
 
-  //   if (!settings) {
-  //     // Create new settings if none exist
-  //     settings = await this.prisma.appSettings.create({
-  //       data: {
-  //         loginBackgroundUrl: dto.loginBackgroundUrl || null,
-  //       },
-  //     });
+    if (!settings) {
+      // Create new settings if none exist
+      settings = await this.prisma.appSettings.create({
+        data: {
+          loginBackgroundUrl: dto.loginBackgroundUrl || null,
+        },
+      });
 
-  //     // Log creation
-  //     if (currentUserId) {
-  //       await this.auditLogService.logCreate(
-  //         currentUserId,
-  //         AuditEntityType.SETTINGS,
-  //         settings.id,
-  //         settings,
-  //       );
-  //     }
-  //   } else {
-  //     // Update existing settings
-  //     const oldSettings = { ...settings };
+      // Log creation
+      if (currentUserId) {
+        await this.auditLogService.logCreate(
+          currentUserId,
+          AuditEntityType.SETTINGS,
+          settings.id,
+          settings,
+        );
+      }
+    } else {
+      // Update existing settings
+      const oldSettings = { ...settings };
 
-  //     settings = await this.prisma.appSettings.update({
-  //       where: { id: settings.id },
-  //       data: {
-  //         loginBackgroundUrl: dto.loginBackgroundUrl !== undefined ? dto.loginBackgroundUrl : settings.loginBackgroundUrl,
-  //       },
-  //     });
+      settings = await this.prisma.appSettings.update({
+        where: { id: settings.id },
+        data: {
+          loginBackgroundUrl: dto.loginBackgroundUrl !== undefined ? dto.loginBackgroundUrl : settings.loginBackgroundUrl,
+        },
+      });
 
-  //     // Log update
-  //     if (currentUserId) {
-  //       await this.auditLogService.logUpdate(
-  //         currentUserId,
-  //         AuditEntityType.SETTINGS,
-  //         settings.id,
-  //         oldSettings,
-  //         settings,
-  //       );
-  //     }
-  //   }
+      // Log update
+      if (currentUserId) {
+        await this.auditLogService.logUpdate(
+          currentUserId,
+          AuditEntityType.SETTINGS,
+          settings.id,
+          oldSettings,
+          settings,
+        );
+      }
+    }
 
-  //   return settings;
-  // }
+    return settings;
+  }
 }

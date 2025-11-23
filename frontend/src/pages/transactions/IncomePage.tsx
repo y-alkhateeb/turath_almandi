@@ -172,7 +172,7 @@ export const IncomePage = () => {
             <div>
               <p className="text-sm font-medium text-green-800">إجمالي الإيرادات</p>
               <p className="text-3xl font-bold text-green-900 mt-2" dir="ltr">
-                {transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString('ar-IQ')} IQD
+                {transactions.reduce((sum, t) => sum + Number(t.amount), 0).toLocaleString('ar-IQ')} IQD
               </p>
             </div>
             <div className="bg-green-200 p-4 rounded-full">

@@ -321,22 +321,22 @@ export const dashboardRoutes: RouteObject[] = [
           // Admin guards are implemented inside each page component
           // ============================================
           {
-            path: 'management/system',
+            path: 'management',
             children: [
-              // Users Management
+              // Debts Management (same as /debts, but under /management for consistency)
               {
-                path: 'users',
+                path: 'debts',
                 children: [
-                  // Redirect /management/system/users to list
+                  // Redirect /management/debts to /management/debts/list
                   {
                     index: true,
-                    element: <Navigate to="/management/system/users/list" replace />,
+                    element: <Navigate to="/management/debts/list" replace />,
                   },
                   {
                     path: 'list',
                     element: (
                       <LazyPage>
-                        <UsersListPage />
+                        <DebtsListPage />
                       </LazyPage>
                     ),
                   },
@@ -344,75 +344,117 @@ export const dashboardRoutes: RouteObject[] = [
                     path: 'create',
                     element: (
                       <LazyPage>
-                        <UsersCreatePage />
+                        <DebtsCreatePage />
                       </LazyPage>
                     ),
                   },
                   {
-                    path: 'edit/:id',
+                    path: 'view/:id',
                     element: (
                       <LazyPage>
-                        <UsersEditPage />
+                        <DebtsViewPage />
                       </LazyPage>
                     ),
                   },
                 ],
               },
 
-              // Branches Management
+              // System Management
               {
-                path: 'branches',
+                path: 'system',
                 children: [
-                  // Redirect /management/system/branches to list
+                  // Users Management
                   {
-                    index: true,
-                    element: <Navigate to="/management/system/branches/list" replace />,
+                    path: 'users',
+                    children: [
+                      // Redirect /management/system/users to list
+                      {
+                        index: true,
+                        element: <Navigate to="/management/system/users/list" replace />,
+                      },
+                      {
+                        path: 'list',
+                        element: (
+                          <LazyPage>
+                            <UsersListPage />
+                          </LazyPage>
+                        ),
+                      },
+                      {
+                        path: 'create',
+                        element: (
+                          <LazyPage>
+                            <UsersCreatePage />
+                          </LazyPage>
+                        ),
+                      },
+                      {
+                        path: 'edit/:id',
+                        element: (
+                          <LazyPage>
+                            <UsersEditPage />
+                          </LazyPage>
+                        ),
+                      },
+                    ],
                   },
+
+                  // Branches Management
                   {
-                    path: 'list',
+                    path: 'branches',
+                    children: [
+                      // Redirect /management/system/branches to list
+                      {
+                        index: true,
+                        element: <Navigate to="/management/system/branches/list" replace />,
+                      },
+                      {
+                        path: 'list',
+                        element: (
+                          <LazyPage>
+                            <BranchesListPage />
+                          </LazyPage>
+                        ),
+                      },
+                      {
+                        path: 'create',
+                        element: (
+                          <LazyPage>
+                            <BranchesCreatePage />
+                          </LazyPage>
+                        ),
+                      },
+                      {
+                        path: 'edit/:id',
+                        element: (
+                          <LazyPage>
+                            <BranchesEditPage />
+                          </LazyPage>
+                        ),
+                      },
+                    ],
+                  },
+
+                  // Audit Log
+                  {
+                    path: 'audit',
                     element: (
                       <LazyPage>
-                        <BranchesListPage />
+                        <AuditLogPage />
                       </LazyPage>
                     ),
                   },
+
+                  // Currency Settings
                   {
-                    path: 'create',
+                    path: 'currency',
                     element: (
                       <LazyPage>
-                        <BranchesCreatePage />
-                      </LazyPage>
-                    ),
-                  },
-                  {
-                    path: 'edit/:id',
-                    element: (
-                      <LazyPage>
-                        <BranchesEditPage />
+                        <CurrencySettingsPage />
                       </LazyPage>
                     ),
                   },
                 ],
-              },
-
-              // Audit Log
-              {
-                path: 'audit',
-                element: (
-                  <LazyPage>
-                    <AuditLogPage />
-                  </LazyPage>
-                ),
-              },
-
-              // Currency Settings
-              {
-                path: 'currency',
-                element: (
-                  <LazyPage>
-                    <CurrencySettingsPage />
-                  </LazyPage>
-                ),
               },
             ],
           },

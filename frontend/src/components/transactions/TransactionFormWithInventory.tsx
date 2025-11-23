@@ -26,7 +26,7 @@ import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
 } from '@/constants/transactionCategories';
-import { transactionService } from '@/api/services';
+import transactionService from '@/api/services/transactionService';
 
 // ============================================
 // ZOD VALIDATION SCHEMA

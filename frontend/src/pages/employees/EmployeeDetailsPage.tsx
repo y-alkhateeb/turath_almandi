@@ -73,7 +73,7 @@ export const EmployeeDetailsPage = () => {
   const [showIncreaseModal, setShowIncreaseModal] = useState(false);
   const [increaseData, setIncreaseData] = useState({
     effectiveDate: new Date().toISOString().split('T')[0],
-    newSalary: '',
+    increaseAmount: '',
     reason: '',
   });
 
@@ -118,19 +118,20 @@ export const EmployeeDetailsPage = () => {
   };
 
   const handleRecordIncrease = async () => {
-    if (!id || !increaseData.newSalary) return;
+    if (!id || !increaseData.increaseAmount || !employee) return;
+    const newSalary = employee.baseSalary + parseFloat(increaseData.increaseAmount);
     await recordIncrease.mutateAsync({
       employeeId: id,
       data: {
         effectiveDate: increaseData.effectiveDate,
-        newSalary: parseFloat(increaseData.newSalary),
+        newSalary: newSalary,
         reason: increaseData.reason || undefined,
       },
     });
     setShowIncreaseModal(false);
     setIncreaseData({
       effectiveDate: new Date().toISOString().split('T')[0],
-      newSalary: '',
+      increaseAmount: '',
       reason: '',
     });
   };
@@ -696,7 +697,7 @@ export const EmployeeDetailsPage = () => {
           setShowIncreaseModal(false);
           setIncreaseData({
             effectiveDate: new Date().toISOString().split('T')[0],
-            newSalary: '',
+            increaseAmount: '',
             reason: '',
           });
         }}
@@ -721,31 +722,30 @@ export const EmployeeDetailsPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              الراتب الجديد (الراتب الأساسي) <span className="text-red-500">*</span>
+              مقدار الزيادة <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               step="0.01"
               min="0"
-              value={increaseData.newSalary}
-              onChange={(e) => setIncreaseData({ ...increaseData, newSalary: e.target.value })}
+              value={increaseData.increaseAmount}
+              onChange={(e) => setIncreaseData({ ...increaseData, increaseAmount: e.target.value })}
               placeholder="0.00"
               className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
             />
-            {employee && increaseData.newSalary && (
+            {employee && increaseData.increaseAmount && (
               <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded text-sm">
                 <p className="text-[var(--text-secondary)]">
                   الراتب الحالي: <CurrencyAmountCompact amount={employee.baseSalary} />
                 </p>
                 <p className="text-green-600 font-medium">
-                  الزيادة: +
+                  الراتب الجديد:{' '}
                   <CurrencyAmountCompact
-                    amount={parseFloat(increaseData.newSalary) - employee.baseSalary}
+                    amount={employee.baseSalary + parseFloat(increaseData.increaseAmount)}
                   />{' '}
-                  (
+                  (+
                   {(
-                    ((parseFloat(increaseData.newSalary) - employee.baseSalary) /
-                      employee.baseSalary) *
+                    (parseFloat(increaseData.increaseAmount) / employee.baseSalary) *
                     100
                   ).toFixed(1)}
                   %)

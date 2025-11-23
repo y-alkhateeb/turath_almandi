@@ -462,7 +462,7 @@ export const usePayDebt = () => {
       queryClient.setQueryData<Debt>(queryKeys.debts.detail(id), (old) => {
         if (!old) return old;
 
-        const newRemainingAmount = old.remainingAmount - data.amountPaid;
+        const newRemainingAmount = Number(old.remainingAmount) - Number(data.amountPaid);
         const newStatus =
           newRemainingAmount <= 0
             ? 'PAID'
@@ -504,7 +504,7 @@ export const usePayDebt = () => {
             data: old.data.map((debt) => {
               if (debt.id !== id) return debt;
 
-              const newRemainingAmount = debt.remainingAmount - data.amountPaid;
+              const newRemainingAmount = Number(debt.remainingAmount) - Number(data.amountPaid);
               const newStatus =
                 newRemainingAmount <= 0
                   ? 'PAID'

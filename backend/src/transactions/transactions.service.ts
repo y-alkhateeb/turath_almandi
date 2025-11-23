@@ -849,4 +849,246 @@ export class TransactionsService {
       transactions: formattedTransactions,
     };
   }
+
+  /**
+   * Create transaction with inventory operations and partial payment support
+   * Supports:
+   * - Purchase (add to inventory) or Consumption (deduct from inventory)
+   * - Multiple inventory items per transaction
+   * - Partial payment with automatic debt creation
+   */
+  async createTransactionWithInventory(
+    dto: any, // Will use CreateTransactionWithInventoryDto
+    user: RequestUser,
+  ): Promise<any> {
+    // Determine branchId based on user role
+    let branchId: string;
+
+    if (user.role === UserRole.ADMIN) {
+      if (!dto.branchId) {
+        throw new BadRequestException('Admin must specify branchId for transaction');
+      }
+      branchId = dto.branchId;
+    } else {
+      if (!user.branchId) {
+        throw new BadRequestException('Accountant must be assigned to branch');
+      }
+      branchId = user.branchId;
+    }
+
+    // Validate amounts
+    if (dto.totalAmount <= 0) {
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
+    }
+
+    const paidAmount = dto.paidAmount ?? dto.totalAmount;
+
+    if (paidAmount < 0) {
+      throw new BadRequestException('Paid amount cannot be negative');
+    }
+
+    if (paidAmount > dto.totalAmount) {
+      throw new BadRequestException('Paid amount cannot exceed total amount');
+    }
+
+    const remainingAmount = dto.totalAmount - paidAmount;
+
+    // If creating debt, validate debt fields
+    if (dto.createDebtForRemaining && remainingAmount > 0) {
+      if (!dto.debtCreditorName) {
+        throw new BadRequestException('Creditor name is required when creating debt');
+      }
+    }
+
+    // Use Prisma transaction for atomicity
+    return this.prisma.$transaction(async (prisma) => {
+      let linkedDebtId: string | null = null;
+
+      // Create debt if partial payment
+      if (dto.createDebtForRemaining && remainingAmount > 0) {
+        const debt = await prisma.debt.create({
+          data: {
+            branchId,
+            creditorName: dto.debtCreditorName,
+            originalAmount: remainingAmount,
+            remainingAmount: remainingAmount,
+            date: formatDateForDB(dto.date),
+            dueDate: dto.debtDueDate ? formatDateForDB(dto.debtDueDate) : null,
+            status: 'ACTIVE',
+            notes: dto.debtNotes || null,
+            createdBy: user.id,
+          },
+        });
+
+        linkedDebtId = debt.id;
+
+        // Log debt creation
+        await this.auditLogService.logCreate(
+          user.id,
+          AuditEntityType.DEBT,
+          debt.id,
+          debt,
+        );
+      }
+
+      // Create the main transaction
+      const transaction = await prisma.transaction.create({
+        data: {
+          type: dto.type,
+          amount: paidAmount, // Store paid amount as the transaction amount
+          totalAmount: dto.totalAmount,
+          paidAmount: paidAmount,
+          date: formatDateForDB(dto.date),
+          paymentMethod: dto.paymentMethod || null,
+          category: normalizeCategory(dto.category) || 'General',
+          employeeVendorName: dto.employeeVendorName || 'N/A',
+          notes: dto.notes || null,
+          branchId: branchId,
+          createdBy: user.id,
+          linkedDebtId: linkedDebtId,
+        },
+        include: {
+          branch: true,
+          creator: {
+            select: USER_SELECT,
+          },
+          linkedDebt: true,
+        },
+      });
+
+      // Process inventory items if any
+      if (dto.inventoryItems && dto.inventoryItems.length > 0) {
+        for (const item of dto.inventoryItems) {
+          // Get inventory item to validate and check availability
+          const inventoryItem = await prisma.inventoryItem.findFirst({
+            where: {
+              id: item.itemId,
+              branchId: branchId,
+              deletedAt: null,
+            },
+          });
+
+          if (!inventoryItem) {
+            throw new NotFoundException(`Inventory item ${item.itemId} not found in this branch`);
+          }
+
+          // For CONSUMPTION, validate sufficient quantity
+          if (item.operationType === 'CONSUMPTION') {
+            if (Number(inventoryItem.quantity) < item.quantity) {
+              throw new BadRequestException(
+                `Insufficient quantity for ${inventoryItem.name}. Available: ${inventoryItem.quantity}, Requested: ${item.quantity}`,
+              );
+            }
+
+            // Deduct from inventory
+            await prisma.inventoryItem.update({
+              where: { id: item.itemId },
+              data: {
+                quantity: {
+                  decrement: item.quantity,
+                },
+                lastUpdated: getCurrentTimestamp(),
+              },
+            });
+
+            // Record consumption
+            await prisma.inventoryConsumption.create({
+              data: {
+                inventoryItemId: item.itemId,
+                branchId: branchId,
+                quantity: item.quantity,
+                unit: inventoryItem.unit,
+                reason: `Transaction: ${transaction.id}`,
+                consumedAt: getCurrentTimestamp(),
+                recordedBy: user.id,
+              },
+            });
+          } else if (item.operationType === 'PURCHASE') {
+            // Add to inventory using weighted average cost
+            if (!item.unitPrice) {
+              throw new BadRequestException('Unit price is required for purchase operations');
+            }
+
+            const currentQuantity = Number(inventoryItem.quantity);
+            const currentCost = Number(inventoryItem.costPerUnit);
+            const newQuantity = currentQuantity + item.quantity;
+
+            // Calculate weighted average cost
+            const totalValue = currentQuantity * currentCost + item.quantity * item.unitPrice;
+            const newCost = newQuantity > 0 ? totalValue / newQuantity : item.unitPrice;
+
+            await prisma.inventoryItem.update({
+              where: { id: item.itemId },
+              data: {
+                quantity: {
+                  increment: item.quantity,
+                },
+                costPerUnit: newCost,
+                lastUpdated: getCurrentTimestamp(),
+              },
+            });
+          }
+
+          // Create transaction-inventory link
+          await prisma.transactionInventoryItem.create({
+            data: {
+              transactionId: transaction.id,
+              inventoryItemId: item.itemId,
+              quantity: item.quantity,
+              operationType: item.operationType,
+              unitPrice: item.unitPrice || null,
+            },
+          });
+        }
+      }
+
+      // Log transaction creation
+      await this.auditLogService.logCreate(
+        user.id,
+        AuditEntityType.TRANSACTION,
+        transaction.id,
+        transaction,
+      );
+
+      // Notify about transaction
+      this.notificationsService
+        .notifyNewTransaction(
+          transaction.id,
+          transaction.type,
+          Number(transaction.amount),
+          transaction.category,
+          transaction.branchId,
+          user.id,
+        )
+        .catch((error) => {
+          console.error('Failed to create transaction notification:', error);
+        });
+
+      // Emit WebSocket event
+      this.websocketGateway.emitNewTransaction(transaction);
+
+      // Fetch full transaction with all relations
+      const fullTransaction = await prisma.transaction.findUnique({
+        where: { id: transaction.id },
+        include: {
+          branch: true,
+          creator: {
+            select: USER_SELECT,
+          },
+          linkedDebt: {
+            include: {
+              payments: true,
+            },
+          },
+          transactionInventoryItems: {
+            include: {
+              inventoryItem: true,
+            },
+          },
+        },
+      });
+
+      return fullTransaction;
+    });
+  }
 }

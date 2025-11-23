@@ -56,6 +56,13 @@ enum InventoryUnit {
   @@map("inventory_unit")
 }
 
+enum InventoryOperationType {
+  PURCHASE
+  CONSUMPTION
+
+  @@map("inventory_operation_type")
+}
+
 enum NotificationSeverity {
   INFO
   WARNING
@@ -175,16 +182,21 @@ model Transaction {
   employeeVendorName String           @map("employee_vendor_name") @db.VarChar(200)
   notes              String?          @db.Text
   inventoryItemId    String?          @map("inventory_item_id") @db.Uuid
+  paidAmount         Decimal?         @map("paid_amount") @db.Decimal(15, 2)
+  totalAmount        Decimal?         @map("total_amount") @db.Decimal(15, 2)
+  linkedDebtId       String?          @map("linked_debt_id") @db.Uuid
   createdBy          String           @map("created_by") @db.Uuid
   createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz
 
   // Relations
-  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  creator        User            @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
-  salaryPayments SalaryPayment[]
+  branch                   Branch                      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator                  User                        @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  inventoryItem            InventoryItem?              @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  linkedDebt               Debt?                       @relation("TransactionDebt", fields: [linkedDebtId], references: [id], onDelete: SetNull)
+  salaryPayments           SalaryPayment[]
+  transactionInventoryItems TransactionInventoryItem[]
 
   @@index([branchId])
   @@index([type])
@@ -193,6 +205,7 @@ model Transaction {
   @@index([createdBy])
   @@index([paymentMethod])
   @@index([inventoryItemId])
+  @@index([linkedDebtId])
   @@index([deletedAt])
   @@index([branchId, date])
   @@index([type, date])
@@ -216,9 +229,10 @@ model Debt {
   deletedAt       DateTime?   @map("deleted_at") @db.Timestamptz
 
   // Relations
-  branch   Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  creator  User          @relation("DebtCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  payments DebtPayment[]
+  branch             Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator            User          @relation("DebtCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  payments           DebtPayment[]
+  linkedTransactions Transaction[] @relation("TransactionDebt")
 
   @@index([branchId])
   @@index([status])
@@ -265,9 +279,10 @@ model InventoryItem {
   deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz
 
   // Relations
-  branch       Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  consumptions InventoryConsumption[]
+  branch                    Branch                      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  transactions              Transaction[]
+  consumptions              InventoryConsumption[]
+  transactionInventoryItems TransactionInventoryItem[]
 
   @@index([branchId])
   @@index([name])
@@ -484,4 +499,25 @@ model SalaryIncrease {
   @@index([recordedBy])
   @@index([employeeId, effectiveDate])
   @@map("salary_increases")
+}
+
+// Transaction Inventory Items (Many-to-Many relationship between Transactions and Inventory)
+model TransactionInventoryItem {
+  id              String                  @id @default(uuid()) @db.Uuid
+  transactionId   String                  @map("transaction_id") @db.Uuid
+  inventoryItemId String                  @map("inventory_item_id") @db.Uuid
+  quantity        Decimal                 @db.Decimal(12, 3)
+  operationType   InventoryOperationType  @map("operation_type")
+  unitPrice       Decimal?                @map("unit_price") @db.Decimal(15, 2)
+  createdAt       DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  transaction   Transaction   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+
+  @@index([transactionId])
+  @@index([inventoryItemId])
+  @@index([operationType])
+  @@map("transaction_inventory_items")
 }

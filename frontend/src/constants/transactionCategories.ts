@@ -28,14 +28,14 @@ export const INCOME_CATEGORIES: CategoryOption[] = [
  * These values match backend EXPENSE_CATEGORIES constants
  */
 export const EXPENSE_CATEGORIES: CategoryOption[] = [
-  { value: 'SALARIES', label: 'رواتب', type: TransactionType.EXPENSE },
+  { value: 'WORKER_DAILY', label: 'يوميات العمال', type: TransactionType.EXPENSE },
   { value: 'RENT', label: 'إيجار', type: TransactionType.EXPENSE },
   { value: 'UTILITIES', label: 'مرافق', type: TransactionType.EXPENSE },
   { value: 'SUPPLIES', label: 'مستلزمات', type: TransactionType.EXPENSE },
   { value: 'MAINTENANCE', label: 'صيانة', type: TransactionType.EXPENSE },
   { value: 'TRANSPORTATION', label: 'مواصلات', type: TransactionType.EXPENSE },
   { value: 'INVENTORY', label: 'مشتريات مخزون', type: TransactionType.EXPENSE },
-  { value: 'DEBT_REPAYMENT', label: 'سداد دين', type: TransactionType.EXPENSE },
+  { value: 'APP_PURCHASES', label: 'مشتريات التطبيق', type: TransactionType.EXPENSE },
   { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى', type: TransactionType.EXPENSE },
 ];
 

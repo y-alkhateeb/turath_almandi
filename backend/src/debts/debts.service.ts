@@ -441,10 +441,9 @@ export class DebtsService {
       }
     }
 
-    // Get today's date for overdue calculation
+    // Get today's date for overdue calculation (beginning of day)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayFormatted = formatDateForDB(today.toISOString().split('T')[0]);
 
     // Execute all queries in parallel for best performance
     const [
@@ -486,7 +485,7 @@ export class DebtsService {
         where: {
           ...where,
           dueDate: {
-            lt: todayFormatted,
+            lt: today,
           },
           status: {
             not: DebtStatus.PAID,

@@ -20,8 +20,10 @@ import type {
   UpdateEmployeeInput,
   CreateSalaryPaymentInput,
   CreateSalaryIncreaseInput,
+  CreateBonusInput,
   SalaryPayment,
   SalaryIncrease,
+  Bonus,
   PayrollSummary,
 } from '@/types';
 import { ApiError } from '@/api/apiClient';
@@ -453,6 +455,110 @@ export const useRecordSalaryIncrease = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.employees.active });
 
       toast.success('تم تسجيل الزيادة على الراتب بنجاح');
+    },
+
+    onError: () => {
+      // Error toast shown by global API interceptor
+    },
+  });
+};
+
+/**
+ * useCreateBonus Hook
+ * Mutation to create a bonus for an employee
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const createBonus = useCreateBonus();
+ *
+ * const handleCreateBonus = async () => {
+ *   await createBonus.mutateAsync({
+ *     employeeId: 'employee-id',
+ *     data: {
+ *       amount: 500000,
+ *       bonusDate: '2025-11-23',
+ *       reason: 'أداء متميز',
+ *     },
+ *   });
+ * };
+ * ```
+ */
+export const useCreateBonus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<Bonus, ApiError, { employeeId: string; data: CreateBonusInput }>({
+    mutationFn: ({ employeeId, data }) => employeeService.createBonus(employeeId, data),
+
+    onSuccess: (_, { employeeId }) => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.bonuses(employeeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.detail(employeeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.all });
+
+      toast.success('تم إضافة المكافأة بنجاح');
+    },
+
+    onError: () => {
+      // Error toast shown by global API interceptor
+    },
+  });
+};
+
+/**
+ * useBonusHistory Hook
+ * Query bonus history for an employee
+ *
+ * @param employeeId - Employee UUID
+ * @param startDate - Optional start date filter
+ * @param endDate - Optional end date filter
+ * @returns Query result with bonuses array
+ *
+ * @example
+ * ```tsx
+ * const { data: bonuses } = useBonusHistory(employeeId);
+ * ```
+ */
+export const useBonusHistory = (employeeId: string, startDate?: string, endDate?: string) => {
+  return useQuery<Bonus[], ApiError>({
+    queryKey: queryKeys.employees.bonuses(employeeId, startDate, endDate),
+    queryFn: () => employeeService.getBonusHistory(employeeId, startDate, endDate),
+    enabled: !!employeeId,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+/**
+ * useDeleteBonus Hook
+ * Mutation to delete a bonus (soft delete)
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const deleteBonus = useDeleteBonus();
+ *
+ * const handleDelete = async (bonusId: string) => {
+ *   await deleteBonus.mutateAsync({ id: bonusId, employeeId });
+ * };
+ * ```
+ */
+export const useDeleteBonus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, ApiError, { id: string; employeeId: string }>({
+    mutationFn: ({ id }) => employeeService.deleteBonus(id),
+
+    onSuccess: (_, { employeeId }) => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.bonuses(employeeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.detail(employeeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.all });
+
+      toast.success('تم حذف المكافأة بنجاح');
     },
 
     onError: () => {

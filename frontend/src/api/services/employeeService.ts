@@ -526,4 +526,7 @@ export default {
   getPayrollSummary,
   getRecentIncreases,
   deleteSalaryPayment,
+  createBonus,
+  getBonusHistory,
+  deleteBonus,
 };

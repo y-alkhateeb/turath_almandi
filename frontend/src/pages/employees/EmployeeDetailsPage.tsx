@@ -119,7 +119,7 @@ export const EmployeeDetailsPage = () => {
 
   const handleRecordIncrease = async () => {
     if (!id || !increaseData.increaseAmount || !employee) return;
-    const newSalary = employee.baseSalary + parseFloat(increaseData.increaseAmount);
+    const newSalary = Number(employee.baseSalary) + Number(increaseData.increaseAmount);
     await recordIncrease.mutateAsync({
       employeeId: id,
       data: {
@@ -733,7 +733,7 @@ export const EmployeeDetailsPage = () => {
               placeholder="0.00"
               className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
             />
-            {employee && increaseData.increaseAmount && (
+            {employee && increaseData.increaseAmount && !isNaN(parseFloat(increaseData.increaseAmount)) && (
               <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded text-sm">
                 <p className="text-[var(--text-secondary)]">
                   الراتب الحالي: <CurrencyAmountCompact amount={employee.baseSalary} />
@@ -741,11 +741,11 @@ export const EmployeeDetailsPage = () => {
                 <p className="text-green-600 font-medium">
                   الراتب الجديد:{' '}
                   <CurrencyAmountCompact
-                    amount={employee.baseSalary + parseFloat(increaseData.increaseAmount)}
+                    amount={Number(employee.baseSalary) + Number(increaseData.increaseAmount)}
                   />{' '}
                   (+
                   {(
-                    (parseFloat(increaseData.increaseAmount) / employee.baseSalary) *
+                    (Number(increaseData.increaseAmount) / Number(employee.baseSalary)) *
                     100
                   ).toFixed(1)}
                   %)

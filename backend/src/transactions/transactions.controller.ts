@@ -3,6 +3,7 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
+import { CreateTransactionWithInventoryDto } from './dto/create-transaction-with-inventory.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -31,6 +32,14 @@ export class TransactionsController {
     @CurrentUser() user: RequestUser,
   ) {
     return this.transactionsService.createPurchaseWithInventory(createPurchaseDto, user);
+  }
+
+  @Post('with-inventory')
+  createWithInventory(
+    @Body() dto: CreateTransactionWithInventoryDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    return this.transactionsService.createTransactionWithInventory(dto, user);
   }
 
   @Get()

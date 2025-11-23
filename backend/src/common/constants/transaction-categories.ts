@@ -11,14 +11,14 @@ export const INCOME_CATEGORIES = [
 ] as const;
 
 export const EXPENSE_CATEGORIES = [
-  'SALARIES',        // رواتب
+  'WORKER_DAILY',    // يوميات العمال
   'RENT',            // إيجار
   'UTILITIES',       // مرافق (كهرباء، ماء، إنترنت)
   'SUPPLIES',        // مستلزمات
   'MAINTENANCE',     // صيانة
   'TRANSPORTATION',  // مواصلات
   'INVENTORY',       // مشتريات مخزون
-  'DEBT_REPAYMENT',  // سداد دين
+  'APP_PURCHASES',   // مشتريات التطبيق
   'OTHER_EXPENSE',   // مصروفات أخرى
 ] as const;
 
@@ -37,14 +37,14 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   SERVICES: 'خدمات',
   DEBT_PAYMENT: 'سداد دين',
   OTHER_INCOME: 'إيرادات أخرى',
-  SALARIES: 'رواتب',
+  WORKER_DAILY: 'يوميات العمال',
   RENT: 'إيجار',
   UTILITIES: 'مرافق',
   SUPPLIES: 'مستلزمات',
   MAINTENANCE: 'صيانة',
   TRANSPORTATION: 'مواصلات',
   INVENTORY: 'مشتريات مخزون',
-  DEBT_REPAYMENT: 'سداد دين',
+  APP_PURCHASES: 'مشتريات التطبيق',
   OTHER_EXPENSE: 'مصروفات أخرى',
 };
 

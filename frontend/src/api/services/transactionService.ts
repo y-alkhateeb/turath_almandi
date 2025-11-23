@@ -16,6 +16,7 @@
 import apiClient from '../apiClient';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
 import type { PaginatedResponse, TransactionQueryFilters, TransactionStatsResponse } from '#/api';
+import type { TransactionWithInventoryRequest } from '@/types/inventoryOperation.types';
 
 // ============================================
 // API ENDPOINTS
@@ -118,6 +119,26 @@ export const getOne = (id: string): Promise<Transaction> => {
 export const create = (data: CreateTransactionInput): Promise<Transaction> => {
   return apiClient.post<Transaction>({
     url: TransactionApiEndpoints.Base,
+    data,
+  });
+};
+
+/**
+ * Create transaction with inventory operations and partial payment
+ * POST /transactions/with-inventory
+ *
+ * Supports:
+ * - Purchase (add to inventory) or Consumption (deduct from inventory)
+ * - Multiple inventory items per transaction
+ * - Partial payment with automatic debt creation
+ *
+ * @param data - TransactionWithInventoryRequest
+ * @returns Created Transaction with relations
+ * @throws ApiError on 400 (validation), 401, 403, 404
+ */
+export const createWithInventory = (data: TransactionWithInventoryRequest): Promise<Transaction> => {
+  return apiClient.post<Transaction>({
+    url: '/transactions/with-inventory',
     data,
   });
 };
@@ -335,6 +356,7 @@ const transactionService = {
   getAllUnpaginated,
   getOne,
   create,
+  createWithInventory,
   update,
   delete: deleteTransaction,
   getSummary,

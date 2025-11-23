@@ -4,6 +4,7 @@
  */
 
 import { InventoryUnit } from './inventory.types';
+import { TransactionInventoryItem } from './inventoryOperation.types';
 
 export enum TransactionType {
   INCOME = 'INCOME',
@@ -35,6 +36,9 @@ export interface Transaction {
   employeeVendorName: string | null;
   notes: string | null;
   inventoryItemId?: string | null;
+  paidAmount?: number | null;
+  totalAmount?: number | null;
+  linkedDebtId?: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -49,6 +53,14 @@ export interface Transaction {
     role: string;
   };
   inventoryItem?: InventoryItem | null;
+  linkedDebt?: {
+    id: string;
+    creditorName: string;
+    originalAmount: number;
+    remainingAmount: number;
+    status: string;
+  } | null;
+  transactionInventoryItems?: TransactionInventoryItem[];
 }
 
 export interface CreateTransactionInput {

@@ -70,6 +70,7 @@ const AuditLogPage = lazy(() => import('@/pages/management/system/audit'));
 
 // Settings
 const CurrencySettingsPage = lazy(() => import('@/pages/settings/currency'));
+const AppSettingsPage = lazy(() => import('@/pages/settings/app'));
 
 // Profile
 const ProfilePage = lazy(() => import('@/pages/profile'));
@@ -451,6 +452,16 @@ export const dashboardRoutes: RouteObject[] = [
                     element: (
                       <LazyPage>
                         <CurrencySettingsPage />
+                      </LazyPage>
+                    ),
+                  },
+
+                  // App Settings (Login Background)
+                  {
+                    path: 'app',
+                    element: (
+                      <LazyPage>
+                        <AppSettingsPage />
                       </LazyPage>
                     ),
                   },

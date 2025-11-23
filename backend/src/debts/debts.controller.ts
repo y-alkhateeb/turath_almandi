@@ -33,6 +33,17 @@ export class DebtsController {
     return this.debtsService.findAll(user, { page, limit });
   }
 
+  @Get('summary')
+  getSummary(
+    @CurrentUser() user: RequestUser,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('branchId') branchId?: string,
+  ) {
+    const dateRange = startDate || endDate ? { startDate, endDate } : undefined;
+    return this.debtsService.getDebtsSummary(user, dateRange, branchId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: RequestUser) {
     return this.debtsService.findOne(id, user);

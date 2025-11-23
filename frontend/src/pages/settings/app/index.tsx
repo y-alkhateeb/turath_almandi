@@ -3,39 +3,32 @@
  * Page for managing app-wide settings (Admin only)
  *
  * Features:
- * - Update login background image URL
- * - Preview background image
+ * - Update app name
+ * - Upload app icon (favicon)
+ * - Upload login background image
+ * - Image upload with drag & drop
  * - Admin-only access
  */
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { ImageUpload } from '@/components/form/ImageUpload';
 import { useAuth } from '@/hooks/useAuth';
 import { getAppSettings, updateAppSettings } from '@/api/services/settingsService';
 import type { AppSettings, UpdateAppSettingsInput } from '#/settings.types';
 
 // Validation schema
 const appSettingsSchema = z.object({
-  loginBackgroundUrl: z
-    .string()
-    .url({ message: 'يجب أن يكون رابط صحيح' })
-    .max(2000, { message: 'الرابط طويل جداً (الحد الأقصى 2000 حرف)' })
-    .optional()
-    .or(z.literal('')),
+  loginBackgroundUrl: z.string().optional().or(z.literal('')),
   appName: z
     .string()
     .max(200, { message: 'اسم التطبيق طويل جداً (الحد الأقصى 200 حرف)' })
     .optional()
     .or(z.literal('')),
-  appIconUrl: z
-    .string()
-    .url({ message: 'يجب أن يكون رابط صحيح' })
-    .max(2000, { message: 'الرابط طويل جداً (الحد الأقصى 2000 حرف)' })
-    .optional()
-    .or(z.literal('')),
+  appIconUrl: z.string().optional().or(z.literal('')),
 });
 
 type AppSettingsFormData = z.infer<typeof appSettingsSchema>;
@@ -50,10 +43,11 @@ export default function AppSettingsPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
+    setValue,
   } = useForm<AppSettingsFormData>({
     resolver: zodResolver(appSettingsSchema),
     defaultValues: {
@@ -62,9 +56,6 @@ export default function AppSettingsPage() {
       appIconUrl: '',
     },
   });
-
-  const loginBackgroundUrl = watch('loginBackgroundUrl');
-  const appIconUrl = watch('appIconUrl');
 
   // Fetch app settings on mount
   useEffect(() => {
@@ -187,102 +178,39 @@ export default function AppSettingsPage() {
               </p>
             </div>
 
-            {/* App Icon URL */}
-            <div>
-              <label
-                htmlFor="appIconUrl"
-                className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-              >
-                رابط أيقونة التطبيق (Favicon)
-              </label>
-              <input
-                id="appIconUrl"
-                type="url"
-                {...register('appIconUrl')}
-                placeholder="https://example.com/icon.png"
-                className={`w-full px-4 py-3 border ${
-                  errors.appIconUrl ? 'border-red-500' : 'border-[var(--border-color)]'
-                } rounded-lg text-[var(--text-primary)] bg-[var(--bg-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                disabled={isSaving}
-                dir="ltr"
-              />
-              {errors.appIconUrl && (
-                <p className="mt-1 text-sm text-red-600">{errors.appIconUrl.message}</p>
+            {/* App Icon Upload */}
+            <Controller
+              name="appIconUrl"
+              control={control}
+              render={({ field }) => (
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                  onError={setErrorMessage}
+                  label="أيقونة التطبيق (Favicon)"
+                  description="الأيقونة التي ستظهر في تبويب المتصفح (حجم موصى به: 512x512 بكسل)"
+                  disabled={isSaving}
+                  maxSizeMB={2}
+                />
               )}
-              <p className="mt-2 text-xs text-[var(--text-secondary)]">
-                رابط أيقونة التطبيق التي ستظهر في تبويب المتصفح
-              </p>
-            </div>
+            />
 
-            {/* Icon Preview */}
-            {appIconUrl && (
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  معاينة الأيقونة
-                </label>
-                <div className="flex items-center gap-4 p-4 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)]">
-                  <img
-                    src={appIconUrl}
-                    alt="معاينة أيقونة التطبيق"
-                    className="w-16 h-16 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.src = '';
-                      e.currentTarget.alt = 'فشل تحميل الأيقونة';
-                    }}
-                  />
-                  <span className="text-sm text-[var(--text-secondary)]">حجم الأيقونة الموصى به: 512x512 بكسل</span>
-                </div>
-              </div>
-            )}
-
-            {/* Login Background URL Input */}
-            <div>
-              <label
-                htmlFor="loginBackgroundUrl"
-                className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-              >
-                رابط صورة خلفية تسجيل الدخول
-              </label>
-              <input
-                id="loginBackgroundUrl"
-                type="url"
-                {...register('loginBackgroundUrl')}
-                placeholder="https://example.com/image.jpg"
-                className={`w-full px-4 py-3 border ${
-                  errors.loginBackgroundUrl ? 'border-red-500' : 'border-[var(--border-color)]'
-                } rounded-lg text-[var(--text-primary)] bg-[var(--bg-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                disabled={isSaving}
-                dir="ltr"
-              />
-              {errors.loginBackgroundUrl && (
-                <p className="mt-1 text-sm text-red-600">{errors.loginBackgroundUrl.message}</p>
+            {/* Login Background Upload */}
+            <Controller
+              name="loginBackgroundUrl"
+              control={control}
+              render={({ field }) => (
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                  onError={setErrorMessage}
+                  label="صورة خلفية تسجيل الدخول"
+                  description="الصورة التي ستظهر في خلفية صفحة تسجيل الدخول"
+                  disabled={isSaving}
+                  maxSizeMB={5}
+                />
               )}
-              <p className="mt-2 text-xs text-[var(--text-secondary)]">
-                أدخل رابط الصورة التي تريد عرضها كخلفية لصفحة تسجيل الدخول. إذا تركت الحقل فارغاً، سيتم
-                عرض خلفية ملونة افتراضية.
-              </p>
-            </div>
-
-            {/* Preview */}
-            {loginBackgroundUrl && (
-              <div>
-                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                  معاينة
-                </label>
-                <div className="relative w-full h-48 border border-[var(--border-color)] rounded-lg overflow-hidden">
-                  <img
-                    src={loginBackgroundUrl}
-                    alt="معاينة صورة الخلفية"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = '';
-                      e.currentTarget.alt = 'فشل تحميل الصورة';
-                      e.currentTarget.className = 'w-full h-full flex items-center justify-center bg-gray-100 text-gray-500';
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+            />
 
             {/* Current Setting Info */}
             {currentSettings?.loginBackgroundUrl && (

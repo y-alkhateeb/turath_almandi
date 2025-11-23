@@ -2,6 +2,8 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -18,6 +20,7 @@ import { WebSocketModule } from './websocket/websocket.module';
 import { ReportsModule } from './reports/reports.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmployeesModule } from './employees/employees.module';
+import { UploadModule } from './upload/upload.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
@@ -33,6 +36,10 @@ import { envValidationSchema } from './common/config/env.validation';
         abortEarly: false, // Show all validation errors at once
         allowUnknown: true, // Allow other env vars not in schema
       },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
     ThrottlerModule.forRoot([
       {
@@ -54,6 +61,7 @@ import { envValidationSchema } from './common/config/env.validation';
     ReportsModule,
     SettingsModule,
     EmployeesModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [

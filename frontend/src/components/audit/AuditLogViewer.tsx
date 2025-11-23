@@ -13,7 +13,7 @@
  */
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, User, Search, Filter, Globe } from 'lucide-react';
+import { ChevronDown, ChevronRight, Calendar, User, Search, Filter, Globe } from 'lucide-react';
 import { DateInput } from '@/components/form';
 import { formatDateTime } from '@/utils/format';
 import { AuditAction } from '@/types/enum';

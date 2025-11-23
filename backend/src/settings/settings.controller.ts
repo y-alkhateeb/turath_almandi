@@ -12,7 +12,8 @@ import { UserRole } from '@prisma/client';
 import { SettingsService } from './settings.service';
 import { CreateCurrencyDto } from './dto/create-currency.dto';
 import { SetDefaultCurrencyDto } from './dto/set-default-currency.dto';
-import { UpdateAppSettingsDto } from './dto/update-app-settings.dto';
+// TEMPORARILY COMMENTED OUT DUE TO PRISMA CLIENT GENERATION ISSUES
+// import { UpdateAppSettingsDto } from './dto/update-app-settings.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -77,27 +78,28 @@ export class SettingsController {
     return this.settingsService.createCurrency(dto, user.id);
   }
 
-  /**
-   * Get app settings (public endpoint)
-   * Needed for login page to get background image
-   */
-  @Get('app')
-  @HttpCode(HttpStatus.OK)
-  getAppSettings() {
-    return this.settingsService.getAppSettings();
-  }
+  // TEMPORARILY COMMENTED OUT DUE TO PRISMA CLIENT GENERATION ISSUES
+  // /**
+  //  * Get app settings (public endpoint)
+  //  * Needed for login page to get background image
+  //  */
+  // @Get('app')
+  // @HttpCode(HttpStatus.OK)
+  // getAppSettings() {
+  //   return this.settingsService.getAppSettings();
+  // }
 
-  /**
-   * Update app settings (admin only)
-   */
-  @Patch('app')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles([UserRole.ADMIN])
-  @HttpCode(HttpStatus.OK)
-  updateAppSettings(
-    @Body() dto: UpdateAppSettingsDto,
-    @CurrentUser() user: RequestUser,
-  ) {
-    return this.settingsService.updateAppSettings(dto, user.id);
-  }
+  // /**
+  //  * Update app settings (admin only)
+  //  */
+  // @Patch('app')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles([UserRole.ADMIN])
+  // @HttpCode(HttpStatus.OK)
+  // updateAppSettings(
+  //   @Body() dto: UpdateAppSettingsDto,
+  //   @CurrentUser() user: RequestUser,
+  // ) {
+  //   return this.settingsService.updateAppSettings(dto, user.id);
+  // }
 }

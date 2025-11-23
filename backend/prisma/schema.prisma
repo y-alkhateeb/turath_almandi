@@ -391,17 +391,7 @@ model CurrencySettings {
   @@map("currency_settings")
 }
 
-// 12. App Settings Table
-model AppSettings {
-  id                  String   @id @default(uuid()) @db.Uuid
-  loginBackgroundUrl  String?  @map("login_background_url") @db.Text
-  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  @@map("app_settings")
-}
-
-// 13. Employees Table
+// 12. Employees Table
 model Employee {
   id             String         @id @default(uuid()) @db.Uuid
   branchId       String         @map("branch_id") @db.Uuid
@@ -433,7 +423,7 @@ model Employee {
   @@map("employees")
 }
 
-// 14. Salary Payments Table
+// 13. Salary Payments Table
 model SalaryPayment {
   id            String    @id @default(uuid()) @db.Uuid
   employeeId    String    @map("employee_id") @db.Uuid
@@ -460,7 +450,7 @@ model SalaryPayment {
   @@map("salary_payments")
 }
 
-// 15. Salary Increases Table
+// 14. Salary Increases Table
 model SalaryIncrease {
   id             String   @id @default(uuid()) @db.Uuid
   employeeId     String   @map("employee_id") @db.Uuid

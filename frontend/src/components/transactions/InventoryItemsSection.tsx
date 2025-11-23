@@ -9,7 +9,7 @@ import { FormInput } from '@/components/form/FormInput';
 import { FormRadioGroup, type RadioOption } from '@/components/form/FormRadioGroup';
 import { InventoryOperationType, type InventoryItemOperation } from '@/types/inventoryOperation.types';
 import type { InventoryItem } from '@/types/inventory.types';
-import { inventoryService } from '@/api/services';
+import inventoryService from '@/api/services/inventoryService';
 
 interface InventoryItemsSectionProps {
   branchId: string | null;

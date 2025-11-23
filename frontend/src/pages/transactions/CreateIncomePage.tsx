@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { TransactionForm } from '@/components/transactions/TransactionForm';
+import { TransactionFormWithInventory } from '@/components/transactions/TransactionFormWithInventory';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/ui/button';
 import { PageLayout } from '@/components/layouts';
-import { useCreateTransaction } from '@/hooks/useTransactions';
-import type { CreateTransactionInput } from '#/entity';
+import type { Transaction } from '#/entity';
 
 /**
  * Create Transaction Page
@@ -13,10 +12,9 @@ import type { CreateTransactionInput } from '#/entity';
  */
 export const CreateIncomePage = () => {
   const navigate = useNavigate();
-  const createTransaction = useCreateTransaction();
 
-  const handleSubmit = async (data: CreateTransactionInput) => {
-    await createTransaction.mutateAsync(data);
+  const handleSuccess = (_transaction: Transaction) => {
+    // Success toast shown by form component
     navigate('/transactions/list');
   };
 
@@ -37,11 +35,9 @@ export const CreateIncomePage = () => {
     >
       {/* Form Card */}
       <Card padding="lg">
-        <TransactionForm
-          mode="create"
-          onSubmit={handleSubmit}
+        <TransactionFormWithInventory
+          onSuccess={handleSuccess}
           onCancel={handleCancel}
-          isSubmitting={createTransaction.isPending}
         />
       </Card>
     </PageLayout>

@@ -481,8 +481,7 @@ export const usePayDebt = () => {
             {
               id: `temp-${Date.now()}`,
               debtId: id,
-              amount: data.amountPaid,
-              currency: data.currency || old.currency,
+              amountPaid: data.amountPaid, // Fixed: was 'amount', should be 'amountPaid'
               paymentDate: data.paymentDate,
               notes: data.notes || null,
               recordedBy: '',

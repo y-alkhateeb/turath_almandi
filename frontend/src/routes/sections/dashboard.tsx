@@ -71,6 +71,9 @@ const AppSettingsPage = lazy(() => import('@/pages/settings/app'));
 // Profile
 const ProfilePage = lazy(() => import('@/pages/profile'));
 
+// Reports
+const SmartReportBuilderPage = lazy(() => import('@/pages/reports/smart-builder'));
+
 // ============================================
 // LAZY PAGE WRAPPER
 // ============================================
@@ -270,6 +273,23 @@ export const dashboardRoutes: RouteObject[] = [
                 element: (
                   <LazyPage>
                     <EmployeeDetailsPage />
+                  </LazyPage>
+                ),
+              },
+            ],
+          },
+
+          // ============================================
+          // REPORTS
+          // ============================================
+          {
+            path: 'reports',
+            children: [
+              {
+                path: 'smart-builder',
+                element: (
+                  <LazyPage>
+                    <SmartReportBuilderPage />
                   </LazyPage>
                 ),
               },

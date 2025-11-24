@@ -854,7 +854,7 @@ export class TransactionsService {
    * Create transaction with inventory operations and partial payment support
    * Supports:
    * - Purchase (add to inventory) or Consumption (deduct from inventory)
-   * - Multiple inventory items per transaction
+   * - Single inventory item per transaction
    * - Partial payment with automatic debt creation
    */
   async createTransactionWithInventory(
@@ -939,9 +939,9 @@ export class TransactionsService {
           totalAmount: dto.totalAmount,
           paidAmount: paidAmount,
           date: formatDateForDB(dto.date),
-          paymentMethod: dto.paymentMethod || null,
+          paymentMethod: dto.paymentMethod,
           category: normalizeCategory(dto.category) || 'General',
-          employeeVendorName: dto.employeeVendorName || 'N/A',
+          employeeVendorName: 'N/A',
           notes: dto.notes || null,
           branchId: branchId,
           createdBy: user.id,
@@ -956,90 +956,90 @@ export class TransactionsService {
         },
       });
 
-      // Process inventory items if any
-      if (dto.inventoryItems && dto.inventoryItems.length > 0) {
-        for (const item of dto.inventoryItems) {
-          // Get inventory item to validate and check availability
-          const inventoryItem = await prisma.inventoryItem.findFirst({
-            where: {
-              id: item.itemId,
-              branchId: branchId,
-              deletedAt: null,
+      // Process inventory item if present
+      if (dto.inventoryItem) {
+        const item = dto.inventoryItem;
+
+        // Get inventory item to validate and check availability
+        const inventoryItem = await prisma.inventoryItem.findFirst({
+          where: {
+            id: item.itemId,
+            branchId: branchId,
+            deletedAt: null,
+          },
+        });
+
+        if (!inventoryItem) {
+          throw new NotFoundException(`Inventory item ${item.itemId} not found in this branch`);
+        }
+
+        // For CONSUMPTION, validate sufficient quantity
+        if (item.operationType === 'CONSUMPTION') {
+          if (Number(inventoryItem.quantity) < item.quantity) {
+            throw new BadRequestException(
+              `Insufficient quantity for ${inventoryItem.name}. Available: ${inventoryItem.quantity}, Requested: ${item.quantity}`,
+            );
+          }
+
+          // Deduct from inventory
+          await prisma.inventoryItem.update({
+            where: { id: item.itemId },
+            data: {
+              quantity: {
+                decrement: item.quantity,
+              },
+              lastUpdated: getCurrentTimestamp(),
             },
           });
 
-          if (!inventoryItem) {
-            throw new NotFoundException(`Inventory item ${item.itemId} not found in this branch`);
-          }
-
-          // For CONSUMPTION, validate sufficient quantity
-          if (item.operationType === 'CONSUMPTION') {
-            if (Number(inventoryItem.quantity) < item.quantity) {
-              throw new BadRequestException(
-                `Insufficient quantity for ${inventoryItem.name}. Available: ${inventoryItem.quantity}, Requested: ${item.quantity}`,
-              );
-            }
-
-            // Deduct from inventory
-            await prisma.inventoryItem.update({
-              where: { id: item.itemId },
-              data: {
-                quantity: {
-                  decrement: item.quantity,
-                },
-                lastUpdated: getCurrentTimestamp(),
-              },
-            });
-
-            // Record consumption
-            await prisma.inventoryConsumption.create({
-              data: {
-                inventoryItemId: item.itemId,
-                branchId: branchId,
-                quantity: item.quantity,
-                unit: inventoryItem.unit,
-                reason: `Transaction: ${transaction.id}`,
-                consumedAt: getCurrentTimestamp(),
-                recordedBy: user.id,
-              },
-            });
-          } else if (item.operationType === 'PURCHASE') {
-            // Add to inventory using weighted average cost
-            if (!item.unitPrice) {
-              throw new BadRequestException('Unit price is required for purchase operations');
-            }
-
-            const currentQuantity = Number(inventoryItem.quantity);
-            const currentCost = Number(inventoryItem.costPerUnit);
-            const newQuantity = currentQuantity + item.quantity;
-
-            // Calculate weighted average cost
-            const totalValue = currentQuantity * currentCost + item.quantity * item.unitPrice;
-            const newCost = newQuantity > 0 ? totalValue / newQuantity : item.unitPrice;
-
-            await prisma.inventoryItem.update({
-              where: { id: item.itemId },
-              data: {
-                quantity: {
-                  increment: item.quantity,
-                },
-                costPerUnit: newCost,
-                lastUpdated: getCurrentTimestamp(),
-              },
-            });
-          }
-
-          // Create transaction-inventory link
-          await prisma.transactionInventoryItem.create({
+          // Record consumption
+          await prisma.inventoryConsumption.create({
             data: {
-              transactionId: transaction.id,
               inventoryItemId: item.itemId,
+              branchId: branchId,
               quantity: item.quantity,
-              operationType: item.operationType,
-              unitPrice: item.unitPrice || null,
+              unit: inventoryItem.unit,
+              reason: `Transaction: ${transaction.id}`,
+              consumedAt: getCurrentTimestamp(),
+              recordedBy: user.id,
+            },
+          });
+        } else if (item.operationType === 'PURCHASE') {
+          // Add to inventory using weighted average cost
+          if (!item.unitPrice) {
+            throw new BadRequestException('Unit price is required for purchase operations');
+          }
+
+          const currentQuantity = Number(inventoryItem.quantity);
+          const currentCost = Number(inventoryItem.costPerUnit);
+          const newQuantity = currentQuantity + item.quantity;
+
+          // Calculate weighted average cost
+          const totalValue = currentQuantity * currentCost + item.quantity * item.unitPrice;
+          const newCost = newQuantity > 0 ? totalValue / newQuantity : item.unitPrice;
+
+          await prisma.inventoryItem.update({
+            where: { id: item.itemId },
+            data: {
+              quantity: {
+                increment: item.quantity,
+              },
+              costPerUnit: newCost,
+              lastUpdated: getCurrentTimestamp(),
             },
           });
         }
+
+        // Create transaction-inventory link
+        await prisma.transactionInventoryItem.create({
+          data: {
+            transactionId: transaction.id,
+            inventoryItemId: item.itemId,
+            quantity: item.quantity,
+            operationType: item.operationType,
+            unitPrice: item.unitPrice || null,
+          },
+        });
       }
 
       // Log transaction creation

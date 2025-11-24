@@ -7,7 +7,6 @@ import {
   IsEnum,
   IsOptional,
   IsDateString,
-  IsArray,
   ValidateNested,
   IsUUID,
   IsBoolean,
@@ -60,17 +59,8 @@ export class CreateTransactionWithInventoryDto {
    * طريقة الدفع للمبلغ المدفوع
    * @example 'CASH'
    */
-  @IsOptional()
   @IsEnum(['CASH', 'MASTER'])
-  paymentMethod?: 'CASH' | 'MASTER';
-
-  /**
-   * اسم الموظف أو البائع
-   * @example 'أحمد محمد'
-   */
-  @IsString()
-  @IsNotEmpty()
-  employeeVendorName: string;
+  paymentMethod: 'CASH' | 'MASTER';
 
   /**
    * تاريخ المعاملة
@@ -96,13 +86,12 @@ export class CreateTransactionWithInventoryDto {
   branchId?: string;
 
   /**
-   * قائمة أصناف المخزون المرتبطة بالمعاملة
+   * صنف المخزون المرتبط بالمعاملة (صنف واحد فقط)
    */
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
+  @ValidateNested()
   @Type(() => InventoryItemOperationDto)
-  inventoryItems?: InventoryItemOperationDto[];
+  inventoryItem?: InventoryItemOperationDto;
 
   /**
    * هل نسجل المبلغ المتبقي كدين؟

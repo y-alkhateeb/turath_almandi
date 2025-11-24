@@ -15,17 +15,31 @@ export interface InventoryItemOperation {
   unitPrice?: number;
 }
 
+// Single inventory item with display information
+export interface SingleInventoryItem {
+  itemId: string;
+  itemName: string; // For display
+  quantity: number;
+  unitPrice: number;
+  unit: string; // For display
+}
+
 export interface TransactionWithInventoryRequest {
   type: 'INCOME' | 'EXPENSE';
   totalAmount: number;
   paidAmount?: number;
   category?: string;
-  paymentMethod?: 'CASH' | 'MASTER';
-  employeeVendorName: string;
+  paymentMethod: 'CASH' | 'MASTER'; // Now required
   date: string;
   notes?: string;
   branchId?: string;
-  inventoryItems?: InventoryItemOperation[];
+  // Single inventory item (not array)
+  inventoryItem?: {
+    itemId: string;
+    quantity: number;
+    operationType: 'PURCHASE' | 'CONSUMPTION';
+    unitPrice: number;
+  };
   createDebtForRemaining?: boolean;
   debtCreditorName?: string;
   debtDueDate?: string;

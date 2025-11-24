@@ -1,14 +1,15 @@
 /**
- * TransactionFormWithInventory - Enhanced Form Component
- * Form for creating transactions with inventory operations and partial payment
+ * TransactionFormWithInventory - Refactored Form Component
+ * Form for creating transactions with inventory operations and payment
  *
- * New Features:
- * - Partial payment with debt creation
- * - Inventory operations (purchase/consumption)
- * - Multiple inventory items per transaction
+ * Features:
+ * - Single inventory item per transaction
+ * - Auto-calculated total for inventory items
+ * - Unified payment section with partial payment and debt creation
+ * - Auto-determined operation type (PURCHASE/CONSUMPTION)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,12 +17,12 @@ import { FormInput } from '@/components/form/FormInput';
 import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
 import { FormTextarea } from '@/components/form/FormTextarea';
 import { BranchSelector, DateInput } from '@/components/form';
-import { PartialPaymentSection } from './PartialPaymentSection';
-import { InventoryItemsSection } from './InventoryItemsSection';
+import { PaymentSection } from './PaymentSection';
+import { InventoryItemSection } from './InventoryItemSection';
 import { useAuth } from '@/hooks/useAuth';
 import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction } from '#/entity';
-import type { TransactionWithInventoryRequest, InventoryItemOperation } from '@/types/inventoryOperation.types';
+import type { TransactionWithInventoryRequest, SingleInventoryItem } from '@/types/inventoryOperation.types';
 import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
@@ -36,29 +37,12 @@ const createTransactionWithInventorySchema = z.object({
   type: z.nativeEnum(TransactionType, {
     errorMap: () => ({ message: 'نوع العملية مطلوب' }),
   }),
-  totalAmount: z
-    .preprocess(
-      (val) => {
-        if (val === '' || val === null) return undefined;
-        if (typeof val === 'string') {
-          const num = parseFloat(val);
-          return isNaN(num) ? undefined : num;
-        }
-        return val;
-      },
-      z.number({
-        required_error: 'المبلغ مطلوب',
-        invalid_type_error: 'المبلغ يجب أن يكون رقمًا',
-      })
-        .min(0.01, { message: 'المبلغ يجب أن يكون 0.01 على الأقل' })
-        .positive({ message: 'المبلغ يجب أن يكون موجبًا' })
-    ),
-  paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   category: z.string().optional(),
   date: z.string().min(1, { message: 'التاريخ مطلوب' }),
-  employeeVendorName: z.string().min(1, { message: 'الاسم مطلوب' }),
   notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
   branchId: z.string().optional(),
+  // Manual total amount (only for non-INVENTORY categories)
+  manualTotalAmount: z.number().optional(),
 });
 
 type FormData = z.infer<typeof createTransactionWithInventorySchema>;
@@ -81,11 +65,6 @@ const transactionTypeOptions: SelectOption[] = [
   { value: TransactionType.EXPENSE, label: 'مصروف' },
 ];
 
-const paymentMethodOptions: SelectOption[] = [
-  { value: PaymentMethod.CASH, label: 'نقدي' },
-  { value: PaymentMethod.MASTER, label: 'ماستر كارد' },
-];
-
 // ============================================
 // COMPONENT
 // ============================================
@@ -98,15 +77,20 @@ export function TransactionFormWithInventory({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Partial payment state
+  // Payment state
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'MASTER'>('CASH');
+  const [isPartialPayment, setIsPartialPayment] = useState(false);
   const [paidAmount, setPaidAmount] = useState(0);
   const [createDebt, setCreateDebt] = useState(false);
   const [debtCreditorName, setDebtCreditorName] = useState('');
   const [debtDueDate, setDebtDueDate] = useState('');
-  const [debtNotes, setDebtNotes] = useState('');
 
   // Inventory state
-  const [inventoryItems, setInventoryItems] = useState<InventoryItemOperation[]>([]);
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState<SingleInventoryItem | null>(null);
+  const [inventoryCalculatedTotal, setInventoryCalculatedTotal] = useState(0);
+
+  // Manual total amount for non-inventory categories
+  const [manualTotalAmount, setManualTotalAmount] = useState<number>(0);
 
   const {
     register,
@@ -120,11 +104,8 @@ export function TransactionFormWithInventory({
     resolver: zodResolver(createTransactionWithInventorySchema),
     defaultValues: {
       type: TransactionType.EXPENSE,
-      totalAmount: undefined,
-      paymentMethod: PaymentMethod.CASH,
       category: 'INVENTORY',
       date: new Date().toISOString().split('T')[0],
-      employeeVendorName: '',
       notes: '',
       branchId: isAdmin ? undefined : user?.branchId,
     },
@@ -132,15 +113,25 @@ export function TransactionFormWithInventory({
 
   const transactionType = watch('type');
   const category = watch('category');
-  const totalAmount = Number(watch('totalAmount')) || 0;
   const selectedBranchId = watch('branchId') || user?.branchId || null;
 
-  // Auto-update paid amount when total changes
-  useEffect(() => {
-    if (!paidAmount || paidAmount === 0) {
-      setPaidAmount(Number(totalAmount));
+  // Auto-determine inventory operation type based on transaction type
+  const inventoryOperationType = useMemo(() => {
+    if (category !== 'INVENTORY') return null;
+    return transactionType === TransactionType.EXPENSE ? 'PURCHASE' : 'CONSUMPTION';
+  }, [transactionType, category]);
+
+  // Determine if we should show inventory section or manual amount input
+  const showInventorySection = category === 'INVENTORY';
+  const showManualAmountInput = !showInventorySection;
+
+  // Calculate the actual total amount based on category
+  const totalAmount = useMemo(() => {
+    if (showInventorySection) {
+      return inventoryCalculatedTotal;
     }
-  }, [totalAmount]);
+    return manualTotalAmount;
+  }, [showInventorySection, inventoryCalculatedTotal, manualTotalAmount]);
 
   // Auto-select first category when transaction type changes
   useEffect(() => {
@@ -150,17 +141,63 @@ export function TransactionFormWithInventory({
     }
   }, [transactionType, setValue]);
 
-  const showInventorySection = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
-  const showPartialPayment = transactionType === TransactionType.EXPENSE;
+  // Auto-update paid amount when total changes and not in partial payment mode
+  useEffect(() => {
+    if (!isPartialPayment) {
+      setPaidAmount(totalAmount);
+    }
+  }, [totalAmount, isPartialPayment]);
+
+  // Reset inventory item when category changes away from INVENTORY
+  useEffect(() => {
+    if (category !== 'INVENTORY') {
+      setSelectedInventoryItem(null);
+      setInventoryCalculatedTotal(0);
+    }
+  }, [category]);
+
+  // Reset inventory item when transaction type changes (operation type changes)
+  useEffect(() => {
+    if (category === 'INVENTORY' && selectedInventoryItem) {
+      // When operation type changes, reset the selected item to avoid inconsistencies
+      // The InventoryItemSection will handle updating unit price for CONSUMPTION
+      setSelectedInventoryItem(null);
+      setInventoryCalculatedTotal(0);
+    }
+  }, [transactionType]);
 
   const handleFormSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     setError(null);
 
     try {
+      // Validate total amount
+      if (totalAmount <= 0) {
+        throw new Error('المبلغ الإجمالي يجب أن يكون أكبر من صفر');
+      }
+
+      // Validate inventory item for INVENTORY category
+      if (showInventorySection && !selectedInventoryItem) {
+        throw new Error('يرجى اختيار صنف من المخزون');
+      }
+
+      if (showInventorySection && selectedInventoryItem) {
+        if (selectedInventoryItem.quantity <= 0) {
+          throw new Error('الكمية يجب أن تكون أكبر من صفر');
+        }
+        if (selectedInventoryItem.unitPrice <= 0) {
+          throw new Error('سعر الوحدة يجب أن يكون أكبر من صفر');
+        }
+      }
+
       // Validate partial payment
-      if (showPartialPayment && paidAmount > totalAmount) {
-        throw new Error('المبلغ المدفوع لا يمكن أن يتجاوز المبلغ الإجمالي');
+      if (isPartialPayment) {
+        if (paidAmount < 0) {
+          throw new Error('المبلغ المدفوع لا يمكن أن يكون سالباً');
+        }
+        if (paidAmount > totalAmount) {
+          throw new Error('المبلغ المدفوع لا يمكن أن يتجاوز المبلغ الإجمالي');
+        }
       }
 
       // Validate debt fields if creating debt
@@ -174,32 +211,42 @@ export function TransactionFormWithInventory({
       // Build request payload
       const requestData: TransactionWithInventoryRequest = {
         type: data.type,
-        totalAmount: data.totalAmount,
-        paidAmount: showPartialPayment ? paidAmount : data.totalAmount,
+        totalAmount: totalAmount,
+        paidAmount: isPartialPayment ? paidAmount : totalAmount,
         category: data.category,
-        paymentMethod: data.paymentMethod,
-        employeeVendorName: data.employeeVendorName,
+        paymentMethod: paymentMethod,
         date: data.date,
         notes: data.notes,
         branchId: data.branchId,
-        inventoryItems: showInventorySection ? inventoryItems : undefined,
         createDebtForRemaining: createDebt && remainingAmount > 0,
         debtCreditorName: createDebt && remainingAmount > 0 ? debtCreditorName : undefined,
         debtDueDate: createDebt && debtDueDate ? debtDueDate : undefined,
-        debtNotes: createDebt ? debtNotes : undefined,
       };
+
+      // Add inventory item if applicable
+      if (showInventorySection && selectedInventoryItem && inventoryOperationType) {
+        requestData.inventoryItem = {
+          itemId: selectedInventoryItem.itemId,
+          quantity: selectedInventoryItem.quantity,
+          operationType: inventoryOperationType,
+          unitPrice: selectedInventoryItem.unitPrice,
+        };
+      }
 
       // Call API
       const result = await transactionService.createWithInventory(requestData);
 
       // Reset form
       reset();
+      setPaymentMethod('CASH');
+      setIsPartialPayment(false);
       setPaidAmount(0);
       setCreateDebt(false);
       setDebtCreditorName('');
       setDebtDueDate('');
-      setDebtNotes('');
-      setInventoryItems([]);
+      setSelectedInventoryItem(null);
+      setInventoryCalculatedTotal(0);
+      setManualTotalAmount(0);
 
       // Success callback
       if (onSuccess) {
@@ -258,31 +305,6 @@ export function TransactionFormWithInventory({
         )}
       </div>
 
-      {/* Total Amount and Payment Method */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <FormInput
-          name="totalAmount"
-          label="المبلغ الإجمالي"
-          type="number"
-          step="0.01"
-          min="0.01"
-          placeholder="أدخل المبلغ"
-          register={register}
-          error={errors.totalAmount}
-          required
-          disabled={isSubmitting}
-        />
-
-        <FormSelect
-          name="paymentMethod"
-          label="طريقة الدفع"
-          options={paymentMethodOptions}
-          register={register}
-          error={errors.paymentMethod}
-          disabled={isSubmitting}
-        />
-      </div>
-
       {/* Category and Date */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <FormSelect
@@ -309,55 +331,62 @@ export function TransactionFormWithInventory({
         />
       </div>
 
-      {/* Employee/Vendor Name */}
-      <FormInput
-        name="employeeVendorName"
-        label="اسم الموظف أو البائع"
-        type="text"
-        placeholder="أدخل الاسم"
-        register={register}
-        error={errors.employeeVendorName}
-        required
+      {/* Inventory Section (if category is INVENTORY) */}
+      {showInventorySection && inventoryOperationType && (
+        <InventoryItemSection
+          branchId={selectedBranchId}
+          operationType={inventoryOperationType}
+          selectedItem={selectedInventoryItem}
+          onItemChange={setSelectedInventoryItem}
+          onTotalChange={setInventoryCalculatedTotal}
+          disabled={isSubmitting}
+        />
+      )}
+
+      {/* Manual Total Amount Input (for non-INVENTORY categories) */}
+      {showManualAmountInput && (
+        <FormInput
+          label="المبلغ الإجمالي"
+          type="number"
+          step="0.01"
+          min="0.01"
+          placeholder="أدخل المبلغ"
+          value={manualTotalAmount || ''}
+          onChange={(e) => setManualTotalAmount(parseFloat(e.target.value) || 0)}
+          required
+          disabled={isSubmitting}
+        />
+      )}
+
+      {/* Payment Section (always shown) */}
+      <PaymentSection
+        totalAmount={totalAmount}
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={setPaymentMethod}
+        isPartialPayment={isPartialPayment}
+        onPartialPaymentChange={setIsPartialPayment}
+        paidAmount={paidAmount}
+        onPaidAmountChange={setPaidAmount}
+        createDebt={createDebt}
+        onCreateDebtChange={setCreateDebt}
+        debtCreditorName={debtCreditorName}
+        onDebtCreditorNameChange={setDebtCreditorName}
+        debtDueDate={debtDueDate}
+        onDebtDueDateChange={setDebtDueDate}
         disabled={isSubmitting}
       />
 
       {/* Notes */}
       <FormTextarea
         name="notes"
-        label="ملاحظات"
-        placeholder="أدخل ملاحظات إضافية (اختياري)"
+        label="ملاحظات (اختياري)"
+        placeholder="أدخل ملاحظات إضافية"
         rows={3}
         maxLength={1000}
         register={register}
         error={errors.notes}
         disabled={isSubmitting}
       />
-
-      {/* Inventory Section */}
-      {showInventorySection && (
-        <InventoryItemsSection
-          branchId={selectedBranchId}
-          items={inventoryItems}
-          onItemsChange={setInventoryItems}
-        />
-      )}
-
-      {/* Partial Payment Section */}
-      {showPartialPayment && (
-        <PartialPaymentSection
-          totalAmount={totalAmount}
-          paidAmount={paidAmount}
-          onPaidAmountChange={setPaidAmount}
-          createDebt={createDebt}
-          onCreateDebtChange={setCreateDebt}
-          debtCreditorName={debtCreditorName}
-          onDebtCreditorNameChange={setDebtCreditorName}
-          debtDueDate={debtDueDate}
-          onDebtDueDateChange={setDebtDueDate}
-          debtNotes={debtNotes}
-          onDebtNotesChange={setDebtNotes}
-        />
-      )}
 
       {/* Form Actions */}
       <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">

@@ -105,7 +105,7 @@ export function TransactionFormWithInventory({
     resolver: zodResolver(createTransactionWithInventorySchema),
     defaultValues: {
       type: TransactionType.EXPENSE,
-      category: 'INVENTORY',
+      category: 'OTHER_EXPENSE', // Default to OTHER_EXPENSE, not INVENTORY
       date: new Date().toISOString().split('T')[0],
       notes: '',
       branchId: isAdmin ? undefined : user?.branchId,
@@ -115,6 +115,14 @@ export function TransactionFormWithInventory({
   const transactionType = watch('type');
   const category = watch('category');
   const selectedBranchId = watch('branchId') || user?.branchId || null;
+
+  // Debug: Log values to understand the issue
+  console.log('🔍 Debug TransactionForm:', {
+    transactionType,
+    category,
+    categoryIsInventory: category === 'INVENTORY',
+    typeIsExpense: transactionType === TransactionType.EXPENSE,
+  });
 
   // Auto-determine inventory operation type based on transaction type
   const inventoryOperationType = useMemo(() => {
@@ -126,6 +134,8 @@ export function TransactionFormWithInventory({
   // Show inventory section ONLY for EXPENSE + INVENTORY (مشتريات المخزن)
   const showInventorySection = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
   const showManualAmountInput = !showInventorySection;
+
+  console.log('🔍 Show Inventory Section:', showInventorySection);
 
   // Show partial payment section ONLY for INCOME transactions
   const showPartialPayment = transactionType === TransactionType.INCOME;

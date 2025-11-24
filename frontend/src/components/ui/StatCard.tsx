@@ -4,11 +4,11 @@ import { cn } from '@/lib/utils';
 
 export interface StatCardProps {
   title: string;
-  value: string | number;
+  value: React.ReactNode;
   icon: LucideIcon;
   change?: string;
   trend?: 'up' | 'down';
-  description?: string;
+  description?: React.ReactNode;
   className?: string;
 }
 

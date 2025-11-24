@@ -6,7 +6,7 @@
 export const INCOME_CATEGORIES = [
   'SALES',           // مبيعات
   'SERVICES',        // خدمات
-  'DEBT_PAYMENT',    // سداد دين
+  'APP_PURCHASES',   // مشتريات التطبيق
   'OTHER_INCOME',    // إيرادات أخرى
 ] as const;
 
@@ -18,7 +18,6 @@ export const EXPENSE_CATEGORIES = [
   'MAINTENANCE',     // صيانة
   'TRANSPORTATION',  // مواصلات
   'INVENTORY',       // مشتريات مخزون
-  'APP_PURCHASES',   // مشتريات التطبيق
   'OTHER_EXPENSE',   // مصروفات أخرى
 ] as const;
 
@@ -35,7 +34,7 @@ export type TransactionCategory = typeof TRANSACTION_CATEGORIES[number];
 export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   SALES: 'مبيعات',
   SERVICES: 'خدمات',
-  DEBT_PAYMENT: 'سداد دين',
+  APP_PURCHASES: 'مشتريات التطبيق',
   OTHER_INCOME: 'إيرادات أخرى',
   WORKER_DAILY: 'يوميات العمال',
   RENT: 'إيجار',
@@ -44,7 +43,6 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   MAINTENANCE: 'صيانة',
   TRANSPORTATION: 'مواصلات',
   INVENTORY: 'مشتريات مخزون',
-  APP_PURCHASES: 'مشتريات التطبيق',
   OTHER_EXPENSE: 'مصروفات أخرى',
 };
 

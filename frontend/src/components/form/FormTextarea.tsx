@@ -4,13 +4,16 @@ export interface FormTextareaProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
   placeholder?: string;
-  register: UseFormRegister<T>;
-  error?: FieldError;
+  register?: UseFormRegister<T>;
+  error?: FieldError | string;
   required?: boolean;
   disabled?: boolean;
   className?: string;
   rows?: number;
   maxLength?: number;
+  // Controlled component props
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
 export function FormTextarea<T extends FieldValues>({
@@ -24,7 +27,13 @@ export function FormTextarea<T extends FieldValues>({
   className = '',
   rows = 4,
   maxLength,
+  value,
+  onChange,
 }: FormTextareaProps<T>) {
+  // Determine if using react-hook-form or controlled component
+  const isControlled = value !== undefined || onChange !== undefined;
+  const errorMessage = typeof error === 'string' ? error : error?.message;
+
   return (
     <div className={`mb-4 ${className}`}>
       <label htmlFor={name} className="block text-sm font-medium text-[var(--text-primary)] mb-2">
@@ -33,7 +42,9 @@ export function FormTextarea<T extends FieldValues>({
       </label>
       <textarea
         id={name}
-        {...register(name)}
+        {...(register && !isControlled ? register(name) : {})}
+        value={isControlled ? value : undefined}
+        onChange={isControlled ? onChange : undefined}
         placeholder={placeholder}
         disabled={disabled}
         rows={rows}
@@ -53,7 +64,7 @@ export function FormTextarea<T extends FieldValues>({
       />
       {error && (
         <p id={`${name}-error`} className="mt-2 text-sm text-red-600" role="alert">
-          {error.message}
+          {errorMessage}
         </p>
       )}
     </div>

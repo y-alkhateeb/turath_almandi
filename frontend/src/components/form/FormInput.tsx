@@ -53,16 +53,10 @@ export function FormInput<T extends FieldValues>({
 }: FormInputProps<T>) {
   // Determine if using react-hook-form or controlled component
   const isControlled = value !== undefined || onChange !== undefined;
-  const errorMessage = typeof error === 'string' ? error : error?.message;
 
   // Use date-specific classes for date inputs, base classes for others
   const isDateType = type === 'date' || type === 'datetime-local' || type === 'time';
   const inputClasses = isDateType ? dateInputClasses : baseInputClasses;
-
-  // Support both register pattern and Controller pattern
-  const inputProps = register
-    ? register(name)
-    : { name, value, onChange, onBlur };
 
   // Error can be FieldError object or string
   const errorMessage = typeof error === 'string' ? error : error?.message;

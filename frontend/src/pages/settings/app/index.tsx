@@ -6,11 +6,12 @@
  * - Update app name
  * - Upload app icon (favicon)
  * - Upload login background image
+ * - Currency settings management
  * - Image upload with drag & drop
  * - Admin-only access
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,7 +19,17 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { ImageUpload } from '@/components/form/ImageUpload';
 import { useAuth } from '@/hooks/useAuth';
 import { getAppSettings, updateAppSettings } from '@/api/services/settingsService';
-import type { AppSettings, UpdateAppSettingsInput } from '#/settings.types';
+import {
+  useAllCurrencies,
+  useSetDefaultCurrency,
+  useCreateCurrency,
+} from '@/hooks/queries/useSettings';
+import {
+  CurrencyList,
+  CurrencyChangeModal,
+  AddCurrencyModal,
+} from '@/components/settings';
+import type { AppSettings, UpdateAppSettingsInput, CurrencyWithUsage, CreateCurrencyInput } from '#/settings.types';
 
 // Validation schema
 const appSettingsSchema = z.object({
@@ -40,6 +51,22 @@ export default function AppSettingsPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [currentSettings, setCurrentSettings] = useState<AppSettings | null>(null);
+
+  // Currency modal states
+  const [isChangeModalOpen, setIsChangeModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyWithUsage | null>(null);
+
+  // Currency data
+  const {
+    data: currencies = [],
+    isLoading: currenciesLoading,
+    refetch: refetchCurrencies,
+  } = useAllCurrencies(isAdmin);
+
+  // Currency mutations
+  const setDefaultCurrency = useSetDefaultCurrency();
+  const createCurrency = useCreateCurrency();
 
   const {
     register,
@@ -79,6 +106,51 @@ export default function AppSettingsPage() {
       fetchSettings();
     }
   }, [isAdmin, reset]);
+
+  // Currency handlers
+  const handleSetDefault = useCallback((currency: CurrencyWithUsage) => {
+    setSelectedCurrency(currency);
+    setIsChangeModalOpen(true);
+  }, []);
+
+  const handleConfirmChange = useCallback(async () => {
+    if (!selectedCurrency) return;
+
+    try {
+      await setDefaultCurrency.mutateAsync({ code: selectedCurrency.code });
+      await refetchCurrencies();
+      setIsChangeModalOpen(false);
+      setSelectedCurrency(null);
+    } catch (error) {
+      console.error('Failed to set default currency:', error);
+    }
+  }, [selectedCurrency, setDefaultCurrency, refetchCurrencies]);
+
+  const handleCancelChange = useCallback(() => {
+    setIsChangeModalOpen(false);
+    setSelectedCurrency(null);
+  }, []);
+
+  const handleAddClick = useCallback(() => {
+    setIsAddModalOpen(true);
+  }, []);
+
+  const handleAddSubmit = useCallback(
+    async (data: CreateCurrencyInput) => {
+      try {
+        await createCurrency.mutateAsync(data);
+        await refetchCurrencies();
+      } catch (error) {
+        console.error('Failed to create currency:', error);
+        throw error;
+      }
+    },
+    [createCurrency, refetchCurrencies]
+  );
+
+  const handleCancelAdd = useCallback(() => {
+    setIsAddModalOpen(false);
+  }, []);
 
   const onSubmit = async (data: AppSettingsFormData) => {
     setIsSaving(true);
@@ -243,6 +315,53 @@ export default function AppSettingsPage() {
           </form>
         )}
       </div>
+
+      {/* Currency Settings Section */}
+      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">
+          إعدادات العملة
+        </h2>
+
+        {currenciesLoading ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <p className="mt-2 text-[var(--text-secondary)]">جاري التحميل...</p>
+          </div>
+        ) : (
+          <CurrencyList
+            currencies={currencies}
+            defaultCode={currencies.find((c) => c.isDefault)?.code || ''}
+            onSetDefault={handleSetDefault}
+            onAdd={handleAddClick}
+            isLoading={false}
+          />
+        )}
+      </div>
+
+      {/* Currency Change Confirmation Modal */}
+      <CurrencyChangeModal
+        isOpen={isChangeModalOpen}
+        onClose={handleCancelChange}
+        onConfirm={handleConfirmChange}
+        currency={selectedCurrency}
+        transactionCount={currencies.reduce(
+          (sum, currency) =>
+            sum +
+            Number(currency.usageCount?.transactions || 0) +
+            Number(currency.usageCount?.debts || 0) +
+            Number(currency.usageCount?.debtPayments || 0),
+          0
+        )}
+        isSubmitting={setDefaultCurrency.isPending}
+      />
+
+      {/* Add Currency Modal */}
+      <AddCurrencyModal
+        isOpen={isAddModalOpen}
+        onClose={handleCancelAdd}
+        onSubmit={handleAddSubmit}
+        isSubmitting={createCurrency.isPending}
+      />
     </div>
   );
 }

@@ -37,6 +37,7 @@ export interface NotificationListProps {
 
 /**
  * Get severity icon and color classes
+ * Uses CSS variables and dark mode support
  */
 const getSeverityStyle = (
   severity: NotificationSeverity
@@ -45,32 +46,32 @@ const getSeverityStyle = (
     case NotificationSeverity.INFO:
       return {
         icon: Info,
-        colorClass: 'text-blue-600',
-        bgClass: 'bg-blue-50 border-blue-200',
+        colorClass: 'text-blue-600 dark:text-blue-400',
+        bgClass: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
       };
     case NotificationSeverity.WARNING:
       return {
         icon: AlertTriangle,
-        colorClass: 'text-yellow-600',
-        bgClass: 'bg-yellow-50 border-yellow-200',
+        colorClass: 'text-yellow-600 dark:text-yellow-400',
+        bgClass: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
       };
     case NotificationSeverity.ERROR:
       return {
         icon: AlertCircle,
-        colorClass: 'text-red-600',
-        bgClass: 'bg-red-50 border-red-200',
+        colorClass: 'text-red-600 dark:text-red-400',
+        bgClass: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
       };
     case NotificationSeverity.CRITICAL:
       return {
         icon: AlertCircle,
-        colorClass: 'text-red-800',
-        bgClass: 'bg-red-100 border-red-300',
+        colorClass: 'text-red-800 dark:text-red-300',
+        bgClass: 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700',
       };
     default:
       return {
         icon: Info,
-        colorClass: 'text-gray-600',
-        bgClass: 'bg-gray-50 border-gray-200',
+        colorClass: 'text-gray-600 dark:text-gray-400',
+        bgClass: 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800',
       };
   }
 };

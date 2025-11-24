@@ -124,6 +124,15 @@ export function TransactionFormWithInventory({
     typeIsExpense: transactionType === TransactionType.EXPENSE,
   });
 
+  // Compute category options based on transaction type (memoized)
+  const categoryOptions = useMemo(() => {
+    const options = transactionType === TransactionType.INCOME
+      ? INCOME_CATEGORIES
+      : EXPENSE_CATEGORIES;
+    console.log('📋 Categories for', transactionType, ':', options.map(c => ({ value: c.value, label: c.label })));
+    return options;
+  }, [transactionType]);
+
   // Auto-determine inventory operation type based on transaction type
   const inventoryOperationType = useMemo(() => {
     if (category !== 'INVENTORY') return null;
@@ -132,10 +141,13 @@ export function TransactionFormWithInventory({
 
   // Determine if we should show inventory section or manual amount input
   // Show inventory section ONLY for EXPENSE + INVENTORY (مشتريات المخزن)
-  const showInventorySection = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
-  const showManualAmountInput = !showInventorySection;
+  const showInventorySection = useMemo(() => {
+    const result = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
+    console.log('🔍 Show Inventory Section:', { category, transactionType, result });
+    return result;
+  }, [category, transactionType]);
 
-  console.log('🔍 Show Inventory Section:', showInventorySection);
+  const showManualAmountInput = !showInventorySection;
 
   // Show partial payment section ONLY for INCOME transactions
   const showPartialPayment = transactionType === TransactionType.INCOME;
@@ -336,13 +348,7 @@ export function TransactionFormWithInventory({
         <FormSelect
           name="category"
           label="الفئة"
-          options={(() => {
-            const categories = transactionType === TransactionType.INCOME
-              ? INCOME_CATEGORIES
-              : EXPENSE_CATEGORIES;
-            console.log('📋 Categories for', transactionType, ':', categories.map(c => ({ value: c.value, label: c.label })));
-            return categories;
-          })()}
+          options={categoryOptions}
           register={register}
           error={errors.category}
           disabled={isSubmitting}

@@ -12,6 +12,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
+import * as contentDisposition from 'content-disposition';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -211,9 +212,10 @@ export class SmartReportsController {
       exportResult.buffer.length,
     );
 
-    // Send response
+    // Send response with properly sanitized Content-Disposition header
+    // Using content-disposition package to prevent header injection attacks (XSS/CRLF)
     res.setHeader('Content-Type', exportResult.contentType);
-    res.setHeader('Content-Disposition', `attachment; filename="${exportResult.fileName}"`);
+    res.setHeader('Content-Disposition', contentDisposition(exportResult.fileName, { type: 'attachment' }));
     res.status(HttpStatus.OK).send(exportResult.buffer);
   }
 

@@ -17,7 +17,10 @@ export class ExportService {
     customFileName?: string,
   ): Promise<ExportResult> {
     const timestamp = new Date().toISOString().split('T')[0];
-    const baseFileName = customFileName || `report-${timestamp}`;
+    const rawFileName = customFileName || `report-${timestamp}`;
+
+    // Sanitize filename to prevent path traversal and header injection attacks
+    const baseFileName = this.sanitizeFileName(rawFileName);
 
     switch (format) {
       case 'excel':
@@ -29,6 +32,43 @@ export class ExportService {
       default:
         throw new Error(`Unsupported export format: ${format}`);
     }
+  }
+
+  /**
+   * Sanitize filename to prevent path traversal, CRLF injection, and other attacks
+   * Following RFC 6266 and OWASP best practices:
+   * - Removes path separators (/, \)
+   * - Removes relative path segments (.., .)
+   * - Removes control characters (CRLF, null bytes, etc.)
+   * - Removes special filesystem characters
+   * - Limits length to 200 characters (safe limit for all filesystems)
+   * - Falls back to timestamp if result is empty
+   */
+  private sanitizeFileName(fileName: string): string {
+    if (!fileName || typeof fileName !== 'string') {
+      return `report-${Date.now()}`;
+    }
+
+    // Remove path separators and relative path segments
+    let sanitized = fileName
+      .replace(/[\/\\]/g, '_')           // Replace / and \ with underscore
+      .replace(/\.\./g, '_')             // Replace .. with underscore
+      .replace(/^\.+/, '')               // Remove leading dots
+      .replace(/[\x00-\x1F\x7F]/g, '')   // Remove control characters (including CRLF, null bytes)
+      .replace(/[<>:"|?*]/g, '_')        // Replace special filesystem chars
+      .trim();                            // Remove leading/trailing whitespace
+
+    // Limit length (255 is filesystem limit, use 200 to leave room for extension)
+    if (sanitized.length > 200) {
+      sanitized = sanitized.substring(0, 200);
+    }
+
+    // If empty after sanitization, use timestamp
+    if (!sanitized || sanitized.length === 0) {
+      sanitized = `report-${Date.now()}`;
+    }
+
+    return sanitized;
   }
 
   private async exportToExcel(
@@ -120,6 +160,23 @@ export class ExportService {
     };
   }
 
+  /**
+   * Escape HTML to prevent XSS attacks in PDF/HTML exports
+   * Escapes: < > & " ' to their HTML entity equivalents
+   */
+  private escapeHtml(unsafe: string | number | boolean | Date | null | undefined): string {
+    if (unsafe === null || unsafe === undefined) {
+      return '';
+    }
+
+    return String(unsafe)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   private async exportToPdf(
     data: ReadonlyArray<ReportResultRow>,
     fields: ReadonlyArray<ReportField>,
@@ -131,6 +188,7 @@ export class ExportService {
       .filter((f) => f.visible)
       .sort((a, b) => a.order - b.order);
 
+    // Escape all HTML to prevent XSS attacks
     let html = `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -149,7 +207,7 @@ export class ExportService {
         <table>
           <thead>
             <tr>
-              ${visibleFields.map((f) => `<th>${f.displayName}</th>`).join('')}
+              ${visibleFields.map((f) => `<th>${this.escapeHtml(f.displayName)}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
@@ -158,8 +216,8 @@ export class ExportService {
     for (const row of data) {
       html += '<tr>';
       for (const field of visibleFields) {
-        const value = row[field.sourceField] ?? '';
-        html += `<td>${String(value)}</td>`;
+        const value = row[field.sourceField];
+        html += `<td>${this.escapeHtml(value)}</td>`;
       }
       html += '</tr>';
     }

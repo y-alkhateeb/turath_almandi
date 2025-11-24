@@ -10,6 +10,8 @@ import { useUserInfo, useUserActions } from '@/store/userStore';
 import { useTheme } from '@/theme/hooks';
 import { ThemeMode } from '@/theme/type';
 import { Icon } from '@/components/icon';
+import { useUnreadNotifications } from '@/hooks/queries/useNotifications';
+import { NotificationsDropdown } from '@/components/notifications/NotificationsDropdown';
 
 export interface HeaderProps {
   onMenuClick: () => void;
@@ -21,18 +23,27 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { clearAuth } = useUserActions();
   const { themeMode, toggleTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
+  // Get unread notifications count
+  const { data: unreadData } = useUnreadNotifications();
+  const unreadCount = unreadData?.count || 0;
 
   const handleLogout = () => {
     clearAuth();
     navigate('/login', { replace: true });
   };
 
-  // Close menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
       }
     };
 
@@ -186,15 +197,25 @@ export function Header({ onMenuClick }: HeaderProps) {
           </button>
 
           {/* Notifications */}
-          <button
-            className="relative w-11 h-11 rounded-xl bg-brand-gold-500/20 backdrop-blur-sm border border-brand-gold-500/30 text-brand-cream-100 hover:bg-brand-gold-500 hover:scale-105 transition-all flex items-center justify-center group"
-            aria-label="الإشعارات"
-          >
-            <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-            <span className="absolute -top-1 -left-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse">
-              5
-            </span>
-          </button>
+          <div className="relative" ref={notificationsRef}>
+            <button
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              className="relative w-11 h-11 rounded-xl bg-brand-gold-500/20 backdrop-blur-sm border border-brand-gold-500/30 text-brand-cream-100 hover:bg-brand-gold-500 hover:scale-105 transition-all flex items-center justify-center group"
+              aria-label="الإشعارات"
+            >
+              <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -left-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {isNotificationsOpen && (
+              <NotificationsDropdown onClose={() => setIsNotificationsOpen(false)} />
+            )}
+          </div>
 
           {/* Modern User Menu */}
           <div className="relative" ref={menuRef}>

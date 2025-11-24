@@ -3,10 +3,11 @@
  * Form for creating transactions with inventory operations and payment
  *
  * Features:
- * - Single inventory item per transaction
+ * - Single inventory item per transaction (only for EXPENSE + INVENTORY)
  * - Auto-calculated total for inventory items
  * - Unified payment section with partial payment and debt creation
- * - Auto-determined operation type (PURCHASE/CONSUMPTION)
+ * - Inventory section shows only for "مشتريات المخزن" (EXPENSE + INVENTORY = PURCHASE)
+ * - For other categories, manual amount input is used
  */
 
 import { useState, useEffect, useMemo } from 'react';
@@ -122,7 +123,8 @@ export function TransactionFormWithInventory({
   }, [transactionType, category]);
 
   // Determine if we should show inventory section or manual amount input
-  const showInventorySection = category === 'INVENTORY';
+  // Show inventory section ONLY for EXPENSE + INVENTORY (مشتريات المخزن)
+  const showInventorySection = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
   const showManualAmountInput = !showInventorySection;
 
   // Calculate the actual total amount based on category
@@ -403,7 +405,7 @@ export function TransactionFormWithInventory({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-3 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+          className="px-6 py-3 text-sm font-medium text-white bg-brand-gold-500 rounded-lg hover:bg-brand-gold-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-gold-500 focus:ring-offset-2"
         >
           {isSubmitting && (
             <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">

@@ -112,7 +112,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({
           checked={isPartialPayment}
           onChange={(e) => onPartialPaymentChange(e.target.checked)}
           disabled={disabled || totalAmount === 0}
-          className="w-4 h-4 text-blue-600 dark:text-blue-400 border-[var(--border-color)] rounded focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-4 h-4 text-brand-gold-500 border-[var(--border-color)] rounded focus:ring-brand-gold-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <span className="text-sm font-medium text-[var(--text-primary)]">دفع جزئي</span>
       </label>
@@ -157,7 +157,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({
                   checked={createDebt}
                   onChange={(e) => onCreateDebtChange(e.target.checked)}
                   disabled={disabled}
-                  className="w-4 h-4 text-blue-600 dark:text-blue-400 border-[var(--border-color)] rounded focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="w-4 h-4 text-brand-gold-500 border-[var(--border-color)] rounded focus:ring-brand-gold-500"
                 />
                 <span className="text-sm font-medium text-[var(--text-primary)]">
                   تسجيل المتبقي كدين
@@ -166,8 +166,8 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({
 
               {/* Debt Fields */}
               {createDebt && (
-                <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
-                  <h4 className="text-md font-semibold text-blue-900 dark:text-blue-300">
+                <div className="space-y-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50">
+                  <h4 className="text-md font-semibold text-amber-900 dark:text-amber-300">
                     معلومات الدين
                   </h4>
 
@@ -189,8 +189,8 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({
                     disabled={disabled}
                   />
 
-                  <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded border border-blue-200 dark:border-blue-700/40">
-                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                  <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded border border-amber-200 dark:border-amber-700/40">
+                    <p className="text-sm text-amber-800 dark:text-amber-300">
                       <strong>مبلغ الدين:</strong>{' '}
                       <CurrencyAmountCompact amount={remainingAmount} decimals={2} />
                     </p>

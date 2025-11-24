@@ -182,10 +182,10 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({
                   />
 
                   <DateInput
-                    mode="form"
+                    mode="controlled"
                     label="تاريخ الاستحقاق (اختياري)"
                     value={debtDueDate}
-                    onChange={onDebtDueDateChange}
+                    onChange={(value) => onDebtDueDateChange(value || '')}
                     disabled={disabled}
                   />
 

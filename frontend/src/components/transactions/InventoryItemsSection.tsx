@@ -132,15 +132,15 @@ export const InventoryItemsSection: React.FC<InventoryItemsSectionProps> = ({
 
   if (!branchId) {
     return (
-      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-gray-600 text-center">الرجاء اختيار الفرع أولاً</p>
+      <div className="p-4 bg-[var(--bg-secondary)] dark:bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-color)]">
+        <p className="text-[var(--text-secondary)] text-center">الرجاء اختيار الفرع أولاً</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900">أصناف المخزون</h3>
+    <div className="space-y-4 p-4 bg-[var(--bg-secondary)] dark:bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-color)]">
+      <h3 className="text-lg font-semibold text-[var(--text-primary)]">أصناف المخزون</h3>
 
       {/* Operation Type Selection */}
       <FormRadioGroup
@@ -151,9 +151,9 @@ export const InventoryItemsSection: React.FC<InventoryItemsSectionProps> = ({
       />
 
       {loading ? (
-        <p className="text-gray-600">جاري تحميل المخزون...</p>
+        <p className="text-[var(--text-secondary)]">جاري تحميل المخزون...</p>
       ) : availableItems.length === 0 ? (
-        <p className="text-gray-600">لا توجد أصناف متوفرة في هذا الفرع</p>
+        <p className="text-[var(--text-secondary)]">لا توجد أصناف متوفرة في هذا الفرع</p>
       ) : (
         <div className="space-y-4">
           {/* Item Selection Form */}
@@ -194,7 +194,7 @@ export const InventoryItemsSection: React.FC<InventoryItemsSectionProps> = ({
           <button
             type="button"
             onClick={handleAddItem}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!selectedItemId || !quantity || Number(quantity) <= 0}
           >
             إضافة
@@ -203,16 +203,16 @@ export const InventoryItemsSection: React.FC<InventoryItemsSectionProps> = ({
           {/* Added Items List */}
           {items.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-md font-semibold text-gray-800 mb-2">الأصناف المضافة:</h4>
+              <h4 className="text-md font-semibold text-[var(--text-primary)] mb-2">الأصناف المضافة:</h4>
               <div className="space-y-2">
                 {items.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 bg-white rounded-md border border-gray-300"
+                    className="flex items-center justify-between p-3 bg-[var(--bg-primary)] dark:bg-[var(--bg-secondary)] rounded-md border border-[var(--border-color)]"
                   >
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">{getItemName(item.itemId)}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-medium text-[var(--text-primary)]">{getItemName(item.itemId)}</p>
+                      <p className="text-sm text-[var(--text-secondary)]">
                         {item.quantity} {getItemUnit(item.itemId)}
                         {item.operationType === InventoryOperationType.PURCHASE && item.unitPrice && (
                           <>
@@ -227,7 +227,7 @@ export const InventoryItemsSection: React.FC<InventoryItemsSectionProps> = ({
                           </>
                         )}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--text-secondary)]">
                         {item.operationType === InventoryOperationType.PURCHASE
                           ? '🔵 شراء'
                           : '🔴 صرف'}
@@ -236,7 +236,7 @@ export const InventoryItemsSection: React.FC<InventoryItemsSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
-                      className="px-3 py-1 text-red-600 hover:bg-red-50 rounded-md"
+                      className="px-3 py-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                     >
                       حذف
                     </button>

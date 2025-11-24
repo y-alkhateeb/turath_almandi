@@ -217,8 +217,8 @@ export function TransactionFormWithInventory({
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
       {/* Error Display */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
 
@@ -250,8 +250,8 @@ export function TransactionFormWithInventory({
 
         {!isAdmin && user?.branch && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">الفرع</label>
-            <div className="px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
+            <div className="px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)]">
               {user.branch.name}
             </div>
           </div>
@@ -360,13 +360,13 @@ export function TransactionFormWithInventory({
       )}
 
       {/* Form Actions */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+      <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-secondary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             إلغاء
           </button>
@@ -374,7 +374,7 @@ export function TransactionFormWithInventory({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-3 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
         >
           {isSubmitting && (
             <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">

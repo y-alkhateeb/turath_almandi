@@ -153,7 +153,7 @@ export const useAuth = (): UseAuthReturn => {
   const loginMutation = useMutation<LoginResponse, ApiError, LoginCredentials>({
     mutationFn: authService.login,
 
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       // Store tokens and user info
       setAuth(
         data.user,
@@ -161,7 +161,7 @@ export const useAuth = (): UseAuthReturn => {
           accessToken: data.access_token,
           refreshToken: data.refresh_token,
         },
-        false // rememberMe - can be made configurable later
+        variables.rememberMe ?? false // Use rememberMe from login form
       );
 
       // Update profile cache

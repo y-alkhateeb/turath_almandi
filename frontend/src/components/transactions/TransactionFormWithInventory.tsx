@@ -156,6 +156,16 @@ export function TransactionFormWithInventory({
     }
   }, [category]);
 
+  // Reset inventory item when transaction type changes (operation type changes)
+  useEffect(() => {
+    if (category === 'INVENTORY' && selectedInventoryItem) {
+      // When operation type changes, reset the selected item to avoid inconsistencies
+      // The InventoryItemSection will handle updating unit price for CONSUMPTION
+      setSelectedInventoryItem(null);
+      setInventoryCalculatedTotal(0);
+    }
+  }, [transactionType]);
+
   const handleFormSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     setError(null);

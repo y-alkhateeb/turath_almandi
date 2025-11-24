@@ -73,6 +73,25 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
     onTotalChange(total);
   }, [quantity, unitPrice, onTotalChange]);
 
+  // Update unit price when operationType changes and item is selected
+  useEffect(() => {
+    if (selectedItem && operationType === 'CONSUMPTION') {
+      // Find the item in available items to get fresh cost per unit
+      const item = availableItems.find((i) => i.id === selectedItem.itemId);
+      if (item) {
+        const costPerUnit = Number(item.costPerUnit) || 0;
+        setUnitPrice(costPerUnit.toFixed(2));
+
+        // Update selected item with new unit price
+        const newItem: SingleInventoryItem = {
+          ...selectedItem,
+          unitPrice: costPerUnit,
+        };
+        onItemChange(newItem);
+      }
+    }
+  }, [operationType]); // Only depend on operationType
+
   // When item is selected, auto-fill unit price for CONSUMPTION
   const handleItemSelect = (itemId: string) => {
     if (!itemId) {

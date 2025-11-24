@@ -44,7 +44,7 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
   const [remainingAmount, setRemainingAmount] = useState(0);
 
   useEffect(() => {
-    const remaining = totalAmount - paidAmount;
+    const remaining = Number(totalAmount) - Number(paidAmount);
     setRemainingAmount(remaining > 0 ? remaining : 0);
   }, [totalAmount, paidAmount]);
 

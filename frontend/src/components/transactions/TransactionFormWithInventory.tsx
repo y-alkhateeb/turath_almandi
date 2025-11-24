@@ -132,13 +132,13 @@ export function TransactionFormWithInventory({
 
   const transactionType = watch('type');
   const category = watch('category');
-  const totalAmount = watch('totalAmount') || 0;
+  const totalAmount = Number(watch('totalAmount')) || 0;
   const selectedBranchId = watch('branchId') || user?.branchId || null;
 
   // Auto-update paid amount when total changes
   useEffect(() => {
     if (!paidAmount || paidAmount === 0) {
-      setPaidAmount(totalAmount);
+      setPaidAmount(Number(totalAmount));
     }
   }, [totalAmount]);
 

@@ -336,11 +336,13 @@ export function TransactionFormWithInventory({
         <FormSelect
           name="category"
           label="الفئة"
-          options={
-            transactionType === TransactionType.INCOME
+          options={(() => {
+            const categories = transactionType === TransactionType.INCOME
               ? INCOME_CATEGORIES
-              : EXPENSE_CATEGORIES
-          }
+              : EXPENSE_CATEGORIES;
+            console.log('📋 Categories for', transactionType, ':', categories.map(c => ({ value: c.value, label: c.label })));
+            return categories;
+          })()}
           register={register}
           error={errors.category}
           disabled={isSubmitting}

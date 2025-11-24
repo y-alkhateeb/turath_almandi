@@ -3,11 +3,15 @@ import { UseFormRegister, FieldError, FieldValues, Path } from 'react-hook-form'
 export interface FormCheckboxProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
-  register: UseFormRegister<T>;
-  error?: FieldError;
+  register?: UseFormRegister<T>;
+  error?: FieldError | string;
   disabled?: boolean;
   className?: string;
   description?: string;
+  // Controlled component props (for use without react-hook-form)
+  checked?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 export function FormCheckbox<T extends FieldValues>({
@@ -18,7 +22,16 @@ export function FormCheckbox<T extends FieldValues>({
   disabled = false,
   className = '',
   description,
+  checked,
+  onChange,
+  onBlur,
 }: FormCheckboxProps<T>) {
+  // Determine if using react-hook-form or controlled component
+  const isControlled = checked !== undefined || onChange !== undefined;
+
+  // Error can be FieldError object or string
+  const errorMessage = typeof error === 'string' ? error : error?.message;
+
   return (
     <div className={`mb-4 ${className}`}>
       <div className="flex items-start">
@@ -26,7 +39,10 @@ export function FormCheckbox<T extends FieldValues>({
           <input
             id={name}
             type="checkbox"
-            {...register(name)}
+            {...(register && !isControlled ? register(name) : {})}
+            checked={isControlled ? checked : undefined}
+            onChange={isControlled ? onChange : undefined}
+            onBlur={isControlled ? onBlur : undefined}
             disabled={disabled}
             className={`
               w-5 h-5 border rounded
@@ -60,9 +76,9 @@ export function FormCheckbox<T extends FieldValues>({
           )}
         </div>
       </div>
-      {error && (
+      {errorMessage && (
         <p id={`${name}-error`} className="mt-2 text-sm text-red-600 mr-8" role="alert">
-          {error.message}
+          {errorMessage}
         </p>
       )}
     </div>

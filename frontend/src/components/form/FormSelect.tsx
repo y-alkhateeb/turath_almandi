@@ -16,12 +16,16 @@ export interface FormSelectProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
   options: SelectOption[];
-  register: UseFormRegister<T>;
-  error?: FieldError;
+  register?: UseFormRegister<T>;
+  error?: FieldError | string;
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
   className?: string;
+  // Controlled component props (for use without react-hook-form)
+  value?: string | number;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLSelectElement>) => void;
 }
 
 export function FormSelect<T extends FieldValues>({
@@ -34,7 +38,16 @@ export function FormSelect<T extends FieldValues>({
   disabled = false,
   placeholder = 'اختر خيارًا...',
   className = '',
+  value,
+  onChange,
+  onBlur,
 }: FormSelectProps<T>) {
+  // Determine if using react-hook-form or controlled component
+  const isControlled = value !== undefined || onChange !== undefined;
+
+  // Error can be FieldError object or string
+  const errorMessage = typeof error === 'string' ? error : error?.message;
+
   return (
     <div className={`${fieldContainerClasses} ${className}`}>
       <label htmlFor={name} className={labelClasses}>
@@ -43,7 +56,10 @@ export function FormSelect<T extends FieldValues>({
       </label>
       <select
         id={name}
-        {...register(name)}
+        {...(register && !isControlled ? register(name) : {})}
+        value={isControlled ? value : undefined}
+        onChange={isControlled ? onChange : undefined}
+        onBlur={isControlled ? onBlur : undefined}
         disabled={disabled}
         dir="rtl"
         className={`
@@ -66,9 +82,9 @@ export function FormSelect<T extends FieldValues>({
           </option>
         ))}
       </select>
-      {error && (
+      {errorMessage && (
         <p id={`${name}-error`} className={errorClasses} role="alert">
-          {error.message}
+          {errorMessage}
         </p>
       )}
     </div>

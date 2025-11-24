@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
 import { DateInput } from '@/components/form/DateInput';
+import { CurrencyAmountCompact } from '@/components/currency';
 
 interface PartialPaymentSectionProps {
   totalAmount: number;
@@ -44,7 +45,7 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
   const [remainingAmount, setRemainingAmount] = useState(0);
 
   useEffect(() => {
-    const remaining = totalAmount - paidAmount;
+    const remaining = Number(totalAmount) - Number(paidAmount);
     setRemainingAmount(remaining > 0 ? remaining : 0);
   }, [totalAmount, paidAmount]);
 
@@ -86,9 +87,11 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
             المتبقي
           </label>
           <div className="px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-md">
-            <span className="text-lg font-semibold text-yellow-800">
-              {remainingAmount.toFixed(2)} دينار
-            </span>
+            <CurrencyAmountCompact
+              amount={remainingAmount}
+              decimals={2}
+              className="text-lg font-semibold text-yellow-800"
+            />
           </div>
         </div>
       </div>
@@ -142,7 +145,7 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
 
           <div className="bg-blue-100 p-3 rounded">
             <p className="text-sm text-blue-800">
-              <strong>مبلغ الدين:</strong> {remainingAmount.toFixed(2)} دينار
+              <strong>مبلغ الدين:</strong> <CurrencyAmountCompact amount={remainingAmount} decimals={2} />
             </p>
           </div>
         </div>

@@ -6,6 +6,7 @@ import type {
   InventoryUnit,
 } from '../types/inventory.types';
 import { useAuth } from '../hooks/useAuth';
+import { CurrencyAmountCompact } from '@/components/currency';
 
 interface InventoryTableProps {
   items: InventoryItem[];
@@ -231,12 +232,12 @@ export default function InventoryTable({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-[var(--text-primary)]">
-                          {formatAmount(Number(item.costPerUnit))} $
+                          <CurrencyAmountCompact amount={Number(item.costPerUnit)} decimals={2} />
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-[var(--text-primary)]">
-                          {formatAmount(totalValue)} $
+                          <CurrencyAmountCompact amount={totalValue} decimals={2} />
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

@@ -670,7 +670,7 @@ export const EmployeeDetailsPage = () => {
             />
             {employee && (
               <p className="text-xs text-[var(--text-secondary)] mt-1">
-                الراتب الكامل: <CurrencyAmountCompact amount={employee.baseSalary + employee.allowance} />
+                الراتب الكامل: <CurrencyAmountCompact amount={Number(employee.baseSalary) + Number(employee.allowance)} />
               </p>
             )}
           </div>

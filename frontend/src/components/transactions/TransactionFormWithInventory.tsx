@@ -150,19 +150,18 @@ export function TransactionFormWithInventory({
     }
   }, [totalAmount, isPartialPayment]);
 
-  // Reset inventory item when category changes away from INVENTORY
+  // Reset inventory item when category changes away from INVENTORY or type changes away from EXPENSE
   useEffect(() => {
-    if (category !== 'INVENTORY') {
+    if (!showInventorySection) {
       setSelectedInventoryItem(null);
       setInventoryCalculatedTotal(0);
     }
-  }, [category]);
+  }, [showInventorySection]);
 
   // Reset inventory item when transaction type changes (operation type changes)
   useEffect(() => {
-    if (category === 'INVENTORY' && selectedInventoryItem) {
-      // When operation type changes, reset the selected item to avoid inconsistencies
-      // The InventoryItemSection will handle updating unit price for CONSUMPTION
+    if (category === 'INVENTORY' && selectedInventoryItem && transactionType === TransactionType.EXPENSE) {
+      // When switching back to EXPENSE+INVENTORY, reset the item
       setSelectedInventoryItem(null);
       setInventoryCalculatedTotal(0);
     }

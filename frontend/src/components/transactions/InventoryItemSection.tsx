@@ -74,8 +74,9 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
   }, [quantity, unitPrice, onTotalChange]);
 
   // Update unit price when operationType changes and item is selected
+  // Unit price is always readonly and fetched from inventory
   useEffect(() => {
-    if (selectedItem && operationType === 'CONSUMPTION') {
+    if (selectedItem) {
       // Find the item in available items to get fresh cost per unit
       const item = availableItems.find((i) => i.id === selectedItem.itemId);
       if (item) {
@@ -92,7 +93,7 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
     }
   }, [operationType]); // Only depend on operationType
 
-  // When item is selected, auto-fill unit price for CONSUMPTION
+  // When item is selected, auto-fill unit price from inventory (for both PURCHASE and CONSUMPTION)
   const handleItemSelect = (itemId: string) => {
     if (!itemId) {
       onItemChange(null);
@@ -104,18 +105,16 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
     const item = availableItems.find((i) => i.id === itemId);
     if (!item) return;
 
-    // For CONSUMPTION, set unit price from inventory (readonly)
-    if (operationType === 'CONSUMPTION') {
-      const costPerUnit = Number(item.costPerUnit) || 0;
-      setUnitPrice(costPerUnit.toFixed(2));
-    }
+    // Always set unit price from inventory (readonly for both operations)
+    const costPerUnit = Number(item.costPerUnit) || 0;
+    setUnitPrice(costPerUnit.toFixed(2));
 
     // Update selected item
     const newItem: SingleInventoryItem = {
       itemId: item.id,
       itemName: item.name,
       quantity: Number(quantity) || 0,
-      unitPrice: operationType === 'CONSUMPTION' ? Number(item.costPerUnit) : Number(unitPrice) || 0,
+      unitPrice: costPerUnit,
       unit: item.unit,
     };
 
@@ -226,7 +225,7 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
                 )}
               </div>
 
-              {/* Unit Price Input */}
+              {/* Unit Price Input - Always readonly */}
               <div>
                 <FormInput
                   label="سعر الوحدة"
@@ -237,13 +236,11 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
                   min="0.01"
                   step="0.01"
                   required
-                  disabled={disabled || operationType === 'CONSUMPTION'}
+                  disabled={true}
                 />
-                {operationType === 'CONSUMPTION' && (
-                  <p className="text-xs text-[var(--text-secondary)] mt-1">
-                    يتم جلب السعر تلقائياً من المخزون
-                  </p>
-                )}
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  يتم جلب السعر تلقائياً من المخزون
+                </p>
               </div>
 
               {/* Calculated Total Display */}

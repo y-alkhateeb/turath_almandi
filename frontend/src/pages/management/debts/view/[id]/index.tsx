@@ -27,11 +27,12 @@ import { useDebt } from '@/hooks/useDebts';
 import { PayDebtModal } from '@/components/PayDebtModal';
 import { DebtPaymentHistory } from '@/components/debts/DebtPaymentHistory';
 import { ErrorState } from '@/components/common/ErrorState';
-import { formatCurrency, formatDate } from '@/utils/format';
+import { formatDate } from '@/utils/format';
 import { DebtStatus, Currency } from '@/types/enum';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/ui/button';
+import { CurrencyAmountCompact } from '@/components/currency';
 
 // ============================================
 // HELPER FUNCTIONS
@@ -347,7 +348,7 @@ export default function ViewDebtPage() {
             </label>
             <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
               <span className="font-semibold text-[var(--text-primary)]">
-                {formatCurrency(debt.originalAmount)} {getCurrencyLabel(debt.currency)}
+                <CurrencyAmountCompact amount={debt.originalAmount} />
               </span>
             </div>
           </div>
@@ -361,7 +362,7 @@ export default function ViewDebtPage() {
               <span
                 className={`font-semibold ${debt.status === DebtStatus.PAID ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
               >
-                {formatCurrency(debt.remainingAmount)} {getCurrencyLabel(debt.currency)}
+                <CurrencyAmountCompact amount={debt.remainingAmount} />
               </span>
             </div>
           </div>
@@ -373,7 +374,7 @@ export default function ViewDebtPage() {
             </label>
             <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
               <span className="font-semibold text-green-600 dark:text-green-400">
-                {formatCurrency(paidAmount)} {getCurrencyLabel(debt.currency)}
+                <CurrencyAmountCompact amount={paidAmount} />
               </span>
               <span className="text-sm text-[var(--text-secondary)] mr-2">
                 ({paymentPercentage.toFixed(0)}%)

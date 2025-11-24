@@ -190,7 +190,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             max={debt.remainingAmount}
           />
           <p className="mt-1 text-xs text-[var(--text-secondary)]">
-            الحد الأقصى: {formatAmount(debt.remainingAmount)} د.ع
+            الحد الأقصى: <CurrencyAmountCompact amount={debt.remainingAmount} decimals={2} as="span" />
           </p>
         </div>
 

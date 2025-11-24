@@ -3,8 +3,7 @@
  * Displays a financial metric with icon, title, value, and optional breakdown
  */
 
-import { formatCurrency } from '@/lib/utils/formatCurrency';
-import { useDefaultCurrency } from '@/hooks/queries/useSettings';
+import { CurrencyAmountCompact } from '@/components/currency';
 
 interface FinancialCardProps {
   title: string;
@@ -57,8 +56,6 @@ export const FinancialCard = ({
   breakdown,
   isLoading = false,
 }: FinancialCardProps) => {
-  // Fetch default currency for amount formatting
-  const { data: defaultCurrency } = useDefaultCurrency();
   const config = colorConfigs[color];
 
   if (isLoading) {
@@ -93,9 +90,7 @@ export const FinancialCard = ({
       </div>
 
       <div className={`text-3xl font-bold ${config.valueText} mb-2 font-arabic`}>
-        {defaultCurrency
-          ? formatCurrency(value, defaultCurrency)
-          : `${value.toLocaleString('ar-IQ')} د.ع`}
+        <CurrencyAmountCompact amount={value} />
       </div>
 
       {breakdown && breakdown.length > 0 && (
@@ -104,9 +99,7 @@ export const FinancialCard = ({
             <div key={index} className="flex justify-between items-center text-sm">
               <span className="text-[var(--text-secondary)] font-arabic">{item.label}</span>
               <span className={`font-semibold ${config.text} font-arabic`}>
-                {defaultCurrency
-                  ? formatCurrency(item.value, defaultCurrency)
-                  : `${item.value.toLocaleString('ar-IQ')} د.ع`}
+                <CurrencyAmountCompact amount={item.value} />
               </span>
             </div>
           ))}

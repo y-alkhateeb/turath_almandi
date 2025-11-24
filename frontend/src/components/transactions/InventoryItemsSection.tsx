@@ -10,6 +10,7 @@ import { FormRadioGroup, type RadioOption } from '@/components/form/FormRadioGro
 import { InventoryOperationType, type InventoryItemOperation } from '@/types/inventoryOperation.types';
 import type { InventoryItem } from '@/types/inventory.types';
 import inventoryService from '@/api/services/inventoryService';
+import { CurrencyAmountCompact } from '@/components/currency';
 
 interface InventoryItemsSectionProps {
   branchId: string | null;
@@ -213,9 +214,18 @@ export const InventoryItemsSection: React.FC<InventoryItemsSectionProps> = ({
                       <p className="font-medium text-gray-900">{getItemName(item.itemId)}</p>
                       <p className="text-sm text-gray-600">
                         {item.quantity} {getItemUnit(item.itemId)}
-                        {item.operationType === InventoryOperationType.PURCHASE &&
-                          item.unitPrice &&
-                          ` × ${item.unitPrice} دينار = ${(item.quantity * item.unitPrice).toFixed(2)} دينار`}
+                        {item.operationType === InventoryOperationType.PURCHASE && item.unitPrice && (
+                          <>
+                            {' × '}
+                            <CurrencyAmountCompact amount={item.unitPrice} decimals={2} as="span" />
+                            {' = '}
+                            <CurrencyAmountCompact
+                              amount={item.quantity * item.unitPrice}
+                              decimals={2}
+                              as="span"
+                            />
+                          </>
+                        )}
                       </p>
                       <p className="text-xs text-gray-500">
                         {item.operationType === InventoryOperationType.PURCHASE

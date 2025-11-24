@@ -9,20 +9,23 @@
  * - Redirects back to intended route after login
  * - Shows loading spinner while checking auth
  * - Handles token expiry gracefully
+ * - Waits for Zustand hydration to avoid race conditions
  */
 
 import { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUserToken } from '@/store/userStore';
+import { useHydration } from '@/hooks/useHydration';
 import { PageLoading } from '@/components/loading';
 
 export function LoginAuthGuard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { accessToken } = useUserToken();
+  const hasHydrated = useHydration();
 
   useEffect(() => {
-    if (!accessToken) {
+    if (hasHydrated && !accessToken) {
       // Preserve the intended route in state so we can redirect back after login
       // Don't preserve /login itself to avoid redirect loops
       const from = location.pathname !== '/login' ? location.pathname : '/dashboard';
@@ -32,10 +35,10 @@ export function LoginAuthGuard() {
         state: { from },
       });
     }
-  }, [accessToken, navigate, location.pathname]);
+  }, [hasHydrated, accessToken, navigate, location.pathname]);
 
   // Show loading while checking authentication
-  if (!accessToken) {
+  if (!hasHydrated || !accessToken) {
     return <PageLoading message="جاري التحقق من الصلاحيات..." />;
   }
 

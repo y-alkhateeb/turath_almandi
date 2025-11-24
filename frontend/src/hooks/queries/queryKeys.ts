@@ -456,7 +456,6 @@ export const queryKeys = {
   employees: employeeKeys,
   notifications: notificationKeys,
   dashboard: dashboardKeys,
-  reports: reportKeys,
   audit: auditKeys,
   settings: settingsKeys,
 } as const;

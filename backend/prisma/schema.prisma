@@ -88,6 +88,17 @@ enum EmployeeStatus {
   @@map("employee_status")
 }
 
+enum ReportType {
+  FINANCIAL
+  DEBTS
+  INVENTORY
+  SALARY
+  BRANCHES
+  CUSTOM
+
+  @@map("report_type")
+}
+
 // ============================================================================
 // MODELS
 // ============================================================================
@@ -119,6 +130,8 @@ model User {
   recordedSalaryPayments   SalaryPayment[]          @relation("SalaryPaymentRecorder")
   recordedSalaryIncreases  SalaryIncrease[]         @relation("SalaryIncreaseRecorder")
   recordedBonuses          Bonus[]                  @relation("BonusRecorder")
+  createdReportTemplates   ReportTemplate[]         @relation("ReportTemplateCreator")
+  reportExecutions         ReportExecution[]        @relation("ReportExecutor")
 
   @@index([branchId])
   @@index([role])
@@ -550,4 +563,82 @@ model TransactionInventoryItem {
   @@index([inventoryItemId])
   @@index([operationType])
   @@map("transaction_inventory_items")
+}
+
+// ============================================================================
+// SMART REPORTS MODELS
+// ============================================================================
+
+// 18. Report Templates Table
+model ReportTemplate {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String      @db.VarChar(200)
+  description String?     @db.Text
+  reportType  ReportType
+  config      Json        @db.JsonB
+  isPublic    Boolean     @default(false) @map("is_public")
+  isDefault   Boolean     @default(false) @map("is_default")
+  createdById String      @map("created_by_id") @db.Uuid
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt   DateTime?   @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  createdBy  User              @relation("ReportTemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  executions ReportExecution[]
+
+  @@index([createdById])
+  @@index([reportType])
+  @@index([isPublic])
+  @@index([isDefault])
+  @@index([deletedAt])
+  @@map("report_templates")
+}
+
+// 19. Report Field Metadata Table
+model ReportFieldMetadata {
+  id             String    @id @default(uuid()) @db.Uuid
+  dataSource     String    @db.VarChar(50)
+  fieldName      String    @map("field_name") @db.VarChar(100)
+  displayName    String    @map("display_name") @db.VarChar(200)
+  description    String?   @db.Text
+  dataType       String    @map("data_type") @db.VarChar(20)
+  filterable     Boolean   @default(true)
+  sortable       Boolean   @default(true)
+  aggregatable   Boolean   @default(false)
+  groupable      Boolean   @default(false)
+  defaultVisible Boolean   @default(false) @map("default_visible")
+  defaultOrder   Int       @default(999) @map("default_order")
+  category       String?   @db.VarChar(100)
+  format         String?   @db.VarChar(50)
+  enumValues     Json?     @map("enum_values") @db.JsonB
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([dataSource, fieldName])
+  @@index([dataSource])
+  @@map("report_field_metadata")
+}
+
+// 20. Report Executions Table
+model ReportExecution {
+  id             String    @id @default(uuid()) @db.Uuid
+  templateId     String?   @map("template_id") @db.Uuid
+  config         Json      @db.JsonB
+  appliedFilters Json      @map("applied_filters") @db.JsonB
+  resultCount    Int       @map("result_count")
+  executionTime  Int       @map("execution_time")
+  exportFormat   String?   @map("export_format") @db.VarChar(20)
+  fileSize       Int?      @map("file_size")
+  executedById   String    @map("executed_by_id") @db.Uuid
+  executedAt     DateTime  @default(now()) @map("executed_at") @db.Timestamptz
+
+  // Relations
+  template   ReportTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  executedBy User            @relation("ReportExecutor", fields: [executedById], references: [id], onDelete: Restrict)
+
+  @@index([templateId])
+  @@index([executedById])
+  @@index([executedAt])
+  @@map("report_executions")
 }

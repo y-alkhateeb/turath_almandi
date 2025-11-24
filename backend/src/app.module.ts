@@ -20,6 +20,7 @@ import { WebSocketModule } from './websocket/websocket.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmployeesModule } from './employees/employees.module';
 import { UploadModule } from './upload/upload.module';
+import { SmartReportsModule } from './reports/smart-reports.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
@@ -60,6 +61,7 @@ import { envValidationSchema } from './common/config/env.validation';
     SettingsModule,
     EmployeesModule,
     UploadModule,
+    SmartReportsModule,
   ],
   controllers: [AppController],
   providers: [

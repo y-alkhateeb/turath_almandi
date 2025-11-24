@@ -14,7 +14,8 @@
 
 import { DollarSign, TrendingUp, TrendingDown, CreditCard, Activity } from 'lucide-react';
 import { StatCard } from '@/components/ui/StatCard';
-import { formatCurrency, formatNumber } from '@/utils/format';
+import { formatNumber } from '@/utils/format';
+import { CurrencyAmount } from '@/components/currency/CurrencyAmount';
 import type { DashboardStats } from '#/entity';
 
 // ============================================
@@ -73,12 +74,17 @@ export function DashboardStatsCards({ stats, isLoading }: DashboardStatsCardsPro
       {/* Total Revenue */}
       <StatCard
         title="إجمالي الإيرادات"
-        value={formatCurrency(stats.totalRevenue)}
+        value={<CurrencyAmount amount={stats.totalRevenue} decimals={0} />}
         icon={DollarSign}
         description={
-          stats.cashRevenue !== undefined && stats.masterRevenue !== undefined
-            ? `نقدي: ${formatCurrency(stats.cashRevenue)} • ماستر: ${formatCurrency(stats.masterRevenue)}`
-            : 'إجمالي الإيرادات المسجلة'
+          stats.cashRevenue !== undefined && stats.masterRevenue !== undefined ? (
+            <span>
+              نقدي: <CurrencyAmount amount={stats.cashRevenue} decimals={0} as="span" /> • ماستر:{' '}
+              <CurrencyAmount amount={stats.masterRevenue} decimals={0} as="span" />
+            </span>
+          ) : (
+            'إجمالي الإيرادات المسجلة'
+          )
         }
         className="border-r-4 border-green-500"
         trend={
@@ -95,7 +101,7 @@ export function DashboardStatsCards({ stats, isLoading }: DashboardStatsCardsPro
       {/* Total Expenses */}
       <StatCard
         title="إجمالي المصروفات"
-        value={formatCurrency(stats.totalExpenses)}
+        value={<CurrencyAmount amount={stats.totalExpenses} decimals={0} />}
         icon={CreditCard}
         description="إجمالي المصروفات المسجلة"
         className="border-r-4 border-red-500"
@@ -113,7 +119,7 @@ export function DashboardStatsCards({ stats, isLoading }: DashboardStatsCardsPro
       {/* Net Profit */}
       <StatCard
         title="صافي الربح"
-        value={formatCurrency(netProfit)}
+        value={<CurrencyAmount amount={netProfit} decimals={0} />}
         icon={TrendingUp}
         description={`هامش الربح: ${profitMargin}%`}
         className={`border-r-4 ${netProfit >= 0 ? 'border-blue-500' : 'border-orange-500'}`}

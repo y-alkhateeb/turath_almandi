@@ -14,7 +14,8 @@
  */
 
 import { ArrowRight } from 'lucide-react';
-import { formatDateTable, formatCurrency } from '@/utils/format';
+import { formatDateTable } from '@/utils/format';
+import { CurrencyAmountCompact } from '@/components/currency/CurrencyAmount';
 import { getCategoryLabel } from '@/constants/transactionCategories';
 import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction } from '#/entity';
@@ -185,7 +186,7 @@ export function DashboardRecentTransactions({
                     {getTypeLabel(transaction.type)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)] font-semibold">
-                    {formatCurrency(transaction.amount)}
+                    <CurrencyAmountCompact amount={transaction.amount} decimals={2} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     {getPaymentMethodLabel(transaction.paymentMethod)}

@@ -55,8 +55,8 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
   };
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900">الدفع</h3>
+    <div className="space-y-4 p-4 bg-[var(--bg-secondary)] dark:bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-color)]">
+      <h3 className="text-lg font-semibold text-[var(--text-primary)]">الدفع</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Amount */}
@@ -65,7 +65,7 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
           type="number"
           value={totalAmount}
           disabled
-          className="bg-gray-100"
+          className="opacity-70"
         />
 
         {/* Paid Amount */}
@@ -83,14 +83,14 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
 
         {/* Remaining Amount */}
         <div className="flex flex-col">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
             المتبقي
           </label>
-          <div className="px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-md">
+          <div className="px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-md">
             <CurrencyAmountCompact
               amount={remainingAmount}
               decimals={2}
-              className="text-lg font-semibold text-yellow-800"
+              className="text-lg font-semibold text-yellow-800 dark:text-yellow-400"
             />
           </div>
         </div>
@@ -104,9 +104,9 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
               type="checkbox"
               checked={createDebt}
               onChange={(e) => onCreateDebtChange(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="w-4 h-4 text-blue-600 dark:text-blue-400 border-[var(--border-color)] rounded focus:ring-blue-500 dark:focus:ring-blue-400"
             />
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-[var(--text-primary)]">
               تسجيل المبلغ المتبقي كدين
             </span>
           </label>
@@ -115,8 +115,8 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
 
       {/* Debt Fields */}
       {createDebt && remainingAmount > 0 && (
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 space-y-4">
-          <h4 className="text-md font-semibold text-blue-900">معلومات الدين</h4>
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50 space-y-4">
+          <h4 className="text-md font-semibold text-blue-900 dark:text-blue-300">معلومات الدين</h4>
 
           <FormInput
             label="اسم الدائن *"
@@ -143,8 +143,8 @@ export const PartialPaymentSection: React.FC<PartialPaymentSectionProps> = ({
             rows={3}
           />
 
-          <div className="bg-blue-100 p-3 rounded">
-            <p className="text-sm text-blue-800">
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded border border-blue-200 dark:border-blue-700/40">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
               <strong>مبلغ الدين:</strong> <CurrencyAmountCompact amount={remainingAmount} decimals={2} />
             </p>
           </div>

@@ -59,6 +59,14 @@ export function FormInput<T extends FieldValues>({
   const isDateType = type === 'date' || type === 'datetime-local' || type === 'time';
   const inputClasses = isDateType ? dateInputClasses : baseInputClasses;
 
+  // Support both register pattern and Controller pattern
+  const inputProps = register
+    ? register(name)
+    : { name, value, onChange, onBlur };
+
+  // Error can be FieldError object or string
+  const errorMessage = typeof error === 'string' ? error : error?.message;
+
   return (
     <div className={`${fieldContainerClasses} ${className}`} dir={dir}>
       {label && (

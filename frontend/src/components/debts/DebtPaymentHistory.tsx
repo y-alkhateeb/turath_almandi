@@ -14,8 +14,7 @@
 
 import { Table, type Column } from '../ui/Table';
 import { formatDate } from '@/utils/format';
-import { formatCurrency } from '@/lib/utils/formatCurrency';
-import { useDefaultCurrency } from '@/hooks/queries/useSettings';
+import { CurrencyAmountCompact } from '@/components/currency';
 import type { DebtPayment } from '#/entity';
 
 // ============================================
@@ -32,9 +31,6 @@ export interface DebtPaymentHistoryProps {
 // ============================================
 
 export function DebtPaymentHistory({ payments, isLoading }: DebtPaymentHistoryProps) {
-  // Fetch default currency for amount formatting
-  const { data: defaultCurrency } = useDefaultCurrency();
-
   // Sort payments by date descending (newest first)
   const sortedPayments = [...payments].sort(
     (a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
@@ -60,11 +56,10 @@ export function DebtPaymentHistory({ payments, isLoading }: DebtPaymentHistoryPr
         // Defensive: handle undefined/null amountPaid
         const amount = payment.amountPaid ?? 0;
         return (
-          <span className="font-semibold text-green-600">
-            {defaultCurrency
-              ? formatCurrency(amount, defaultCurrency)
-              : `${amount.toLocaleString('ar-IQ')} د.ع`}
-          </span>
+          <CurrencyAmountCompact
+            amount={amount}
+            className="font-semibold text-green-600"
+          />
         );
       },
     },
@@ -92,11 +87,10 @@ export function DebtPaymentHistory({ payments, isLoading }: DebtPaymentHistoryPr
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-green-800">إجمالي المبالغ المدفوعة:</span>
-            <span className="text-lg font-bold text-green-900">
-              {defaultCurrency
-                ? formatCurrency(totalPaid, defaultCurrency)
-                : `${totalPaid.toLocaleString('ar-IQ')} د.ع`}
-            </span>
+            <CurrencyAmountCompact
+              amount={totalPaid}
+              className="text-lg font-bold text-green-900"
+            />
           </div>
           <p className="text-xs text-green-700 mt-1">عدد الدفعات: {payments.length}</p>
         </div>

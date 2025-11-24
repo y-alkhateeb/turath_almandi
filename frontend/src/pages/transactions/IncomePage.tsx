@@ -4,6 +4,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Alert } from '@/components/ui/Alert';
 import { TransactionType } from '../../types/transactions.types';
+import { CurrencyAmountCompact } from '@/components/currency';
 
 /**
  * Income Page - Example usage of IncomeForm
@@ -132,11 +133,8 @@ export const IncomePage = () => {
                       day: 'numeric',
                     })}
                   </td>
-                  <td
-                    className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600"
-                    dir="ltr"
-                  >
-                    {transaction.amount.toLocaleString('ar-IQ')} {transaction.currency}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                    <CurrencyAmountCompact amount={transaction.amount} />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     <span
@@ -171,8 +169,10 @@ export const IncomePage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-green-800">إجمالي الإيرادات</p>
-              <p className="text-3xl font-bold text-green-900 mt-2" dir="ltr">
-                {transactions.reduce((sum, t) => sum + Number(t.amount), 0).toLocaleString('ar-IQ')} IQD
+              <p className="text-3xl font-bold text-green-900 mt-2">
+                <CurrencyAmountCompact
+                  amount={transactions.reduce((sum, t) => sum + Number(t.amount), 0)}
+                />
               </p>
             </div>
             <div className="bg-green-200 p-4 rounded-full">

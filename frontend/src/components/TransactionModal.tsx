@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Modal } from './Modal';
 import { TransactionType, PaymentMethod, type Transaction } from '../types/transactions.types';
 import { useUpdateTransaction } from '../hooks/useTransactions';
+import { CurrencyAmountCompact } from '@/components/currency';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -87,13 +88,6 @@ export default function TransactionModal({
     });
   };
 
-  const formatAmount = (amount: number) => {
-    return amount.toLocaleString('ar-IQ', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-  };
-
   const getTypeLabel = (type: TransactionType) => {
     return type === 'INCOME' ? 'إيراد' : 'مصروف';
   };
@@ -136,7 +130,9 @@ export default function TransactionModal({
                 المبلغ
               </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                <span className="font-semibold">{formatAmount(transaction.amount)} IQD</span>
+                <span className="font-semibold">
+                  <CurrencyAmountCompact amount={transaction.amount} decimals={2} />
+                </span>
               </div>
             </div>
 
@@ -251,7 +247,7 @@ export default function TransactionModal({
             {/* Amount */}
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                المبلغ (IQD) <span className="text-red-500">*</span>
+                المبلغ <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"

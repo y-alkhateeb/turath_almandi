@@ -6,6 +6,7 @@
  * - Business logic in hooks (useNotifications, useMarkAsRead, useMarkAllAsRead)
  * - Presentational component (NotificationList)
  * - This page only orchestrates components (container pattern)
+ * - Follows standard design patterns with PageLayout, StatCard, Tabs, Card
  *
  * Features:
  * - List all notifications with filter tabs (All, Unread)
@@ -14,14 +15,16 @@
  * - Mark notification as read on click
  * - Mark all as read button
  * - Navigate to settings page
+ * - Stats cards showing totals
  * - Loading states with skeleton
  * - Error and empty states
  * - RTL support
+ * - Dark mode support
  * - Strict typing
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { Settings, Bell, CheckCheck } from 'lucide-react';
+import { Settings, Bell, CheckCheck, BellRing, BellOff, Info } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import {
   useNotifications,
@@ -34,6 +37,9 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { PageLayout } from '@/components/layouts';
 import { PageLoading } from '@/components/loading';
 import { Button } from '@/ui/button';
+import { Card } from '@/ui/card';
+import { StatCard } from '@/components/ui/StatCard';
+import { Tabs, TabsList, TabsTrigger } from '@/ui/tabs';
 
 // ============================================
 // TYPES
@@ -177,6 +183,7 @@ export default function NotificationsPage() {
   // ============================================
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const readCount = notifications.filter((n) => n.isRead).length;
   const hasUnread = unreadCount > 0;
 
   // Header Actions
@@ -200,90 +207,97 @@ export default function NotificationsPage() {
     </div>
   );
 
-  // Filter Tabs Component
-  const filterTabs = (
-    <div className="flex gap-2" dir="rtl">
-      <button
-        onClick={() => handleTabChange('all')}
-        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-          activeTab === 'all'
-            ? 'bg-primary-600 text-white'
-            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-        }`}
-      >
-        الكل
-      </button>
-      <button
-        onClick={() => handleTabChange('unread')}
-        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-          activeTab === 'unread'
-            ? 'bg-primary-600 text-white'
-            : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'
-        }`}
-      >
-        غير مقروء
-        {unreadCount > 0 && (
-          <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
-      </button>
-    </div>
-  );
-
   // ============================================
   // RENDER
   // ============================================
 
-  // Empty State
-  if (notifications.length === 0) {
-    return (
-      <PageLayout
-        title="الإشعارات"
-        description="عرض وإدارة إشعاراتك"
-        actions={headerActions}
-      >
-        {filterTabs}
-        <EmptyState
-          icon={<Bell className="w-8 h-8 text-primary-600" />}
-          title={activeTab === 'unread' ? 'لا توجد إشعارات غير مقروءة' : 'لا توجد إشعارات'}
-          description={
-            activeTab === 'unread' ? 'جميع الإشعارات مقروءة. عمل رائع!' : 'لم تتلقَ أي إشعارات بعد.'
-          }
-        />
-      </PageLayout>
-    );
-  }
-
-  // Main Content
   return (
     <PageLayout
       title="الإشعارات"
-      description={`عرض وإدارة إشعاراتك (${total} إشعار)`}
+      description="عرض وإدارة جميع الإشعارات"
       actions={headerActions}
       error={error}
       onRetry={handleRetry}
     >
-
-      {/* Filter Tabs */}
-      {filterTabs}
-
-      {/* Notifications List */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg overflow-hidden">
-        <NotificationList
-          notifications={notifications}
-          isLoading={false}
-          onMarkAsRead={handleMarkAsRead}
-          onMarkAllAsRead={handleMarkAllAsRead}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4" dir="rtl">
+        <StatCard
+          title="الكل"
+          value={total}
+          icon={Bell}
+          description="جميع الإشعارات"
+        />
+        <StatCard
+          title="غير مقروء"
+          value={unreadCount}
+          icon={BellRing}
+          description="إشعارات جديدة"
+          className="border-r-4 border-red-500"
+        />
+        <StatCard
+          title="مقروء"
+          value={readCount}
+          icon={BellOff}
+          description="تم الاطلاع عليها"
+          className="border-r-4 border-green-500"
+        />
+        <StatCard
+          title="معلومة"
+          value={notifications.length}
+          icon={Info}
+          description="التحديث التلقائي نشط"
         />
       </div>
 
-      {/* Auto-refresh indicator */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4" dir="rtl">
-        <p className="text-sm text-blue-800 dark:text-blue-300">
-          <strong>ملاحظة:</strong> يتم تحديث الإشعارات تلقائياً كل 30 ثانية وفي الوقت الفعلي عبر WebSocket.
-        </p>
-      </div>
+      {/* Filters/Tabs Card */}
+      <Card className="p-4">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList>
+            <TabsTrigger value="all">الكل ({total})</TabsTrigger>
+            <TabsTrigger value="unread">
+              غير مقروء
+              {unreadCount > 0 && (
+                <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </Card>
+
+      {/* Notifications List Card */}
+      <Card className="p-6">
+        {notifications.length === 0 ? (
+          <EmptyState
+            icon={<Bell className="w-8 h-8 text-primary-600" />}
+            title={activeTab === 'unread' ? 'لا توجد إشعارات غير مقروءة' : 'لا توجد إشعارات'}
+            description={
+              activeTab === 'unread'
+                ? 'جميع الإشعارات مقروءة. عمل رائع!'
+                : 'لم تتلقَ أي إشعارات بعد.'
+            }
+          />
+        ) : (
+          <NotificationList
+            notifications={notifications}
+            isLoading={false}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAllAsRead={handleMarkAllAsRead}
+          />
+        )}
+      </Card>
+
+      {/* Auto-refresh Info Card */}
+      <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <div className="flex items-start gap-3" dir="rtl">
+          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-blue-800 dark:text-blue-300">
+            <strong>ملاحظة:</strong> يتم تحديث الإشعارات تلقائياً كل 30 ثانية وفي الوقت الفعلي عبر
+            WebSocket.
+          </p>
+        </div>
+      </Card>
 
       {/* Loading Overlay - Shown during mark all operation */}
       {markAllAsRead.isPending && (

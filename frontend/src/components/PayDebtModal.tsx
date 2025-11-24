@@ -7,8 +7,9 @@ import { FormInput } from '@/components/form/FormInput';
 import { FormTextarea } from '@/components/form/FormTextarea';
 import { DateInput } from '@/components/form';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { CurrencyAmountCompact } from '@/components/currency';
 import type { Debt, PayDebtFormData } from '../types/debts.types';
-import { formatAmount, formatDateTable } from '@/utils/format';
+import { formatDateTable } from '@/utils/format';
 
 /**
  * Zod Validation Schema for Pay Debt Form
@@ -149,7 +150,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             <div>
               <p className="text-xs text-[var(--text-secondary)]">المبلغ الأصلي</p>
               <p className="text-sm font-medium text-[var(--text-primary)]">
-                {formatAmount(debt.originalAmount)} د.ع
+                <CurrencyAmountCompact amount={debt.originalAmount} />
               </p>
             </div>
 
@@ -157,7 +158,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             <div>
               <p className="text-xs text-[var(--text-secondary)]">المبلغ المتبقي</p>
               <p className="text-sm font-bold text-red-600">
-                {formatAmount(debt.remainingAmount)} د.ع
+                <CurrencyAmountCompact amount={debt.remainingAmount} />
               </p>
             </div>
           </div>

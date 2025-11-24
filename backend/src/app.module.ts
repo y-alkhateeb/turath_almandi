@@ -17,7 +17,6 @@ import { TasksModule } from './tasks/tasks.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
-import { ReportsModule } from './reports/reports.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmployeesModule } from './employees/employees.module';
 import { UploadModule } from './upload/upload.module';
@@ -58,7 +57,6 @@ import { envValidationSchema } from './common/config/env.validation';
     InventoryModule,
     DashboardModule,
     WebSocketModule,
-    ReportsModule,
     SettingsModule,
     EmployeesModule,
     UploadModule,

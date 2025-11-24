@@ -90,12 +90,6 @@ export const navData: NavItem[] = [
     ],
   },
   {
-    title: 'التقارير',
-    path: '/reports',
-    icon: <Icon icon="lucide:file-bar-chart" size={24} />,
-    caption: 'التقارير المالية والإحصائية',
-  },
-  {
     title: 'الإشعارات',
     path: '/notifications',
     icon: <Icon icon="lucide:bell" size={24} />,

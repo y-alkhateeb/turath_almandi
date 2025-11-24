@@ -21,7 +21,6 @@ import type {
   InventoryQueryFilters,
   NotificationQueryFilters,
   AuditLogQueryFilters,
-  ReportQueryFilters,
   DashboardQueryFilters,
 } from '#/api';
 
@@ -360,56 +359,6 @@ export const dashboardKeys = {
    */
   branchComparison: (dates?: { startDate?: string; endDate?: string }) =>
     ['dashboard', 'comparison', dates] as const,
-} as const;
-
-// ============================================
-// REPORT QUERY KEYS
-// ============================================
-
-/**
- * Report query keys
- * Used for report generation queries
- */
-export const reportKeys = {
-  /** Reports namespace root */
-  all: ['reports'] as const,
-
-  /**
-   * Report by type and filters
-   * @param type - Report type ('financial' | 'debts' | 'inventory' | 'salaries')
-   * @param filters - Optional ReportQueryFilters
-   * @returns ['reports', type, filters]
-   */
-  byType: (type: 'financial' | 'debts' | 'inventory' | 'salaries', filters?: ReportQueryFilters) =>
-    ['reports', type, filters] as const,
-
-  /**
-   * Financial report
-   * @param filters - Report filters
-   * @returns ['reports', 'financial', filters]
-   */
-  financial: (filters: ReportQueryFilters) => ['reports', 'financial', filters] as const,
-
-  /**
-   * Debt report
-   * @param filters - Optional report filters
-   * @returns ['reports', 'debts', filters]
-   */
-  debt: (filters?: ReportQueryFilters) => ['reports', 'debts', filters] as const,
-
-  /**
-   * Inventory report
-   * @param branchId - Optional branch UUID
-   * @returns ['reports', 'inventory', branchId]
-   */
-  inventory: (branchId?: string) => ['reports', 'inventory', { branchId }] as const,
-
-  /**
-   * Salary report
-   * @param filters - Report filters
-   * @returns ['reports', 'salaries', filters]
-   */
-  salary: (filters: ReportQueryFilters) => ['reports', 'salaries', filters] as const,
 } as const;
 
 // ============================================

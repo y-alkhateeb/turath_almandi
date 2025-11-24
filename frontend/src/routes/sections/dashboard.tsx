@@ -50,9 +50,6 @@ const EmployeeCreatePage = lazy(() => import('@/pages/employees/CreateEmployeePa
 const EmployeeEditPage = lazy(() => import('@/pages/employees/EditEmployeePage'));
 const EmployeeDetailsPage = lazy(() => import('@/pages/employees/EmployeeDetailsPage'));
 
-// Reports
-const ReportsPage = lazy(() => import('@/pages/reports'));
-
 // Notifications
 const NotificationsPage = lazy(() => import('@/pages/notifications'));
 const NotificationsSettingsPage = lazy(() => import('@/pages/notifications/settings'));
@@ -277,18 +274,6 @@ export const dashboardRoutes: RouteObject[] = [
                 ),
               },
             ],
-          },
-
-          // ============================================
-          // REPORTS
-          // ============================================
-          {
-            path: 'reports',
-            element: (
-              <LazyPage>
-                <ReportsPage />
-              </LazyPage>
-            ),
           },
 
           // ============================================

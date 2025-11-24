@@ -78,7 +78,8 @@ export class QueryBuilderService {
     const delegate = getPrismaDelegate(this.prisma, dataSource);
 
     // Get total count
-    const totalCount = await (delegate as { count: (args: { where: WhereCondition }) => Promise<number> }).count({
+    // Using any cast as Prisma delegate types are dynamically determined at runtime
+    const totalCount = await (delegate as any).count({
       where: whereClause,
     });
 
@@ -106,7 +107,8 @@ export class QueryBuilderService {
     }
 
     // Execute query
-    const rawData = await (delegate as { findMany: (args: typeof findManyArgs) => Promise<ReportResultRow[]> }).findMany(findManyArgs);
+    // Using any cast as Prisma delegate types are dynamically determined at runtime
+    const rawData = await (delegate as any).findMany(findManyArgs);
 
     // Format results
     const data = this.formatResults(rawData, config.fields);
@@ -181,7 +183,7 @@ export class QueryBuilderService {
       return conditions[0];
     }
 
-    return { AND: conditions };
+    return { AND: conditions } as WhereCondition;
   }
 
   /**
@@ -191,7 +193,7 @@ export class QueryBuilderService {
     const { field, operator } = filter;
 
     if (isNullCheckFilter(filter)) {
-      return this.buildNullCheckCondition(field, operator);
+      return this.buildNullCheckCondition(field, operator as 'isNull' | 'isNotNull');
     }
 
     if (isRangeFilter(filter)) {
@@ -199,7 +201,7 @@ export class QueryBuilderService {
     }
 
     if (isArrayValueFilter(filter)) {
-      return this.buildArrayCondition(field, operator, filter.value);
+      return this.buildArrayCondition(field, operator as 'in' | 'notIn', filter.value);
     }
 
     if (isSingleValueFilter(filter)) {
@@ -235,7 +237,7 @@ export class QueryBuilderService {
         gte: this.convertValue(min),
         lte: this.convertValue(max),
       },
-    };
+    } as WhereCondition;
   }
 
   /**
@@ -370,7 +372,8 @@ export class QueryBuilderService {
     }
 
     // Execute aggregate query
-    const aggregateResult = await (delegate as { aggregate: (args: { where: WhereCondition } & Record<string, Record<string, boolean>>) => Promise<Record<string, Record<string, number | null>>> }).aggregate({
+    // Using any cast as Prisma delegate types are dynamically determined at runtime
+    const aggregateResult = await (delegate as any).aggregate({
       where: whereClause,
       ...aggregateArgs,
     });

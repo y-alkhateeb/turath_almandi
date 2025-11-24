@@ -179,10 +179,10 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">صنف المخزون</h3>
         <span className={`text-sm font-medium px-3 py-1 rounded-full ${
           operationType === 'PURCHASE'
-            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
             : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
         }`}>
-          {operationType === 'PURCHASE' ? '🔵 شراء وإضافة' : '🔴 صرف واستهلاك'}
+          {operationType === 'PURCHASE' ? '📦 شراء وإضافة' : '📤 صرف واستهلاك'}
         </span>
       </div>
 
@@ -197,7 +197,7 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
             label="الصنف"
             options={inventoryOptions}
             value={selectedItem?.itemId || ''}
-            onChange={handleItemSelect}
+            onChange={(e) => handleItemSelect(e.target.value)}
             placeholder="اختر صنفاً"
             required
             disabled={disabled}
@@ -247,18 +247,18 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
               </div>
 
               {/* Calculated Total Display */}
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                  <span className="text-sm font-medium text-amber-900 dark:text-amber-300">
                     المبلغ الإجمالي المحسوب:
                   </span>
                   <CurrencyAmountCompact
                     amount={calculatedTotal}
                     decimals={2}
-                    className="text-lg font-bold text-blue-800 dark:text-blue-400"
+                    className="text-lg font-bold text-amber-800 dark:text-amber-400"
                   />
                 </div>
-                <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
                   {quantity || '0'} {selectedItem.unit} × {unitPrice || '0'} = {calculatedTotal.toFixed(2)}
                 </p>
               </div>

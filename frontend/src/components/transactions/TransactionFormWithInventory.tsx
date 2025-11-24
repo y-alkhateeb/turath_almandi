@@ -105,7 +105,7 @@ export function TransactionFormWithInventory({
     resolver: zodResolver(createTransactionWithInventorySchema),
     defaultValues: {
       type: TransactionType.EXPENSE,
-      category: 'INVENTORY',
+      category: 'OTHER_EXPENSE', // Default to OTHER_EXPENSE, not INVENTORY
       date: new Date().toISOString().split('T')[0],
       notes: '',
       branchId: isAdmin ? undefined : user?.branchId,
@@ -116,6 +116,23 @@ export function TransactionFormWithInventory({
   const category = watch('category');
   const selectedBranchId = watch('branchId') || user?.branchId || null;
 
+  // Debug: Log values to understand the issue
+  console.log('🔍 Debug TransactionForm:', {
+    transactionType,
+    category,
+    categoryIsInventory: category === 'INVENTORY',
+    typeIsExpense: transactionType === TransactionType.EXPENSE,
+  });
+
+  // Compute category options based on transaction type (memoized)
+  const categoryOptions = useMemo(() => {
+    const options = transactionType === TransactionType.INCOME
+      ? INCOME_CATEGORIES
+      : EXPENSE_CATEGORIES;
+    console.log('📋 Categories for', transactionType, ':', options.map(c => ({ value: c.value, label: c.label })));
+    return options;
+  }, [transactionType]);
+
   // Auto-determine inventory operation type based on transaction type
   const inventoryOperationType = useMemo(() => {
     if (category !== 'INVENTORY') return null;
@@ -124,7 +141,12 @@ export function TransactionFormWithInventory({
 
   // Determine if we should show inventory section or manual amount input
   // Show inventory section ONLY for EXPENSE + INVENTORY (مشتريات المخزن)
-  const showInventorySection = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
+  const showInventorySection = useMemo(() => {
+    const result = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
+    console.log('🔍 Show Inventory Section:', { category, transactionType, result });
+    return result;
+  }, [category, transactionType]);
+
   const showManualAmountInput = !showInventorySection;
 
   // Show partial payment section ONLY for INCOME transactions
@@ -326,11 +348,7 @@ export function TransactionFormWithInventory({
         <FormSelect
           name="category"
           label="الفئة"
-          options={
-            transactionType === TransactionType.INCOME
-              ? INCOME_CATEGORIES
-              : EXPENSE_CATEGORIES
-          }
+          options={categoryOptions}
           register={register}
           error={errors.category}
           disabled={isSubmitting}

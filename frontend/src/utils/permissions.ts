@@ -284,7 +284,7 @@ export function getAccessibleBranchIds(user: User | null | undefined): string[] 
 export function canPerformAction(
   user: User | null | undefined,
   action: 'create' | 'update' | 'delete' | 'view',
-  resource: 'user' | 'branch' | 'transaction' | 'debt' | 'inventory' | 'report' | 'audit',
+  resource: 'user' | 'branch' | 'transaction' | 'debt' | 'inventory' | 'audit',
   resourceBranchId?: string | null
 ): boolean {
   if (!user) return false;
@@ -292,11 +292,6 @@ export function canPerformAction(
   // Admin-only resources
   if (resource === 'user' || resource === 'branch' || resource === 'audit') {
     return isAdmin(user);
-  }
-
-  // Reports - all authenticated users can view/export
-  if (resource === 'report') {
-    return action === 'view' || action === 'create'; // 'create' for export
   }
 
   // Branch-specific resources

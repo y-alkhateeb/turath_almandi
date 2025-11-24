@@ -57,7 +57,7 @@ export type NotificationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 /**
  * Related entity types for navigation
  */
-export type EntityType = 'transaction' | 'debt' | 'inventory' | 'user' | 'branch' | 'report';
+export type EntityType = 'transaction' | 'debt' | 'inventory' | 'user' | 'branch';
 
 /**
  * Toast configuration options
@@ -132,8 +132,6 @@ const getEntityNavigationPath = (
       return `/management/system/users/list`;
     case 'branch':
       return `/management/system/branches/list`;
-    case 'report':
-      return `/reports`;
     default:
       return null;
   }

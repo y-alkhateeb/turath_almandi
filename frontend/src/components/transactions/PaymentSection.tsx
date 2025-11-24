@@ -25,6 +25,7 @@ interface PaymentSectionProps {
   debtDueDate: string;
   onDebtDueDateChange: (value: string) => void;
   disabled?: boolean;
+  showPartialPaymentOption?: boolean; // Show partial payment checkbox only for INCOME
 }
 
 const paymentMethodOptions: RadioOption[] = [
@@ -47,6 +48,7 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({
   debtDueDate,
   onDebtDueDateChange,
   disabled = false,
+  showPartialPaymentOption = true, // Default to true for backward compatibility
 }) => {
   const [remainingAmount, setRemainingAmount] = useState(0);
 
@@ -102,104 +104,108 @@ export const PaymentSection: React.FC<PaymentSectionProps> = ({
         required
       />
 
-      {/* Divider */}
-      <div className="border-t border-[var(--border-color)] my-4"></div>
+      {/* Divider - Only show if partial payment option is available */}
+      {showPartialPaymentOption && <div className="border-t border-[var(--border-color)] my-4"></div>}
 
-      {/* Partial Payment Checkbox */}
-      <label className="flex items-center space-x-2 space-x-reverse cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isPartialPayment}
-          onChange={(e) => onPartialPaymentChange(e.target.checked)}
-          disabled={disabled || totalAmount === 0}
-          className="w-4 h-4 text-brand-gold-500 border-[var(--border-color)] rounded focus:ring-brand-gold-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        <span className="text-sm font-medium text-[var(--text-primary)]">دفع جزئي</span>
-      </label>
+      {/* Partial Payment Checkbox - Only for INCOME transactions */}
+      {showPartialPaymentOption && (
+        <>
+          <label className="flex items-center space-x-2 space-x-reverse cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isPartialPayment}
+              onChange={(e) => onPartialPaymentChange(e.target.checked)}
+              disabled={disabled || totalAmount === 0}
+              className="w-4 h-4 text-brand-gold-500 border-[var(--border-color)] rounded focus:ring-brand-gold-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <span className="text-sm font-medium text-[var(--text-primary)]">دفع جزئي</span>
+          </label>
 
-      {/* Partial Payment Fields */}
-      {isPartialPayment && (
-        <div className="space-y-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
-          {/* Paid Amount Input */}
-          <FormInput
-            label="المبلغ المدفوع"
-            type="number"
-            value={paidAmount || ''}
-            onChange={handlePaidAmountChange}
-            min={0}
-            max={totalAmount}
-            step="0.01"
-            placeholder="أدخل المبلغ المدفوع"
-            required
-            disabled={disabled}
-          />
-
-          {/* Remaining Amount Display */}
-          <div className="p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700/40">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-yellow-900 dark:text-yellow-300">
-                المتبقي:
-              </span>
-              <CurrencyAmountCompact
-                amount={remainingAmount}
-                decimals={2}
-                className="text-lg font-bold text-yellow-800 dark:text-yellow-400"
+          {/* Partial Payment Fields */}
+          {isPartialPayment && (
+            <div className="space-y-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 rounded-lg border border-yellow-200 dark:border-yellow-700/50">
+              {/* Paid Amount Input */}
+              <FormInput
+                label="المبلغ المدفوع"
+                type="number"
+                value={paidAmount || ''}
+                onChange={handlePaidAmountChange}
+                min={0}
+                max={totalAmount}
+                step="0.01"
+                placeholder="أدخل المبلغ المدفوع"
+                required
+                disabled={disabled}
               />
-            </div>
-          </div>
 
-          {/* Create Debt Checkbox */}
-          {remainingAmount > 0 && (
-            <>
-              <label className="flex items-center space-x-2 space-x-reverse cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={createDebt}
-                  onChange={(e) => onCreateDebtChange(e.target.checked)}
-                  disabled={disabled}
-                  className="w-4 h-4 text-brand-gold-500 border-[var(--border-color)] rounded focus:ring-brand-gold-500"
-                />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
-                  تسجيل المتبقي كدين
-                </span>
-              </label>
-
-              {/* Debt Fields */}
-              {createDebt && (
-                <div className="space-y-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50">
-                  <h4 className="text-md font-semibold text-amber-900 dark:text-amber-300">
-                    معلومات الدين
-                  </h4>
-
-                  <FormInput
-                    label="اسم الدائن"
-                    type="text"
-                    value={debtCreditorName}
-                    onChange={(e) => onDebtCreditorNameChange(e.target.value)}
-                    placeholder="أدخل اسم الدائن"
-                    required
-                    disabled={disabled}
+              {/* Remaining Amount Display */}
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700/40">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-yellow-900 dark:text-yellow-300">
+                    المتبقي:
+                  </span>
+                  <CurrencyAmountCompact
+                    amount={remainingAmount}
+                    decimals={2}
+                    className="text-lg font-bold text-yellow-800 dark:text-yellow-400"
                   />
-
-                  <DateInput
-                    mode="controlled"
-                    label="تاريخ الاستحقاق (اختياري)"
-                    value={debtDueDate}
-                    onChange={(value) => onDebtDueDateChange(value || '')}
-                    disabled={disabled}
-                  />
-
-                  <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded border border-amber-200 dark:border-amber-700/40">
-                    <p className="text-sm text-amber-800 dark:text-amber-300">
-                      <strong>مبلغ الدين:</strong>{' '}
-                      <CurrencyAmountCompact amount={remainingAmount} decimals={2} />
-                    </p>
-                  </div>
                 </div>
+              </div>
+
+              {/* Create Debt Checkbox */}
+              {remainingAmount > 0 && (
+                <>
+                  <label className="flex items-center space-x-2 space-x-reverse cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={createDebt}
+                      onChange={(e) => onCreateDebtChange(e.target.checked)}
+                      disabled={disabled}
+                      className="w-4 h-4 text-brand-gold-500 border-[var(--border-color)] rounded focus:ring-brand-gold-500"
+                    />
+                    <span className="text-sm font-medium text-[var(--text-primary)]">
+                      تسجيل المتبقي كدين
+                    </span>
+                  </label>
+
+                  {/* Debt Fields */}
+                  {createDebt && (
+                    <div className="space-y-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50">
+                      <h4 className="text-md font-semibold text-amber-900 dark:text-amber-300">
+                        معلومات الدين
+                      </h4>
+
+                      <FormInput
+                        label="اسم الدائن"
+                        type="text"
+                        value={debtCreditorName}
+                        onChange={(e) => onDebtCreditorNameChange(e.target.value)}
+                        placeholder="أدخل اسم الدائن"
+                        required
+                        disabled={disabled}
+                      />
+
+                      <DateInput
+                        mode="controlled"
+                        label="تاريخ الاستحقاق (اختياري)"
+                        value={debtDueDate}
+                        onChange={(value) => onDebtDueDateChange(value || '')}
+                        disabled={disabled}
+                      />
+
+                      <div className="bg-amber-100 dark:bg-amber-900/30 p-3 rounded border border-amber-200 dark:border-amber-700/40">
+                        <p className="text-sm text-amber-800 dark:text-amber-300">
+                          <strong>مبلغ الدين:</strong>{' '}
+                          <CurrencyAmountCompact amount={remainingAmount} decimals={2} />
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
-            </>
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

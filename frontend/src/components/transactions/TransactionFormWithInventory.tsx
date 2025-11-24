@@ -127,6 +127,9 @@ export function TransactionFormWithInventory({
   const showInventorySection = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
   const showManualAmountInput = !showInventorySection;
 
+  // Show partial payment section ONLY for INCOME transactions
+  const showPartialPayment = transactionType === TransactionType.INCOME;
+
   // Calculate the actual total amount based on category
   const totalAmount = useMemo(() => {
     if (showInventorySection) {
@@ -149,6 +152,15 @@ export function TransactionFormWithInventory({
       setPaidAmount(totalAmount);
     }
   }, [totalAmount, isPartialPayment]);
+
+  // For EXPENSE transactions, always set paid = total (no partial payment)
+  useEffect(() => {
+    if (!showPartialPayment) {
+      setPaidAmount(totalAmount);
+      setIsPartialPayment(false);
+      setCreateDebt(false);
+    }
+  }, [showPartialPayment, totalAmount]);
 
   // Reset inventory item when category changes away from INVENTORY or type changes away from EXPENSE
   useEffect(() => {
@@ -374,6 +386,7 @@ export function TransactionFormWithInventory({
         onDebtCreditorNameChange={setDebtCreditorName}
         debtDueDate={debtDueDate}
         onDebtDueDateChange={setDebtDueDate}
+        showPartialPaymentOption={showPartialPayment}
         disabled={isSubmitting}
       />
 

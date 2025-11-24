@@ -22,9 +22,13 @@ export interface FormInputProps<T extends FieldValues> {
   step?: string;
   min?: string | number;
   max?: string | number;
-  // Controlled component props
+  // Controlled component props (for use without react-hook-form)
   value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  // Additional props
+  dir?: 'ltr' | 'rtl';
+  helpText?: string;
 }
 
 export function FormInput<T extends FieldValues>({
@@ -43,6 +47,9 @@ export function FormInput<T extends FieldValues>({
   max,
   value,
   onChange,
+  onBlur,
+  dir,
+  helpText,
 }: FormInputProps<T>) {
   // Determine if using react-hook-form or controlled component
   const isControlled = value !== undefined || onChange !== undefined;
@@ -53,7 +60,7 @@ export function FormInput<T extends FieldValues>({
   const inputClasses = isDateType ? dateInputClasses : baseInputClasses;
 
   return (
-    <div className={`${fieldContainerClasses} ${className}`}>
+    <div className={`${fieldContainerClasses} ${className}`} dir={dir}>
       {label && (
         <label htmlFor={name} className={labelClasses}>
           {label}
@@ -66,6 +73,7 @@ export function FormInput<T extends FieldValues>({
         {...(register && !isControlled ? register(name) : {})}
         value={isControlled ? value : undefined}
         onChange={isControlled ? onChange : undefined}
+        onBlur={isControlled ? onBlur : undefined}
         placeholder={placeholder}
         disabled={disabled}
         autoComplete={autoComplete}
@@ -80,9 +88,14 @@ export function FormInput<T extends FieldValues>({
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${name}-error` : undefined}
       />
-      {error && (
+      {errorMessage && (
         <p id={`${name}-error`} className={errorClasses} role="alert">
           {errorMessage}
+        </p>
+      )}
+      {helpText && !error && (
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          {helpText}
         </p>
       )}
     </div>

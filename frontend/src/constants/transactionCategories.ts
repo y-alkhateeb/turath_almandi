@@ -19,7 +19,7 @@ export interface CategoryOption {
 export const INCOME_CATEGORIES: CategoryOption[] = [
   { value: 'SALES', label: 'مبيعات', type: TransactionType.INCOME },
   { value: 'SERVICES', label: 'خدمات', type: TransactionType.INCOME },
-  { value: 'DEBT_PAYMENT', label: 'سداد دين', type: TransactionType.INCOME },
+  { value: 'APP_PURCHASES', label: 'مشتريات التطبيق', type: TransactionType.INCOME },
   { value: 'OTHER_INCOME', label: 'إيرادات أخرى', type: TransactionType.INCOME },
 ];
 
@@ -35,7 +35,6 @@ export const EXPENSE_CATEGORIES: CategoryOption[] = [
   { value: 'MAINTENANCE', label: 'صيانة', type: TransactionType.EXPENSE },
   { value: 'TRANSPORTATION', label: 'مواصلات', type: TransactionType.EXPENSE },
   { value: 'INVENTORY', label: 'مشتريات مخزون', type: TransactionType.EXPENSE },
-  { value: 'APP_PURCHASES', label: 'مشتريات التطبيق', type: TransactionType.EXPENSE },
   { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى', type: TransactionType.EXPENSE },
 ];
 

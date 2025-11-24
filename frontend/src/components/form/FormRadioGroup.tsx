@@ -10,12 +10,15 @@ export interface FormRadioGroupProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
   options: RadioOption[];
-  register: UseFormRegister<T>;
-  error?: FieldError;
+  register?: UseFormRegister<T>;
+  error?: FieldError | string;
   required?: boolean;
   disabled?: boolean;
   className?: string;
   inline?: boolean;
+  // Controlled component props
+  value?: string | number;
+  onChange?: (value: string | number) => void;
 }
 
 export function FormRadioGroup<T extends FieldValues>({
@@ -28,7 +31,13 @@ export function FormRadioGroup<T extends FieldValues>({
   disabled = false,
   className = '',
   inline = false,
+  value,
+  onChange,
 }: FormRadioGroupProps<T>) {
+  // Determine if using react-hook-form or controlled component
+  const isControlled = value !== undefined || onChange !== undefined;
+  const errorMessage = typeof error === 'string' ? error : error?.message;
+
   return (
     <div className={`mb-4 ${className}`}>
       <fieldset>
@@ -47,8 +56,12 @@ export function FormRadioGroup<T extends FieldValues>({
                 <input
                   id={`${name}-${option.value}`}
                   type="radio"
-                  {...register(name)}
+                  {...(register && !isControlled ? register(name) : {})}
                   value={option.value}
+                  checked={isControlled ? value === option.value : undefined}
+                  onChange={
+                    isControlled ? () => onChange?.(option.value) : undefined
+                  }
                   disabled={disabled}
                   className={`
                     w-5 h-5 border
@@ -95,7 +108,7 @@ export function FormRadioGroup<T extends FieldValues>({
       </fieldset>
       {error && (
         <p id={`${name}-error`} className="mt-2 text-sm text-red-600" role="alert">
-          {error.message}
+          {errorMessage}
         </p>
       )}
     </div>

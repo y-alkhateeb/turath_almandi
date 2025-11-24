@@ -78,8 +78,14 @@ export default function NotificationsPage() {
     refetch,
   } = useNotifications(activeTab === 'unread' ? { isRead: false } : undefined);
 
+  /**
+   * Fetch all notifications count for stats (always get total)
+   * This is separate to ensure we always have the full count
+   */
+  const { data: allNotificationsData } = useNotifications();
+
   const notifications = notificationsData?.data || [];
-  const total = notificationsData?.pagination?.total || 0;
+  const total = allNotificationsData?.pagination?.total || 0;
 
   // ============================================
   // MUTATIONS

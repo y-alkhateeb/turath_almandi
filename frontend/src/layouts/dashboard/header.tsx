@@ -4,12 +4,14 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Menu, LogOut, Bell, Moon, Sun, User, Settings, ChevronDown } from 'lucide-react';
+import { Menu, LogOut, Bell, Moon, Sun, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserInfo, useUserActions } from '@/store/userStore';
 import { useTheme } from '@/theme/hooks';
 import { ThemeMode } from '@/theme/type';
 import { Icon } from '@/components/icon';
+import { useUnreadNotifications } from '@/hooks/queries/useNotifications';
+import { NotificationsDropdown } from '@/components/notifications/NotificationsDropdown';
 
 export interface HeaderProps {
   onMenuClick: () => void;
@@ -21,18 +23,27 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { clearAuth } = useUserActions();
   const { themeMode, toggleTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
+  // Get unread notifications count
+  const { data: unreadData } = useUnreadNotifications();
+  const unreadCount = unreadData?.count || 0;
 
   const handleLogout = () => {
     clearAuth();
     navigate('/login', { replace: true });
   };
 
-  // Close menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
       }
     };
 
@@ -186,15 +197,25 @@ export function Header({ onMenuClick }: HeaderProps) {
           </button>
 
           {/* Notifications */}
-          <button
-            className="relative w-11 h-11 rounded-xl bg-brand-gold-500/20 backdrop-blur-sm border border-brand-gold-500/30 text-brand-cream-100 hover:bg-brand-gold-500 hover:scale-105 transition-all flex items-center justify-center group"
-            aria-label="الإشعارات"
-          >
-            <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-            <span className="absolute -top-1 -left-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse">
-              5
-            </span>
-          </button>
+          <div className="relative" ref={notificationsRef}>
+            <button
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              className="relative w-11 h-11 rounded-xl bg-brand-gold-500/20 backdrop-blur-sm border border-brand-gold-500/30 text-brand-cream-100 hover:bg-brand-gold-500 hover:scale-105 transition-all flex items-center justify-center group"
+              aria-label="الإشعارات"
+            >
+              <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -left-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg animate-pulse">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {isNotificationsOpen && (
+              <NotificationsDropdown onClose={() => setIsNotificationsOpen(false)} />
+            )}
+          </div>
 
           {/* Modern User Menu */}
           <div className="relative" ref={menuRef}>
@@ -263,53 +284,6 @@ export function Header({ onMenuClick }: HeaderProps) {
                   </div>
                 </div>
 
-                {/* Menu Items */}
-                <div className="py-2 relative">
-                  {/* Profile */}
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      // Navigate to profile page
-                    }}
-                    className="menu-item-1 w-full flex items-center gap-3 px-4 py-3 text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-all duration-300 group hover:pr-5"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-brand-gold-500/10 flex items-center justify-center group-hover:bg-brand-gold-500/30 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                      <User className="w-4 h-4 text-brand-gold-500 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="flex-1 text-right">
-                      <p className="text-sm font-medium group-hover:text-brand-gold-500 transition-colors">
-                        الملف الشخصي
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                        عرض وتعديل معلوماتك
-                      </p>
-                    </div>
-                    <ChevronDown className="w-4 h-4 opacity-0 group-hover:opacity-100 -rotate-90 transition-all duration-300" />
-                  </button>
-
-                  {/* Settings */}
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      // Navigate to settings page
-                    }}
-                    className="menu-item-2 w-full flex items-center gap-3 px-4 py-3 text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-all duration-300 group hover:pr-5"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-brand-green-500/10 flex items-center justify-center group-hover:bg-brand-green-500/30 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                      <Settings className="w-4 h-4 text-brand-green-500 group-hover:rotate-90 group-hover:scale-110 transition-all duration-500" />
-                    </div>
-                    <div className="flex-1 text-right">
-                      <p className="text-sm font-medium group-hover:text-brand-green-500 transition-colors">
-                        الإعدادات
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                        تخصيص التطبيق
-                      </p>
-                    </div>
-                    <ChevronDown className="w-4 h-4 opacity-0 group-hover:opacity-100 -rotate-90 transition-all duration-300" />
-                  </button>
-                </div>
-
                 {/* Animated Divider */}
                 <div className="relative border-t border-[var(--border-color)]">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-gold-500/30 to-transparent h-px"></div>
@@ -322,7 +296,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                       setIsUserMenuOpen(false);
                       handleLogout();
                     }}
-                    className="menu-item-3 w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all duration-300 group hover:pr-5 hover:shadow-lg hover:shadow-red-500/20"
+                    className="menu-item-1 w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all duration-300 group hover:pr-5 hover:shadow-lg hover:shadow-red-500/20"
                   >
                     <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/20 flex items-center justify-center group-hover:bg-red-100 dark:group-hover:bg-red-950/40 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300">
                       <LogOut className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />

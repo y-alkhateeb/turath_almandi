@@ -92,37 +92,6 @@ const initialState: UserStoreState = {
 // STORAGE HELPERS
 // ============================================
 
-// Storage preference helper - not currently used but kept for potential future use
-// const getStorageByPreference = (rememberMe: boolean): Storage => {
-//   // Check if data exists in sessionStorage
-//   const hasSessionData = sessionStorage.getItem('auth-storage') !== null;
-//   // Check if data exists in localStorage
-//   const hasLocalData = localStorage.getItem('auth-storage') !== null;
-//
-//   // If data exists in sessionStorage and not in localStorage, user is in session-only mode
-//   if (hasSessionData && !hasLocalData) {
-//     return sessionStorage;
-//   }
-//
-//   // If data exists in localStorage, user has Remember Me enabled
-//   if (hasLocalData) {
-//     return localStorage;
-//   }
-//
-//   // No existing data - use preference from login
-//   return rememberMe ? localStorage : sessionStorage;
-// };
-
-/**
- * Migrate data between storages when rememberMe changes
- */
-const migrateStorage = (fromStorage: Storage, toStorage: Storage): void => {
-  const data = fromStorage.getItem('auth-storage');
-  if (data) {
-    toStorage.setItem('auth-storage', data);
-    fromStorage.removeItem('auth-storage');
-  }
-};
 
 // ============================================
 // STORE CREATION
@@ -159,15 +128,6 @@ const useUserStore = create<UserStore>()(
          * Convenience method for login flow
          */
         setAuth: (user: User, tokens: AuthTokens, rememberMe = false) => {
-          const currentRememberMe = get().rememberMe;
-
-          // If rememberMe preference changed, migrate storage
-          if (currentRememberMe !== rememberMe) {
-            const fromStorage = currentRememberMe ? localStorage : sessionStorage;
-            const toStorage = rememberMe ? localStorage : sessionStorage;
-            migrateStorage(fromStorage, toStorage);
-          }
-
           set({ user, tokens, rememberMe });
         },
 
@@ -176,9 +136,7 @@ const useUserStore = create<UserStore>()(
          * Called on logout or auth failure
          */
         clearAuth: () => {
-          // Clear from both storages to be safe
           localStorage.removeItem('auth-storage');
-          sessionStorage.removeItem('auth-storage');
           set(initialState);
         },
 
@@ -197,48 +155,11 @@ const useUserStore = create<UserStore>()(
       name: 'auth-storage',
 
       /**
-       * Storage strategy based on "Remember Me"
-       * Uses custom storage getter that respects the rememberMe flag
+       * Simplified: Always use localStorage for cross-tab support
+       * This allows users to stay logged in across tabs/windows
+       * rememberMe flag is still preserved for future use
        */
-      storage: createJSONStorage(() => ({
-        getItem: (name: string) => {
-          // Check both storages and return data from whichever has it
-          const sessionData = sessionStorage.getItem(name);
-          if (sessionData) return sessionData;
-
-          const localData = localStorage.getItem(name);
-          if (localData) return localData;
-
-          return null;
-        },
-
-        setItem: (name: string, value: string) => {
-          try {
-            const parsed = JSON.parse(value);
-            const rememberMe = parsed.state?.rememberMe ?? false;
-
-            // Use appropriate storage based on rememberMe preference
-            const targetStorage = rememberMe ? localStorage : sessionStorage;
-            const otherStorage = rememberMe ? sessionStorage : localStorage;
-
-            // Set in target storage
-            targetStorage.setItem(name, value);
-
-            // Remove from other storage to prevent conflicts
-            otherStorage.removeItem(name);
-          } catch (error) {
-            console.error('[UserStore] Error setting item:', error);
-            // Fallback to localStorage if parsing fails
-            localStorage.setItem(name, value);
-          }
-        },
-
-        removeItem: (name: string) => {
-          // Remove from both storages
-          localStorage.removeItem(name);
-          sessionStorage.removeItem(name);
-        },
-      })),
+      storage: createJSONStorage(() => localStorage),
 
       /**
        * Partialize: only persist specific fields
@@ -257,6 +178,18 @@ const useUserStore = create<UserStore>()(
     }
   )
 );
+
+// ============================================
+// CLEANUP OLD SESSION STORAGE
+// ============================================
+
+/**
+ * Clean up old sessionStorage data if exists
+ * This ensures a clean migration from the old dual-storage approach
+ */
+if (typeof window !== 'undefined') {
+  sessionStorage.removeItem('auth-storage');
+}
 
 // ============================================
 // SELECTORS (Hook Exports)

@@ -69,7 +69,6 @@ const BranchesEditPage = lazy(() => import('@/pages/management/system/branches/e
 const AuditLogPage = lazy(() => import('@/pages/management/system/audit'));
 
 // Settings
-const CurrencySettingsPage = lazy(() => import('@/pages/settings/currency'));
 const AppSettingsPage = lazy(() => import('@/pages/settings/app'));
 
 // Profile
@@ -446,17 +445,7 @@ export const dashboardRoutes: RouteObject[] = [
                     ),
                   },
 
-                  // Currency Settings
-                  {
-                    path: 'currency',
-                    element: (
-                      <LazyPage>
-                        <CurrencySettingsPage />
-                      </LazyPage>
-                    ),
-                  },
-
-                  // App Settings (Login Background)
+                  // App Settings (includes currency settings)
                   {
                     path: 'app',
                     element: (

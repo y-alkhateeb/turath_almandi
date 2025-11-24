@@ -141,7 +141,10 @@ export function TransactionFormWithInventory({
   // Auto-select first category when transaction type changes
   useEffect(() => {
     if (transactionType) {
-      const defaultCategory = transactionType === TransactionType.INCOME ? 'SALES' : 'INVENTORY';
+      // For INCOME, default to SALES
+      // For EXPENSE, default to OTHER_EXPENSE (not INVENTORY)
+      // User must explicitly choose INVENTORY to see inventory section
+      const defaultCategory = transactionType === TransactionType.INCOME ? 'SALES' : 'OTHER_EXPENSE';
       setValue('category', defaultCategory);
     }
   }, [transactionType, setValue]);

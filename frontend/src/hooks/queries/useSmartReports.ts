@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tantml:invoke name="@tanstack/react-query">';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import smartReportsService from '@/api/services/smartReportsService';
 import type {
   ReportConfiguration,

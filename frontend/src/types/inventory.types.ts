@@ -41,10 +41,11 @@ export interface InventoryItem {
 
 export interface CreateInventoryInput {
   name: string;
-  quantity: number;
+  quantity?: number; // اختياري - يتم تحديده من خلال معاملة مشتريات المخزون
   unit: InventoryUnit;
-  costPerUnit: number;
+  costPerUnit?: number; // اختياري - يتم تحديده من خلال معاملة مشتريات المخزون
   notes?: string;
+  branchId?: string;
 }
 
 export interface UpdateInventoryInput {

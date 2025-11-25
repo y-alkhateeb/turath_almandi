@@ -31,30 +31,16 @@ import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '
 
 /**
  * Zod schema for creating inventory item
- * Matches backend CreateInventoryDto validation rules
+ * الكمية والسعر اختياريان - يتم تحديدهما من خلال معاملات مشتريات المخزون
  */
 const createInventorySchema = z.object({
   name: z
     .string()
     .min(1, { message: 'اسم الصنف مطلوب' })
     .max(200, { message: 'اسم الصنف يجب ألا يتجاوز 200 حرف' }),
-  quantity: z
-    .number({
-      required_error: 'الكمية مطلوبة',
-      invalid_type_error: 'الكمية يجب أن تكون رقمًا',
-    })
-    .min(0, { message: 'الكمية يجب أن تكون صفر أو أكبر' })
-    .nonnegative({ message: 'الكمية يجب أن تكون موجبة' }),
   unit: z.nativeEnum(InventoryUnit, {
     errorMap: () => ({ message: 'الوحدة مطلوبة' }),
   }),
-  costPerUnit: z
-    .number({
-      required_error: 'سعر الوحدة مطلوب',
-      invalid_type_error: 'سعر الوحدة يجب أن يكون رقمًا',
-    })
-    .min(0, { message: 'سعر الوحدة يجب أن يكون صفر أو أكبر' })
-    .nonnegative({ message: 'سعر الوحدة يجب أن يكون موجبًا' }),
   notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
   branchId: z.string().optional(),
 });
@@ -152,28 +138,26 @@ export function InventoryForm({
           }
         : {
             name: '',
-            quantity: undefined,
             unit: InventoryUnit.KG,
-            costPerUnit: undefined,
             notes: '',
             branchId: isAdmin ? undefined : user?.branchId,
           },
   });
 
-  // Watch quantity and costPerUnit for total cost calculation
-  const quantity = watch('quantity' as keyof CreateFormData) as number | undefined;
-  const costPerUnit = watch('costPerUnit' as keyof CreateFormData) as number | undefined;
+  // Watch quantity and costPerUnit for total cost calculation (edit mode only)
+  const quantity = watch('quantity' as keyof UpdateFormData) as number | undefined;
+  const costPerUnit = watch('costPerUnit' as keyof UpdateFormData) as number | undefined;
 
-  // Calculate total cost
+  // Calculate total cost (edit mode only)
   const [totalCost, setTotalCost] = useState<number>(0);
 
   useEffect(() => {
-    if (quantity !== undefined && costPerUnit !== undefined) {
+    if (mode === 'edit' && quantity !== undefined && costPerUnit !== undefined) {
       setTotalCost(quantity * costPerUnit);
     } else {
       setTotalCost(0);
     }
-  }, [quantity, costPerUnit]);
+  }, [mode, quantity, costPerUnit]);
 
   // Reset form when mode or initialData changes
   useEffect(() => {
@@ -194,11 +178,10 @@ export function InventoryForm({
         const createData = data as CreateFormData;
         const submitData: CreateInventoryInput = {
           name: createData.name,
-          quantity: createData.quantity,
           unit: createData.unit,
-          costPerUnit: createData.costPerUnit,
           notes: createData.notes || undefined,
           branchId: createData.branchId,
+          // الكمية والسعر = 0 افتراضياً، يتم تحديثهما من خلال معاملات المشتريات
         };
         await onSubmit(submitData);
         // Reset form after successful submission
@@ -236,20 +219,6 @@ export function InventoryForm({
         disabled={isSubmitting}
       />
 
-      {/* Quantity */}
-      <FormInput
-        name="quantity"
-        label="الكمية"
-        type="number"
-        step="0.01"
-        min="0"
-        placeholder="أدخل الكمية"
-        register={register}
-        error={errors.quantity}
-        required
-        disabled={isSubmitting}
-      />
-
       {/* Unit */}
       <FormSelect
         name="unit"
@@ -261,29 +230,54 @@ export function InventoryForm({
         disabled={isSubmitting}
       />
 
-      {/* Cost Per Unit */}
-      <FormInput
-        name="costPerUnit"
-        label="سعر الوحدة"
-        type="number"
-        step="0.01"
-        min="0"
-        placeholder="أدخل سعر الوحدة"
-        register={register}
-        error={errors.costPerUnit}
-        required
-        disabled={isSubmitting}
-      />
+      {/* Quantity - Edit mode only */}
+      {mode === 'edit' && (
+        <FormInput
+          name="quantity"
+          label="الكمية"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="أدخل الكمية"
+          register={register}
+          error={errors.quantity}
+          disabled={isSubmitting}
+        />
+      )}
 
-      {/* Total Cost Display - Calculated */}
-      {totalCost > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      {/* Cost Per Unit - Edit mode only */}
+      {mode === 'edit' && (
+        <FormInput
+          name="costPerUnit"
+          label="سعر الوحدة"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="أدخل سعر الوحدة"
+          register={register}
+          error={errors.costPerUnit}
+          disabled={isSubmitting}
+        />
+      )}
+
+      {/* Total Cost Display - Calculated (Edit mode only) */}
+      {mode === 'edit' && totalCost > 0 && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-800">القيمة الإجمالية (تلقائي):</span>
-            <span className="text-lg font-bold text-blue-900">{formatCurrency(totalCost)}</span>
+            <span className="text-sm font-medium text-blue-800 dark:text-blue-300">القيمة الإجمالية (تلقائي):</span>
+            <span className="text-lg font-bold text-blue-900 dark:text-blue-200">{formatCurrency(totalCost)}</span>
           </div>
-          <p className="text-xs text-blue-700 mt-1">
+          <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
             الكمية × سعر الوحدة = {quantity?.toFixed(2)} × {formatCurrency(costPerUnit || 0)}
+          </p>
+        </div>
+      )}
+
+      {/* Info message for create mode */}
+      {mode === 'create' && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            <strong>ملاحظة:</strong> الكمية والسعر سيتم تحديدهما من خلال معاملة &quot;مشتريات مخزون&quot;
           </p>
         </div>
       )}

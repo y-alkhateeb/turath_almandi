@@ -22,8 +22,9 @@ export class CreateInventoryDto {
 
   @IsNumber()
   @Min(0, { message: 'Quantity must be greater than or equal to 0' })
-  @Transform(({ value }) => parseFloat(value))
-  quantity: number;
+  @Transform(({ value }) => (value === undefined || value === null || value === '' ? 0 : parseFloat(value)))
+  @IsOptional()
+  quantity?: number = 0;
 
   @IsEnum(InventoryUnit, { message: 'الوحدة يجب أن تكون واحدة من القيم المسموحة: KG, PIECE, LITER, OTHER' })
   @IsNotEmpty()
@@ -31,8 +32,9 @@ export class CreateInventoryDto {
 
   @IsNumber()
   @Min(0, { message: 'Cost per unit must be greater than or equal to 0' })
-  @Transform(({ value }) => parseFloat(value))
-  costPerUnit: number;
+  @Transform(({ value }) => (value === undefined || value === null || value === '' ? 0 : parseFloat(value)))
+  @IsOptional()
+  costPerUnit?: number = 0;
 
   @Trim()
   @Escape()

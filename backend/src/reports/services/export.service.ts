@@ -123,6 +123,24 @@ export class ExportService {
     };
   }
 
+  /**
+   * Prevent CSV injection/formula injection by prepending single quote to dangerous values.
+   * See: https://owasp.org/www-community/attacks/CSV_Injection
+   */
+  private sanitizeForCsv(value: string | number | boolean | Date | null | undefined): string {
+    if (value === null || value === undefined) return '';
+    let str = String(value);
+    // Check for dangerous initial characters (formula injection)
+    if (/^[=\+\-\@]/.test(str)) {
+      str = "'" + str;
+    }
+    // Escape quotes for CSV
+    str = str.replace(/"/g, '""');
+    // Remove newlines/carriage returns to prevent CSV-breaking.
+    str = str.replace(/[\r\n]+/g, ' ');
+    return str;
+  }
+
   private async exportToCsv(
     data: ReadonlyArray<ReportResultRow>,
     fields: ReadonlyArray<ReportField>,
@@ -135,16 +153,15 @@ export class ExportService {
     // Build CSV content
     const lines: string[] = [];
 
-    // Header row
-    lines.push(visibleFields.map((f) => `"${f.displayName}"`).join(','));
+    // Header row - sanitize each header field (displayName)
+    lines.push(visibleFields.map((f) => `"${this.sanitizeForCsv(f.displayName)}"`).join(','));
 
     // Data rows
     for (const row of data) {
       const values = visibleFields.map((field) => {
         const value = row[field.sourceField];
-        if (value === null || value === undefined) return '""';
-        if (typeof value === 'string') return `"${value.replace(/"/g, '""')}"`;
-        return `"${String(value)}"`;
+        // Always sanitize
+        return `"${this.sanitizeForCsv(value)}"`;
       });
       lines.push(values.join(','));
     }

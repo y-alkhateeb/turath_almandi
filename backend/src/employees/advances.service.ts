@@ -102,7 +102,7 @@ export class AdvancesService {
       user.id,
       AuditEntityType.EMPLOYEE,
       advance.id,
-      { type: 'ADVANCE', ...advance },
+      { type: 'ADVANCE', ...advance } as Record<string, unknown>,
     );
 
     return {
@@ -318,8 +318,8 @@ export class AdvancesService {
       user.id,
       AuditEntityType.EMPLOYEE,
       advanceId,
-      advance,
-      { type: 'ADVANCE_CANCELLED', ...updatedAdvance },
+      advance as Record<string, unknown>,
+      { type: 'ADVANCE_CANCELLED', ...updatedAdvance } as Record<string, unknown>,
     );
 
     return updatedAdvance;

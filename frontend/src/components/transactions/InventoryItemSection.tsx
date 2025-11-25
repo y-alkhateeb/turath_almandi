@@ -1,27 +1,31 @@
 /**
- * InventoryItemSection Component
- * Section for selecting a single inventory item with purchase/consumption operation
+ * InventoryItemSection - قسم اختيار صنف المخزون
  *
- * Features:
- * - PURCHASE (شراء): Unit price is editable
- * - CONSUMPTION (بيع): Unit price is editable with profit display
- * - Shows available quantity prominently
- * - Auto-calculates total amount based on quantity × unit price
+ * الميزات:
+ * - شراء (PURCHASE): سعر الوحدة قابل للتعديل
+ * - بيع (CONSUMPTION): سعر الوحدة قابل للتعديل مع عرض الربح
+ * - عرض الكمية المتوفرة
+ * - حساب المبلغ الإجمالي تلقائياً
  */
 
 import { useState, useEffect } from 'react';
-import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
-import { FormInput } from '@/components/form/FormInput';
-import type { SingleInventoryItem } from '@/types/inventoryOperation.types';
 import type { InventoryItem } from '@/types/inventory.types';
 import inventoryService from '@/api/services/inventoryService';
 import { CurrencyAmountCompact } from '@/components/currency';
 
+export interface SelectedInventoryItem {
+  itemId: string;
+  itemName: string;
+  quantity: number;
+  unitPrice: number;
+  unit: string;
+}
+
 interface InventoryItemSectionProps {
   branchId: string | null;
   operationType: 'PURCHASE' | 'CONSUMPTION';
-  selectedItem: SingleInventoryItem | null;
-  onItemChange: (item: SingleInventoryItem | null) => void;
+  selectedItem: SelectedInventoryItem | null;
+  onItemChange: (item: SelectedInventoryItem | null) => void;
   onTotalChange: (total: number) => void;
   disabled?: boolean;
 }
@@ -31,21 +35,21 @@ interface InventoryItemWithDetails extends InventoryItem {
   costPerUnit: number;
 }
 
-export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
+export function InventoryItemSection({
   branchId,
   operationType,
   selectedItem,
   onItemChange,
   onTotalChange,
   disabled = false,
-}) => {
+}: InventoryItemSectionProps) {
   const [availableItems, setAvailableItems] = useState<InventoryItemWithDetails[]>([]);
   const [loading, setLoading] = useState(false);
-  const [quantity, setQuantity] = useState<string>(selectedItem?.quantity.toString() || '');
-  const [unitPrice, setUnitPrice] = useState<string>(selectedItem?.unitPrice.toString() || '');
+  const [quantity, setQuantity] = useState<string>('');
+  const [unitPrice, setUnitPrice] = useState<string>('');
   const [originalCostPerUnit, setOriginalCostPerUnit] = useState<number>(0);
 
-  // Fetch available inventory items for selected branch
+  // جلب أصناف المخزون
   useEffect(() => {
     if (!branchId) {
       setAvailableItems([]);
@@ -56,14 +60,14 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
       setLoading(true);
       try {
         const response = await inventoryService.getAll({ branchId });
-        const itemsWithQuantity = response.data.map((item) => ({
+        const items = response.data.map((item) => ({
           ...item,
-          availableQuantity: Number(item.quantity),
+          availableQuantity: Number(item.quantity) || 0,
           costPerUnit: Number(item.costPerUnit) || 0,
         }));
-        setAvailableItems(itemsWithQuantity);
+        setAvailableItems(items);
       } catch (error) {
-        console.error('Failed to fetch inventory items:', error);
+        console.error('Failed to fetch inventory:', error);
         setAvailableItems([]);
       } finally {
         setLoading(false);
@@ -73,16 +77,17 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
     fetchItems();
   }, [branchId]);
 
-  // Auto-calculate total when quantity or unit price changes
+  // حساب المبلغ الإجمالي
   useEffect(() => {
     const qty = Number(quantity) || 0;
     const price = Number(unitPrice) || 0;
-    const total = qty * price;
-    onTotalChange(total);
+    onTotalChange(qty * price);
   }, [quantity, unitPrice, onTotalChange]);
 
-  // When item is selected, auto-fill unit price from inventory
-  const handleItemSelect = (itemId: string) => {
+  // عند اختيار صنف
+  const handleItemSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const itemId = e.target.value;
+
     if (!itemId) {
       onItemChange(null);
       setQuantity('');
@@ -94,63 +99,61 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
     const item = availableItems.find((i) => i.id === itemId);
     if (!item) return;
 
-    const costPerUnit = item.costPerUnit;
-    setOriginalCostPerUnit(costPerUnit);
-    setUnitPrice(costPerUnit.toFixed(2));
+    const cost = item.costPerUnit;
+    setOriginalCostPerUnit(cost);
+    setUnitPrice(cost.toFixed(2));
+    setQuantity('');
 
-    // Update selected item
-    const newItem: SingleInventoryItem = {
+    onItemChange({
       itemId: item.id,
       itemName: item.name,
-      quantity: Number(quantity) || 0,
-      unitPrice: costPerUnit,
+      quantity: 0,
+      unitPrice: cost,
       unit: item.unit,
-    };
-
-    onItemChange(newItem);
+    });
   };
 
-  // Handle quantity change
-  const handleQuantityChange = (value: string) => {
+  // تغيير الكمية
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     setQuantity(value);
 
     if (selectedItem) {
-      const newItem: SingleInventoryItem = {
+      onItemChange({
         ...selectedItem,
         quantity: Number(value) || 0,
-      };
-      onItemChange(newItem);
+      });
     }
   };
 
-  // Handle unit price change (editable for both PURCHASE and CONSUMPTION)
-  const handleUnitPriceChange = (value: string) => {
+  // تغيير السعر
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     setUnitPrice(value);
 
     if (selectedItem) {
-      const newItem: SingleInventoryItem = {
+      onItemChange({
         ...selectedItem,
         unitPrice: Number(value) || 0,
-      };
-      onItemChange(newItem);
+      });
     }
   };
 
-  const inventoryOptions: SelectOption[] = availableItems.map((item) => ({
-    label: `${item.name} (متوفر: ${item.availableQuantity} ${item.unit})`,
-    value: item.id,
-  }));
+  // الحصول على تفاصيل الصنف المختار
+  const getSelectedItemDetails = () => {
+    if (!selectedItem) return null;
+    return availableItems.find((i) => i.id === selectedItem.itemId);
+  };
 
-  // Calculate total for display
-  const calculatedTotal = (Number(quantity) || 0) * (Number(unitPrice) || 0);
-
-  // Calculate profit for CONSUMPTION (selling)
+  // حساب الربح للبيع
   const calculateProfit = () => {
     if (operationType !== 'CONSUMPTION') return null;
+
     const qty = Number(quantity) || 0;
-    const sellingPrice = Number(unitPrice) || 0;
-    const profitPerUnit = sellingPrice - originalCostPerUnit;
+    const sellPrice = Number(unitPrice) || 0;
+    const profitPerUnit = sellPrice - originalCostPerUnit;
     const totalProfit = profitPerUnit * qty;
+
     return {
       profitPerUnit,
       totalProfit,
@@ -158,171 +161,176 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
     };
   };
 
-  const profitInfo = calculateProfit();
-
-  // Get max quantity for CONSUMPTION
-  const getMaxQuantity = () => {
-    if (operationType === 'CONSUMPTION' && selectedItem) {
-      const item = availableItems.find((i) => i.id === selectedItem.itemId);
-      return item ? item.availableQuantity : undefined;
-    }
-    return undefined;
-  };
-
-  // Get selected item details for display
-  const getSelectedItemDetails = () => {
-    if (!selectedItem) return null;
-    return availableItems.find((i) => i.id === selectedItem.itemId);
-  };
-
   const selectedItemDetails = getSelectedItemDetails();
+  const profit = calculateProfit();
+  const calculatedTotal = (Number(quantity) || 0) * (Number(unitPrice) || 0);
+  const maxQuantity = operationType === 'CONSUMPTION' && selectedItemDetails
+    ? selectedItemDetails.availableQuantity
+    : undefined;
 
+  // إذا لم يتم اختيار فرع
   if (!branchId) {
     return (
-      <div className="p-4 bg-[var(--bg-secondary)] dark:bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-color)]">
-        <p className="text-[var(--text-secondary)] text-center">الرجاء اختيار الفرع أولاً</p>
+      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600">
+        <p className="text-center text-gray-600 dark:text-gray-400">
+          الرجاء اختيار الفرع أولاً
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 p-4 bg-[var(--bg-secondary)] dark:bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-color)]">
+    <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+      {/* العنوان */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">صنف المخزون</h3>
-        <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          صنف المخزون
+        </h3>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
           operationType === 'PURCHASE'
             ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
             : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
         }`}>
-          {operationType === 'PURCHASE' ? '📦 شراء وإضافة' : '💰 بيع من المخزون'}
+          {operationType === 'PURCHASE' ? 'شراء وإضافة للمخزون' : 'بيع من المخزون'}
         </span>
       </div>
 
       {loading ? (
-        <p className="text-[var(--text-secondary)]">جاري تحميل المخزون...</p>
+        <p className="text-gray-600 dark:text-gray-400">جاري تحميل المخزون...</p>
       ) : availableItems.length === 0 ? (
-        <p className="text-[var(--text-secondary)]">لا توجد أصناف متوفرة في هذا الفرع</p>
+        <p className="text-gray-600 dark:text-gray-400">لا توجد أصناف في هذا الفرع</p>
       ) : (
         <div className="space-y-4">
-          {/* Item Selection */}
-          <FormSelect
-            label="الصنف"
-            options={inventoryOptions}
-            value={selectedItem?.itemId || ''}
-            onChange={(e) => handleItemSelect(e.target.value)}
-            placeholder="اختر صنفاً"
-            required
-            disabled={disabled}
-          />
+          {/* اختيار الصنف */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              الصنف <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={selectedItem?.itemId || ''}
+              onChange={handleItemSelect}
+              disabled={disabled}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            >
+              <option value="">-- اختر صنفاً --</option>
+              {availableItems.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} (متوفر: {item.availableQuantity} {item.unit})
+                </option>
+              ))}
+            </select>
+          </div>
 
           {selectedItem && selectedItemDetails && (
             <>
-              {/* Available Quantity Info */}
-              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+              {/* الكمية المتوفرة */}
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
                     الكمية المتوفرة في المخزون:
                   </span>
-                  <span className="text-lg font-bold text-blue-800 dark:text-blue-400">
+                  <span className="text-lg font-bold text-blue-800 dark:text-blue-300">
                     {selectedItemDetails.availableQuantity} {selectedItem.unit}
                   </span>
                 </div>
               </div>
 
-              {/* Quantity Input */}
+              {/* الكمية */}
               <div>
-                <FormInput
-                  label={operationType === 'PURCHASE' ? 'الكمية المشتراة' : 'الكمية المباعة'}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {operationType === 'PURCHASE' ? 'الكمية المشتراة' : 'الكمية المباعة'}{' '}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => handleQuantityChange(e.target.value)}
-                  placeholder="أدخل الكمية"
+                  onChange={handleQuantityChange}
                   min="0.001"
                   step="0.001"
-                  max={getMaxQuantity()}
-                  required
+                  max={maxQuantity}
+                  placeholder="أدخل الكمية"
                   disabled={disabled}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
-                {operationType === 'CONSUMPTION' && getMaxQuantity() && (
+                {operationType === 'CONSUMPTION' && maxQuantity && (
                   <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                    الحد الأقصى: {getMaxQuantity()} {selectedItem.unit}
+                    الحد الأقصى: {maxQuantity} {selectedItem.unit}
                   </p>
                 )}
               </div>
 
-              {/* Unit Price Input - Editable for both operations */}
+              {/* سعر الوحدة */}
               <div>
-                <FormInput
-                  label={operationType === 'PURCHASE' ? 'سعر الشراء للوحدة' : 'سعر البيع للوحدة'}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {operationType === 'PURCHASE' ? 'سعر الشراء للوحدة' : 'سعر البيع للوحدة'}{' '}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
                   type="number"
                   value={unitPrice}
-                  onChange={(e) => handleUnitPriceChange(e.target.value)}
-                  placeholder="أدخل السعر"
+                  onChange={handlePriceChange}
                   min="0.01"
                   step="0.01"
-                  required
+                  placeholder="أدخل السعر"
                   disabled={disabled}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
-                {/* Show original cost per unit for reference */}
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   سعر التكلفة الأصلي: <CurrencyAmountCompact amount={originalCostPerUnit} decimals={2} />
                 </p>
               </div>
 
-              {/* Profit Display for CONSUMPTION (selling) */}
-              {operationType === 'CONSUMPTION' && profitInfo && Number(quantity) > 0 && (
+              {/* عرض الربح للبيع */}
+              {operationType === 'CONSUMPTION' && profit && Number(quantity) > 0 && (
                 <div className={`p-3 rounded-lg border ${
-                  profitInfo.isProfit
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50'
-                    : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700/50'
+                  profit.isProfit
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700'
+                    : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
                 }`}>
                   <h4 className={`text-sm font-semibold mb-2 ${
-                    profitInfo.isProfit
-                      ? 'text-green-900 dark:text-green-300'
-                      : 'text-red-900 dark:text-red-300'
+                    profit.isProfit
+                      ? 'text-green-800 dark:text-green-300'
+                      : 'text-red-800 dark:text-red-300'
                   }`}>
-                    {profitInfo.isProfit ? '📈 الربح المتوقع' : '📉 الخسارة المتوقعة'}
+                    {profit.isProfit ? 'الربح المتوقع' : 'الخسارة المتوقعة'}
                   </h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-[var(--text-secondary)]">الربح للوحدة:</span>
-                      <span className={`mr-2 font-bold ${
-                        profitInfo.isProfit ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
+                      <span className="text-gray-600 dark:text-gray-400">الربح للوحدة: </span>
+                      <span className={`font-bold ${
+                        profit.isProfit ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
                       }`}>
-                        <CurrencyAmountCompact amount={Math.abs(profitInfo.profitPerUnit)} decimals={2} />
-                        {!profitInfo.isProfit && ' -'}
+                        {profit.isProfit ? '+' : '-'}
+                        <CurrencyAmountCompact amount={Math.abs(profit.profitPerUnit)} decimals={2} />
                       </span>
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">إجمالي الربح:</span>
-                      <span className={`mr-2 font-bold ${
-                        profitInfo.isProfit ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
+                      <span className="text-gray-600 dark:text-gray-400">إجمالي الربح: </span>
+                      <span className={`font-bold ${
+                        profit.isProfit ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
                       }`}>
-                        <CurrencyAmountCompact amount={Math.abs(profitInfo.totalProfit)} decimals={2} />
-                        {!profitInfo.isProfit && ' -'}
+                        {profit.isProfit ? '+' : '-'}
+                        <CurrencyAmountCompact amount={Math.abs(profit.totalProfit)} decimals={2} />
                       </span>
                     </div>
                   </div>
-                  <p className="text-xs text-[var(--text-secondary)] mt-2">
-                    ({quantity} × ({unitPrice} - {originalCostPerUnit.toFixed(2)}) = {profitInfo.totalProfit.toFixed(2)})
-                  </p>
                 </div>
               )}
 
-              {/* Calculated Total Display */}
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50">
+              {/* المبلغ الإجمالي */}
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-amber-900 dark:text-amber-300">
+                  <span className="text-sm font-medium text-amber-800 dark:text-amber-300">
                     المبلغ الإجمالي:
                   </span>
                   <CurrencyAmountCompact
                     amount={calculatedTotal}
                     decimals={2}
-                    className="text-lg font-bold text-amber-800 dark:text-amber-400"
+                    className="text-lg font-bold text-amber-800 dark:text-amber-300"
                   />
                 </div>
-                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                  {quantity || '0'} {selectedItem.unit} × {unitPrice || '0'} = {calculatedTotal.toFixed(2)}
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                  {quantity || '0'} × {unitPrice || '0'} = {calculatedTotal.toFixed(2)}
                 </p>
               </div>
             </>
@@ -331,4 +339,6 @@ export const InventoryItemSection: React.FC<InventoryItemSectionProps> = ({
       )}
     </div>
   );
-};
+}
+
+export default InventoryItemSection;

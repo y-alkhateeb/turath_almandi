@@ -92,6 +92,16 @@ export enum EmployeeStatus {
 }
 
 /**
+ * Advance status (حالة السلفة)
+ * Matches backend Prisma enum: AdvanceStatus
+ */
+export enum AdvanceStatus {
+  ACTIVE = 'ACTIVE',
+  PAID = 'PAID',
+  CANCELLED = 'CANCELLED',
+}
+
+/**
  * Notification severity levels
  * Matches backend Prisma enum: NotificationSeverity
  */

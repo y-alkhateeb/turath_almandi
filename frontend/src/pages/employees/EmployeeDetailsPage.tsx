@@ -12,6 +12,7 @@ import {
   User,
   Trash2,
   Gift,
+  Banknote,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -25,7 +26,10 @@ import {
   useRecordSalaryIncrease,
   useCreateBonus,
   useDeleteBonus,
+  useEmployeeAdvances,
 } from '@/hooks/useEmployees';
+import { AdvanceDialog } from '@/components/employees/AdvanceDialog';
+import { AdvancesList } from '@/components/employees/AdvancesList';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
 import { Card } from '@/components/ui/Card';
@@ -48,6 +52,7 @@ export const EmployeeDetailsPage = () => {
   const { data: payments = [] } = useSalaryPaymentHistory(id!);
   const { data: increases = [] } = useSalaryIncreaseHistory(id!);
   const { data: bonuses = [] } = useBonusHistory(id!);
+  const { data: advancesData } = useEmployeeAdvances(id!);
 
   const resignEmployee = useResignEmployee();
   const deletePayment = useDeleteSalaryPayment();
@@ -56,8 +61,9 @@ export const EmployeeDetailsPage = () => {
   const createBonus = useCreateBonus();
   const deleteBonus = useDeleteBonus();
 
-  const [activeTab, setActiveTab] = useState<'info' | 'payments' | 'increases' | 'bonuses'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'payments' | 'increases' | 'bonuses' | 'advances'>('info');
   const [showResignModal, setShowResignModal] = useState(false);
+  const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
   const [resignDate, setResignDate] = useState('');
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
 
@@ -517,6 +523,17 @@ export const EmployeeDetailsPage = () => {
           <Gift className="w-4 h-4 inline ml-2" />
           المكافآت ({bonuses.length})
         </button>
+        <button
+          onClick={() => setActiveTab('advances')}
+          className={`px-4 py-2 font-medium transition-colors relative ${
+            activeTab === 'advances'
+              ? 'text-primary-600 border-b-2 border-primary-600'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <Banknote className="w-4 h-4 inline ml-2" />
+          السلف ({advancesData?.summary?.activeCount || 0})
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -581,6 +598,36 @@ export const EmployeeDetailsPage = () => {
             <Table columns={bonusColumns} data={bonuses} keyExtractor={(b) => b.id} />
           )}
         </Card>
+      )}
+
+      {activeTab === 'advances' && (
+        <Card padding="lg">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">سجل السلف</h3>
+            {employee.status === EmployeeStatus.ACTIVE && (
+              <Button size="sm" onClick={() => setShowAdvanceDialog(true)}>
+                <Banknote className="w-4 h-4" />
+                تسجيل سلفة
+              </Button>
+            )}
+          </div>
+          <AdvancesList
+            employeeId={id!}
+            employeeName={employee.name}
+          />
+        </Card>
+      )}
+
+      {/* Advance Dialog */}
+      {employee && (
+        <AdvanceDialog
+          isOpen={showAdvanceDialog}
+          onClose={() => setShowAdvanceDialog(false)}
+          employeeId={id!}
+          employeeName={employee.name}
+          baseSalary={Number(employee.baseSalary)}
+          allowance={Number(employee.allowance)}
+        />
       )}
 
       {/* Resign Modal */}

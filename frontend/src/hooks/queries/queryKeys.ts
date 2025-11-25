@@ -277,6 +277,21 @@ export const employeeKeys = {
    */
   bonuses: (employeeId: string, startDate?: string, endDate?: string) =>
     ['employees', employeeId, 'bonuses', startDate, endDate] as const,
+
+  /**
+   * Advances for a specific employee (السلف)
+   * @param employeeId - Employee UUID
+   * @returns ['employees', employeeId, 'advances']
+   */
+  advances: (employeeId: string) => ['employees', employeeId, 'advances'] as const,
+
+  /**
+   * Branch advances summary
+   * @param branchId - Branch UUID
+   * @returns ['employees', 'branch', branchId, 'advances-summary']
+   */
+  branchAdvances: (branchId: string) =>
+    ['employees', 'branch', branchId, 'advances-summary'] as const,
 } as const;
 
 // ============================================

@@ -131,9 +131,19 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto, currentUserId?: string) {
     const existingUser = await this.findOne(id); // Check existence
 
+    // Prepare update data
+    const { password, ...restDto } = updateUserDto;
+    const updateData: Record<string, unknown> = { ...restDto };
+
+    // Hash password if provided
+    if (password) {
+      const saltRounds = 10;
+      updateData.passwordHash = await bcrypt.hash(password, saltRounds);
+    }
+
     const updatedUser = await this.prisma.user.update({
       where: { id },
-      data: updateUserDto,
+      data: updateData,
       select: {
         id: true,
         username: true,

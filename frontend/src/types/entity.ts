@@ -489,6 +489,7 @@ export interface UpdateUserInput {
   role?: UserRole;
   branchId?: string | null;
   isActive?: boolean;
+  password?: string;
 }
 
 // ============================================

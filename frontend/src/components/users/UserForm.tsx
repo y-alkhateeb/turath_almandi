@@ -83,12 +83,24 @@ const createUserSchema = z
 /**
  * Zod schema for updating a user
  * All fields optional except validation rules remain the same
+ * Password can be optionally changed
  */
 const updateUserSchema = z
   .object({
     role: z.nativeEnum(UserRole).optional(),
     branchId: z.string().optional().nullable(),
     isActive: z.boolean().optional(),
+    password: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || val.length >= 8,
+        { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' }
+      )
+      .refine(
+        (val) => !val || passwordRegex.test(val),
+        { message: 'كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم ورمز خاص (@$!%*?&)' }
+      ),
   })
   .refine(
     (data) => {
@@ -155,6 +167,7 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
             role: initialData.role as UserRole,
             branchId: initialData.branchId,
             isActive: initialData.isActive,
+            password: '', // Optional password for edit
           }
         : {
             username: '',
@@ -174,6 +187,7 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
         role: initialData.role as UserRole,
         branchId: initialData.branchId,
         isActive: initialData.isActive,
+        password: '', // Reset password to empty
       });
     }
   }, [mode, initialData, reset]);
@@ -204,6 +218,8 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
           role: updateData.role,
           branchId: updateData.role === UserRole.ACCOUNTANT ? updateData.branchId || null : null,
           isActive: updateData.isActive,
+          // Only include password if it's not empty
+          ...(updateData.password && { password: updateData.password }),
         };
         await onSubmit(submitData);
         // Reset form after successful submission
@@ -224,11 +240,11 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
           label="اسم المستخدم"
           type="text"
           placeholder="أدخل اسم المستخدم"
-          register={register}
-          error={errors.username}
+          register={register as unknown as Parameters<typeof FormInput>[0]['register']}
+          error={(errors as Record<string, { message?: string }>).username}
           required
           disabled={isSubmitting}
-          helperText="3-50 حرف، أحرف إنجليزية وأرقام فقط"
+          helpText="3-50 حرف، أحرف إنجليزية وأرقام فقط"
         />
       )}
 
@@ -245,18 +261,32 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
         </div>
       )}
 
-      {/* Password (Create Only) */}
+      {/* Password (Create Mode - Required) */}
       {mode === 'create' && (
         <FormInput
           name="password"
           label="كلمة المرور"
           type="password"
           placeholder="أدخل كلمة المرور"
-          register={register}
-          error={errors.password}
+          register={register as unknown as Parameters<typeof FormInput>[0]['register']}
+          error={(errors as Record<string, { message?: string }>).password}
           required
           disabled={isSubmitting}
-          helperText="8 أحرف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص (@$!%*?&)"
+          helpText="8 أحرف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص (@$!%*?&)"
+        />
+      )}
+
+      {/* Password (Edit Mode - Optional) */}
+      {mode === 'edit' && (
+        <FormInput
+          name="password"
+          label="كلمة المرور الجديدة (اختياري)"
+          type="password"
+          placeholder="اتركها فارغة للإبقاء على كلمة المرور الحالية"
+          register={register as unknown as Parameters<typeof FormInput>[0]['register']}
+          error={(errors as Record<string, { message?: string }>).password}
+          disabled={isSubmitting}
+          helpText="8 أحرف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص (@$!%*?&)"
         />
       )}
 

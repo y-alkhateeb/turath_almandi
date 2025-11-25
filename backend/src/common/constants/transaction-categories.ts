@@ -7,6 +7,7 @@ export const INCOME_CATEGORIES = [
   'SALES',           // مبيعات
   'SERVICES',        // خدمات
   'APP_PURCHASES',   // مشتريات التطبيق
+  'INVENTORY_SALES', // مبيعات المخزون
   'OTHER_INCOME',    // إيرادات أخرى
 ] as const;
 
@@ -35,6 +36,7 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   SALES: 'مبيعات',
   SERVICES: 'خدمات',
   APP_PURCHASES: 'مشتريات التطبيق',
+  INVENTORY_SALES: 'مبيعات المخزون',
   OTHER_INCOME: 'إيرادات أخرى',
   WORKER_DAILY: 'يوميات العمال',
   RENT: 'إيجار',

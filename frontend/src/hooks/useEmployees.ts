@@ -21,9 +21,14 @@ import type {
   CreateSalaryPaymentInput,
   CreateSalaryIncreaseInput,
   CreateBonusInput,
+  CreateAdvanceInput,
+  RecordDeductionInput,
   SalaryPayment,
   SalaryIncrease,
   Bonus,
+  EmployeeAdvance,
+  EmployeeAdvancesResponse,
+  BranchAdvancesSummaryResponse,
   PayrollSummary,
 } from '@/types';
 import { ApiError } from '@/api/apiClient';
@@ -90,10 +95,34 @@ export const useEmployee = (id: string) => {
  * const { data: activeEmployees } = useActiveEmployees();
  * ```
  */
-export const useActiveEmployees = () => {
+export const useActiveEmployees = (branchId?: string) => {
   return useQuery<Employee[], ApiError>({
-    queryKey: queryKeys.employees.active,
-    queryFn: () => employeeService.getActive(),
+    queryKey: ['employees', 'active', branchId],
+    queryFn: () => employeeService.getActive(branchId || ''),
+    enabled: branchId !== undefined,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+/**
+ * useActiveEmployeesByBranch Hook
+ * Query active employees for a specific branch
+ *
+ * @param branchId - Branch UUID
+ * @returns Query result with active employees array
+ *
+ * @example
+ * ```tsx
+ * const { data: employees } = useActiveEmployeesByBranch(branchId);
+ * ```
+ */
+export const useActiveEmployeesByBranch = (branchId: string | null | undefined) => {
+  return useQuery<Employee[], ApiError>({
+    queryKey: ['employees', 'active', branchId],
+    queryFn: () => employeeService.getActive(branchId!),
+    enabled: !!branchId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 1,
@@ -559,6 +588,201 @@ export const useDeleteBonus = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.employees.all });
 
       toast.success('تم حذف المكافأة بنجاح');
+    },
+
+    onError: () => {
+      // Error toast shown by global API interceptor
+    },
+  });
+};
+
+// ============================================
+// ADVANCE HOOKS (السلف)
+// ============================================
+
+/**
+ * useEmployeeAdvances Hook
+ * Query advances for a specific employee
+ *
+ * @param employeeId - Employee UUID
+ * @returns Query result with advances and summary
+ *
+ * @example
+ * ```tsx
+ * const { data } = useEmployeeAdvances(employeeId);
+ * // data.advances - Array of advances
+ * // data.summary - Total, paid, remaining
+ * ```
+ */
+export const useEmployeeAdvances = (employeeId: string) => {
+  return useQuery<EmployeeAdvancesResponse, ApiError>({
+    queryKey: queryKeys.employees.advances(employeeId),
+    queryFn: () => employeeService.getEmployeeAdvances(employeeId),
+    enabled: !!employeeId,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+/**
+ * useBranchAdvancesSummary Hook
+ * Query advances summary for all employees in a branch
+ *
+ * @param branchId - Branch UUID
+ * @returns Query result with branch advances summary
+ *
+ * @example
+ * ```tsx
+ * const { data } = useBranchAdvancesSummary(branchId);
+ * // data.employees - Array of employee advance summaries
+ * // data.totals - Branch-wide totals
+ * ```
+ */
+export const useBranchAdvancesSummary = (branchId: string) => {
+  return useQuery<BranchAdvancesSummaryResponse, ApiError>({
+    queryKey: queryKeys.employees.branchAdvances(branchId),
+    queryFn: () => employeeService.getBranchAdvancesSummary(branchId),
+    enabled: !!branchId,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+/**
+ * useCreateAdvance Hook
+ * Mutation to create a new advance for an employee
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const createAdvance = useCreateAdvance();
+ *
+ * const handleCreate = async () => {
+ *   await createAdvance.mutateAsync({
+ *     employeeId: 'employee-id',
+ *     amount: 2000000, // 2 million IQD
+ *     monthlyDeduction: 200000, // 200k monthly
+ *     advanceDate: '2025-11-25',
+ *     reason: 'سلفة شخصية',
+ *   });
+ * };
+ * ```
+ */
+export const useCreateAdvance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<EmployeeAdvance, ApiError, CreateAdvanceInput>({
+    mutationFn: (data) => employeeService.createAdvance(data),
+
+    onSuccess: (advance) => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.advances(advance.employeeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.detail(advance.employeeId) });
+
+      // Show warning if advance exceeds 2 months salary
+      if (advance.exceedsTwoMonthsSalary) {
+        toast.warning('تحذير: مبلغ السلفة يتجاوز راتب شهرين!', {
+          description: 'تم تسجيل السلفة بنجاح',
+          duration: 5000,
+        });
+      } else {
+        toast.success('تم تسجيل السلفة بنجاح');
+      }
+    },
+
+    onError: () => {
+      // Error toast shown by global API interceptor
+    },
+  });
+};
+
+/**
+ * useRecordAdvanceDeduction Hook
+ * Mutation to record a deduction from an advance
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const recordDeduction = useRecordAdvanceDeduction();
+ *
+ * const handleDeduction = async () => {
+ *   await recordDeduction.mutateAsync({
+ *     advanceId: 'advance-id',
+ *     amount: 200000,
+ *     deductionDate: '2025-11-25',
+ *     salaryPaymentId: 'salary-payment-id', // optional
+ *     notes: 'خصم شهر نوفمبر',
+ *   });
+ * };
+ * ```
+ */
+export const useRecordAdvanceDeduction = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    EmployeeAdvance,
+    ApiError,
+    RecordDeductionInput & { employeeId: string }
+  >({
+    mutationFn: ({ employeeId, ...data }) => employeeService.recordAdvanceDeduction(data),
+
+    onSuccess: (advance, { employeeId }) => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.advances(employeeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.detail(employeeId) });
+
+      // Check if advance is fully paid
+      if (advance.status === 'PAID') {
+        toast.success('تم سداد السلفة بالكامل!', {
+          description: 'المبلغ المتبقي: 0',
+        });
+      } else {
+        toast.success('تم تسجيل الخصم بنجاح', {
+          description: `المبلغ المتبقي: ${advance.remainingAmount.toLocaleString()}`,
+        });
+      }
+    },
+
+    onError: () => {
+      // Error toast shown by global API interceptor
+    },
+  });
+};
+
+/**
+ * useCancelAdvance Hook
+ * Mutation to cancel an advance (only if no deductions made)
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const cancelAdvance = useCancelAdvance();
+ *
+ * const handleCancel = async () => {
+ *   await cancelAdvance.mutateAsync({
+ *     advanceId: 'advance-id',
+ *     employeeId: 'employee-id',
+ *   });
+ * };
+ * ```
+ */
+export const useCancelAdvance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<EmployeeAdvance, ApiError, { advanceId: string; employeeId: string }>({
+    mutationFn: ({ advanceId }) => employeeService.cancelAdvance(advanceId),
+
+    onSuccess: (_, { employeeId }) => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.advances(employeeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.employees.detail(employeeId) });
+
+      toast.success('تم إلغاء السلفة بنجاح');
     },
 
     onError: () => {

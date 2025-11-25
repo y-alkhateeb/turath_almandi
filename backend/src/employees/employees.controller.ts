@@ -13,12 +13,15 @@ import { EmployeesService } from './employees.service';
 import { SalaryPaymentsService } from './salary-payments.service';
 import { SalaryIncreasesService } from './salary-increases.service';
 import { BonusesService } from './bonuses.service';
+import { AdvancesService } from './advances.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { CreateSalaryPaymentDto } from './dto/create-salary-payment.dto';
 import { RecordSalaryIncreaseDto } from './dto/record-salary-increase.dto';
 import { CreateBonusDto } from './dto/create-bonus.dto';
 import { ResignEmployeeDto } from './dto/resign-employee.dto';
+import { CreateAdvanceDto } from './dto/create-advance.dto';
+import { RecordDeductionDto } from './dto/record-deduction.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -39,6 +42,7 @@ export class EmployeesController {
     private readonly salaryPaymentsService: SalaryPaymentsService,
     private readonly salaryIncreasesService: SalaryIncreasesService,
     private readonly bonusesService: BonusesService,
+    private readonly advancesService: AdvancesService,
   ) {}
 
   // Employee endpoints
@@ -202,5 +206,40 @@ export class EmployeesController {
   ) {
     const limitNum = limit ? parseInt(limit, 10) : 10;
     return this.salaryIncreasesService.getRecentIncreases(branchId, limitNum, user);
+  }
+
+  // ============================================
+  // Advance (سلفة) endpoints
+  // ============================================
+
+  @Post('advances')
+  createAdvance(@Body() createAdvanceDto: CreateAdvanceDto, @CurrentUser() user: RequestUser) {
+    return this.advancesService.createAdvance(createAdvanceDto, user);
+  }
+
+  @Get(':id/advances')
+  getEmployeeAdvances(@Param('id') employeeId: string, @CurrentUser() user: RequestUser) {
+    return this.advancesService.getEmployeeAdvances(employeeId, user);
+  }
+
+  @Post('advances/deductions')
+  recordDeduction(
+    @Body() recordDeductionDto: RecordDeductionDto,
+    @CurrentUser() user: RequestUser,
+  ) {
+    return this.advancesService.recordDeduction(recordDeductionDto, user);
+  }
+
+  @Post('advances/:id/cancel')
+  cancelAdvance(@Param('id') advanceId: string, @CurrentUser() user: RequestUser) {
+    return this.advancesService.cancelAdvance(advanceId, user);
+  }
+
+  @Get('branch/:branchId/advances-summary')
+  getBranchAdvancesSummary(
+    @Param('branchId') branchId: string,
+    @CurrentUser() user: RequestUser,
+  ) {
+    return this.advancesService.getBranchAdvancesSummary(branchId, user);
   }
 }

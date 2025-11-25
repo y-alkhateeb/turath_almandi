@@ -32,6 +32,11 @@ import type {
   Bonus,
   PayrollSummary,
   EmployeeFilters,
+  EmployeeAdvance,
+  CreateAdvanceInput,
+  RecordDeductionInput,
+  EmployeeAdvancesResponse,
+  BranchAdvancesSummaryResponse,
 } from '#/entity';
 import type { PaginatedResponse } from '#/api';
 
@@ -504,6 +509,124 @@ export const deleteSalaryPayment = (id: string): Promise<void> => {
 };
 
 // ============================================
+// EMPLOYEE ADVANCES (السلف)
+// ============================================
+
+/**
+ * Create new advance for employee
+ * POST /employees/advances
+ *
+ * Backend validation (from CreateAdvanceDto):
+ * - employeeId: Required, UUID
+ * - amount: Required, > 0
+ * - monthlyDeduction: Required, > 0
+ * - advanceDate: Required, ISO date string
+ * - reason: Optional, text
+ *
+ * Backend behavior:
+ * - Creates EmployeeAdvance record
+ * - Calculates if advance exceeds 2 months salary (warning)
+ * - Sets initial remainingAmount = amount
+ * - Accountants can only create for employees in their branch
+ * - Creates audit log entry
+ *
+ * @param data - CreateAdvanceInput
+ * @returns Created EmployeeAdvance with employee and recorder relations
+ * @throws ApiError on 400 (validation), 401, 403, 404
+ */
+export const createAdvance = (data: CreateAdvanceInput): Promise<EmployeeAdvance> => {
+  return apiClient.post<EmployeeAdvance>({
+    url: '/employees/advances',
+    data,
+  });
+};
+
+/**
+ * Get advances for employee
+ * GET /employees/:id/advances
+ *
+ * Backend behavior:
+ * - Returns advances with deductions history
+ * - Includes summary (total, paid, remaining)
+ * - Accountants can only access employees from their branch
+ *
+ * @param employeeId - Employee UUID
+ * @returns EmployeeAdvancesResponse with advances and summary
+ * @throws ApiError on 401, 403, 404
+ */
+export const getEmployeeAdvances = (employeeId: string): Promise<EmployeeAdvancesResponse> => {
+  return apiClient.get<EmployeeAdvancesResponse>({
+    url: `/employees/${employeeId}/advances`,
+  });
+};
+
+/**
+ * Record deduction from advance
+ * POST /employees/advances/deductions
+ *
+ * Backend validation (from RecordDeductionDto):
+ * - advanceId: Required, UUID
+ * - amount: Required, > 0
+ * - deductionDate: Required, ISO date string
+ * - salaryPaymentId: Optional, UUID (links to salary payment)
+ * - notes: Optional, text
+ *
+ * Backend behavior:
+ * - Creates AdvanceDeduction record
+ * - Updates advance remainingAmount
+ * - Sets advance status to PAID when remainingAmount = 0
+ * - Uses Prisma transaction for atomicity
+ *
+ * @param data - RecordDeductionInput
+ * @returns Updated EmployeeAdvance with new deduction
+ * @throws ApiError on 400 (amount exceeds remaining), 401, 403, 404
+ */
+export const recordAdvanceDeduction = (data: RecordDeductionInput): Promise<EmployeeAdvance> => {
+  return apiClient.post<EmployeeAdvance>({
+    url: '/employees/advances/deductions',
+    data,
+  });
+};
+
+/**
+ * Cancel advance
+ * POST /employees/advances/:id/cancel
+ *
+ * Backend behavior:
+ * - Sets status to CANCELLED
+ * - Only allowed if no deductions have been made
+ * - Accountants can only cancel advances from their branch
+ *
+ * @param advanceId - Advance UUID
+ * @returns Updated EmployeeAdvance with CANCELLED status
+ * @throws ApiError on 400 (has deductions), 401, 403, 404
+ */
+export const cancelAdvance = (advanceId: string): Promise<EmployeeAdvance> => {
+  return apiClient.post<EmployeeAdvance>({
+    url: `/employees/advances/${advanceId}/cancel`,
+  });
+};
+
+/**
+ * Get advances summary for branch
+ * GET /employees/branch/:branchId/advances-summary
+ *
+ * Backend behavior:
+ * - Returns summary of all active advances per employee
+ * - Includes total, remaining, and monthly deduction amounts
+ * - Accountants can only access their branch
+ *
+ * @param branchId - Branch UUID
+ * @returns BranchAdvancesSummaryResponse with employee advances
+ * @throws ApiError on 401, 403
+ */
+export const getBranchAdvancesSummary = (branchId: string): Promise<BranchAdvancesSummaryResponse> => {
+  return apiClient.get<BranchAdvancesSummaryResponse>({
+    url: `/employees/branch/${branchId}/advances-summary`,
+  });
+};
+
+// ============================================
 // DEFAULT EXPORT
 // ============================================
 
@@ -529,4 +652,10 @@ export default {
   createBonus,
   getBonusHistory,
   deleteBonus,
+  // Advances (السلف)
+  createAdvance,
+  getEmployeeAdvances,
+  recordAdvanceDeduction,
+  cancelAdvance,
+  getBranchAdvancesSummary,
 };

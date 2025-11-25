@@ -489,6 +489,7 @@ export interface UpdateUserInput {
   role?: UserRole;
   branchId?: string | null;
   isActive?: boolean;
+  password?: string;
 }
 
 // ============================================
@@ -644,4 +645,130 @@ export interface PayrollSummary {
     totalAmount: number;
     paymentCount: number;
   }>;
+}
+
+// ============================================
+// EMPLOYEE ADVANCE (سلفة) ENTITIES
+// ============================================
+
+import type { AdvanceStatus } from './enum';
+
+/**
+ * Advance Deduction entity (خصم السلفة)
+ * Matches backend AdvanceDeduction model
+ */
+export interface AdvanceDeduction {
+  id: string;
+  advanceId: string;
+  amount: number;
+  deductionDate: string; // ISO date string
+  salaryPaymentId: string | null;
+  notes: string | null;
+  recordedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  // Optional relations
+  recorder?: UserRelation;
+  salaryPayment?: SalaryPayment;
+}
+
+/**
+ * Employee Advance entity (السلفة)
+ * Matches backend EmployeeAdvance model
+ */
+export interface EmployeeAdvance {
+  id: string;
+  employeeId: string;
+  amount: number; // المبلغ الأصلي
+  remainingAmount: number; // المبلغ المتبقي
+  monthlyDeduction: number; // القسط الشهري
+  advanceDate: string; // ISO date string
+  reason: string | null;
+  status: AdvanceStatus;
+  recordedBy: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  // Optional relations
+  employee?: Employee;
+  recorder?: UserRelation;
+  deductions?: AdvanceDeduction[];
+  // Computed fields from API
+  warning?: string | null;
+  totalActiveAdvances?: number;
+  twoMonthsSalary?: number;
+  salaryMonthsEquivalent?: string;
+}
+
+/**
+ * Input for creating an advance
+ */
+export interface CreateAdvanceInput {
+  employeeId: string;
+  amount: number;
+  monthlyDeduction: number;
+  advanceDate: string;
+  reason?: string;
+}
+
+/**
+ * Input for recording a deduction
+ */
+export interface RecordDeductionInput {
+  advanceId: string;
+  amount: number;
+  deductionDate: string;
+  salaryPaymentId?: string;
+  notes?: string;
+}
+
+/**
+ * Summary of advances for an employee
+ */
+export interface EmployeeAdvancesSummary {
+  totalActiveAdvances: number;
+  totalRemaining: number;
+  totalMonthlyDeduction: number;
+  netSalaryAfterDeduction: number;
+  salaryMonthsEquivalent: string;
+  exceedsTwoMonths: boolean;
+  twoMonthsSalary: number;
+}
+
+/**
+ * Response from getEmployeeAdvances
+ */
+export interface EmployeeAdvancesResponse {
+  advances: EmployeeAdvance[];
+  summary: EmployeeAdvancesSummary;
+}
+
+/**
+ * Branch advances summary item
+ */
+export interface BranchAdvanceSummaryItem {
+  employeeId: string;
+  employeeName: string;
+  position: string;
+  baseSalary: number;
+  allowance: number;
+  totalSalary: number;
+  activeAdvancesCount: number;
+  totalRemaining: number;
+  totalMonthlyDeduction: number;
+  netSalary: number;
+  salaryMonthsEquivalent: string;
+  exceedsTwoMonths: boolean;
+}
+
+/**
+ * Branch advances summary response
+ */
+export interface BranchAdvancesSummaryResponse {
+  employees: BranchAdvanceSummaryItem[];
+  totals: {
+    employeesWithAdvances: number;
+    totalRemainingAdvances: number;
+    totalMonthlyDeductions: number;
+  };
 }

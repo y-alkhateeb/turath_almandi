@@ -70,6 +70,6 @@ export interface PayDebtInput {
 
 export interface PayDebtFormData {
   amountPaid: string; // String for form input, converted to number on submit
-  paymentDate: Date;
+  paymentDate: string; // String for form input (YYYY-MM-DD format)
   notes: string;
 }

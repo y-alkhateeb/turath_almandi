@@ -88,6 +88,14 @@ enum EmployeeStatus {
   @@map("employee_status")
 }
 
+enum AdvanceStatus {
+  ACTIVE
+  PAID
+  CANCELLED
+
+  @@map("advance_status")
+}
+
 enum ReportType {
   FINANCIAL
   DEBTS
@@ -132,6 +140,8 @@ model User {
   recordedBonuses          Bonus[]                  @relation("BonusRecorder")
   createdReportTemplates   ReportTemplate[]         @relation("ReportTemplateCreator")
   reportExecutions         ReportExecution[]        @relation("ReportExecutor")
+  recordedAdvances         EmployeeAdvance[]        @relation("AdvanceRecorder")
+  recordedDeductions       AdvanceDeduction[]       @relation("DeductionRecorder")
 
   @@index([branchId])
   @@index([role])
@@ -455,6 +465,7 @@ model Employee {
   salaryPayments  SalaryPayment[]
   salaryIncreases SalaryIncrease[]
   bonuses         Bonus[]
+  advances        EmployeeAdvance[]
 
   @@index([branchId])
   @@index([status])
@@ -480,9 +491,10 @@ model SalaryPayment {
   deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
 
   // Relations
-  employee    Employee     @relation(fields: [employeeId], references: [id], onDelete: Restrict)
-  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  recorder    User         @relation("SalaryPaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  employee          Employee           @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  transaction       Transaction?       @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  recorder          User               @relation("SalaryPaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  advanceDeductions AdvanceDeduction[]
 
   @@index([employeeId])
   @@index([paymentDate])
@@ -544,7 +556,60 @@ model Bonus {
   @@map("bonuses")
 }
 
-// 17. Transaction Inventory Items (Many-to-Many relationship between Transactions and Inventory)
+// 17. Employee Advances Table (السلفات)
+model EmployeeAdvance {
+  id               String         @id @default(uuid()) @db.Uuid
+  employeeId       String         @map("employee_id") @db.Uuid
+  amount           Decimal        @db.Decimal(15, 2)
+  remainingAmount  Decimal        @map("remaining_amount") @db.Decimal(15, 2)
+  monthlyDeduction Decimal        @map("monthly_deduction") @db.Decimal(15, 2)
+  advanceDate      DateTime       @map("advance_date") @db.Date
+  reason           String?        @db.Text
+  status           AdvanceStatus  @default(ACTIVE)
+  recordedBy       String         @map("recorded_by") @db.Uuid
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt        DateTime?      @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  recorder   User               @relation("AdvanceRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  deductions AdvanceDeduction[]
+
+  @@index([employeeId])
+  @@index([advanceDate])
+  @@index([status])
+  @@index([recordedBy])
+  @@index([deletedAt])
+  @@index([employeeId, status])
+  @@map("employee_advances")
+}
+
+// 18. Advance Deductions Table (خصومات السلفة من الراتب)
+model AdvanceDeduction {
+  id              String    @id @default(uuid()) @db.Uuid
+  advanceId       String    @map("advance_id") @db.Uuid
+  amount          Decimal   @db.Decimal(15, 2)
+  deductionDate   DateTime  @map("deduction_date") @db.Date
+  salaryPaymentId String?   @map("salary_payment_id") @db.Uuid
+  notes           String?   @db.Text
+  recordedBy      String    @map("recorded_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  advance       EmployeeAdvance @relation(fields: [advanceId], references: [id], onDelete: Cascade)
+  salaryPayment SalaryPayment?  @relation(fields: [salaryPaymentId], references: [id], onDelete: SetNull)
+  recorder      User            @relation("DeductionRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+
+  @@index([advanceId])
+  @@index([deductionDate])
+  @@index([salaryPaymentId])
+  @@index([recordedBy])
+  @@map("advance_deductions")
+}
+
+// 19. Transaction Inventory Items (Many-to-Many relationship between Transactions and Inventory)
 model TransactionInventoryItem {
   id              String                  @id @default(uuid()) @db.Uuid
   transactionId   String                  @map("transaction_id") @db.Uuid

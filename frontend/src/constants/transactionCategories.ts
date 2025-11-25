@@ -27,11 +27,29 @@ export const INCOME_CATEGORIES: CategoryOption[] = [
  * These values match backend EXPENSE_CATEGORIES constants
  */
 export const EXPENSE_CATEGORIES: CategoryOption[] = [
+  { value: 'EMPLOYEE_SALARIES', label: 'رواتب الموظفين', type: TransactionType.EXPENSE },
   { value: 'WORKER_DAILY', label: 'يوميات العمال', type: TransactionType.EXPENSE },
   { value: 'SUPPLIES', label: 'مستلزمات', type: TransactionType.EXPENSE },
   { value: 'MAINTENANCE', label: 'صيانة', type: TransactionType.EXPENSE },
   { value: 'INVENTORY', label: 'مشتريات مخزون', type: TransactionType.EXPENSE },
   { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى', type: TransactionType.EXPENSE },
+];
+
+/**
+ * Employee action types for EMPLOYEE_SALARIES category
+ */
+export type EmployeeActionType = 'SALARY' | 'BONUS' | 'ADVANCE';
+
+export interface EmployeeActionOption {
+  value: EmployeeActionType;
+  label: string;
+  description: string;
+}
+
+export const EMPLOYEE_ACTION_OPTIONS: EmployeeActionOption[] = [
+  { value: 'SALARY', label: 'صرف راتب', description: 'صرف راتب شهري للموظف' },
+  { value: 'BONUS', label: 'مكافأة', description: 'صرف مكافأة للموظف' },
+  { value: 'ADVANCE', label: 'سلفة', description: 'صرف سلفة للموظف' },
 ];
 
 /**

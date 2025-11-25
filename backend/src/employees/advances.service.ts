@@ -100,9 +100,9 @@ export class AdvancesService {
     // تسجيل في سجل التدقيق
     await this.auditLogService.logCreate(
       user.id,
-      AuditEntityType.EMPLOYEE,
+      AuditEntityType.ADVANCE,
       advance.id,
-      { type: 'ADVANCE', ...advance } as Record<string, unknown>,
+      advance,
     );
 
     return {
@@ -316,10 +316,10 @@ export class AdvancesService {
 
     await this.auditLogService.logUpdate(
       user.id,
-      AuditEntityType.EMPLOYEE,
+      AuditEntityType.ADVANCE_CANCELLED,
       advanceId,
-      advance as Record<string, unknown>,
-      { type: 'ADVANCE_CANCELLED', ...updatedAdvance } as Record<string, unknown>,
+      advance,
+      updatedAdvance,
     );
 
     return updatedAdvance;

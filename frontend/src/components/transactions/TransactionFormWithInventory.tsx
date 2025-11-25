@@ -3,10 +3,12 @@
  * Form for creating transactions with inventory operations and payment
  *
  * Features:
- * - Single inventory item per transaction (only for EXPENSE + INVENTORY)
+ * - Single inventory item per transaction
  * - Auto-calculated total for inventory items
- * - Unified payment section with partial payment and debt creation
- * - Inventory section shows only for "مشتريات المخزن" (EXPENSE + INVENTORY = PURCHASE)
+ * - Unified payment section with partial payment and debt creation for ALL transactions
+ * - Inventory section shows for:
+ *   - "مشتريات المخزن" (EXPENSE + INVENTORY = PURCHASE) - شراء وإضافة للمخزون
+ *   - "مبيعات المخزون" (INCOME + INVENTORY_SALES = CONSUMPTION) - بيع من المخزون
  * - For other categories, manual amount input is used
  */
 
@@ -133,24 +135,35 @@ export function TransactionFormWithInventory({
     return options;
   }, [transactionType]);
 
-  // Auto-determine inventory operation type based on transaction type
+  // Auto-determine inventory operation type based on transaction type and category
   const inventoryOperationType = useMemo(() => {
-    if (category !== 'INVENTORY') return null;
-    return transactionType === TransactionType.EXPENSE ? 'PURCHASE' : 'CONSUMPTION';
+    // EXPENSE + INVENTORY = PURCHASE (شراء وإضافة للمخزون)
+    if (category === 'INVENTORY' && transactionType === TransactionType.EXPENSE) {
+      return 'PURCHASE';
+    }
+    // INCOME + INVENTORY_SALES = CONSUMPTION (بيع من المخزون)
+    if (category === 'INVENTORY_SALES' && transactionType === TransactionType.INCOME) {
+      return 'CONSUMPTION';
+    }
+    return null;
   }, [transactionType, category]);
 
   // Determine if we should show inventory section or manual amount input
-  // Show inventory section ONLY for EXPENSE + INVENTORY (مشتريات المخزن)
+  // Show inventory section for:
+  // - EXPENSE + INVENTORY (مشتريات المخزن) = شراء
+  // - INCOME + INVENTORY_SALES (مبيعات المخزون) = بيع
   const showInventorySection = useMemo(() => {
-    const result = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
-    console.log('🔍 Show Inventory Section:', { category, transactionType, result });
+    const isPurchase = category === 'INVENTORY' && transactionType === TransactionType.EXPENSE;
+    const isSale = category === 'INVENTORY_SALES' && transactionType === TransactionType.INCOME;
+    const result = isPurchase || isSale;
+    console.log('🔍 Show Inventory Section:', { category, transactionType, isPurchase, isSale, result });
     return result;
   }, [category, transactionType]);
 
   const showManualAmountInput = !showInventorySection;
 
-  // Show partial payment section ONLY for INCOME transactions
-  const showPartialPayment = transactionType === TransactionType.INCOME;
+  // Show partial payment section for ALL transactions (both INCOME and EXPENSE)
+  const showPartialPayment = true;
 
   // Calculate the actual total amount based on category
   const totalAmount = useMemo(() => {
@@ -178,16 +191,9 @@ export function TransactionFormWithInventory({
     }
   }, [totalAmount, isPartialPayment]);
 
-  // For EXPENSE transactions, always set paid = total (no partial payment)
-  useEffect(() => {
-    if (!showPartialPayment) {
-      setPaidAmount(totalAmount);
-      setIsPartialPayment(false);
-      setCreateDebt(false);
-    }
-  }, [showPartialPayment, totalAmount]);
+  // Note: Partial payment is now enabled for all transactions (INCOME and EXPENSE)
 
-  // Reset inventory item when category changes away from INVENTORY or type changes away from EXPENSE
+  // Reset inventory item when category changes away from inventory categories
   useEffect(() => {
     if (!showInventorySection) {
       setSelectedInventoryItem(null);
@@ -197,12 +203,12 @@ export function TransactionFormWithInventory({
 
   // Reset inventory item when transaction type changes (operation type changes)
   useEffect(() => {
-    if (category === 'INVENTORY' && selectedInventoryItem && transactionType === TransactionType.EXPENSE) {
-      // When switching back to EXPENSE+INVENTORY, reset the item
+    // Reset when switching between PURCHASE and CONSUMPTION modes
+    if (showInventorySection && selectedInventoryItem) {
       setSelectedInventoryItem(null);
       setInventoryCalculatedTotal(0);
     }
-  }, [transactionType]);
+  }, [inventoryOperationType]);
 
   const handleFormSubmit = async (data: FormData) => {
     setIsSubmitting(true);

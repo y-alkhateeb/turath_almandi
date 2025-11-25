@@ -10,6 +10,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, FileDown, FileSpreadsheet, FileText } from 'lucide-react';
 import type { QueryResult, ReportField, ExportFormat } from '@/types/smart-reports.types';
+import { useCurrencyStore } from '@/stores/currencyStore';
+import { formatCurrencyAuto } from '@/utils/currency.utils';
 
 interface ReportPreviewProps {
   result: QueryResult | null;
@@ -27,6 +29,7 @@ export function ReportPreview({
   isExporting,
 }: ReportPreviewProps) {
   const visibleFields = fields.filter((f) => f.visible).sort((a, b) => a.order - b.order);
+  const currency = useCurrencyStore((state) => state.currency);
 
   if (isLoading) {
     return (
@@ -144,7 +147,7 @@ export function ReportPreview({
                     <TableRow key={row.id || index}>
                       {visibleFields.map((field) => (
                         <TableCell key={field.sourceField}>
-                          {formatCellValue(row[field.sourceField], field.format)}
+                          {formatCellValue(row[field.sourceField], field.format, currency)}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -159,13 +162,30 @@ export function ReportPreview({
   );
 }
 
+// Currency settings type for formatting
+interface CurrencySettings {
+  code: string;
+  symbol: string;
+  nameAr: string;
+  nameEn: string;
+}
+
 // Helper function to format cell values
-function formatCellValue(value: string | number | boolean | Date | null, format?: string): string {
+function formatCellValue(
+  value: string | number | boolean | Date | null,
+  format?: string,
+  currency?: CurrencySettings | null
+): string {
   if (value === null || value === undefined) {
     return '-';
   }
 
   if (format === 'currency') {
+    // Use dynamic currency from store if available
+    if (currency) {
+      return formatCurrencyAuto(Number(value), currency, 2);
+    }
+    // Fallback to basic number formatting if no currency set
     return Number(value).toLocaleString('ar-IQ', {
       style: 'decimal',
       minimumFractionDigits: 2,

@@ -16,6 +16,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import settingsService from '@/api/services/settingsService';
 import { queryKeys } from './queryKeys';
+import { useCurrencyStore } from '@/stores/currencyStore';
 import type {
   CurrencySettings,
   CurrencyWithUsage,
@@ -110,6 +111,10 @@ export const useSetDefaultCurrency = () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.settings.currency,
       });
+
+      // Update Zustand store with new currency to sync across all components
+      // This ensures CurrencyAmount components display the new currency immediately
+      useCurrencyStore.getState().refreshCurrency();
 
       // Show success toast
       toast.success('تم تغيير العملة الافتراضية بنجاح');

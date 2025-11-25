@@ -150,8 +150,13 @@ export class QueryBuilderService {
   ): WhereCondition {
     const conditions: WhereCondition[] = [];
 
-    // Always exclude soft-deleted records
-    conditions.push({ deletedAt: null });
+    // Data sources that have deletedAt field (branches doesn't have it)
+    const softDeleteSources: DataSourceType[] = ['transactions', 'debts', 'inventory', 'salaries'];
+
+    // Exclude soft-deleted records only for models that support it
+    if (softDeleteSources.includes(dataSource)) {
+      conditions.push({ deletedAt: null });
+    }
 
     // Apply RBAC - Accountants can only see their branch
     if (userContext.role === 'ACCOUNTANT' && userContext.branchId) {

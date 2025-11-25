@@ -36,6 +36,53 @@ export interface UpdateTemplateInput {
   readonly isDefault?: boolean;
 }
 
+/**
+ * Default field metadata for each data source (fallback when database is empty)
+ */
+const DEFAULT_FIELD_METADATA: Record<DataSourceType, Omit<FieldMetadata, 'id'>[]> = {
+  transactions: [
+    { dataSource: 'transactions', fieldName: 'amount', displayName: 'المبلغ', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 1, format: 'currency' },
+    { dataSource: 'transactions', fieldName: 'type', displayName: 'النوع', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 2, enumValues: ['INCOME', 'EXPENSE'] },
+    { dataSource: 'transactions', fieldName: 'category', displayName: 'الفئة', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 3 },
+    { dataSource: 'transactions', fieldName: 'paymentMethod', displayName: 'طريقة الدفع', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 4, enumValues: ['CASH', 'MASTER'] },
+    { dataSource: 'transactions', fieldName: 'employeeVendorName', displayName: 'اسم الموظف/المورد', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 5 },
+    { dataSource: 'transactions', fieldName: 'notes', displayName: 'الملاحظات', dataType: 'string', filterable: true, sortable: false, aggregatable: false, groupable: false, defaultVisible: false, defaultOrder: 6 },
+    { dataSource: 'transactions', fieldName: 'date', displayName: 'التاريخ', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 7, format: 'date-short' },
+    { dataSource: 'transactions', fieldName: 'createdAt', displayName: 'تاريخ الإنشاء', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: false, defaultOrder: 10, format: 'date-long' },
+  ],
+  debts: [
+    { dataSource: 'debts', fieldName: 'creditorName', displayName: 'اسم الدائن', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 1 },
+    { dataSource: 'debts', fieldName: 'originalAmount', displayName: 'المبلغ الأصلي', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 2, format: 'currency' },
+    { dataSource: 'debts', fieldName: 'remainingAmount', displayName: 'المبلغ المتبقي', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 3, format: 'currency' },
+    { dataSource: 'debts', fieldName: 'status', displayName: 'الحالة', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 4, enumValues: ['ACTIVE', 'PAID', 'PARTIAL'] },
+    { dataSource: 'debts', fieldName: 'date', displayName: 'تاريخ الدين', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 5, format: 'date-short' },
+    { dataSource: 'debts', fieldName: 'dueDate', displayName: 'تاريخ الاستحقاق', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 6, format: 'date-short' },
+    { dataSource: 'debts', fieldName: 'notes', displayName: 'الملاحظات', dataType: 'string', filterable: true, sortable: false, aggregatable: false, groupable: false, defaultVisible: false, defaultOrder: 7 },
+  ],
+  inventory: [
+    { dataSource: 'inventory', fieldName: 'name', displayName: 'اسم الصنف', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 1 },
+    { dataSource: 'inventory', fieldName: 'quantity', displayName: 'الكمية', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 2 },
+    { dataSource: 'inventory', fieldName: 'unit', displayName: 'الوحدة', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 3, enumValues: ['KG', 'PIECE', 'LITER', 'OTHER'] },
+    { dataSource: 'inventory', fieldName: 'costPerUnit', displayName: 'التكلفة لكل وحدة', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 4, format: 'currency' },
+    { dataSource: 'inventory', fieldName: 'lastUpdated', displayName: 'آخر تحديث', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 5, format: 'date-long' },
+  ],
+  salaries: [
+    { dataSource: 'salaries', fieldName: 'name', displayName: 'اسم الموظف', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 1 },
+    { dataSource: 'salaries', fieldName: 'position', displayName: 'المنصب', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 2 },
+    { dataSource: 'salaries', fieldName: 'baseSalary', displayName: 'الراتب الأساسي', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 3, format: 'currency' },
+    { dataSource: 'salaries', fieldName: 'allowance', displayName: 'البدل', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 4, format: 'currency' },
+    { dataSource: 'salaries', fieldName: 'status', displayName: 'الحالة', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 5, enumValues: ['ACTIVE', 'RESIGNED'] },
+    { dataSource: 'salaries', fieldName: 'hireDate', displayName: 'تاريخ التوظيف', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 6, format: 'date-short' },
+  ],
+  branches: [
+    { dataSource: 'branches', fieldName: 'name', displayName: 'اسم الفرع', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 1 },
+    { dataSource: 'branches', fieldName: 'location', displayName: 'الموقع', dataType: 'string', filterable: true, sortable: false, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 2 },
+    { dataSource: 'branches', fieldName: 'managerName', displayName: 'اسم المدير', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 3 },
+    { dataSource: 'branches', fieldName: 'phone', displayName: 'الهاتف', dataType: 'string', filterable: true, sortable: false, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 4 },
+    { dataSource: 'branches', fieldName: 'isActive', displayName: 'نشط', dataType: 'boolean', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 5 },
+  ],
+};
+
 @Injectable()
 export class ReportConfigService {
   private readonly logger = new Logger(ReportConfigService.name);
@@ -194,12 +241,14 @@ export class ReportConfigService {
 
   /**
    * Get available fields for a data source
+   * Falls back to default field metadata if database is empty
    */
   async getAvailableFields(dataSource: DataSourceType): Promise<FieldMetadata[]> {
     if (!isValidDataSource(dataSource)) {
       throw new BadRequestException(`Invalid data source: ${dataSource}`);
     }
 
+    // Try to get fields from database
     const fields = await this.prisma.reportFieldMetadata.findMany({
       where: { dataSource },
       orderBy: [
@@ -208,23 +257,34 @@ export class ReportConfigService {
       ],
     });
 
-    return fields.map((f) => ({
-      id: f.id,
-      dataSource: f.dataSource as DataSourceType,
-      fieldName: f.fieldName,
-      displayName: f.displayName,
-      description: f.description ?? undefined,
-      dataType: f.dataType as FieldMetadata['dataType'],
-      filterable: f.filterable,
-      sortable: f.sortable,
-      aggregatable: f.aggregatable,
-      groupable: f.groupable,
-      defaultVisible: f.defaultVisible,
-      defaultOrder: f.defaultOrder,
-      category: f.category ?? undefined,
-      format: f.format as FieldMetadata['format'],
-      enumValues: f.enumValues as string[] | undefined,
-    }));
+    // If database has fields, use them
+    if (fields.length > 0) {
+      return fields.map((f) => ({
+        id: f.id,
+        dataSource: f.dataSource as DataSourceType,
+        fieldName: f.fieldName,
+        displayName: f.displayName,
+        description: f.description ?? undefined,
+        dataType: f.dataType as FieldMetadata['dataType'],
+        filterable: f.filterable,
+        sortable: f.sortable,
+        aggregatable: f.aggregatable,
+        groupable: f.groupable,
+        defaultVisible: f.defaultVisible,
+        defaultOrder: f.defaultOrder,
+        category: f.category ?? undefined,
+        format: f.format as FieldMetadata['format'],
+        enumValues: f.enumValues as string[] | undefined,
+      }));
+    }
+
+    // Fall back to default field metadata
+    this.logger.warn(`No fields found in database for ${dataSource}, using defaults`);
+    const defaultFields = DEFAULT_FIELD_METADATA[dataSource] || [];
+    return defaultFields.map((f, index) => ({
+      ...f,
+      id: `default-${dataSource}-${f.fieldName}`,
+    })) as FieldMetadata[];
   }
 
   /**

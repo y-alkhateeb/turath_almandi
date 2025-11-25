@@ -4,20 +4,15 @@
  */
 
 export const INCOME_CATEGORIES = [
-  'SALES',           // مبيعات
-  'SERVICES',        // خدمات
-  'APP_PURCHASES',   // مشتريات التطبيق
-  'INVENTORY_SALES', // مبيعات المخزون
-  'OTHER_INCOME',    // إيرادات أخرى
+  'INVENTORY_SALES',   // مبيعات المخزون
+  'CAPITAL_ADDITION',  // إضافة رأس مال
+  'APP_PURCHASES',     // مبيعات التطبيق
 ] as const;
 
 export const EXPENSE_CATEGORIES = [
   'WORKER_DAILY',    // يوميات العمال
-  'RENT',            // إيجار
-  'UTILITIES',       // مرافق (كهرباء، ماء، إنترنت)
   'SUPPLIES',        // مستلزمات
   'MAINTENANCE',     // صيانة
-  'TRANSPORTATION',  // مواصلات
   'INVENTORY',       // مشتريات مخزون
   'OTHER_EXPENSE',   // مصروفات أخرى
 ] as const;
@@ -33,17 +28,12 @@ export type TransactionCategory = typeof TRANSACTION_CATEGORIES[number];
  * Category labels in Arabic for display purposes
  */
 export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
-  SALES: 'مبيعات',
-  SERVICES: 'خدمات',
-  APP_PURCHASES: 'مشتريات التطبيق',
   INVENTORY_SALES: 'مبيعات المخزون',
-  OTHER_INCOME: 'إيرادات أخرى',
+  CAPITAL_ADDITION: 'إضافة رأس مال',
+  APP_PURCHASES: 'مبيعات التطبيق',
   WORKER_DAILY: 'يوميات العمال',
-  RENT: 'إيجار',
-  UTILITIES: 'مرافق',
   SUPPLIES: 'مستلزمات',
   MAINTENANCE: 'صيانة',
-  TRANSPORTATION: 'مواصلات',
   INVENTORY: 'مشتريات مخزون',
   OTHER_EXPENSE: 'مصروفات أخرى',
 };

@@ -17,11 +17,9 @@ export interface CategoryOption {
  * These values match backend INCOME_CATEGORIES constants
  */
 export const INCOME_CATEGORIES: CategoryOption[] = [
-  { value: 'SALES', label: 'مبيعات', type: TransactionType.INCOME },
-  { value: 'SERVICES', label: 'خدمات', type: TransactionType.INCOME },
-  { value: 'APP_PURCHASES', label: 'مشتريات التطبيق', type: TransactionType.INCOME },
   { value: 'INVENTORY_SALES', label: 'مبيعات المخزون', type: TransactionType.INCOME },
-  { value: 'OTHER_INCOME', label: 'إيرادات أخرى', type: TransactionType.INCOME },
+  { value: 'CAPITAL_ADDITION', label: 'إضافة رأس مال', type: TransactionType.INCOME },
+  { value: 'APP_PURCHASES', label: 'مبيعات التطبيق', type: TransactionType.INCOME },
 ];
 
 /**
@@ -30,11 +28,8 @@ export const INCOME_CATEGORIES: CategoryOption[] = [
  */
 export const EXPENSE_CATEGORIES: CategoryOption[] = [
   { value: 'WORKER_DAILY', label: 'يوميات العمال', type: TransactionType.EXPENSE },
-  { value: 'RENT', label: 'إيجار', type: TransactionType.EXPENSE },
-  { value: 'UTILITIES', label: 'مرافق', type: TransactionType.EXPENSE },
   { value: 'SUPPLIES', label: 'مستلزمات', type: TransactionType.EXPENSE },
   { value: 'MAINTENANCE', label: 'صيانة', type: TransactionType.EXPENSE },
-  { value: 'TRANSPORTATION', label: 'مواصلات', type: TransactionType.EXPENSE },
   { value: 'INVENTORY', label: 'مشتريات مخزون', type: TransactionType.EXPENSE },
   { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى', type: TransactionType.EXPENSE },
 ];

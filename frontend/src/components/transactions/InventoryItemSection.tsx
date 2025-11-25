@@ -171,8 +171,8 @@ export function InventoryItemSection({
   // إذا لم يتم اختيار فرع
   if (!branchId) {
     return (
-      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600">
-        <p className="text-center text-gray-600 dark:text-gray-400">
+      <div className="p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-color)]">
+        <p className="text-center text-[var(--text-secondary)]">
           الرجاء اختيار الفرع أولاً
         </p>
       </div>
@@ -183,7 +183,7 @@ export function InventoryItemSection({
     <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
       {/* العنوان */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">
           صنف المخزون
         </h3>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -196,21 +196,21 @@ export function InventoryItemSection({
       </div>
 
       {loading ? (
-        <p className="text-gray-600 dark:text-gray-400">جاري تحميل المخزون...</p>
+        <p className="text-[var(--text-secondary)]">جاري تحميل المخزون...</p>
       ) : availableItems.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-400">لا توجد أصناف في هذا الفرع</p>
+        <p className="text-[var(--text-secondary)]">لا توجد أصناف في هذا الفرع</p>
       ) : (
         <div className="space-y-4">
           {/* اختيار الصنف */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
               الصنف <span className="text-red-500">*</span>
             </label>
             <select
               value={selectedItem?.itemId || ''}
               onChange={handleItemSelect}
               disabled={disabled}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
             >
               <option value="">-- اختر صنفاً --</option>
               {availableItems.map((item) => (
@@ -237,7 +237,7 @@ export function InventoryItemSection({
 
               {/* الكمية */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                   {operationType === 'PURCHASE' ? 'الكمية المشتراة' : 'الكمية المباعة'}{' '}
                   <span className="text-red-500">*</span>
                 </label>
@@ -250,7 +250,7 @@ export function InventoryItemSection({
                   max={maxQuantity}
                   placeholder="أدخل الكمية"
                   disabled={disabled}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
                 />
                 {operationType === 'CONSUMPTION' && maxQuantity && (
                   <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
@@ -261,7 +261,7 @@ export function InventoryItemSection({
 
               {/* سعر الوحدة */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                   {operationType === 'PURCHASE' ? 'سعر الشراء للوحدة' : 'سعر البيع للوحدة'}{' '}
                   <span className="text-red-500">*</span>
                 </label>
@@ -273,9 +273,9 @@ export function InventoryItemSection({
                   step="0.01"
                   placeholder="أدخل السعر"
                   disabled={disabled}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
                 />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
                   سعر التكلفة الأصلي: <CurrencyAmountCompact amount={originalCostPerUnit} decimals={2} />
                 </p>
               </div>
@@ -296,7 +296,7 @@ export function InventoryItemSection({
                   </h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">الربح للوحدة: </span>
+                      <span className="text-[var(--text-secondary)]">الربح للوحدة: </span>
                       <span className={`font-bold ${
                         profit.isProfit ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
                       }`}>
@@ -305,7 +305,7 @@ export function InventoryItemSection({
                       </span>
                     </div>
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">إجمالي الربح: </span>
+                      <span className="text-[var(--text-secondary)]">إجمالي الربح: </span>
                       <span className={`font-bold ${
                         profit.isProfit ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
                       }`}>
@@ -318,18 +318,18 @@ export function InventoryItemSection({
               )}
 
               {/* المبلغ الإجمالي */}
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
+              <div className="p-3 bg-brand-gold-50 dark:bg-brand-gold-900/20 rounded-lg border border-brand-gold-200 dark:border-brand-gold-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                  <span className="text-sm font-medium text-brand-gold-800 dark:text-brand-gold-300">
                     المبلغ الإجمالي:
                   </span>
                   <CurrencyAmountCompact
                     amount={calculatedTotal}
                     decimals={2}
-                    className="text-lg font-bold text-amber-800 dark:text-amber-300"
+                    className="text-lg font-bold text-brand-gold-800 dark:text-brand-gold-300"
                   />
                 </div>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                <p className="text-xs text-brand-gold-600 dark:text-brand-gold-400 mt-1">
                   {quantity || '0'} × {unitPrice || '0'} = {calculatedTotal.toFixed(2)}
                 </p>
               </div>

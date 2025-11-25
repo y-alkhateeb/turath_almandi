@@ -95,10 +95,34 @@ export const useEmployee = (id: string) => {
  * const { data: activeEmployees } = useActiveEmployees();
  * ```
  */
-export const useActiveEmployees = () => {
+export const useActiveEmployees = (branchId?: string) => {
   return useQuery<Employee[], ApiError>({
-    queryKey: queryKeys.employees.active,
-    queryFn: () => employeeService.getActive(),
+    queryKey: ['employees', 'active', branchId],
+    queryFn: () => employeeService.getActive(branchId || ''),
+    enabled: branchId !== undefined,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+/**
+ * useActiveEmployeesByBranch Hook
+ * Query active employees for a specific branch
+ *
+ * @param branchId - Branch UUID
+ * @returns Query result with active employees array
+ *
+ * @example
+ * ```tsx
+ * const { data: employees } = useActiveEmployeesByBranch(branchId);
+ * ```
+ */
+export const useActiveEmployeesByBranch = (branchId: string | null | undefined) => {
+  return useQuery<Employee[], ApiError>({
+    queryKey: ['employees', 'active', branchId],
+    queryFn: () => employeeService.getActive(branchId!),
+    enabled: !!branchId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: 1,

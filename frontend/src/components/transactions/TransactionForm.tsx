@@ -9,6 +9,7 @@
  * - Branch selector for admins
  * - Arabic labels and error messages
  * - Strict typing matching backend DTOs
+ * - Employee salary section for EMPLOYEE_SALARIES category
  */
 
 import { useEffect } from 'react';
@@ -20,6 +21,7 @@ import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
 import { FormRadioGroup, type RadioOption } from '@/components/form/FormRadioGroup';
 import { FormTextarea } from '@/components/form/FormTextarea';
 import { BranchSelector, DateInput } from '@/components/form';
+import { EmployeeSalarySection } from '@/components/transactions/EmployeeSalarySection';
 import { useAuth } from '@/hooks/useAuth';
 import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
@@ -195,13 +197,21 @@ export function TransactionForm({
     }
   }, [mode, initialData, reset]);
 
-  // Watch transaction type for conditional fields (only in create mode)
+  // Watch transaction type and category for conditional fields (only in create mode)
   const transactionType = watch('type' as keyof CreateFormData) as TransactionType | undefined;
+  const category = watch('category' as keyof CreateFormData) as string | undefined;
+  const branchIdValue = watch('branchId' as keyof CreateFormData) as string | undefined;
+
+  // Determine the effective branchId (from form or user's branch)
+  const effectiveBranchId = isAdmin ? branchIdValue : user?.branchId;
+
+  // Check if the employee salaries category is selected
+  const isEmployeeSalariesCategory = category === 'EMPLOYEE_SALARIES' && transactionType === TransactionType.EXPENSE;
 
   // Auto-select first category when transaction type changes
   useEffect(() => {
     if (mode === 'create' && transactionType) {
-      const defaultCategory = transactionType === TransactionType.INCOME ? 'SALES' : 'SALARIES';
+      const defaultCategory = transactionType === TransactionType.INCOME ? 'INVENTORY_SALES' : 'EMPLOYEE_SALARIES';
       reset((formValues) => ({
         ...formValues,
         category: defaultCategory,
@@ -307,35 +317,8 @@ export function TransactionForm({
         )}
       </div>
 
-      {/* Amount and Payment Method - Same line on large screens */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Amount */}
-        <FormInput
-          name="amount"
-          label="المبلغ"
-          type="number"
-          step="0.01"
-          min="0.01"
-          placeholder="أدخل المبلغ"
-          register={register}
-          error={errors.amount}
-          required
-          disabled={isSubmitting}
-        />
-
-        {/* Payment Method */}
-        <FormSelect
-          name="paymentMethod"
-          label="طريقة الدفع"
-          options={paymentMethodOptions}
-          register={register}
-          error={errors.paymentMethod}
-          disabled={isSubmitting}
-        />
-      </div>
-
-      {/* Category and Date - Same line on large screens */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Category Selection */}
+      <div className="grid grid-cols-1 gap-4">
         {/* Category - Dynamic based on transaction type */}
         <FormSelect
           name="category"
@@ -355,53 +338,143 @@ export function TransactionForm({
           error={errors.category}
           disabled={isSubmitting}
         />
-
-        {/* Date */}
-        <DateInput
-          mode="form"
-          name="date"
-          label="التاريخ"
-          register={register}
-          error={errors.date}
-          required={mode === 'create'}
-          disabled={isSubmitting}
-        />
       </div>
 
-      {/* Employee/Vendor Name - Show for expenses or if type not selected */}
-      {(mode === 'edit' ||
-        transactionType === TransactionType.EXPENSE ||
-        transactionType === undefined) && (
-        <FormInput
-          name="employeeVendorName"
-          label={
-            transactionType === TransactionType.EXPENSE
-              ? 'اسم الموظف أو البائع'
-              : 'اسم الموظف/البائع'
-          }
-          type="text"
-          placeholder="أدخل الاسم (اختياري)"
-          register={register}
-          error={errors.employeeVendorName}
+      {/* Employee Salaries Section - Shows when EMPLOYEE_SALARIES category is selected */}
+      {mode === 'create' && isEmployeeSalariesCategory && (
+        <EmployeeSalarySection
+          branchId={effectiveBranchId || null}
+          onSuccess={() => {
+            reset();
+            // Call onCancel to go back or refresh
+            onCancel?.();
+          }}
           disabled={isSubmitting}
         />
       )}
 
-      {/* Notes */}
-      <FormTextarea
-        name="notes"
-        label="ملاحظات"
-        placeholder="أدخل ملاحظات إضافية (اختياري)"
-        rows={3}
-        maxLength={1000}
-        register={register}
-        error={errors.notes}
-        disabled={isSubmitting}
-      />
+      {/* Regular Transaction Fields - Hidden when EMPLOYEE_SALARIES is selected */}
+      {(!isEmployeeSalariesCategory || mode === 'edit') && (
+        <>
+          {/* Amount and Payment Method - Same line on large screens */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Amount */}
+            <FormInput
+              name="amount"
+              label="المبلغ"
+              type="number"
+              step="0.01"
+              min="0.01"
+              placeholder="أدخل المبلغ"
+              register={register}
+              error={errors.amount}
+              required
+              disabled={isSubmitting}
+            />
 
-      {/* Form Actions */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
-        {onCancel && (
+            {/* Payment Method */}
+            <FormSelect
+              name="paymentMethod"
+              label="طريقة الدفع"
+              options={paymentMethodOptions}
+              register={register}
+              error={errors.paymentMethod}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Date */}
+          <DateInput
+            mode="form"
+            name="date"
+            label="التاريخ"
+            register={register}
+            error={errors.date}
+            required={mode === 'create'}
+            disabled={isSubmitting}
+          />
+
+          {/* Employee/Vendor Name - Show for expenses or if type not selected */}
+          {(mode === 'edit' ||
+            transactionType === TransactionType.EXPENSE ||
+            transactionType === undefined) && (
+            <FormInput
+              name="employeeVendorName"
+              label={
+                transactionType === TransactionType.EXPENSE
+                  ? 'اسم الموظف أو البائع'
+                  : 'اسم الموظف/البائع'
+              }
+              type="text"
+              placeholder="أدخل الاسم (اختياري)"
+              register={register}
+              error={errors.employeeVendorName}
+              disabled={isSubmitting}
+            />
+          )}
+
+          {/* Notes */}
+          <FormTextarea
+            name="notes"
+            label="ملاحظات"
+            placeholder="أدخل ملاحظات إضافية (اختياري)"
+            rows={3}
+            maxLength={1000}
+            register={register}
+            error={errors.notes}
+            disabled={isSubmitting}
+          />
+        </>
+      )}
+
+      {/* Form Actions - Hidden when EMPLOYEE_SALARIES is selected in create mode */}
+      {(!isEmployeeSalariesCategory || mode === 'edit') && (
+        <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="px-6 py-3 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              إلغاء
+            </button>
+          )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-6 py-3 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          >
+            {isSubmitting && (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            )}
+            {mode === 'create' ? 'إضافة عملية' : 'تحديث العملية'}
+          </button>
+        </div>
+      )}
+
+      {/* Cancel button only when EMPLOYEE_SALARIES is selected */}
+      {mode === 'create' && isEmployeeSalariesCategory && onCancel && (
+        <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
           <button
             type="button"
             onClick={onCancel}
@@ -410,37 +483,8 @@ export function TransactionForm({
           >
             إلغاء
           </button>
-        )}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-3 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-        >
-          {isSubmitting && (
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-          )}
-          {mode === 'create' ? 'إضافة عملية' : 'تحديث العملية'}
-        </button>
-      </div>
+        </div>
+      )}
     </form>
   );
 }

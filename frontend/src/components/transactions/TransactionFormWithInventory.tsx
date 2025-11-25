@@ -2,11 +2,13 @@
  * TransactionFormWithInventory - نموذج إضافة معاملة جديدة
  *
  * السيناريوهات:
- * 1. مصروف + مشتريات مخزون = شراء وإضافة للمخزون (سعر قابل للتعديل)
- * 2. إيراد + مبيعات المخزون = بيع من المخزون (سعر قابل للتعديل + عرض الربح)
+ * 1. مصروف + مشتريات مخزون = شراء وإضافة للمخزون
+ * 2. إيراد + مبيعات المخزون = بيع من المخزون
  * 3. باقي الفئات = إدخال مبلغ يدوي
  *
- * الدفع الجزئي متاح لجميع المعاملات
+ * ملاحظات:
+ * - المصروفات = نقدي فقط
+ * - الإيرادات = نقدي أو ماستر كارد
  */
 
 import { useState, useEffect } from 'react';
@@ -116,14 +118,21 @@ export function TransactionFormWithInventory({
   // ============================================
   const totalAmount = isInventoryCategory ? inventoryTotal : manualAmount;
 
+  // هل المصروفات؟ (طريقة الدفع نقدي فقط)
+  const isExpense = transactionType === 'EXPENSE';
+
   // ============================================
   // تأثيرات جانبية
   // ============================================
 
   // تغيير الفئة الافتراضية عند تغيير النوع
   useEffect(() => {
-    const defaultCategory = transactionType === 'INCOME' ? 'SALES' : 'OTHER_EXPENSE';
+    const defaultCategory = transactionType === 'INCOME' ? 'INVENTORY_SALES' : 'OTHER_EXPENSE';
     setValue('category', defaultCategory);
+    // إعادة ضبط طريقة الدفع عند تغيير النوع
+    if (transactionType === 'EXPENSE') {
+      setPaymentMethod('CASH');
+    }
   }, [transactionType, setValue]);
 
   // تحديث المبلغ المدفوع عند تغيير الإجمالي
@@ -179,7 +188,7 @@ export function TransactionFormWithInventory({
         totalAmount,
         paidAmount: isPartialPayment ? paidAmount : totalAmount,
         category: data.category,
-        paymentMethod,
+        paymentMethod: isExpense ? 'CASH' : paymentMethod, // المصروفات نقدي فقط
         date: data.date,
         notes: data.notes,
         branchId: data.branchId,
@@ -229,21 +238,21 @@ export function TransactionFormWithInventory({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" dir="rtl">
       {/* رسالة الخطأ */}
       {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+        <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 rounded-lg">
+          <p className="text-sm text-red-700 dark:text-red-200">{error}</p>
         </div>
       )}
 
       {/* نوع العملية والفرع */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
             نوع العملية <span className="text-red-500">*</span>
           </label>
           <select
             {...register('type')}
             disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
           >
             <option value="EXPENSE">مصروف</option>
             <option value="INCOME">إيراد</option>
@@ -267,10 +276,10 @@ export function TransactionFormWithInventory({
           />
         ) : user?.branch ? (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
               الفرع
             </label>
-            <div className="px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100">
+            <div className="px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)]">
               {user.branch.name}
             </div>
           </div>
@@ -280,13 +289,13 @@ export function TransactionFormWithInventory({
       {/* الفئة والتاريخ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
             الفئة <span className="text-red-500">*</span>
           </label>
           <select
             {...register('category')}
             disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
           >
             {categoryOptions.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -325,7 +334,7 @@ export function TransactionFormWithInventory({
       {/* المبلغ اليدوي - يظهر فقط للفئات العادية */}
       {!isInventoryCategory && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
             المبلغ الإجمالي <span className="text-red-500">*</span>
           </label>
           <input
@@ -336,7 +345,7 @@ export function TransactionFormWithInventory({
             step="0.01"
             placeholder="أدخل المبلغ"
             disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
           />
         </div>
       )}
@@ -357,11 +366,12 @@ export function TransactionFormWithInventory({
         debtDueDate={debtDueDate}
         onDebtDueDateChange={setDebtDueDate}
         disabled={isSubmitting}
+        isExpense={isExpense}
       />
 
       {/* الملاحظات */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
           ملاحظات (اختياري)
         </label>
         <textarea
@@ -370,7 +380,7 @@ export function TransactionFormWithInventory({
           maxLength={1000}
           placeholder="أدخل ملاحظات إضافية"
           disabled={isSubmitting}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none"
+          className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)] resize-none"
         />
         {errors.notes && (
           <p className="text-sm text-red-500 mt-1">{errors.notes.message}</p>
@@ -378,13 +388,13 @@ export function TransactionFormWithInventory({
       </div>
 
       {/* أزرار التحكم */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+            className="px-6 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-secondary)] disabled:opacity-50 transition-colors"
           >
             إلغاء
           </button>
@@ -392,7 +402,7 @@ export function TransactionFormWithInventory({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-50 flex items-center gap-2"
+          className="px-6 py-2 text-sm font-medium text-white bg-brand-gold-500 rounded-lg hover:bg-brand-gold-600 disabled:opacity-50 flex items-center gap-2 transition-colors"
         >
           {isSubmitting && (
             <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

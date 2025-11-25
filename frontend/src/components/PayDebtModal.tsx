@@ -180,7 +180,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
             name="amountPaid"
             label="المبلغ المراد دفعه"
             type="number"
-            register={register}
+            register={register as unknown as Parameters<typeof FormInput>[0]['register']}
             error={errors.amountPaid}
             required
             disabled={isSubmitting}
@@ -199,7 +199,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
           mode="form"
           name="paymentDate"
           label="تاريخ الدفع"
-          register={register}
+          register={register as unknown as Parameters<typeof DateInput>[0]['register']}
           error={errors.paymentDate}
           required
           disabled={isSubmitting}
@@ -208,7 +208,7 @@ export const PayDebtModal = ({ isOpen, onClose, debt }: PayDebtModalProps) => {
         <FormTextarea
           name="notes"
           label="ملاحظات"
-          register={register}
+          register={register as unknown as Parameters<typeof FormTextarea>[0]['register']}
           error={errors.notes}
           disabled={isSubmitting}
           placeholder="أضف أي ملاحظات إضافية هنا..."

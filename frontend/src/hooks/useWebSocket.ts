@@ -234,7 +234,7 @@ class WebSocketManager {
         });
       }
 
-      console.log(`[WebSocket] Event received: ${eventType}`, payload);
+      console.log('[WebSocket] Event received: %s', eventType, payload);
     } catch (error) {
       console.error('[WebSocket] Failed to parse message:', event.data, error);
     }

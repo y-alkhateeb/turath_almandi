@@ -22,6 +22,8 @@ export enum AuditEntityType {
   SALARY_PAYMENT = 'SALARY_PAYMENT',
   SALARY_INCREASE = 'SALARY_INCREASE',
   BONUS = 'BONUS',
+  ADVANCE = 'ADVANCE',
+  ADVANCE_CANCELLED = 'ADVANCE_CANCELLED',
 }
 
 interface AuditLogData {

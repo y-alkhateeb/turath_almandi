@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Play, Info, AlertCircle } from 'lucide-react';
 import { DataSourceSelector } from './components/DataSourceSelector';

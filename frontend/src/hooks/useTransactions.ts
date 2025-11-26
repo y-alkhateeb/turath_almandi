@@ -19,6 +19,7 @@ import transactionService from '@/api/services/transactionService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
 import type { PaginatedResponse, TransactionQueryFilters, TransactionStatsResponse } from '#/api';
+import type { TransactionWithInventoryRequest } from '@/types/inventoryOperation.types';
 import { ApiError } from '@/api/apiClient';
 
 // ============================================
@@ -402,6 +403,60 @@ export const useDeleteTransaction = () => {
 
       // Show success toast
       toast.success('تم حذف العملية بنجاح');
+    },
+  });
+};
+
+/**
+ * useCreateTransactionWithInventory Hook
+ * Mutation to create transaction with inventory operations
+ * Handles cache invalidation for transactions, inventory, debts, and dashboard
+ *
+ * @returns Mutation object with mutate/mutateAsync
+ *
+ * @example
+ * ```tsx
+ * const createTransaction = useCreateTransactionWithInventory();
+ *
+ * const handleCreate = async () => {
+ *   await createTransaction.mutateAsync({
+ *     type: 'EXPENSE',
+ *     totalAmount: 500,
+ *     paidAmount: 500,
+ *     category: 'INVENTORY',
+ *     paymentMethod: 'CASH',
+ *     date: '2025-01-01',
+ *     inventoryItem: {
+ *       itemId: 'item-id',
+ *       quantity: 10,
+ *       operationType: 'PURCHASE',
+ *       unitPrice: 50,
+ *     },
+ *   });
+ * };
+ * ```
+ */
+export const useCreateTransactionWithInventory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<Transaction, ApiError, TransactionWithInventoryRequest>({
+    mutationFn: (data: TransactionWithInventoryRequest) =>
+      transactionService.createWithInventory(data),
+
+    onSuccess: () => {
+      // Invalidate all related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.debts?.all || ['debts'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+
+      toast.success('تم إنشاء المعاملة بنجاح');
+    },
+
+    onError: (error: ApiError) => {
+      const message =
+        error?.response?.data?.message || error?.message || 'حدث خطأ أثناء إنشاء المعاملة';
+      toast.error(message);
     },
   });
 };

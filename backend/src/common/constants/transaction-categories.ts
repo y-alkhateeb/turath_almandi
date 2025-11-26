@@ -10,11 +10,12 @@ export const INCOME_CATEGORIES = [
 ] as const;
 
 export const EXPENSE_CATEGORIES = [
-  'WORKER_DAILY',    // يوميات العمال
-  'SUPPLIES',        // مستلزمات
-  'MAINTENANCE',     // صيانة
-  'INVENTORY',       // مشتريات مخزون
-  'OTHER_EXPENSE',   // مصروفات أخرى
+  'EMPLOYEE_SALARIES', // رواتب الموظفين
+  'WORKER_DAILY',      // يوميات العمال
+  'SUPPLIES',          // مستلزمات
+  'MAINTENANCE',       // صيانة
+  'INVENTORY',         // مشتريات مخزون
+  'OTHER_EXPENSE',     // مصروفات أخرى
 ] as const;
 
 export const TRANSACTION_CATEGORIES = [
@@ -28,9 +29,12 @@ export type TransactionCategory = typeof TRANSACTION_CATEGORIES[number];
  * Category labels in Arabic for display purposes
  */
 export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
+  // INCOME
   INVENTORY_SALES: 'مبيعات المخزون',
   CAPITAL_ADDITION: 'إضافة رأس مال',
   APP_PURCHASES: 'مبيعات التطبيق',
+  // EXPENSE
+  EMPLOYEE_SALARIES: 'رواتب الموظفين',
   WORKER_DAILY: 'يوميات العمال',
   SUPPLIES: 'مستلزمات',
   MAINTENANCE: 'صيانة',

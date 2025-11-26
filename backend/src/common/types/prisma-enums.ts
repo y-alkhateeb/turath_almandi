@@ -3,72 +3,86 @@
  * These are used as fallback types for TypeScript compilation
  * when Prisma client types might not be fully available.
  *
+ * Using const objects with type unions for compatibility with
+ * Prisma's generated $Enums types (which are also string literals).
+ *
  * IMPORTANT: Keep these in sync with prisma/schema.prisma
  */
 
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  ACCOUNTANT = 'ACCOUNTANT',
-}
+export const UserRole = {
+  ADMIN: 'ADMIN',
+  ACCOUNTANT: 'ACCOUNTANT',
+} as const;
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
-export enum TransactionType {
-  INCOME = 'INCOME',
-  EXPENSE = 'EXPENSE',
-}
+export const TransactionType = {
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE',
+} as const;
+export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType];
 
-export enum PaymentMethod {
-  CASH = 'CASH',
-  MASTER = 'MASTER',
-}
+export const PaymentMethod = {
+  CASH: 'CASH',
+  MASTER: 'MASTER',
+} as const;
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
 
-export enum DebtStatus {
-  ACTIVE = 'ACTIVE',
-  PAID = 'PAID',
-  PARTIAL = 'PARTIAL',
-}
+export const DebtStatus = {
+  ACTIVE: 'ACTIVE',
+  PAID: 'PAID',
+  PARTIAL: 'PARTIAL',
+} as const;
+export type DebtStatus = (typeof DebtStatus)[keyof typeof DebtStatus];
 
-export enum InventoryUnit {
-  KG = 'KG',
-  PIECE = 'PIECE',
-  LITER = 'LITER',
-  OTHER = 'OTHER',
-}
+export const InventoryUnit = {
+  KG: 'KG',
+  PIECE: 'PIECE',
+  LITER: 'LITER',
+  OTHER: 'OTHER',
+} as const;
+export type InventoryUnit = (typeof InventoryUnit)[keyof typeof InventoryUnit];
 
-export enum InventoryOperationType {
-  PURCHASE = 'PURCHASE',
-  CONSUMPTION = 'CONSUMPTION',
-}
+export const InventoryOperationType = {
+  PURCHASE: 'PURCHASE',
+  CONSUMPTION: 'CONSUMPTION',
+} as const;
+export type InventoryOperationType = (typeof InventoryOperationType)[keyof typeof InventoryOperationType];
 
-export enum NotificationSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  CRITICAL = 'CRITICAL',
-}
+export const NotificationSeverity = {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR',
+  CRITICAL: 'CRITICAL',
+} as const;
+export type NotificationSeverity = (typeof NotificationSeverity)[keyof typeof NotificationSeverity];
 
-export enum DisplayMethod {
-  POPUP = 'POPUP',
-  TOAST = 'TOAST',
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-}
+export const DisplayMethod = {
+  POPUP: 'POPUP',
+  TOAST: 'TOAST',
+  EMAIL: 'EMAIL',
+  SMS: 'SMS',
+} as const;
+export type DisplayMethod = (typeof DisplayMethod)[keyof typeof DisplayMethod];
 
-export enum EmployeeStatus {
-  ACTIVE = 'ACTIVE',
-  RESIGNED = 'RESIGNED',
-}
+export const EmployeeStatus = {
+  ACTIVE: 'ACTIVE',
+  RESIGNED: 'RESIGNED',
+} as const;
+export type EmployeeStatus = (typeof EmployeeStatus)[keyof typeof EmployeeStatus];
 
-export enum AdvanceStatus {
-  ACTIVE = 'ACTIVE',
-  PAID = 'PAID',
-  CANCELLED = 'CANCELLED',
-}
+export const AdvanceStatus = {
+  ACTIVE: 'ACTIVE',
+  PAID: 'PAID',
+  CANCELLED: 'CANCELLED',
+} as const;
+export type AdvanceStatus = (typeof AdvanceStatus)[keyof typeof AdvanceStatus];
 
-export enum ReportType {
-  FINANCIAL = 'FINANCIAL',
-  DEBTS = 'DEBTS',
-  INVENTORY = 'INVENTORY',
-  SALARY = 'SALARY',
-  BRANCHES = 'BRANCHES',
-  CUSTOM = 'CUSTOM',
-}
+export const ReportType = {
+  FINANCIAL: 'FINANCIAL',
+  DEBTS: 'DEBTS',
+  INVENTORY: 'INVENTORY',
+  SALARY: 'SALARY',
+  BRANCHES: 'BRANCHES',
+  CUSTOM: 'CUSTOM',
+} as const;
+export type ReportType = (typeof ReportType)[keyof typeof ReportType];

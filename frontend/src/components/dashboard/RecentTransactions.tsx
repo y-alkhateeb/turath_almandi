@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Badge } from '@/components/ui/Badge';
 import { Transaction } from '@/types/dashboard';
 import { formatCurrency, formatDateShort, cn } from '@/lib/utils';

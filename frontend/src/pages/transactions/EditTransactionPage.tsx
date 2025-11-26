@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { TransactionForm } from '@/components/transactions/TransactionForm';
 import { useTransaction, useUpdateTransaction } from '@/hooks/useTransactions';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
@@ -58,7 +58,7 @@ export const EditTransactionPage = () => {
       }
     >
       {/* Edit Form Card */}
-      <Card padding="lg">
+      <Card className="p-8">
         <TransactionForm
           mode="edit"
           initialData={transaction}

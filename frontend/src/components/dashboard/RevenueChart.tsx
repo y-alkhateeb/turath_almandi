@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { RevenueDataPoint } from '@/types/dashboard';
 import { formatCurrency } from '@/lib/utils/formatCurrency';
 import type { CurrencySettings } from '#/settings.types';

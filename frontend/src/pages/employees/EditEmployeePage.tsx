@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { EmployeeForm } from '@/components/EmployeeForm';
 import { useEmployee, useUpdateEmployee } from '@/hooks/useEmployees';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { PageLayout } from '@/components/layouts';
 import { PageLoading } from '@/components/loading';
@@ -48,7 +48,7 @@ export const EditEmployeePage = () => {
       {isLoadingEmployee ? (
         <PageLoading message="جاري تحميل بيانات الموظف..." />
       ) : employee ? (
-        <Card padding="lg">
+        <Card className="p-8">
           <EmployeeForm
             onSubmit={handleUpdate}
             onCancel={handleCancel}

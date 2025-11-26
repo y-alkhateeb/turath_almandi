@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, Edit, Trash2 } from 'lucide-react';
 import { useTransaction, useDeleteTransaction } from '@/hooks/useTransactions';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { PageLoading } from '@/components/loading';
 import { Alert } from '@/ui/alert';
@@ -101,7 +101,7 @@ export const ViewTransactionPage = () => {
       </div>
 
       {/* Transaction Details Card */}
-      <Card padding="lg">
+      <Card className="p-8">
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

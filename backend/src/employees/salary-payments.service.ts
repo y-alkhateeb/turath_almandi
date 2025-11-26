@@ -222,23 +222,19 @@ export class SalaryPaymentsService {
       return completeSalaryPayment!;
     });
 
-    // Log the creation in audit log
+    // Log the creation in audit log (convert to JSON-safe format)
+    const auditData = JSON.parse(JSON.stringify({
+      ...result,
+      advanceDeductions: advanceDeductionsInfo,
+      totalMonthlyDeduction,
+      netSalaryPaid,
+    }));
+
     await this.auditLogService.logCreate(
       user.id,
       AuditEntityType.SALARY_PAYMENT,
       result.id,
-      {
-        ...result,
-        advanceDeductions: advanceDeductionsInfo.map(d => ({
-          advanceId: d.advanceId,
-          deductionAmount: d.deductionAmount,
-          previousRemaining: d.previousRemaining,
-          newRemaining: d.newRemaining,
-          status: d.status,
-        })),
-        totalMonthlyDeduction,
-        netSalaryPaid,
-      } as unknown as Record<string, unknown>,
+      auditData,
     );
 
     return {

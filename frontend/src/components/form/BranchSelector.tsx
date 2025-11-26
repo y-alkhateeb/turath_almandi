@@ -111,7 +111,7 @@ export function BranchSelector<T extends FieldValues = any>(props: BranchSelecto
   }
 
   return (
-    <div className={className}>
+    <div className={`w-full ${className}`}>
       {showLabel && (
         <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           {label}
@@ -121,7 +121,7 @@ export function BranchSelector<T extends FieldValues = any>(props: BranchSelecto
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
         disabled={branchesLoading}
-        className="w-full px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <option value="">{placeholder}</option>
         {branches.map((branch) => (

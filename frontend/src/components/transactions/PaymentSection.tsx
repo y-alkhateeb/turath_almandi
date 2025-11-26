@@ -158,7 +158,7 @@ export function PaymentSection({
               step="0.01"
               placeholder="أدخل المبلغ المدفوع"
               disabled={disabled}
-              className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+              className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors"
             />
           </div>
 
@@ -199,7 +199,7 @@ export function PaymentSection({
                   </h4>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                       اسم الدائن <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -208,12 +208,12 @@ export function PaymentSection({
                       onChange={(e) => onDebtCreditorNameChange(e.target.value)}
                       placeholder="أدخل اسم الدائن"
                       disabled={disabled}
-                      className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                      className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                       تاريخ الاستحقاق (اختياري)
                     </label>
                     <input
@@ -221,7 +221,8 @@ export function PaymentSection({
                       value={debtDueDate}
                       onChange={(e) => onDebtDueDateChange(e.target.value)}
                       disabled={disabled}
-                      className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-gold-500 focus:border-brand-gold-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                      className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors [color-scheme:light] dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:brightness-200"
+                      dir="ltr"
                     />
                   </div>
 

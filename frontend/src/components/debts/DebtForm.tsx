@@ -208,7 +208,7 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
         name="notes"
         label="ملاحظات"
         placeholder="أدخل ملاحظات إضافية (اختياري)"
-        rows={3}
+        rows={4}
         maxLength={1000}
         register={register}
         error={errors.notes}
@@ -216,21 +216,11 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
       />
 
       {/* Form Actions */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isSubmitting}
-            className="px-6 py-3 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            إلغاء
-          </button>
-        )}
+      <div className="flex gap-3 pt-4">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-3 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSubmitting && (
             <svg
@@ -254,8 +244,18 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
               />
             </svg>
           )}
-          إضافة دين
+          {isSubmitting ? 'جاري الحفظ...' : 'إضافة الدين'}
         </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="flex-1 bg-[var(--bg-secondary)] text-[var(--text-primary)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--bg-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            إلغاء
+          </button>
+        )}
       </div>
     </form>
   );

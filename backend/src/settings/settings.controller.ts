@@ -8,7 +8,7 @@ import {
   HttpCode,
   HttpStatus
 } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-enums';
 import { SettingsService } from './settings.service';
 import { CreateCurrencyDto } from './dto/create-currency.dto';
 import { SetDefaultCurrencyDto } from './dto/set-default-currency.dto';

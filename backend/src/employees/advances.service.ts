@@ -7,7 +7,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdvanceDto } from './dto/create-advance.dto';
 import { RecordDeductionDto } from './dto/record-deduction.dto';
-import { AdvanceStatus, UserRole, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { AdvanceStatus, UserRole } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { formatDateForDB } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';

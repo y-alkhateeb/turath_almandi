@@ -7,7 +7,7 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
-import { TransactionType, PaymentMethod } from '@prisma/client';
+import { TransactionType, PaymentMethod } from '../../common/types/prisma-enums';
 import { Transform } from 'class-transformer';
 import { IsValidCategory } from '../../common/decorators/is-valid-category.decorator';
 

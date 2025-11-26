@@ -5,7 +5,7 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../types/prisma-enums';
 
 interface UserWithRole {
   role: UserRole;

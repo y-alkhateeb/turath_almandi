@@ -5,7 +5,7 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole, InventoryUnit } from '@prisma/client';
+import { UserRole, InventoryUnit } from '../common/types/prisma-enums';
 
 interface RequestUser {
   id: string;

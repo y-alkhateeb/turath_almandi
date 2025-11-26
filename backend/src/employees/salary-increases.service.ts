@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecordSalaryIncreaseDto } from './dto/record-salary-increase.dto';
-import { UserRole, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB } from '../common/utils/date.utils';

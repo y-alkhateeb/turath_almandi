@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Trim, Escape } from 'class-sanitizer';
 import { Transform } from 'class-transformer';
-import { EmployeeStatus } from '@prisma/client';
+import { EmployeeStatus } from '../../common/types/prisma-enums';
 import { IsPositiveAmount } from '../../common/decorators/is-positive-amount.decorator';
 import { IsNotFutureDate } from '../../common/decorators/is-not-future-date.decorator';
 

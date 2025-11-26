@@ -8,7 +8,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { InventoryUnit } from '@prisma/client';
+import { InventoryUnit } from '../../common/types/prisma-enums';
 
 export class UpdateInventoryDto {
   @IsString()

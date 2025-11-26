@@ -7,7 +7,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
-import { UserRole, DebtStatus, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { UserRole, DebtStatus } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';

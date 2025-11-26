@@ -16,7 +16,7 @@ import { NotificationSettingsService } from './notification-settings.service';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-enums';
 
 interface RequestUser {
   id: string;

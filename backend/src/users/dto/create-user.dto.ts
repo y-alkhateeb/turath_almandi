@@ -9,7 +9,7 @@ import {
   Matches,
 } from 'class-validator';
 import { Trim } from 'class-sanitizer';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../common/types/prisma-enums';
 import { ValidateBranchByRole } from '../../common/decorators/validate-branch-by-role.decorator';
 
 export class CreateUserDto {

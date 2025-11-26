@@ -8,7 +8,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { ResignEmployeeDto } from './dto/resign-employee.dto';
-import { EmployeeStatus, UserRole, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { EmployeeStatus, UserRole } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {

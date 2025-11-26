@@ -5,7 +5,7 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
-import { TransactionType } from '@prisma/client';
+import { TransactionType } from '../types/prisma-enums';
 import {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,

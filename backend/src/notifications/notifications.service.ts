@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotificationSeverity, UserRole, Prisma, Notification, TransactionType } from '@prisma/client';
+import { Prisma, Notification } from '@prisma/client';
+import { NotificationSeverity, UserRole, TransactionType } from '../common/types/prisma-enums';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { getCurrentTimestamp } from '../common/utils/date.utils';

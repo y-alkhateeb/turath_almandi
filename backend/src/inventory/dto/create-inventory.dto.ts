@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Trim, Escape } from 'class-sanitizer';
 import { Transform } from 'class-transformer';
-import { InventoryUnit } from '@prisma/client';
+import { InventoryUnit } from '../../common/types/prisma-enums';
 
 export class CreateInventoryDto {
   @Trim()

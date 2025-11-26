@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Query } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-enums';
 import { BranchesService } from './branches.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';

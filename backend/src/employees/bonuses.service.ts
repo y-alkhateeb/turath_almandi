@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBonusDto } from './dto/create-bonus.dto';
-import { TransactionType, UserRole, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { TransactionType, UserRole } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB, getStartOfDay, getEndOfDay } from '../common/utils/date.utils';

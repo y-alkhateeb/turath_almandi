@@ -8,7 +8,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LoginThrottleGuard } from './guards/login-throttle.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-enums';
 
 interface RequestUser {
   id: string;

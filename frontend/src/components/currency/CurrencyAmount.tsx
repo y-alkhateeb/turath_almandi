@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurrencyStore } from '@/stores/currencyStore';
 import { formatCurrencyAuto } from '@/utils/currency.utils';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 /**
  * CurrencyAmount Component Props

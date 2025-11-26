@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { Loader2, FileDown, FileSpreadsheet, FileText } from 'lucide-react';
 import type { QueryResult, ReportField, ExportFormat } from '@/types/smart-reports.types';
 import { useCurrencyStore } from '@/stores/currencyStore';

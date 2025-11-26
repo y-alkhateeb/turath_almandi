@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Play, Save } from 'lucide-react';
+import { Loader2, Play, Info } from 'lucide-react';
 import { DataSourceSelector } from './components/DataSourceSelector';
 import { FieldSelector } from './components/FieldSelector';
 import { FilterBuilder } from './components/FilterBuilder';
@@ -111,6 +111,25 @@ export default function SmartReportBuilder() {
           </Button>
         </div>
       </div>
+
+      {/* Instructions Card */}
+      <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <CardContent className="pt-4">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">كيفية استخدام منشئ التقارير:</h3>
+              <ol className="list-decimal list-inside text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                <li><strong>اختر مصدر البيانات:</strong> حدد نوع البيانات (المعاملات، الديون، المخزون، الموظفين)</li>
+                <li><strong>اختر الحقول:</strong> انقر على الحقول من قائمة "الحقول المتاحة" لإضافتها إلى التقرير</li>
+                <li><strong>أضف الفلاتر (اختياري):</strong> قم بتصفية البيانات حسب التاريخ أو الفئة أو غيرها</li>
+                <li><strong>حدد الترتيب (اختياري):</strong> رتب النتائج حسب أي حقل تختاره</li>
+                <li><strong>شغّل التقرير:</strong> اضغط على زر "تشغيل التقرير" لعرض النتائج</li>
+              </ol>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">

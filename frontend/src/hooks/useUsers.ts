@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import userService from '@/api/services/userService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
-import type { UserWithBranch, CreateUserDto, UpdateUserDto } from '@/types';
+import type { UserWithBranch, CreateUserInput, UpdateUserInput } from '#/entity';
 import { ApiError } from '@/api/apiClient';
 
 // ============================================
@@ -96,8 +96,8 @@ export const useUser = (id: string) => {
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<UserWithBranch, ApiError, CreateUserDto>({
-    mutationFn: (data: CreateUserDto) => userService.create(data),
+  return useMutation<UserWithBranch, ApiError, CreateUserInput>({
+    mutationFn: (data: CreateUserInput) => userService.create(data),
 
     // Optimistic update
     onMutate: async (newUser) => {
@@ -167,8 +167,8 @@ export const useCreateUser = () => {
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<UserWithBranch, ApiError, { id: string; data: UpdateUserDto }>({
-    mutationFn: ({ id, data }: { id: string; data: UpdateUserDto }) =>
+  return useMutation<UserWithBranch, ApiError, { id: string; data: UpdateUserInput }>({
+    mutationFn: ({ id, data }: { id: string; data: UpdateUserInput }) =>
       userService.update(id, data),
 
     // Optimistic update

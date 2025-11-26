@@ -23,7 +23,6 @@ import { ChevronRight } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreateUser } from '@/hooks/useUsers';
-import { useBranches } from '@/hooks/useBranches';
 import { UserForm } from '@/components/users/UserForm';
 import type { CreateUserInput } from '#/entity';
 import { toast } from 'sonner';
@@ -50,15 +49,6 @@ export default function CreateUserPage() {
       router.push('/dashboard');
     }
   }, [isAdmin, router]);
-
-  // ============================================
-  // DATA FETCHING
-  // ============================================
-
-  /**
-   * Fetch branches for branch selector (accountants need a branch)
-   */
-  const { data: branches = [] } = useBranches();
 
   // ============================================
   // MUTATIONS
@@ -140,7 +130,6 @@ export default function CreateUserPage() {
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
         <UserForm
           mode="create"
-          branches={branches}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isSubmitting={createUser.isPending}

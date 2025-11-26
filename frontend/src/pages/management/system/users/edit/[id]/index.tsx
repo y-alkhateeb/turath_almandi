@@ -25,7 +25,6 @@ import { useRouter } from '@/routes/hooks';
 import { useParams } from '@/routes/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useUser, useUpdateUser } from '@/hooks/useUsers';
-import { useBranches } from '@/hooks/useBranches';
 import { UserForm } from '@/components/users/UserForm';
 import { ErrorState } from '@/components/common/ErrorState';
 import type { UpdateUserInput } from '#/entity';
@@ -67,14 +66,7 @@ export default function EditUserPage() {
     isLoading,
     error,
     refetch,
-  } = useUser(id || '', {
-    enabled: !!id && isAdmin,
-  });
-
-  /**
-   * Fetch branches for branch selector (accountants need a branch)
-   */
-  const { data: branches = [] } = useBranches();
+  } = useUser(id || '');
 
   // ============================================
   // MUTATIONS
@@ -293,7 +285,6 @@ export default function EditUserPage() {
         <UserForm
           mode="edit"
           initialData={user}
-          branches={branches}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isSubmitting={updateUser.isPending}

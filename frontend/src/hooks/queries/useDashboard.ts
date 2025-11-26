@@ -18,6 +18,7 @@ import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dashboardService from '@/api/services/dashboardService';
 import { queryKeys } from '@/hooks/queries/queryKeys';
+import { QUERY_CONFIG } from '@/hooks/queries/queryConfig';
 import { useAuth } from '../useAuth';
 import type { Transaction } from '#/entity';
 import type {
@@ -73,9 +74,7 @@ export const useDashboardStats = (branchId?: string, date?: string) => {
         branchId: appliedBranchId,
         date,
       }),
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-    retry: 1, // Only retry once on failure
+    ...QUERY_CONFIG.standard,
   });
 };
 
@@ -124,9 +123,7 @@ export const useRevenueData = (
   return useQuery<RevenueDataPoint[], ApiError>({
     queryKey: queryKeys.dashboard.revenueData(filters),
     queryFn: () => dashboardService.getRevenueData(filters),
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-    retry: 1,
+    ...QUERY_CONFIG.standard,
   });
 };
 
@@ -181,9 +178,7 @@ export const useCategoryData = (
   return useQuery<CategoryDataPoint[], ApiError>({
     queryKey: queryKeys.dashboard.categoryData(filters),
     queryFn: () => dashboardService.getCategoryData(filters),
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-    retry: 1,
+    ...QUERY_CONFIG.standard,
   });
 };
 
@@ -228,9 +223,7 @@ export const useRecentTransactions = (branchId?: string, limit?: number) => {
         branchId: appliedBranchId,
         limit,
       }),
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-    retry: 1,
+    ...QUERY_CONFIG.standard,
   });
 };
 
@@ -275,9 +268,7 @@ export const useBranchComparison = (dateRange?: { startDate?: string; endDate?: 
   return useQuery<BranchPerformance[], ApiError>({
     queryKey: queryKeys.dashboard.branchComparison(dateRange),
     queryFn: () => dashboardService.getBranchComparison(dateRange),
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-    retry: 1,
+    ...QUERY_CONFIG.standard,
     // Only enable for admins (will get 403 otherwise)
     enabled: isAdmin,
   });

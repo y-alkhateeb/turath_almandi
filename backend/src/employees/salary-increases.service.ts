@@ -11,13 +11,7 @@ import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.
 import { USER_SELECT } from '../common/constants/prisma-includes';
 import { formatDateForDB } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
 
 // Type for salary increase with relations
 type SalaryIncreaseWithRelations = Prisma.SalaryIncreaseGetPayload<{

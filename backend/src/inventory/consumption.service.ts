@@ -10,13 +10,7 @@ import { UserRole, Prisma } from '@prisma/client';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { formatDateForDB, getStartOfDay, getEndOfDay } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
 
 interface DailyConsumptionSummary {
   date: string;

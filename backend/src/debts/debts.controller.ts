@@ -5,14 +5,7 @@ import { PayDebtDto } from './dto/pay-debt.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '@prisma/client';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
 
 @Controller('debts')
 @UseGuards(JwtAuthGuard, BranchAccessGuard)

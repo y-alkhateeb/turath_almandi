@@ -19,3 +19,6 @@ export * from './write-repository.interface';
 // Data operation interfaces
 export * from './exportable.interface';
 export * from './importable.interface';
+
+// User interfaces
+export * from './request-user.interface';

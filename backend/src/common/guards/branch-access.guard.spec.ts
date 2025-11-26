@@ -23,7 +23,7 @@ describe('BranchAccessGuard', () => {
           id: 'admin-id',
           username: 'admin',
           role: 'ADMIN',
-          branch_id: null,
+          branchId: null,
         },
       };
 
@@ -40,7 +40,7 @@ describe('BranchAccessGuard', () => {
           id: 'admin-id',
           username: 'admin',
           role: 'ADMIN',
-          branch_id: 'branch-1',
+          branchId: 'branch-1',
         },
       };
 
@@ -57,7 +57,7 @@ describe('BranchAccessGuard', () => {
           id: 'accountant-id',
           username: 'accountant',
           role: 'ACCOUNTANT',
-          branch_id: 'branch-1',
+          branchId: 'branch-1',
         },
       };
 
@@ -74,7 +74,7 @@ describe('BranchAccessGuard', () => {
           id: 'accountant-id',
           username: 'accountant',
           role: 'ACCOUNTANT',
-          branch_id: null,
+          branchId: null,
         },
       };
 
@@ -86,13 +86,13 @@ describe('BranchAccessGuard', () => {
       );
     });
 
-    it('should throw ForbiddenException for accountant with undefined branch_id', () => {
+    it('should throw ForbiddenException for accountant with undefined branchId', () => {
       const mockRequest = {
         user: {
           id: 'accountant-id',
           username: 'accountant',
           role: 'ACCOUNTANT',
-          branch_id: undefined,
+          branchId: undefined,
         },
       };
 
@@ -126,7 +126,7 @@ describe('BranchAccessGuard', () => {
           id: 'user-id',
           username: 'user',
           role: 'ACCOUNTANT', // Uppercase
-          branch_id: 'branch-1',
+          branchId: 'branch-1',
         },
       };
 
@@ -144,7 +144,7 @@ describe('BranchAccessGuard', () => {
           id: 'user-id',
           username: 'user',
           role: 'MANAGER', // Different role
-          branch_id: null,
+          branchId: null,
         },
       };
 

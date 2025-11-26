@@ -31,13 +31,7 @@ import {
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 // Currency constants removed - currency is now frontend-only
 import { normalizeCategory } from '../common/constants/transaction-categories';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
 
 interface PaginationParams {
   page?: number;

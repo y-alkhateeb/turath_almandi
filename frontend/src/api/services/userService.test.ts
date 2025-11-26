@@ -1,11 +1,11 @@
 /**
  * User Service Tests
- * Tests for user management API service
+ * Tests for user management API service (unified)
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mockApiClient, mockSuccess, mockError, verifyRequest, resetApiClientMocks } from '@/test/apiClientMock';
-import type { User, CreateUserInput, UpdateUserInput } from '#/entity';
+import type { UserWithBranch, CreateUserInput, UpdateUserInput } from '#/entity';
 import type { PaginatedResponse, UserQueryFilters } from '#/api';
 
 // Mock the apiClient module
@@ -18,7 +18,7 @@ import * as userService from './userService';
 import { UserApiEndpoints } from './userService';
 
 describe('userService', () => {
-  const mockUser: User = {
+  const mockUser: UserWithBranch = {
     id: 'user-123',
     username: 'testuser',
     role: 'ACCOUNTANT',
@@ -26,6 +26,16 @@ describe('userService', () => {
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
+    branch: {
+      id: 'branch-123',
+      name: 'Main Branch',
+      location: 'Downtown',
+      managerName: 'John Doe',
+      phone: '123456789',
+      isActive: true,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    },
   };
 
   beforeEach(() => {
@@ -33,7 +43,7 @@ describe('userService', () => {
   });
 
   describe('getAll', () => {
-    const mockPaginatedResponse: PaginatedResponse<User> = {
+    const mockPaginatedResponse: PaginatedResponse<UserWithBranch> = {
       data: [mockUser],
       meta: {
         total: 1,
@@ -51,7 +61,7 @@ describe('userService', () => {
       expect(result).toEqual(mockPaginatedResponse);
       expect(mockApiClient.get).toHaveBeenCalledTimes(1);
       verifyRequest(mockApiClient.get, {
-        url: UserApiEndpoints.GetAll,
+        url: UserApiEndpoints.Base,
         params: undefined,
       });
     });
@@ -70,7 +80,7 @@ describe('userService', () => {
       await userService.getAll(filters);
 
       verifyRequest(mockApiClient.get, {
-        url: UserApiEndpoints.GetAll,
+        url: UserApiEndpoints.Base,
         params: filters,
       });
     });
@@ -92,14 +102,14 @@ describe('userService', () => {
 
       const result = userService.getAll();
 
-      const _typeCheck: Promise<PaginatedResponse<User>> = result;
+      const _typeCheck: Promise<PaginatedResponse<UserWithBranch>> = result;
       expect(_typeCheck).toBeDefined();
     });
   });
 
   describe('getAllUnpaginated', () => {
     it('should extract data array from paginated response', async () => {
-      const mockResponse: PaginatedResponse<User> = {
+      const mockResponse: PaginatedResponse<UserWithBranch> = {
         data: [mockUser],
         meta: {
           total: 1,
@@ -116,7 +126,7 @@ describe('userService', () => {
       expect(result).toEqual([mockUser]);
       expect(mockApiClient.get).toHaveBeenCalledTimes(1);
       verifyRequest(mockApiClient.get, {
-        url: UserApiEndpoints.GetAll,
+        url: UserApiEndpoints.Base,
         params: { limit: 1000 },
       });
     });
@@ -136,7 +146,7 @@ describe('userService', () => {
 
       const result = userService.getAllUnpaginated();
 
-      const _typeCheck: Promise<User[]> = result;
+      const _typeCheck: Promise<UserWithBranch[]> = result;
       expect(_typeCheck).toBeDefined();
     });
   });
@@ -154,6 +164,21 @@ describe('userService', () => {
       });
     });
 
+    it('should get user without branch', async () => {
+      const userWithoutBranch: UserWithBranch = {
+        ...mockUser,
+        branchId: undefined,
+        branch: undefined,
+      };
+
+      mockApiClient.get.mockReturnValue(mockSuccess(userWithoutBranch));
+
+      const result = await userService.getOne('user-456');
+
+      expect(result).toEqual(userWithoutBranch);
+      expect(result.branch).toBeUndefined();
+    });
+
     it('should handle 404 error', async () => {
       mockApiClient.get.mockReturnValue(mockError(404, 'User not found'));
 
@@ -165,7 +190,7 @@ describe('userService', () => {
 
       const result = userService.getOne('user-123');
 
-      const _typeCheck: Promise<User> = result;
+      const _typeCheck: Promise<UserWithBranch> = result;
       expect(_typeCheck).toBeDefined();
     });
   });
@@ -186,7 +211,7 @@ describe('userService', () => {
       expect(result).toEqual(mockUser);
       expect(mockApiClient.post).toHaveBeenCalledTimes(1);
       verifyRequest(mockApiClient.post, {
-        url: UserApiEndpoints.Create,
+        url: UserApiEndpoints.Base,
         data: createData,
       });
     });
@@ -198,14 +223,20 @@ describe('userService', () => {
         role: 'ADMIN',
       };
 
-      const adminUser = { ...mockUser, role: 'ADMIN' as const, branchId: undefined };
+      const adminUser: UserWithBranch = {
+        ...mockUser,
+        username: 'admin',
+        role: 'ADMIN',
+        branchId: undefined,
+        branch: undefined,
+      };
       mockApiClient.post.mockReturnValue(mockSuccess(adminUser));
 
       const result = await userService.create(adminData);
 
       expect(result.role).toBe('ADMIN');
       verifyRequest(mockApiClient.post, {
-        url: UserApiEndpoints.Create,
+        url: UserApiEndpoints.Base,
         data: adminData,
       });
     });
@@ -227,7 +258,7 @@ describe('userService', () => {
 
       const result = userService.create(createData);
 
-      const _typeCheck: Promise<User> = result;
+      const _typeCheck: Promise<UserWithBranch> = result;
       expect(_typeCheck).toBeDefined();
     });
   });
@@ -288,7 +319,7 @@ describe('userService', () => {
 
       const result = userService.update('user-123', updateData);
 
-      const _typeCheck: Promise<User> = result;
+      const _typeCheck: Promise<UserWithBranch> = result;
       expect(_typeCheck).toBeDefined();
     });
   });
@@ -328,7 +359,7 @@ describe('userService', () => {
   });
 
   describe('assignBranch', () => {
-    it('should assign branch to user', async () => {
+    it('should assign branch to user using dedicated endpoint', async () => {
       const updatedUser = { ...mockUser, branchId: 'new-branch' };
       mockApiClient.patch.mockReturnValue(mockSuccess(updatedUser));
 
@@ -336,7 +367,7 @@ describe('userService', () => {
 
       expect(result).toEqual(updatedUser);
       verifyRequest(mockApiClient.patch, {
-        url: '/users/user-123',
+        url: '/users/user-123/assign-branch',
         data: { branchId: 'new-branch' },
       });
     });
@@ -348,9 +379,21 @@ describe('userService', () => {
       await userService.assignBranch('user-123', null);
 
       verifyRequest(mockApiClient.patch, {
-        url: '/users/user-123',
+        url: '/users/user-123/assign-branch',
         data: { branchId: null },
       });
+    });
+
+    it('should handle 404 error for user not found', async () => {
+      mockApiClient.patch.mockReturnValue(mockError(404, 'User not found'));
+
+      await expect(userService.assignBranch('nonexistent', 'branch-123')).rejects.toThrow('User not found');
+    });
+
+    it('should handle 404 error for branch not found', async () => {
+      mockApiClient.patch.mockReturnValue(mockError(404, 'Branch not found'));
+
+      await expect(userService.assignBranch('user-123', 'nonexistent')).rejects.toThrow('Branch not found');
     });
 
     it('should have correct TypeScript types', () => {
@@ -358,7 +401,7 @@ describe('userService', () => {
 
       const result = userService.assignBranch('user-123', 'branch-123');
 
-      const _typeCheck: Promise<User> = result;
+      const _typeCheck: Promise<UserWithBranch> = result;
       expect(_typeCheck).toBeDefined();
     });
   });
@@ -395,18 +438,16 @@ describe('userService', () => {
 
       const result = userService.setActiveStatus('user-123', true);
 
-      const _typeCheck: Promise<User> = result;
+      const _typeCheck: Promise<UserWithBranch> = result;
       expect(_typeCheck).toBeDefined();
     });
   });
 
   describe('UserApiEndpoints', () => {
     it('should have correct endpoint values', () => {
-      expect(UserApiEndpoints.GetAll).toBe('/users');
-      expect(UserApiEndpoints.GetOne).toBe('/users/:id');
-      expect(UserApiEndpoints.Create).toBe('/users');
-      expect(UserApiEndpoints.Update).toBe('/users/:id');
-      expect(UserApiEndpoints.Delete).toBe('/users/:id');
+      expect(UserApiEndpoints.Base).toBe('/users');
+      expect(UserApiEndpoints.ById).toBe('/users/:id');
+      expect(UserApiEndpoints.AssignBranch).toBe('/users/:id/assign-branch');
     });
   });
 

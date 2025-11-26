@@ -8,13 +8,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { BranchGuard } from '../common/guards/branch.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
 
 @Controller('branches')
 @UseGuards(JwtAuthGuard)

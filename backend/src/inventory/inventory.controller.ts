@@ -5,14 +5,9 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole, InventoryUnit } from '@prisma/client';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
+import { parsePagination } from '../common/utils/pagination.util';
+import { InventoryUnit } from '@prisma/client';
 
 @Controller('inventory')
 @UseGuards(JwtAuthGuard, BranchAccessGuard)
@@ -33,10 +28,7 @@ export class InventoryController {
     @Query('unit') unit?: InventoryUnit,
     @Query('search') search?: string,
   ) {
-    const pagination = {
-      page: page ? parseInt(page, 10) : 1,
-      limit: limit ? parseInt(limit, 10) : 20,
-    };
+    const pagination = parsePagination(page, limit);
 
     const filters = {
       branchId,

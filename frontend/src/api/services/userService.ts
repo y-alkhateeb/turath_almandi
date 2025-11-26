@@ -1,19 +1,20 @@
 /**
- * User Service
- * User CRUD operations (Admin only)
+ * User Service - Unified
+ * All user CRUD operations (Admin only)
  *
  * Endpoints:
- * - GET /users → PaginatedResponse<User>
- * - GET /users/:id → User
- * - POST /users → User (CreateUserDto)
- * - PATCH /users/:id → User (UpdateUserDto)
+ * - GET /users → PaginatedResponse<UserWithBranch>
+ * - GET /users/:id → UserWithBranch
+ * - POST /users → UserWithBranch (CreateUserDto)
+ * - PATCH /users/:id → UserWithBranch (UpdateUserDto)
+ * - PATCH /users/:id/assign-branch → UserWithBranch
  * - DELETE /users/:id → void
  *
  * All types match backend DTOs exactly. No any types.
  */
 
 import apiClient from '../apiClient';
-import type { User, CreateUserInput, UpdateUserInput } from '#/entity';
+import type { UserWithBranch, CreateUserInput, UpdateUserInput } from '#/entity';
 import type { PaginatedResponse, UserQueryFilters } from '#/api';
 
 // ============================================
@@ -27,6 +28,7 @@ import type { PaginatedResponse, UserQueryFilters } from '#/api';
 export enum UserApiEndpoints {
   Base = '/users',
   ById = '/users/:id',
+  AssignBranch = '/users/:id/assign-branch',
 }
 
 // ============================================
@@ -38,11 +40,11 @@ export enum UserApiEndpoints {
  * GET /users
  *
  * @param filters - Optional query filters (role, branchId, isActive, page, limit)
- * @returns PaginatedResponse<User> with users and pagination meta
+ * @returns PaginatedResponse<UserWithBranch> with users and pagination meta
  * @throws ApiError on 401 (not authenticated), 403 (not admin)
  */
-export const getAll = (filters?: UserQueryFilters): Promise<PaginatedResponse<User>> => {
-  return apiClient.get<PaginatedResponse<User>>({
+export const getAll = (filters?: UserQueryFilters): Promise<PaginatedResponse<UserWithBranch>> => {
+  return apiClient.get<PaginatedResponse<UserWithBranch>>({
     url: UserApiEndpoints.Base,
     params: filters,
   });
@@ -52,22 +54,22 @@ export const getAll = (filters?: UserQueryFilters): Promise<PaginatedResponse<Us
  * Get all users without pagination (for dropdowns, etc.)
  * GET /users?limit=1000
  *
- * @returns User[] array
+ * @returns UserWithBranch[] array
  * @throws ApiError on 401 (not authenticated), 403 (not admin)
  */
-export const getAllUnpaginated = (): Promise<User[]> => {
+export const getAllUnpaginated = (): Promise<UserWithBranch[]> => {
   return apiClient
-    .get<User[]>({
+    .get<UserWithBranch[] | PaginatedResponse<UserWithBranch>>({
       url: UserApiEndpoints.Base,
       params: { limit: 1000 },
     })
     .then((response) => {
       // If backend returns paginated response, extract data array
-      if (response && typeof response === 'object' && 'data' in response) {
-        return (response as PaginatedResponse<User>).data;
+      if (response && typeof response === 'object' && 'data' in response && Array.isArray(response.data)) {
+        return response.data;
       }
       // Otherwise assume it's already an array
-      return response as User[];
+      return response as UserWithBranch[];
     });
 };
 
@@ -76,11 +78,11 @@ export const getAllUnpaginated = (): Promise<User[]> => {
  * GET /users/:id
  *
  * @param id - User UUID
- * @returns User with optional branch relation
+ * @returns UserWithBranch with optional branch relation
  * @throws ApiError on 401 (not authenticated), 403 (not admin), 404 (user not found)
  */
-export const getOne = (id: string): Promise<User> => {
-  return apiClient.get<User>({
+export const getOne = (id: string): Promise<UserWithBranch> => {
+  return apiClient.get<UserWithBranch>({
     url: `/users/${id}`,
   });
 };
@@ -96,11 +98,11 @@ export const getOne = (id: string): Promise<User> => {
  * - branchId: optional UUID, required for ACCOUNTANT role
  *
  * @param data - CreateUserInput (username, password, role, branchId?)
- * @returns Created User
+ * @returns Created UserWithBranch
  * @throws ApiError on 400 (validation error), 401, 403, 409 (username exists)
  */
-export const create = (data: CreateUserInput): Promise<User> => {
-  return apiClient.post<User>({
+export const create = (data: CreateUserInput): Promise<UserWithBranch> => {
+  return apiClient.post<UserWithBranch>({
     url: UserApiEndpoints.Base,
     data,
   });
@@ -118,11 +120,11 @@ export const create = (data: CreateUserInput): Promise<User> => {
  *
  * @param id - User UUID
  * @param data - UpdateUserInput (password?, role?, branchId?, isActive?)
- * @returns Updated User
+ * @returns Updated UserWithBranch
  * @throws ApiError on 400 (validation error), 401, 403, 404 (user not found)
  */
-export const update = (id: string, data: UpdateUserInput): Promise<User> => {
-  return apiClient.patch<User>({
+export const update = (id: string, data: UpdateUserInput): Promise<UserWithBranch> => {
+  return apiClient.patch<UserWithBranch>({
     url: `/users/${id}`,
     data,
   });
@@ -146,18 +148,21 @@ export const deleteUser = (id: string): Promise<void> => {
 };
 
 /**
- * Assign user to branch
- * PATCH /users/:id
+ * Assign user to branch (dedicated endpoint)
+ * PATCH /users/:id/assign-branch
  *
- * Helper method to update only branchId
+ * Uses dedicated endpoint for branch assignment
  *
  * @param userId - User UUID
  * @param branchId - Branch UUID or null to unassign
- * @returns Updated User
+ * @returns Updated UserWithBranch
  * @throws ApiError on 400, 401, 403, 404
  */
-export const assignBranch = (userId: string, branchId: string | null): Promise<User> => {
-  return update(userId, { branchId });
+export const assignBranch = (userId: string, branchId: string | null): Promise<UserWithBranch> => {
+  return apiClient.patch<UserWithBranch>({
+    url: `/users/${userId}/assign-branch`,
+    data: { branchId },
+  });
 };
 
 /**
@@ -168,10 +173,10 @@ export const assignBranch = (userId: string, branchId: string | null): Promise<U
  *
  * @param userId - User UUID
  * @param isActive - Active status
- * @returns Updated User
+ * @returns Updated UserWithBranch
  * @throws ApiError on 400, 401, 403, 404
  */
-export const setActiveStatus = (userId: string, isActive: boolean): Promise<User> => {
+export const setActiveStatus = (userId: string, isActive: boolean): Promise<UserWithBranch> => {
   return update(userId, { isActive });
 };
 

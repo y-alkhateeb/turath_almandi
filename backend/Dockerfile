@@ -30,18 +30,35 @@ ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1 \
     PRISMA_HIDE_UPDATE_MESSAGE=1 \
     PRISMA_TELEMETRY_DISABLED=1
 
-# Generate with retry logic (3 attempts with 5 second delay)
-RUN for i in 1 2 3; do \
+# Generate with retry logic (5 attempts with exponential backoff)
+RUN set -e; \
+    for i in 1 2 3 4 5; do \
       echo "Attempt $i: Generating Prisma Client..."; \
-      npx prisma generate && break || \
-      if [ $i -lt 3 ]; then \
-        echo "Generation failed, retrying in 5 seconds..."; \
-        sleep 5; \
+      if npx prisma generate; then \
+        echo "Prisma Client generated successfully"; \
+        break; \
       else \
-        echo "All attempts failed"; \
-        exit 1; \
+        if [ $i -lt 5 ]; then \
+          DELAY=$((i * 5)); \
+          echo "Generation failed, retrying in ${DELAY} seconds..."; \
+          sleep ${DELAY}; \
+        else \
+          echo "All attempts failed"; \
+          exit 1; \
+        fi; \
       fi; \
-    done
+    done && \
+    # Verify Prisma client was generated correctly
+    echo "Verifying Prisma Client generation..." && \
+    if [ ! -d "node_modules/.prisma/client" ]; then \
+      echo "ERROR: Prisma client directory not found!"; \
+      exit 1; \
+    fi && \
+    if [ ! -f "node_modules/.prisma/client/index.js" ]; then \
+      echo "ERROR: Prisma client index.js not found!"; \
+      exit 1; \
+    fi && \
+    echo "Prisma Client verification passed"
 
 # Copy application source
 COPY . .

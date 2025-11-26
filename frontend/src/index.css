@@ -78,17 +78,17 @@
   --color-accent-800: #8c7145;
   --color-accent-900: #6f5a38;
 
-  /* === LEGACY BRAND (for backward compatibility) === */
-  --color-brand-50: #faf7f0;
-  --color-brand-100: #f0e9d8;
-  --color-brand-200: #e5d9bf;
-  --color-brand-300: #d4af77;
-  --color-brand-400: #caa87a;
-  --color-brand-500: #c5a572;
-  --color-brand-600: #b39461;
-  --color-brand-700: #9d7f4f;
-  --color-brand-800: #876a42;
-  --color-brand-900: #6f5635;
+  /* === LEGACY BRAND (Orange) === */
+  --color-brand-50: #fef7f0;
+  --color-brand-100: #fde6cf;
+  --color-brand-200: #fbd4a8;
+  --color-brand-300: #f8a35d;
+  --color-brand-400: #f58b3a;
+  --color-brand-500: #e47020;
+  --color-brand-600: #c45515;
+  --color-brand-700: #a34412;
+  --color-brand-800: #833610;
+  --color-brand-900: #662e0e;
 
   /* === SUCCESS COLORS === */
   --color-success-50: #f0fdf4;

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { TransactionFormWithInventory } from '@/components/transactions/TransactionFormWithInventory';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { PageLayout } from '@/components/layouts';
 import type { Transaction } from '#/entity';
@@ -34,7 +34,7 @@ export const CreateIncomePage = () => {
       }
     >
       {/* Form Card */}
-      <Card padding="lg">
+      <Card className="p-8">
         <TransactionFormWithInventory
           onSuccess={handleSuccess}
           onCancel={handleCancel}

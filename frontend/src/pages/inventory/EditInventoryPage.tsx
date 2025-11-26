@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { InventoryForm } from '@/components/InventoryForm';
 import { useInventory } from '@/hooks/useInventory';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
@@ -57,7 +57,7 @@ export const EditInventoryPage = () => {
       }
     >
       {/* Form Card */}
-      <Card padding="lg">
+      <Card className="p-8">
         <InventoryForm item={item} onSuccess={handleSuccess} onCancel={handleCancel} />
       </Card>
     </PageLayout>

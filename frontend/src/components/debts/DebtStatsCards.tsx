@@ -13,6 +13,7 @@
 
 import { DollarSign, AlertCircle, Clock, CheckCircle, TrendingDown } from 'lucide-react';
 import { StatCard } from '@/components/ui/StatCard';
+import { StatCardSkeleton } from '@/components/skeletons';
 import { formatCurrency } from '@/utils/format';
 
 // ============================================
@@ -31,25 +32,6 @@ export interface DebtSummary {
 export interface DebtStatsCardsProps {
   summary: DebtSummary;
   isLoading: boolean;
-}
-
-// ============================================
-// LOADING SKELETON
-// ============================================
-
-function StatCardSkeleton() {
-  return (
-    <div className="card p-6 animate-pulse">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <div className="h-4 w-24 bg-[var(--bg-tertiary)] rounded mb-3" />
-          <div className="h-8 w-32 bg-[var(--bg-tertiary)] rounded mb-2" />
-          <div className="h-4 w-16 bg-[var(--bg-tertiary)] rounded" />
-        </div>
-        <div className="w-14 h-14 rounded-xl bg-[var(--bg-tertiary)]" />
-      </div>
-    </div>
-  );
 }
 
 // ============================================

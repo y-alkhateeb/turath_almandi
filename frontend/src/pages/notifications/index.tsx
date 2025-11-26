@@ -226,7 +226,7 @@ export default function NotificationsPage() {
       onRetry={handleRetry}
     >
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4" dir="rtl">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6" dir="rtl">
         <StatCard
           title="الكل"
           value={total}

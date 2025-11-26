@@ -143,7 +143,7 @@ export function Breadcrumb({ className, items: customItems }: BreadcrumbProps) {
             {/* Separator (RTL: show before item except first) */}
             {index > 0 && (
               <ChevronLeft
-                className="w-4 h-4 text-gray-400 dark:text-gray-500 rotate-180"
+                className="w-4 h-4 text-[var(--text-secondary)] rotate-180"
                 aria-hidden="true"
               />
             )}
@@ -151,7 +151,7 @@ export function Breadcrumb({ className, items: customItems }: BreadcrumbProps) {
             {/* Breadcrumb item */}
             {item.isLast ? (
               // Current page - not clickable
-              <span className="font-medium text-gray-900 dark:text-gray-100" aria-current="page">
+              <span className="font-medium text-[var(--text-primary)]" aria-current="page">
                 {item.label}
               </span>
             ) : (
@@ -160,8 +160,7 @@ export function Breadcrumb({ className, items: customItems }: BreadcrumbProps) {
                 to={item.path}
                 className={cn(
                   'font-medium transition-colors',
-                  'text-gray-600 hover:text-gray-900',
-                  'dark:text-gray-400 dark:hover:text-gray-100',
+                  'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
                   // First item (home) styling
                   index === 0 && 'flex items-center gap-1'
                 )}

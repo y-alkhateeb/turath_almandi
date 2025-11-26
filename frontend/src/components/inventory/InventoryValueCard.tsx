@@ -12,6 +12,7 @@
 
 import { Package } from 'lucide-react';
 import { StatCard } from '@/components/ui/StatCard';
+import { StatCardSkeleton } from '@/components/skeletons';
 import { formatCurrency, formatNumber } from '@/utils/format';
 
 // ============================================
@@ -25,25 +26,6 @@ export interface InventoryValueCardProps {
 }
 
 // ============================================
-// LOADING SKELETON
-// ============================================
-
-function InventoryValueCardSkeleton() {
-  return (
-    <div className="card p-6 animate-pulse">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <div className="h-4 w-32 bg-[var(--bg-tertiary)] rounded mb-3" />
-          <div className="h-10 w-48 bg-[var(--bg-tertiary)] rounded mb-2" />
-          <div className="h-4 w-24 bg-[var(--bg-tertiary)] rounded" />
-        </div>
-        <div className="w-14 h-14 rounded-xl bg-[var(--bg-tertiary)]" />
-      </div>
-    </div>
-  );
-}
-
-// ============================================
 // COMPONENT
 // ============================================
 
@@ -51,7 +33,7 @@ export function InventoryValueCard({ totalValue, itemCount, isLoading }: Invento
   if (isLoading) {
     return (
       <div dir="rtl">
-        <InventoryValueCardSkeleton />
+        <StatCardSkeleton />
       </div>
     );
   }

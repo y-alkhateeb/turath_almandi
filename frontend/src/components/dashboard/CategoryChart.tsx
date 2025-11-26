@@ -1,5 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { CategoryDataPoint } from '@/types/dashboard';
 import { formatCurrency } from '@/lib/utils/formatCurrency';
 import { formatPercentage } from '@/lib/utils';

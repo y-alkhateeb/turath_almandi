@@ -29,7 +29,7 @@ import { DebtPaymentHistory } from '@/components/debts/DebtPaymentHistory';
 import { ErrorState } from '@/components/common/ErrorState';
 import { formatDate } from '@/utils/format';
 import { DebtStatus, Currency } from '@/types/enum';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/ui/button';
 import { CurrencyAmountCompact } from '@/components/currency';
@@ -250,7 +250,7 @@ export default function ViewDebtPage() {
         </div>
 
         {/* Not Found Message */}
-        <Card padding="lg">
+        <Card className="p-8">
           <div className="text-center">
             <p className="text-[var(--text-secondary)] mb-4">
               لم يتم العثور على الدين المطلوب. قد يكون محذوفاً أو غير موجود.
@@ -314,7 +314,7 @@ export default function ViewDebtPage() {
       </div>
 
       {/* Debt Details Card */}
-      <Card padding="lg" dir="rtl">
+      <Card className="p-8" dir="rtl">
         <div className="flex items-start justify-between mb-6">
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">معلومات الدين</h2>
 
@@ -450,7 +450,7 @@ export default function ViewDebtPage() {
       </Card>
 
       {/* Payment History */}
-      <Card padding="lg" dir="rtl">
+      <Card className="p-8" dir="rtl">
         <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-4">سجل الدفعات</h2>
         <DebtPaymentHistory payments={debt.payments || []} isLoading={false} />
       </Card>

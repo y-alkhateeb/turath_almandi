@@ -229,10 +229,16 @@ export class SalaryPaymentsService {
       result.id,
       {
         ...result,
-        advanceDeductions: advanceDeductionsInfo,
+        advanceDeductions: advanceDeductionsInfo.map(d => ({
+          advanceId: d.advanceId,
+          deductionAmount: d.deductionAmount,
+          previousRemaining: d.previousRemaining,
+          newRemaining: d.newRemaining,
+          status: d.status,
+        })),
         totalMonthlyDeduction,
         netSalaryPaid,
-      },
+      } as unknown as Record<string, unknown>,
     );
 
     return {

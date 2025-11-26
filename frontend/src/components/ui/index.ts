@@ -1,14 +1,5 @@
 // UI components barrel export
-
-// Card components
-export { Card, CardHeader, CardTitle, CardContent, CardFooter } from './Card';
-export type {
-  CardProps,
-  CardHeaderProps,
-  CardTitleProps,
-  CardContentProps,
-  CardFooterProps,
-} from './Card';
+// Note: Card components are now exported from @/ui/card
 
 // StatCard component
 export { StatCard } from './StatCard';

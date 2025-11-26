@@ -32,7 +32,7 @@ import { AdvanceDialog } from '@/components/employees/AdvanceDialog';
 import { AdvancesList } from '@/components/employees/AdvancesList';
 import { PageLoading } from '@/components/loading';
 import { PageLayout } from '@/components/layouts';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
 import { Table, ConfirmModal } from '@/components/ui';
@@ -377,7 +377,7 @@ export const EmployeeDetailsPage = () => {
       }
     >
       {/* Employee Info Card */}
-      <Card padding="lg" className="mb-6">
+      <Card className="p-8 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Name & Status */}
           <div>
@@ -538,7 +538,7 @@ export const EmployeeDetailsPage = () => {
 
       {/* Tab Content */}
       {activeTab === 'payments' && (
-        <Card padding="lg">
+        <Card className="p-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">دفعات الرواتب</h3>
             {employee.status === EmployeeStatus.ACTIVE && (
@@ -559,7 +559,7 @@ export const EmployeeDetailsPage = () => {
       )}
 
       {activeTab === 'increases' && (
-        <Card padding="lg">
+        <Card className="p-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">سجل الزيادات</h3>
             {employee.status === EmployeeStatus.ACTIVE && (
@@ -580,7 +580,7 @@ export const EmployeeDetailsPage = () => {
       )}
 
       {activeTab === 'bonuses' && (
-        <Card padding="lg">
+        <Card className="p-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">سجل المكافآت</h3>
             {employee.status === EmployeeStatus.ACTIVE && (
@@ -601,7 +601,7 @@ export const EmployeeDetailsPage = () => {
       )}
 
       {activeTab === 'advances' && (
-        <Card padding="lg">
+        <Card className="p-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">سجل السلف</h3>
             {employee.status === EmployeeStatus.ACTIVE && (

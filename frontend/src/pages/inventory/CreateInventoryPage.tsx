@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { InventoryForm } from '@/components/InventoryForm';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { PageLayout } from '@/components/layouts';
 
@@ -32,7 +32,7 @@ export const CreateInventoryPage = () => {
       }
     >
       {/* Form Card */}
-      <Card padding="lg">
+      <Card className="p-8">
         <InventoryForm onSuccess={handleSuccess} onCancel={handleCancel} />
       </Card>
     </PageLayout>

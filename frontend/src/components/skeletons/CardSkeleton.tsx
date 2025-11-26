@@ -24,7 +24,7 @@ export interface CardSkeletonProps {
 // STAT CARD SKELETON
 // ============================================
 
-function StatCardSkeleton() {
+export function StatCardSkeleton() {
   return (
     <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-6">
       <div className="flex justify-between items-start">

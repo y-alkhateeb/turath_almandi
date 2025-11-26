@@ -6,7 +6,7 @@
 export { TableSkeleton } from './TableSkeleton';
 export type { TableSkeletonProps } from './TableSkeleton';
 
-export { CardSkeleton } from './CardSkeleton';
+export { CardSkeleton, StatCardSkeleton } from './CardSkeleton';
 export type { CardSkeletonProps } from './CardSkeleton';
 
 export { ChartSkeleton } from './ChartSkeleton';

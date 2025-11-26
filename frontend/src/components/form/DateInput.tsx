@@ -94,12 +94,16 @@ export function DateInput<T extends FieldValues = any>(props: DateInputProps<T>)
           max={max}
           defaultValue={defaultValue}
           className={`
-            w-full px-4 py-2 border rounded-lg
-            bg-[var(--bg-primary)] text-[var(--text-primary)]
-            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+            w-full px-4 py-3 border rounded-lg
+            bg-[var(--bg-secondary)] text-[var(--text-primary)]
+            focus:ring-2 focus:ring-primary-500 focus:border-primary-500
             disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed disabled:opacity-50
             transition-colors
             [color-scheme:light] dark:[color-scheme:dark]
+            [&::-webkit-calendar-picker-indicator]:cursor-pointer
+            [&::-webkit-calendar-picker-indicator]:opacity-100
+            dark:[&::-webkit-calendar-picker-indicator]:invert
+            dark:[&::-webkit-calendar-picker-indicator]:brightness-200
             ${error ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'}
           `}
           dir="ltr"
@@ -151,12 +155,16 @@ export function DateInput<T extends FieldValues = any>(props: DateInputProps<T>)
         max={max}
         placeholder={placeholder}
         className={`
-          w-full px-4 py-2 border rounded-lg
-          bg-[var(--bg-primary)] text-[var(--text-primary)]
-          focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+          w-full px-4 py-3 border rounded-lg
+          bg-[var(--bg-secondary)] text-[var(--text-primary)]
+          focus:ring-2 focus:ring-primary-500 focus:border-primary-500
           disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed disabled:opacity-50
           transition-colors
           [color-scheme:light] dark:[color-scheme:dark]
+          [&::-webkit-calendar-picker-indicator]:cursor-pointer
+          [&::-webkit-calendar-picker-indicator]:opacity-100
+          dark:[&::-webkit-calendar-picker-indicator]:invert
+          dark:[&::-webkit-calendar-picker-indicator]:brightness-200
           ${error ? 'border-red-500 focus:ring-red-500' : 'border-[var(--border-color)]'}
         `}
         dir="ltr"

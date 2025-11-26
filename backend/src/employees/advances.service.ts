@@ -272,12 +272,17 @@ export class AdvancesService {
    * إلغاء سلفة
    */
   async cancelAdvance(advanceId: string, user: RequestUser) {
+    const advanceInclude = {
+      employee: true,
+      deductions: true,
+      recorder: {
+        select: USER_SELECT,
+      },
+    } as const;
+
     const advance = await this.prisma.employeeAdvance.findUnique({
       where: { id: advanceId, deletedAt: null },
-      include: {
-        employee: true,
-        deductions: true,
-      },
+      include: advanceInclude,
     });
 
     if (!advance) {
@@ -301,17 +306,7 @@ export class AdvancesService {
       data: {
         status: AdvanceStatus.CANCELLED,
       },
-      include: {
-        employee: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        recorder: {
-          select: USER_SELECT,
-        },
-      },
+      include: advanceInclude,
     });
 
     await this.auditLogService.logUpdate(

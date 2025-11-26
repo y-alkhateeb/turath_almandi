@@ -152,7 +152,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           id="name"
           type="text"
           {...register('name')}
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
             errors.name ? 'border-red-500' : 'border-[var(--border-color)]'
           }`}
           placeholder="مثال: طحين، سكر، زيت"
@@ -175,7 +175,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
             type="number"
             step="0.001"
             {...register('quantity')}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
               errors.quantity ? 'border-red-500' : 'border-[var(--border-color)]'
             }`}
             placeholder="0"
@@ -196,7 +196,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           <select
             id="unit"
             {...register('unit')}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
               errors.unit ? 'border-red-500' : 'border-[var(--border-color)]'
             }`}
           >
@@ -223,7 +223,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           type="number"
           step="0.01"
           {...register('costPerUnit')}
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
             errors.costPerUnit ? 'border-red-500' : 'border-[var(--border-color)]'
           }`}
           placeholder="0.00"
@@ -244,30 +244,30 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         <textarea
           id="notes"
           {...register('notes')}
-          rows={3}
-          className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={4}
+          className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
           placeholder="ملاحظات إضافية (اختياري)"
         />
       </div>
 
       {/* Form Actions */}
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? 'جاري الحفظ...' : isEditMode ? 'تحديث الصنف' : 'إضافة الصنف'}
+        </button>
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+            className="flex-1 bg-[var(--bg-secondary)] text-[var(--text-primary)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--bg-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             إلغاء
           </button>
         )}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {isSubmitting ? 'جاري الحفظ...' : isEditMode ? 'تحديث' : 'إضافة'}
-        </button>
       </div>
     </form>
   );

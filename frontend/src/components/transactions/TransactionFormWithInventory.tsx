@@ -270,13 +270,13 @@ export function TransactionFormWithInventory({
       {/* Transaction Type and Branch */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             نوع العملية <span className="text-red-500">*</span>
           </label>
           <select
             {...register('type')}
             disabled={createTransaction.isPending}
-            className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+            className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-[var(--bg-primary)] text-[var(--text-primary)] disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
           >
             <option value="EXPENSE">مصروف</option>
             <option value="INCOME">إيراد</option>
@@ -297,10 +297,10 @@ export function TransactionFormWithInventory({
           />
         ) : user?.branch ? (
           <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
               الفرع
             </label>
-            <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
+            <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
               {user.branch.name}
             </div>
           </div>
@@ -310,13 +310,13 @@ export function TransactionFormWithInventory({
       {/* Category and Date */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             الفئة <span className="text-red-500">*</span>
           </label>
           <select
             {...register('category')}
             disabled={createTransaction.isPending}
-            className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+            className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-[var(--bg-primary)] text-[var(--text-primary)] disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
           >
             {categoryOptions.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -356,7 +356,7 @@ export function TransactionFormWithInventory({
       {/* Manual Amount (Non-Inventory) */}
       {!isInventoryCategory && (
         <div>
-          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
             المبلغ <span className="text-red-500">*</span>
           </label>
           <input
@@ -367,7 +367,7 @@ export function TransactionFormWithInventory({
             step="0.01"
             placeholder="أدخل المبلغ"
             disabled={createTransaction.isPending}
-            className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+            className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-[var(--bg-primary)] text-[var(--text-primary)] disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
           />
         </div>
       )}
@@ -393,37 +393,37 @@ export function TransactionFormWithInventory({
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
           ملاحظات
         </label>
         <textarea
           {...register('notes')}
-          rows={3}
+          rows={4}
           placeholder="أدخل ملاحظات إضافية (اختياري)"
           disabled={createTransaction.isPending}
-          className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-brand-500 bg-[var(--bg-primary)] text-[var(--text-primary)] resize-none"
+          className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-[var(--bg-primary)] text-[var(--text-primary)] resize-none disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
         />
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          disabled={createTransaction.isPending || totalAmount <= 0}
+          className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {createTransaction.isPending ? 'جاري الحفظ...' : 'حفظ المعاملة'}
+        </button>
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
             disabled={createTransaction.isPending}
-            className="px-6 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-tertiary)] disabled:opacity-50"
+            className="flex-1 bg-[var(--bg-secondary)] text-[var(--text-primary)] px-6 py-3 rounded-lg font-medium hover:bg-[var(--bg-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             إلغاء
           </button>
         )}
-        <button
-          type="submit"
-          disabled={createTransaction.isPending || totalAmount <= 0}
-          className="px-6 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {createTransaction.isPending ? 'جاري الحفظ...' : 'حفظ المعاملة'}
-        </button>
       </div>
     </form>
   );

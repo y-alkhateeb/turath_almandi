@@ -10,13 +10,7 @@ import {
   getStartOfMonth,
   getEndOfMonth,
 } from '../common/utils/date.utils';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
 
 interface DateRangeFilter {
   startDate?: string;

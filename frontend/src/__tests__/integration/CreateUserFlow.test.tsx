@@ -21,11 +21,11 @@ import {
   createMockUser,
   createMockBranch,
 } from '@/test/integrationTestUtils';
-import * as userManagementService from '@/api/services/userManagementService';
+import * as userService from '@/api/services/userService';
 import * as branchService from '@/api/services/branchService';
 
 // Mock services
-vi.mock('@/api/services/userManagementService');
+vi.mock('@/api/services/userService');
 vi.mock('@/api/services/branchService');
 
 // Mock useAuth hook - Admin only
@@ -61,15 +61,17 @@ describe('Integration: Create User Flow (Admin)', () => {
       branchId: 'branch-1',
     });
 
-    vi.mocked(userManagementService.createUser).mockResolvedValue(mockNewUser);
+    vi.mocked(userService.create).mockResolvedValue(mockNewUser);
 
     // Mock users list
-    vi.mocked(userManagementService.getUsers).mockResolvedValue({
-      users: [mockNewUser],
-      total: 1,
-      page: 1,
-      limit: 10,
-      totalPages: 1,
+    vi.mocked(userService.getAll).mockResolvedValue({
+      data: [mockNewUser],
+      meta: {
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+      },
     });
 
     // Simple users management page
@@ -79,14 +81,14 @@ describe('Integration: Create User Flow (Admin)', () => {
       const [message, setMessage] = React.useState('');
 
       React.useEffect(() => {
-        userManagementService.getUsers().then((result) => {
-          setUsers(result.users);
+        userService.getAll().then((result) => {
+          setUsers(result.data);
         });
       }, []);
 
       const handleCreate = async (data: any) => {
         try {
-          const newUser = await userManagementService.createUser(data);
+          const newUser = await userService.create(data);
           setUsers([newUser, ...users]);
           setMessage('تم إضافة المستخدم بنجاح');
           setShowForm(false);
@@ -251,7 +253,7 @@ describe('Integration: Create User Flow (Admin)', () => {
 
     // Step 10: Verify API was called with correct data
     await waitFor(() => {
-      expect(userManagementService.createUser).toHaveBeenCalledWith({
+      expect(userService.create).toHaveBeenCalledWith({
         username: 'newaccountant',
         email: 'accountant@example.com',
         password: 'SecurePass123!',
@@ -344,7 +346,7 @@ describe('Integration: Create User Flow (Admin)', () => {
       expect(screen.getByText(/كلمة المرور مطلوبة/i)).toBeInTheDocument();
     });
 
-    expect(userManagementService.createUser).not.toHaveBeenCalled();
+    expect(userService.create).not.toHaveBeenCalled();
   });
 
   it('should validate password strength', async () => {
@@ -395,7 +397,7 @@ describe('Integration: Create User Flow (Admin)', () => {
     const user = userEvent.setup();
 
     // Mock API error for duplicate username
-    vi.mocked(userManagementService.createUser).mockRejectedValue({
+    vi.mocked(userService.create).mockRejectedValue({
       statusCode: 409,
       message: 'اسم المستخدم موجود بالفعل',
     });
@@ -408,7 +410,7 @@ describe('Integration: Create User Flow (Admin)', () => {
         e.preventDefault();
         setError('');
         try {
-          await userManagementService.createUser({
+          await userService.create({
             username,
             email: 'test@example.com',
             password: 'password123',

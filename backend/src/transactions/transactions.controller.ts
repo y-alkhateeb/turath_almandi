@@ -7,14 +7,9 @@ import { CreateTransactionWithInventoryDto } from './dto/create-transaction-with
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole, TransactionType, PaymentMethod } from '../common/types/prisma-enums';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
+import { parsePagination } from '../common/utils/pagination.util';
+import { TransactionType, PaymentMethod } from '../common/types/prisma-enums';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard, BranchAccessGuard)
@@ -55,10 +50,7 @@ export class TransactionsController {
     @Query('endDate') endDate?: string,
     @Query('search') search?: string,
   ) {
-    const pagination = {
-      page: page ? parseInt(page, 10) : 1,
-      limit: limit ? parseInt(limit, 10) : 20,
-    };
+    const pagination = parsePagination(page, limit);
 
     const filters = {
       type,

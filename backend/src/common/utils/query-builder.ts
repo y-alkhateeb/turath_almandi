@@ -1,13 +1,7 @@
 import { UserRole } from '../types/prisma-enums';
 import { ForbiddenException } from '@nestjs/common';
 import { ERROR_MESSAGES } from '../constants/error-messages';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../interfaces';
 
 /**
  * Interface for Prisma where clauses that support branch filtering

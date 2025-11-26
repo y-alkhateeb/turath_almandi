@@ -6,13 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { UserRole } from '../types/prisma-enums';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../interfaces';
 
 @Injectable()
 export class BranchGuard implements CanActivate {

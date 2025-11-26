@@ -19,13 +19,7 @@ import {
 } from '../common/constants/prisma-includes';
 import { getCurrentTimestamp } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
 
 interface PaginationParams {
   page?: number;

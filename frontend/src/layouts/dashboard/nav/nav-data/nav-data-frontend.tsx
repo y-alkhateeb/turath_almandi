@@ -90,6 +90,19 @@ export const navData: NavItem[] = [
     ],
   },
   {
+    title: 'التقارير',
+    path: '/reports',
+    icon: <Icon icon="lucide:file-bar-chart" size={24} />,
+    caption: 'إنشاء وعرض التقارير',
+    children: [
+      {
+        title: 'منشئ التقارير',
+        path: '/reports/smart-builder',
+        icon: <Icon icon="lucide:layout-template" size={20} />,
+      },
+    ],
+  },
+  {
     title: 'الإشعارات',
     path: '/notifications',
     icon: <Icon icon="lucide:bell" size={24} />,

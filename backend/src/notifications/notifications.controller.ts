@@ -16,14 +16,8 @@ import { NotificationSettingsService } from './notification-settings.service';
 import { UpdateNotificationSettingsDto } from './dto/update-notification-settings.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UserRole } from '../common/types/prisma-enums';
-
-interface RequestUser {
-  id: string;
-  username: string;
-  role: UserRole;
-  branchId: string | null;
-}
+import { RequestUser } from '../common/interfaces';
+import { parsePagination } from '../common/utils/pagination.util';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
@@ -57,10 +51,9 @@ export class NotificationsController {
       endDate,
     };
 
-    const pageNumber = page ? parseInt(page, 10) : 1;
-    const limitNumber = limit ? parseInt(limit, 10) : 50;
+    const pagination = parsePagination(page, limit, { page: 1, limit: 50, maxLimit: 100 });
 
-    return this.notificationsService.getAll(filters, pageNumber, limitNumber);
+    return this.notificationsService.getAll(filters, pagination.page, pagination.limit);
   }
 
   /**

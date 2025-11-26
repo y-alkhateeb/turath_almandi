@@ -7,7 +7,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
-import { UserRole, Prisma, InventoryUnit } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { UserRole, InventoryUnit } from '../common/types/prisma-enums';
 import { Decimal } from '@prisma/client/runtime/library';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';

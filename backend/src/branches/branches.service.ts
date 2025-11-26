@@ -4,6 +4,7 @@ import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { Prisma } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-enums';
 import { RequestUser } from '../common/interfaces';
 
 @Injectable()

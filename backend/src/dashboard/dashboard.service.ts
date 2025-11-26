@@ -1,6 +1,7 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { TransactionType, UserRole, Transaction, Prisma } from '@prisma/client';
+import { Transaction, Prisma } from '@prisma/client';
+import { TransactionType, UserRole } from '../common/types/prisma-enums';
 import {
   formatDateForDB,
   getCurrentTimestamp,

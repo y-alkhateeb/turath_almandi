@@ -9,7 +9,7 @@ import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequestUser } from '../common/interfaces';
 import { parsePagination } from '../common/utils/pagination.util';
-import { TransactionType, PaymentMethod } from '@prisma/client';
+import { TransactionType, PaymentMethod } from '../common/types/prisma-enums';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard, BranchAccessGuard)

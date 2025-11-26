@@ -8,7 +8,7 @@ import {
   MaxLength,
   Matches,
 } from 'class-validator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../common/types/prisma-enums';
 
 export class UpdateUserDto {
   @IsEnum(UserRole)

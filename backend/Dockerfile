@@ -48,7 +48,7 @@ RUN set -e; \
         fi; \
       fi; \
     done && \
-    # Verify Prisma client was generated correctly
+    # Verify Prisma client was generated correctly (JS and TypeScript types)
     echo "Verifying Prisma Client generation..." && \
     if [ ! -d "node_modules/.prisma/client" ]; then \
       echo "ERROR: Prisma client directory not found!"; \
@@ -58,7 +58,17 @@ RUN set -e; \
       echo "ERROR: Prisma client index.js not found!"; \
       exit 1; \
     fi && \
-    echo "Prisma Client verification passed"
+    if [ ! -f "node_modules/.prisma/client/index.d.ts" ]; then \
+      echo "ERROR: Prisma client TypeScript types (index.d.ts) not found!"; \
+      exit 1; \
+    fi && \
+    if ! grep -q "UserRole" node_modules/.prisma/client/index.d.ts; then \
+      echo "ERROR: UserRole enum not found in Prisma client types!"; \
+      echo "Listing .prisma/client contents:"; \
+      ls -la node_modules/.prisma/client/; \
+      exit 1; \
+    fi && \
+    echo "Prisma Client verification passed (JS + TypeScript types)"
 
 # Copy application source
 COPY . .

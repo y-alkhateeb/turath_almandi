@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, IsNumber, IsOptional, IsDateString, IsEnum, IsUUID, Min } from 'class-validator';
-import { InventoryUnit } from '@prisma/client';
+import { InventoryUnit } from '../../common/types/prisma-enums';
 
 export class RecordConsumptionDto {
   @IsNotEmpty()

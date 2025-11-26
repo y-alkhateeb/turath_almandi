@@ -14,7 +14,7 @@ import {
 import { Response } from 'express';
 import * as contentDisposition from 'content-disposition';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../common/types/prisma-enums';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';

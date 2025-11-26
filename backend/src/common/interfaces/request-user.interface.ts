@@ -10,7 +10,7 @@
  * @property branchId - Assigned branch UUID, null for admins without specific branch
  */
 
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../types/prisma-enums';
 
 export interface RequestUser {
   id: string;

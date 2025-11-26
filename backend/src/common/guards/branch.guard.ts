@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../types/prisma-enums';
 import { RequestUser } from '../interfaces';
 
 @Injectable()

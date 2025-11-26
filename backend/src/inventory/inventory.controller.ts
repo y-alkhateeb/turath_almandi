@@ -7,7 +7,7 @@ import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequestUser } from '../common/interfaces';
 import { parsePagination } from '../common/utils/pagination.util';
-import { InventoryUnit } from '@prisma/client';
+import { InventoryUnit } from '../common/types/prisma-enums';
 
 @Controller('inventory')
 @UseGuards(JwtAuthGuard, BranchAccessGuard)

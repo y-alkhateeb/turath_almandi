@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSalaryPaymentDto } from './dto/create-salary-payment.dto';
-import { TransactionType, UserRole, Prisma, AdvanceStatus } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { TransactionType, UserRole, AdvanceStatus } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import { USER_SELECT } from '../common/constants/prisma-includes';

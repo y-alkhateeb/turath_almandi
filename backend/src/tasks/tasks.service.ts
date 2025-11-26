@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { DebtStatus, UserRole } from '@prisma/client';
+import { DebtStatus, UserRole } from '../common/types/prisma-enums';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 

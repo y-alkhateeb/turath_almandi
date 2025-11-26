@@ -27,7 +27,7 @@ import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequestUser } from '../common/interfaces';
 import { parsePagination } from '../common/utils/pagination.util';
-import { EmployeeStatus } from '@prisma/client';
+import { EmployeeStatus } from '../common/types/prisma-enums';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard, BranchAccessGuard)

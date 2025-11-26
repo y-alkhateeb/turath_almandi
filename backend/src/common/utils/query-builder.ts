@@ -1,4 +1,4 @@
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../types/prisma-enums';
 import { ForbiddenException } from '@nestjs/common';
 import { ERROR_MESSAGES } from '../constants/error-messages';
 import { RequestUser } from '../interfaces';

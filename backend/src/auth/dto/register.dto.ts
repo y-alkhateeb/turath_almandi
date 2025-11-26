@@ -1,5 +1,5 @@
 import { IsString, MinLength, MaxLength, IsEnum, IsOptional, IsUUID, Matches } from 'class-validator';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../common/types/prisma-enums';
 
 export class RegisterDto {
   @IsString()

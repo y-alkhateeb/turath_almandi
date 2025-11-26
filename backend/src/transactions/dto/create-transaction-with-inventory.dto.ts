@@ -14,7 +14,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { TransactionType } from '@prisma/client';
+import { TransactionType } from '../../common/types/prisma-enums';
 import { InventoryItemOperationDto } from './inventory-item-operation.dto';
 
 /**

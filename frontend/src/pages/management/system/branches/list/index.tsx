@@ -20,7 +20,7 @@
  * - Strict typing
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,6 +30,12 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
 import { toast } from 'sonner';
+
+// ============================================
+// FILTER TYPES
+// ============================================
+
+type BranchFilter = 'all' | 'active' | 'inactive';
 
 // ============================================
 // PAGE COMPONENT
@@ -55,13 +61,49 @@ export default function BranchesListPage() {
   }, [isAdmin, router]);
 
   // ============================================
+  // FILTER STATE
+  // ============================================
+
+  /**
+   * Current filter state - default to showing only active branches
+   */
+  const [filter, setFilter] = useState<BranchFilter>('active');
+
+  // ============================================
   // DATA FETCHING
   // ============================================
 
   /**
    * Fetch all branches (including inactive)
    */
-  const { data: branches = [], isLoading, error, refetch } = useAllBranches();
+  const { data: allBranches = [], isLoading, error, refetch } = useAllBranches();
+
+  /**
+   * Filter branches based on current filter state
+   */
+  const branches = useMemo(() => {
+    switch (filter) {
+      case 'active':
+        return allBranches.filter((b) => b.isActive);
+      case 'inactive':
+        return allBranches.filter((b) => !b.isActive);
+      case 'all':
+      default:
+        return allBranches;
+    }
+  }, [allBranches, filter]);
+
+  /**
+   * Count branches by status for filter tabs
+   */
+  const branchCounts = useMemo(
+    () => ({
+      all: allBranches.length,
+      active: allBranches.filter((b) => b.isActive).length,
+      inactive: allBranches.filter((b) => !b.isActive).length,
+    }),
+    [allBranches]
+  );
 
   // ============================================
   // MUTATIONS
@@ -87,7 +129,7 @@ export default function BranchesListPage() {
    */
   const handleToggleActive = useCallback(
     async (id: string) => {
-      const branch = branches.find((b) => b.id === id);
+      const branch = allBranches.find((b) => b.id === id);
       if (!branch) return;
 
       try {
@@ -100,7 +142,7 @@ export default function BranchesListPage() {
         // Error toast shown by mutation
       }
     },
-    [branches, updateBranch]
+    [allBranches, updateBranch]
   );
 
   /**
@@ -120,12 +162,12 @@ export default function BranchesListPage() {
    */
   const handleDelete = useCallback(
     async (id: string) => {
-      const branch = branches.find((b) => b.id === id);
+      const branch = allBranches.find((b) => b.id === id);
       if (!branch) return;
 
       // Show confirmation dialog
       const confirmed = window.confirm(
-        `هل أنت متأكد من حذف الفرع "${branch.name}"؟\nسيتم إيقاف جميع العمليات المرتبطة بهذا الفرع.`
+        `هل أنت متأكد من تعطيل الفرع "${branch.name}"؟\nسيتم إيقاف جميع العمليات المرتبطة بهذا الفرع.`
       );
 
       if (!confirmed) return;
@@ -137,7 +179,7 @@ export default function BranchesListPage() {
         // Error toast shown by mutation
       }
     },
-    [branches, deleteBranch]
+    [allBranches, deleteBranch]
   );
 
   /**
@@ -253,7 +295,7 @@ export default function BranchesListPage() {
         <div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">إدارة الفروع</h1>
           <p className="text-[var(--text-secondary)] mt-1">
-            إضافة وإدارة فروع النظام ({branches.length} فرع)
+            إضافة وإدارة فروع النظام ({branchCounts.all} فرع)
           </p>
         </div>
         <button
@@ -265,15 +307,57 @@ export default function BranchesListPage() {
         </button>
       </div>
 
+      {/* Filter Tabs */}
+      <div className="flex gap-2" dir="rtl">
+        <button
+          onClick={() => setFilter('active')}
+          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+            filter === 'active'
+              ? 'bg-green-100 text-green-800 border border-green-300'
+              : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-color)] hover:bg-[var(--bg-tertiary)]'
+          }`}
+        >
+          نشط ({branchCounts.active})
+        </button>
+        <button
+          onClick={() => setFilter('inactive')}
+          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+            filter === 'inactive'
+              ? 'bg-gray-200 text-gray-800 border border-gray-400'
+              : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-color)] hover:bg-[var(--bg-tertiary)]'
+          }`}
+        >
+          معطل ({branchCounts.inactive})
+        </button>
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+            filter === 'all'
+              ? 'bg-primary-100 text-primary-800 border border-primary-300'
+              : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-color)] hover:bg-[var(--bg-tertiary)]'
+          }`}
+        >
+          الكل ({branchCounts.all})
+        </button>
+      </div>
+
       {/* Branches Table */}
       <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg overflow-hidden">
-        <BranchList
-          branches={branches}
-          isLoading={false}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onToggleActive={handleToggleActive}
-        />
+        {branches.length === 0 ? (
+          <div className="p-8 text-center text-[var(--text-secondary)]">
+            {filter === 'active' && 'لا توجد فروع نشطة'}
+            {filter === 'inactive' && 'لا توجد فروع معطلة'}
+            {filter === 'all' && 'لا توجد فروع'}
+          </div>
+        ) : (
+          <BranchList
+            branches={branches}
+            isLoading={false}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onToggleActive={handleToggleActive}
+          />
+        )}
       </div>
 
       {/* Info Note */}

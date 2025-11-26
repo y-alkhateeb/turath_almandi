@@ -306,32 +306,43 @@ export const useDeleteBranch = () => {
   return useMutation<void, ApiError, string>({
     mutationFn: branchService.delete,
 
-    // Optimistic update
+    // Optimistic update - Backend does soft delete (sets isActive = false)
+    // So we update isActive instead of removing the branch
     onMutate: async (deletedId) => {
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: queryKeys.branches.all });
+      await queryClient.cancelQueries({ queryKey: queryKeys.branches.detail(deletedId) });
 
       // Snapshot current data
+      const previousBranch = queryClient.getQueryData<Branch>(queryKeys.branches.detail(deletedId));
       const previousBranches = queryClient.getQueriesData<Branch[]>({
         queryKey: queryKeys.branches.all,
       });
 
-      // Optimistically remove branch from all lists
+      // Optimistically update isActive to false (soft delete)
       queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
         if (!old) return old;
-        return old.filter((branch) => branch.id !== deletedId);
+        return old.map((branch) =>
+          branch.id === deletedId
+            ? { ...branch, isActive: false, updatedAt: new Date().toISOString() }
+            : branch
+        );
       });
 
-      // Remove branch detail from cache
-      queryClient.removeQueries({
-        queryKey: queryKeys.branches.detail(deletedId),
+      // Update branch detail cache
+      queryClient.setQueryData<Branch>(queryKeys.branches.detail(deletedId), (old) => {
+        if (!old) return old;
+        return { ...old, isActive: false, updatedAt: new Date().toISOString() };
       });
 
-      return { previousBranches };
+      return { previousBranch, previousBranches };
     },
 
-    onError: (error, _deletedId, context) => {
+    onError: (_error, deletedId, context) => {
       // Rollback on error
+      if (context?.previousBranch) {
+        queryClient.setQueryData(queryKeys.branches.detail(deletedId), context.previousBranch);
+      }
       if (context?.previousBranches) {
         context.previousBranches.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
@@ -345,8 +356,8 @@ export const useDeleteBranch = () => {
       // Invalidate all branch queries
       queryClient.invalidateQueries({ queryKey: queryKeys.branches.all });
 
-      // Show success toast
-      toast.success('تم حذف الفرع بنجاح');
+      // Show success toast - Changed from "deleted" to "deactivated" since it's soft delete
+      toast.success('تم تعطيل الفرع بنجاح');
     },
   });
 };

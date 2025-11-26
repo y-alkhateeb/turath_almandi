@@ -49,10 +49,10 @@ export enum SmartReportsApiEndpoints {
  * GET /reports/smart/data-sources
  */
 export async function getDataSources(): Promise<Array<{ value: DataSourceType; label: string }>> {
-  const response = await apiClient.get<Array<{ value: DataSourceType; label: string }>>(
-    SmartReportsApiEndpoints.DataSources
-  );
-  return response.data;
+  // apiClient already unwraps response.data in interceptor
+  return apiClient.get<Array<{ value: DataSourceType; label: string }>>({
+    url: SmartReportsApiEndpoints.DataSources,
+  });
 }
 
 /**
@@ -60,11 +60,11 @@ export async function getDataSources(): Promise<Array<{ value: DataSourceType; l
  * GET /reports/smart/fields
  */
 export async function getFields(dataSource: DataSourceType): Promise<FieldMetadata[]> {
-  const response = await apiClient.get<FieldMetadata[]>(
-    SmartReportsApiEndpoints.Fields,
-    { params: { dataSource } }
-  );
-  return response.data;
+  // apiClient already unwraps response.data in interceptor
+  return apiClient.get<FieldMetadata[]>({
+    url: SmartReportsApiEndpoints.Fields,
+    params: { dataSource },
+  });
 }
 
 /**
@@ -72,8 +72,9 @@ export async function getFields(dataSource: DataSourceType): Promise<FieldMetada
  * GET /reports/smart/templates
  */
 export async function getTemplates(): Promise<ReportTemplate[]> {
-  const response = await apiClient.get<ReportTemplate[]>(SmartReportsApiEndpoints.Templates);
-  return response.data;
+  return apiClient.get<ReportTemplate[]>({
+    url: SmartReportsApiEndpoints.Templates,
+  });
 }
 
 /**
@@ -82,8 +83,7 @@ export async function getTemplates(): Promise<ReportTemplate[]> {
  */
 export async function getTemplate(id: string): Promise<ReportTemplate> {
   const url = SmartReportsApiEndpoints.TemplateById.replace(':id', id);
-  const response = await apiClient.get<ReportTemplate>(url);
-  return response.data;
+  return apiClient.get<ReportTemplate>({ url });
 }
 
 /**
@@ -97,8 +97,10 @@ export async function createTemplate(data: {
   config: ReportConfiguration;
   isPublic: boolean;
 }): Promise<ReportTemplate> {
-  const response = await apiClient.post<ReportTemplate>(SmartReportsApiEndpoints.Templates, data);
-  return response.data;
+  return apiClient.post<ReportTemplate>({
+    url: SmartReportsApiEndpoints.Templates,
+    data,
+  });
 }
 
 /**
@@ -116,8 +118,7 @@ export async function updateTemplate(
   }>
 ): Promise<ReportTemplate> {
   const url = SmartReportsApiEndpoints.TemplateById.replace(':id', id);
-  const response = await apiClient.put<ReportTemplate>(url, data);
-  return response.data;
+  return apiClient.put<ReportTemplate>({ url, data });
 }
 
 /**
@@ -126,7 +127,7 @@ export async function updateTemplate(
  */
 export async function deleteTemplate(id: string): Promise<void> {
   const url = SmartReportsApiEndpoints.TemplateById.replace(':id', id);
-  await apiClient.delete(url);
+  return apiClient.delete({ url });
 }
 
 /**
@@ -134,8 +135,10 @@ export async function deleteTemplate(id: string): Promise<void> {
  * POST /reports/smart/execute
  */
 export async function executeReport(config: ReportConfiguration): Promise<QueryResult> {
-  const response = await apiClient.post<QueryResult>(SmartReportsApiEndpoints.Execute, { config });
-  return response.data;
+  return apiClient.post<QueryResult>({
+    url: SmartReportsApiEndpoints.Execute,
+    data: { config },
+  });
 }
 
 /**
@@ -146,15 +149,12 @@ export async function exportReport(
   config: ReportConfiguration,
   format: ExportFormat
 ): Promise<Blob> {
-  const response = await apiClient.post(
-    SmartReportsApiEndpoints.Export,
-    { config },
-    {
-      params: { format },
-      responseType: 'blob',
-    }
-  );
-  return response.data;
+  return apiClient.post({
+    url: SmartReportsApiEndpoints.Export,
+    data: { config },
+    params: { format },
+    responseType: 'blob',
+  });
 }
 
 // ============================================

@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Play, Info } from 'lucide-react';
+import { Loader2, Play, Info, AlertCircle } from 'lucide-react';
 import { DataSourceSelector } from './components/DataSourceSelector';
 import { FieldSelector } from './components/FieldSelector';
 import { FilterBuilder } from './components/FilterBuilder';
@@ -18,7 +18,48 @@ import type {
   DataSourceType,
   QueryResult,
   ExportFormat,
+  FieldMetadata,
 } from '@/types/smart-reports.types';
+
+// Fallback fields when API fails
+const FALLBACK_FIELDS: Record<DataSourceType, FieldMetadata[]> = {
+  transactions: [
+    { id: 'f-1', dataSource: 'transactions', fieldName: 'amount', displayName: 'المبلغ', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 1, format: 'currency' },
+    { id: 'f-2', dataSource: 'transactions', fieldName: 'type', displayName: 'النوع', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 2, enumValues: ['INCOME', 'EXPENSE'] },
+    { id: 'f-3', dataSource: 'transactions', fieldName: 'category', displayName: 'الفئة', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 3 },
+    { id: 'f-4', dataSource: 'transactions', fieldName: 'paymentMethod', displayName: 'طريقة الدفع', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 4, enumValues: ['CASH', 'MASTER'] },
+    { id: 'f-5', dataSource: 'transactions', fieldName: 'employeeVendorName', displayName: 'اسم الموظف/المورد', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 5 },
+    { id: 'f-6', dataSource: 'transactions', fieldName: 'notes', displayName: 'الملاحظات', dataType: 'string', filterable: true, sortable: false, aggregatable: false, groupable: false, defaultVisible: false, defaultOrder: 6 },
+    { id: 'f-7', dataSource: 'transactions', fieldName: 'date', displayName: 'التاريخ', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 7, format: 'date-short' },
+  ],
+  debts: [
+    { id: 'd-1', dataSource: 'debts', fieldName: 'creditorName', displayName: 'اسم الدائن', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 1 },
+    { id: 'd-2', dataSource: 'debts', fieldName: 'originalAmount', displayName: 'المبلغ الأصلي', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 2, format: 'currency' },
+    { id: 'd-3', dataSource: 'debts', fieldName: 'remainingAmount', displayName: 'المبلغ المتبقي', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 3, format: 'currency' },
+    { id: 'd-4', dataSource: 'debts', fieldName: 'status', displayName: 'الحالة', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 4, enumValues: ['ACTIVE', 'PAID', 'PARTIAL'] },
+    { id: 'd-5', dataSource: 'debts', fieldName: 'date', displayName: 'تاريخ الدين', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 5, format: 'date-short' },
+    { id: 'd-6', dataSource: 'debts', fieldName: 'dueDate', displayName: 'تاريخ الاستحقاق', dataType: 'date', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 6, format: 'date-short' },
+  ],
+  inventory: [
+    { id: 'i-1', dataSource: 'inventory', fieldName: 'name', displayName: 'اسم الصنف', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 1 },
+    { id: 'i-2', dataSource: 'inventory', fieldName: 'quantity', displayName: 'الكمية', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 2 },
+    { id: 'i-3', dataSource: 'inventory', fieldName: 'unit', displayName: 'الوحدة', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 3, enumValues: ['KG', 'PIECE', 'LITER', 'OTHER'] },
+    { id: 'i-4', dataSource: 'inventory', fieldName: 'costPerUnit', displayName: 'التكلفة لكل وحدة', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 4, format: 'currency' },
+  ],
+  salaries: [
+    { id: 's-1', dataSource: 'salaries', fieldName: 'name', displayName: 'اسم الموظف', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 1 },
+    { id: 's-2', dataSource: 'salaries', fieldName: 'position', displayName: 'المنصب', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 2 },
+    { id: 's-3', dataSource: 'salaries', fieldName: 'baseSalary', displayName: 'الراتب الأساسي', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 3, format: 'currency' },
+    { id: 's-4', dataSource: 'salaries', fieldName: 'allowance', displayName: 'البدل', dataType: 'number', filterable: true, sortable: true, aggregatable: true, groupable: false, defaultVisible: true, defaultOrder: 4, format: 'currency' },
+    { id: 's-5', dataSource: 'salaries', fieldName: 'status', displayName: 'الحالة', dataType: 'enum', filterable: true, sortable: true, aggregatable: false, groupable: true, defaultVisible: true, defaultOrder: 5, enumValues: ['ACTIVE', 'RESIGNED'] },
+  ],
+  branches: [
+    { id: 'b-1', dataSource: 'branches', fieldName: 'name', displayName: 'اسم الفرع', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 1 },
+    { id: 'b-2', dataSource: 'branches', fieldName: 'location', displayName: 'الموقع', dataType: 'string', filterable: true, sortable: false, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 2 },
+    { id: 'b-3', dataSource: 'branches', fieldName: 'managerName', displayName: 'اسم المدير', dataType: 'string', filterable: true, sortable: true, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 3 },
+    { id: 'b-4', dataSource: 'branches', fieldName: 'phone', displayName: 'الهاتف', dataType: 'string', filterable: true, sortable: false, aggregatable: false, groupable: false, defaultVisible: true, defaultOrder: 4 },
+  ],
+};
 
 const defaultConfig: ReportConfiguration = {
   dataSource: { type: 'transactions' },
@@ -38,9 +79,17 @@ export default function SmartReportBuilder() {
   const [activeTab, setActiveTab] = useState('build');
 
   // Queries
-  const { data: availableFields, isLoading: fieldsLoading } = useFields(config.dataSource.type);
+  const { data: apiFields, isLoading: fieldsLoading, isError: fieldsError } = useFields(config.dataSource.type);
   const executeReport = useExecuteReport();
   const exportReport = useExportReport();
+
+  // Use fallback fields if API fails or returns empty
+  const availableFields = useMemo(() => {
+    if (apiFields && apiFields.length > 0) {
+      return apiFields;
+    }
+    return FALLBACK_FIELDS[config.dataSource.type] || [];
+  }, [apiFields, config.dataSource.type]);
 
   // Handlers
   const handleDataSourceChange = useCallback((dataSource: DataSourceType) => {
@@ -163,11 +212,19 @@ export default function SmartReportBuilder() {
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
-                <FieldSelector
-                  availableFields={availableFields || []}
-                  selectedFields={config.fields}
-                  onChange={handleFieldsChange}
-                />
+                <div className="space-y-3">
+                  {fieldsError && (
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-sm bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+                      <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                      <span>تعذر تحميل الحقول من الخادم، يتم استخدام القائمة الافتراضية</span>
+                    </div>
+                  )}
+                  <FieldSelector
+                    availableFields={availableFields}
+                    selectedFields={config.fields}
+                    onChange={handleFieldsChange}
+                  />
+                </div>
               )}
             </CardContent>
           </Card>

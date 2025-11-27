@@ -87,16 +87,30 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
   }, [initialData, reset]);
 
   const handleFormSubmit = (data: EmployeeFormData) => {
-    const submitData: CreateEmployeeInput = {
-      name: data.name,
-      position: data.position,
-      baseSalary: Number(data.baseSalary),
-      allowance: Number(data.allowance) || 0,
-      hireDate: data.hireDate,
-      branchId: isAdmin ? data.branchId || null : user?.branchId || null,
-      notes: data.notes || null,
-    };
-    onSubmit(submitData);
+    // For update mode, don't include branchId (backend doesn't allow updating it)
+    if (isEditMode) {
+      const submitData = {
+        name: data.name,
+        position: data.position,
+        baseSalary: Number(data.baseSalary),
+        allowance: Number(data.allowance) || 0,
+        hireDate: data.hireDate,
+        notes: data.notes || null,
+      };
+      onSubmit(submitData as CreateEmployeeInput);
+    } else {
+      // For create mode, include branchId
+      const submitData: CreateEmployeeInput = {
+        name: data.name,
+        position: data.position,
+        baseSalary: Number(data.baseSalary),
+        allowance: Number(data.allowance) || 0,
+        hireDate: data.hireDate,
+        branchId: isAdmin ? data.branchId || null : user?.branchId || null,
+        notes: data.notes || null,
+      };
+      onSubmit(submitData);
+    }
   };
 
   return (

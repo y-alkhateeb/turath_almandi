@@ -532,7 +532,7 @@ export const EmployeeDetailsPage = () => {
           }`}
         >
           <Banknote className="w-4 h-4 inline ml-2" />
-          السلف ({advancesData?.summary?.activeCount || 0})
+          السلف ({advancesData?.summary?.totalActiveAdvances || 0})
         </button>
       </div>
 
@@ -716,9 +716,21 @@ export const EmployeeDetailsPage = () => {
               className="w-full px-4 py-2 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500"
             />
             {employee && (
-              <p className="text-xs text-[var(--text-secondary)] mt-1">
-                الراتب الكامل: <CurrencyAmountCompact amount={Number(employee.baseSalary) + Number(employee.allowance)} />
-              </p>
+              <div className="text-xs text-[var(--text-secondary)] mt-1 space-y-1">
+                <p>
+                  الراتب الكامل: <CurrencyAmountCompact amount={Number(employee.baseSalary) + Number(employee.allowance)} />
+                </p>
+                {advancesData?.summary?.totalMonthlyDeduction && advancesData.summary.totalMonthlyDeduction > 0 && (
+                  <>
+                    <p className="text-amber-600">
+                      خصم السلفة الشهري: <CurrencyAmountCompact amount={advancesData.summary.totalMonthlyDeduction} />
+                    </p>
+                    <p className="text-green-600 font-medium">
+                      صافي الراتب بعد الخصم: <CurrencyAmountCompact amount={advancesData.summary.netSalaryAfterDeduction || (Number(employee.baseSalary) + Number(employee.allowance) - advancesData.summary.totalMonthlyDeduction)} />
+                    </p>
+                  </>
+                )}
+              </div>
             )}
           </div>
 

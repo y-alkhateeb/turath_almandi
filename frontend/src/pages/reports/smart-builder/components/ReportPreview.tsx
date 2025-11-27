@@ -105,18 +105,41 @@ export function ReportPreview({
 
       {/* Aggregations */}
       {result.aggregations && Object.keys(result.aggregations).length > 0 && (
-        <Card>
+        <Card className="bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-primary-200 dark:border-primary-800">
           <CardHeader>
-            <CardTitle className="text-base">المجاميع</CardTitle>
+            <CardTitle className="text-base text-primary-800 dark:text-primary-200">ملخص التقرير</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {Object.entries(result.aggregations).map(([alias, value]) => (
-                <div key={alias} className="space-y-1">
-                  <p className="text-sm text-gray-500">{alias}</p>
-                  <p className="text-2xl font-bold">{value?.toLocaleString() ?? 'N/A'}</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Object.entries(result.aggregations).map(([alias, value]) => {
+                // Check if this is a currency field (contains مبلغ, تكلفة, إجمالي but not عدد)
+                const isCurrencyField = (alias.includes('مبلغ') || alias.includes('تكلفة') || alias.includes('إجمالي')) && !alias.includes('عدد') && !alias.includes('كمية');
+                const isCountField = alias.includes('عدد');
+
+                // Format the value
+                let formattedValue = 'N/A';
+                if (value !== null && value !== undefined) {
+                  if (isCurrencyField && currency) {
+                    formattedValue = formatCurrencyAuto(Number(value), currency, 2);
+                  } else if (isCountField) {
+                    formattedValue = Number(value).toLocaleString('ar-IQ');
+                  } else {
+                    formattedValue = Number(value).toLocaleString('ar-IQ', {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    });
+                  }
+                }
+
+                return (
+                  <div key={alias} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-primary-100 dark:border-primary-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{alias}</p>
+                    <p className={`text-xl font-bold ${isCurrencyField ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-gray-100'}`}>
+                      {formattedValue}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>

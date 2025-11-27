@@ -20,7 +20,7 @@
  * - Strict typing
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +29,7 @@ import { UserList } from '@/components/users/UserList';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ListSkeleton } from '@/components/skeletons/ListSkeleton';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { toast } from 'sonner';
 
 // ============================================
@@ -38,6 +39,13 @@ import { toast } from 'sonner';
 export default function UsersListPage() {
   const router = useRouter();
   const { isAdmin } = useAuth();
+
+  // ============================================
+  // DEACTIVATE CONFIRMATION STATE
+  // ============================================
+
+  const [deactivateUserId, setDeactivateUserId] = useState<string | null>(null);
+  const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
 
   // ============================================
   // ADMIN GUARD
@@ -115,34 +123,39 @@ export default function UsersListPage() {
   );
 
   /**
-   * Handle delete user
-   * Show confirmation dialog before soft deleting (deactivating)
+   * Handle deactivate user button click
+   * Opens confirmation dialog
    */
-  const handleDelete = useCallback(
-    async (id: string) => {
-      const user = users.find((u) => u.id === id);
-      if (!user) return;
+  const handleDeactivateClick = useCallback((id: string) => {
+    setDeactivateUserId(id);
+    setIsDeactivateDialogOpen(true);
+  }, []);
 
-      // Prevent deleting yourself
-      // Note: This would be better checked with current user ID
-      // For now, we'll just show a confirmation
+  /**
+   * Handle confirmed deactivation
+   * Actually deactivates the user after confirmation
+   */
+  const handleDeactivateConfirm = useCallback(async () => {
+    if (!deactivateUserId) return;
 
-      // Show confirmation dialog
-      const confirmed = window.confirm(
-        `هل أنت متأكد من تعطيل المستخدم "${user.username}"؟\nسيتم إيقاف وصوله إلى النظام.`
-      );
+    try {
+      await deleteUser.mutateAsync(deactivateUserId);
+      // Success toast shown by mutation
+    } catch (_error) {
+      // Error toast shown by mutation
+    } finally {
+      setIsDeactivateDialogOpen(false);
+      setDeactivateUserId(null);
+    }
+  }, [deactivateUserId, deleteUser]);
 
-      if (!confirmed) return;
-
-      try {
-        await deleteUser.mutateAsync(id);
-        // Success toast shown by mutation
-      } catch (_error) {
-        // Error toast shown by mutation
-      }
-    },
-    [users, deleteUser]
-  );
+  /**
+   * Handle cancel deactivation
+   */
+  const handleDeactivateCancel = useCallback(() => {
+    setIsDeactivateDialogOpen(false);
+    setDeactivateUserId(null);
+  }, []);
 
   /**
    * Handle add new user
@@ -279,7 +292,7 @@ export default function UsersListPage() {
           users={users}
           isLoading={false}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={handleDeactivateClick}
           onToggleActive={handleToggleActive}
         />
       </div>
@@ -303,6 +316,19 @@ export default function UsersListPage() {
           </div>
         </div>
       )}
+
+      {/* Deactivate User Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isDeactivateDialogOpen}
+        onClose={handleDeactivateCancel}
+        onConfirm={handleDeactivateConfirm}
+        title="تعطيل المستخدم"
+        message={`هل أنت متأكد من تعطيل المستخدم "${users.find((u) => u.id === deactivateUserId)?.username || ''}"؟ سيتم إيقاف وصوله إلى النظام.`}
+        confirmText="تعطيل"
+        cancelText="إلغاء"
+        variant="danger"
+        isLoading={deleteUser.isPending}
+      />
     </div>
   );
 }

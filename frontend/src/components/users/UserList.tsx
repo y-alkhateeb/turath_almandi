@@ -13,7 +13,7 @@
  * - No business logic
  */
 
-import { Edit, Trash2, Calendar, Shield, User as UserIcon } from 'lucide-react';
+import { Edit, Calendar, Shield, User as UserIcon, UserX } from 'lucide-react';
 import { Table, type Column } from '../ui/Table';
 import { formatDate } from '@/utils/format';
 import { UserRole } from '@/types/enum';
@@ -174,7 +174,7 @@ export function UserList({ users, isLoading, onEdit, onDelete, onToggleActive }:
             </button>
           )}
 
-          {/* Delete Button */}
+          {/* Deactivate Button */}
           {onDelete && (
             <button
               onClick={(e) => {
@@ -182,9 +182,9 @@ export function UserList({ users, isLoading, onEdit, onDelete, onToggleActive }:
                 onDelete(user.id);
               }}
               className="px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-              title="حذف"
+              title="تعطيل المستخدم"
             >
-              <Trash2 className="w-4 h-4" />
+              <UserX className="w-4 h-4" />
             </button>
           )}
         </div>

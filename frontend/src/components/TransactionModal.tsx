@@ -6,6 +6,7 @@ import { Modal } from './Modal';
 import { TransactionType, PaymentMethod, type Transaction } from '../types/transactions.types';
 import { useUpdateTransaction } from '../hooks/useTransactions';
 import { CurrencyAmountCompact } from '@/components/currency';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -159,7 +160,7 @@ export default function TransactionModal({
                 الفئة
               </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.category || '-'}
+                {getCategoryLabel(transaction.category)}
               </div>
             </div>
 

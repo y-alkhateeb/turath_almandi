@@ -18,6 +18,7 @@ import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { TransactionFilters as TransactionFiltersType } from '#/entity';
 import type { Branch } from '#/entity';
 import { useAuth } from '@/hooks/useAuth';
+import { ALL_CATEGORIES } from '@/constants/transactionCategories';
 
 // ============================================
 // TYPES
@@ -124,12 +125,11 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
-                <option value="SALE">بيع</option>
-                <option value="PURCHASE">شراء</option>
-                <option value="EXPENSE">مصروف</option>
-                <option value="SALARY">راتب</option>
-                <option value="DEBT_PAYMENT">دفع دين</option>
-                <option value="OTHER">أخرى</option>
+                {ALL_CATEGORIES.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
               </select>
             </div>
 

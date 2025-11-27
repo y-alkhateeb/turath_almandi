@@ -2,13 +2,14 @@ import { useState, useCallback, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Play, Info, AlertCircle } from 'lucide-react';
+import { Loader2, Play, AlertCircle, Settings2 } from 'lucide-react';
 import { DataSourceSelector } from './components/DataSourceSelector';
 import { FieldSelector } from './components/FieldSelector';
 import { FilterBuilder } from './components/FilterBuilder';
 import { SortConfig } from './components/SortConfig';
 import { ReportPreview } from './components/ReportPreview';
 import { TemplateManager } from './components/TemplateManager';
+import { QuickTemplates } from './components/QuickTemplates';
 import { useFields, useExecuteReport, useExportReport } from '@/hooks/queries/useSmartReports';
 import type {
   ReportConfiguration,
@@ -76,7 +77,7 @@ const defaultConfig: ReportConfiguration = {
 export default function SmartReportBuilder() {
   const [config, setConfig] = useState<ReportConfiguration>(defaultConfig);
   const [result, setResult] = useState<QueryResult | null>(null);
-  const [activeTab, setActiveTab] = useState('build');
+  const [activeTab, setActiveTab] = useState('quick');
 
   // Queries
   const { data: apiFields, isLoading: fieldsLoading, isError: fieldsError } = useFields(config.dataSource.type);
@@ -138,6 +139,11 @@ export default function SmartReportBuilder() {
     setResult(null);
   }, []);
 
+  const handleApplyQuickTemplate = useCallback((templateConfig: ReportConfiguration) => {
+    setConfig(templateConfig);
+    setResult(null);
+  }, []);
+
   const isExecuting = executeReport.isPending;
   const isExporting = exportReport.isPending;
   const canExecute = config.fields.filter((f) => f.visible).length > 0;
@@ -145,8 +151,13 @@ export default function SmartReportBuilder() {
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">منشئ التقارير الذكي</h1>
-        <div className="flex gap-2">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">منشئ التقارير</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            أنشئ تقارير مخصصة للمعاملات والديون والمخزون
+          </p>
+        </div>
+        {activeTab === 'advanced' && (
           <Button
             onClick={handleExecute}
             disabled={!canExecute || isExecuting}
@@ -158,40 +169,52 @@ export default function SmartReportBuilder() {
             )}
             تشغيل التقرير
           </Button>
-        </div>
+        )}
       </div>
 
-      {/* Instructions Card */}
-      <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-        <CardContent className="pt-4">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">كيفية استخدام منشئ التقارير:</h3>
-              <ol className="list-decimal list-inside text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <li><strong>اختر مصدر البيانات:</strong> حدد نوع البيانات (المعاملات، الديون، المخزون، الموظفين)</li>
-                <li><strong>اختر الحقول:</strong> انقر على الحقول من قائمة "الحقول المتاحة" لإضافتها إلى التقرير</li>
-                <li><strong>أضف الفلاتر (اختياري):</strong> قم بتصفية البيانات حسب التاريخ أو الفئة أو غيرها</li>
-                <li><strong>حدد الترتيب (اختياري):</strong> رتب النتائج حسب أي حقل تختاره</li>
-                <li><strong>شغّل التقرير:</strong> اضغط على زر "تشغيل التقرير" لعرض النتائج</li>
-              </ol>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="build">بناء التقرير</TabsTrigger>
-          <TabsTrigger value="preview">المعاينة</TabsTrigger>
-          <TabsTrigger value="templates">القوالب</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-800">
+          <TabsTrigger value="quick" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            تقارير سريعة
+          </TabsTrigger>
+          <TabsTrigger value="preview" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            المعاينة
+          </TabsTrigger>
+          <TabsTrigger value="advanced" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            <Settings2 className="h-4 w-4 ml-1" />
+            تخصيص متقدم
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            القوالب المحفوظة
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="build" className="space-y-6">
+        {/* Quick Templates Tab */}
+        <TabsContent value="quick" className="space-y-6">
+          <QuickTemplates
+            onApplyTemplate={handleApplyQuickTemplate}
+            onExecute={handleExecute}
+            isExecuting={isExecuting}
+          />
+        </TabsContent>
+
+        {/* Preview Tab */}
+        <TabsContent value="preview">
+          <ReportPreview
+            result={result}
+            fields={config.fields}
+            isLoading={isExecuting}
+            onExport={handleExport}
+            isExporting={isExporting}
+          />
+        </TabsContent>
+
+        {/* Advanced Build Tab */}
+        <TabsContent value="advanced" className="space-y-6">
           {/* Data Source */}
           <Card>
             <CardHeader>
-              <CardTitle>مصدر البيانات</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">مصدر البيانات</CardTitle>
             </CardHeader>
             <CardContent>
               <DataSourceSelector
@@ -204,12 +227,12 @@ export default function SmartReportBuilder() {
           {/* Field Selector */}
           <Card>
             <CardHeader>
-              <CardTitle>الحقول</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">الحقول</CardTitle>
             </CardHeader>
             <CardContent>
               {fieldsLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -232,7 +255,7 @@ export default function SmartReportBuilder() {
           {/* Filter Builder */}
           <Card>
             <CardHeader>
-              <CardTitle>الفلاتر</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">الفلاتر</CardTitle>
             </CardHeader>
             <CardContent>
               <FilterBuilder
@@ -246,7 +269,7 @@ export default function SmartReportBuilder() {
           {/* Sort Config */}
           <Card>
             <CardHeader>
-              <CardTitle>الترتيب</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">الترتيب</CardTitle>
             </CardHeader>
             <CardContent>
               <SortConfig
@@ -258,16 +281,7 @@ export default function SmartReportBuilder() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="preview">
-          <ReportPreview
-            result={result}
-            fields={config.fields}
-            isLoading={isExecuting}
-            onExport={handleExport}
-            isExporting={isExporting}
-          />
-        </TabsContent>
-
+        {/* Saved Templates Tab */}
         <TabsContent value="templates">
           <TemplateManager
             currentConfig={config}

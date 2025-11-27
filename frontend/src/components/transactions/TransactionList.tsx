@@ -10,6 +10,7 @@ import { Table, type Column } from '../ui/Table';
 import { formatCurrency, formatDate } from '@/utils/format';
 import type { Transaction } from '#/entity';
 import { TransactionType, PaymentMethod } from '@/types/enum';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 
 // ============================================
 // TYPES
@@ -51,21 +52,6 @@ const getPaymentMethodLabel = (method: PaymentMethod | null): string => {
     OTHER: 'أخرى',
   };
   return labels[method] || method;
-};
-
-/**
- * Get category label in Arabic
- */
-const getCategoryLabel = (category: string): string => {
-  const labels: Record<string, string> = {
-    SALE: 'بيع',
-    PURCHASE: 'شراء',
-    EXPENSE: 'مصروف',
-    SALARY: 'راتب',
-    DEBT_PAYMENT: 'دفع دين',
-    OTHER: 'أخرى',
-  };
-  return labels[category] || category;
 };
 
 /**

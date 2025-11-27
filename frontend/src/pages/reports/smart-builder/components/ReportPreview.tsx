@@ -12,6 +12,7 @@ import { Loader2, FileDown, FileSpreadsheet, FileText } from 'lucide-react';
 import type { QueryResult, ReportField, ExportFormat } from '@/types/smart-reports.types';
 import { useCurrencyStore } from '@/stores/currencyStore';
 import { formatCurrencyAuto } from '@/utils/currency.utils';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 
 interface ReportPreviewProps {
   result: QueryResult | null;
@@ -147,7 +148,7 @@ export function ReportPreview({
                     <TableRow key={row.id || index}>
                       {visibleFields.map((field) => (
                         <TableCell key={field.sourceField}>
-                          {formatCellValue(row[field.sourceField], field.format, currency)}
+                          {formatCellValue(row[field.sourceField], field.format, field.sourceField, currency)}
                         </TableCell>
                       ))}
                     </TableRow>
@@ -170,14 +171,49 @@ interface CurrencySettings {
   nameEn: string;
 }
 
+// Labels for enum values
+const ENUM_LABELS: Record<string, Record<string, string>> = {
+  type: {
+    INCOME: 'إيراد',
+    EXPENSE: 'مصروف',
+  },
+  status: {
+    ACTIVE: 'نشط',
+    PAID: 'مسدد',
+    PARTIAL: 'جزئي',
+    RESIGNED: 'مستقيل',
+  },
+  paymentMethod: {
+    CASH: 'نقدي',
+    MASTER: 'ماستر كارد',
+  },
+  unit: {
+    KG: 'كيلوجرام',
+    PIECE: 'قطعة',
+    LITER: 'لتر',
+    OTHER: 'أخرى',
+  },
+};
+
 // Helper function to format cell values
 function formatCellValue(
   value: string | number | boolean | Date | null,
   format?: string,
+  fieldName?: string,
   currency?: CurrencySettings | null
 ): string {
   if (value === null || value === undefined) {
     return '-';
+  }
+
+  // Handle category field specifically
+  if (fieldName === 'category' && typeof value === 'string') {
+    return getCategoryLabel(value);
+  }
+
+  // Handle other enum fields
+  if (fieldName && typeof value === 'string' && ENUM_LABELS[fieldName]) {
+    return ENUM_LABELS[fieldName][value] || value;
   }
 
   if (format === 'currency') {
@@ -197,12 +233,19 @@ function formatCellValue(
     return `${Number(value).toFixed(2)}%`;
   }
 
-  if (format === 'date-short' && value instanceof Date) {
-    return value.toLocaleDateString('ar-IQ');
+  // Handle date strings
+  if (format === 'date-short') {
+    const dateValue = value instanceof Date ? value : new Date(value as string);
+    if (!isNaN(dateValue.getTime())) {
+      return dateValue.toLocaleDateString('ar-IQ');
+    }
   }
 
-  if (format === 'date-long' && value instanceof Date) {
-    return value.toLocaleString('ar-IQ');
+  if (format === 'date-long') {
+    const dateValue = value instanceof Date ? value : new Date(value as string);
+    if (!isNaN(dateValue.getTime())) {
+      return dateValue.toLocaleString('ar-IQ');
+    }
   }
 
   if (typeof value === 'boolean') {

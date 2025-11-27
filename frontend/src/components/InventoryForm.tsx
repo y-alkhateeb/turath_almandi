@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateInventory, useUpdateInventory } from '../hooks/useInventory';
@@ -60,7 +60,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    watch,
+    control,
   } = useForm<InventoryFormData>({
     resolver: zodResolver(inventorySchema),
     defaultValues: {
@@ -73,13 +73,10 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     },
   });
 
-  // Watch branchId to ensure it's captured correctly
-  const watchedBranchId = watch('branchId');
-
   const onSubmit = async (data: InventoryFormData) => {
     try {
-      // Use watchedBranchId as fallback if data.branchId is empty (for admin users)
-      const effectiveBranchId = data.branchId || watchedBranchId || (isAdmin ? undefined : user?.branchId);
+      // For admin users, use selected branchId; for accountants, use their assigned branch
+      const effectiveBranchId = data.branchId || (isAdmin ? undefined : user?.branchId);
       const branchIdValue = effectiveBranchId && effectiveBranchId.trim() !== '' ? effectiveBranchId : undefined;
 
       if (isEditMode) {
@@ -134,8 +131,31 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Branch Selection - Only show in create mode */}
-      {!isEditMode && (
-        <BranchSelector mode="form" name="branchId" register={register} error={errors.branchId} required />
+      {!isEditMode && isAdmin && (
+        <Controller
+          name="branchId"
+          control={control}
+          render={({ field }) => (
+            <BranchSelector
+              mode="controlled"
+              value={field.value || null}
+              onChange={(val) => field.onChange(val || '')}
+              showLabel
+              label="الفرع"
+            />
+          )}
+        />
+      )}
+      {!isEditMode && !isAdmin && user?.branch && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">الفرع</label>
+          <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
+            {user.branch.name}
+          </div>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
+            يتم تعبئة الفرع تلقائيًا من حسابك
+          </p>
+        </div>
       )}
 
       {/* Item Name */}

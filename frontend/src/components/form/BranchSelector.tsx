@@ -122,7 +122,7 @@ export function BranchSelector<T extends FieldValues = any>(props: BranchSelecto
         value={value || ''}
         onChange={(e) => onChange(e.target.value || null)}
         disabled={branchesLoading}
-        className="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed disabled:text-[var(--text-secondary)]"
       >
         <option value="">{placeholder}</option>
         {branches.map((branch) => (

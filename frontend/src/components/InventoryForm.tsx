@@ -16,29 +16,11 @@ const inventorySchema = z.object({
     .string()
     .min(1, { message: 'اسم الصنف مطلوب' })
     .min(2, { message: 'اسم الصنف يجب أن يكون حرفين على الأقل' }),
-  quantity: z
-    .string()
-    .min(1, { message: 'الكمية مطلوبة' })
-    .refine(
-      (val) => {
-        const num = parseFloat(val);
-        return !isNaN(num) && num >= 0;
-      },
-      { message: 'الكمية يجب أن تكون رقم أكبر من أو يساوي صفر' }
-    ),
+  quantity: z.string().optional().default('0'),
   unit: z.nativeEnum(InventoryUnit, {
     message: 'الوحدة مطلوبة',
   }),
-  costPerUnit: z
-    .string()
-    .min(1, { message: 'سعر الوحدة مطلوب' })
-    .refine(
-      (val) => {
-        const num = parseFloat(val);
-        return !isNaN(num) && num >= 0;
-      },
-      { message: 'سعر الوحدة يجب أن يكون رقم أكبر من أو يساوي صفر' }
-    ),
+  costPerUnit: z.string().optional().default('0'),
   notes: z.string(),
   branchId: z.string().optional(),
 });
@@ -78,22 +60,27 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    watch,
   } = useForm<InventoryFormData>({
     resolver: zodResolver(inventorySchema),
     defaultValues: {
       name: item?.name || '',
-      quantity: item?.quantity?.toString() || '',
+      quantity: item?.quantity?.toString() || '0',
       unit: item?.unit || InventoryUnit.KG,
-      costPerUnit: item?.costPerUnit?.toString() || '',
+      costPerUnit: item?.costPerUnit?.toString() || '0',
       notes: '',
       branchId: isAdmin ? '' : user?.branchId,
     },
   });
 
+  // Watch branchId to ensure it's captured correctly
+  const watchedBranchId = watch('branchId');
+
   const onSubmit = async (data: InventoryFormData) => {
     try {
-      // For create mode, branchId is required - don't send empty string
-      const branchIdValue = data.branchId && data.branchId.trim() !== '' ? data.branchId : undefined;
+      // Use watchedBranchId as fallback if data.branchId is empty (for admin users)
+      const effectiveBranchId = data.branchId || watchedBranchId || (isAdmin ? undefined : user?.branchId);
+      const branchIdValue = effectiveBranchId && effectiveBranchId.trim() !== '' ? effectiveBranchId : undefined;
 
       if (isEditMode) {
         // Don't send branchId when updating
@@ -176,7 +163,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
             htmlFor="quantity"
             className="block text-sm font-medium text-[var(--text-primary)] mb-2"
           >
-            الكمية <span className="text-red-500">*</span>
+            الكمية <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
           </label>
           <input
             id="quantity"
@@ -224,7 +211,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           htmlFor="costPerUnit"
           className="block text-sm font-medium text-[var(--text-primary)] mb-2"
         >
-          سعر الوحدة <span className="text-red-500">*</span>
+          سعر الوحدة <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
         </label>
         <input
           id="costPerUnit"

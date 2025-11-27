@@ -34,7 +34,7 @@ import { Card } from '@/ui/card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/ui/button';
 import { CurrencyAmountCompact } from '@/components/currency';
-import { ConfirmModal } from '@/components/ConfirmModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 // ============================================
 // HELPER FUNCTIONS

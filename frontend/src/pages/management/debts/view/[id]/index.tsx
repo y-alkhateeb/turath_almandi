@@ -20,10 +20,11 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ChevronRight, ArrowLeft, DollarSign, Calendar, AlertCircle } from 'lucide-react';
+import { ChevronRight, ArrowLeft, DollarSign, Calendar, AlertCircle, Trash2 } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import { useParams } from '@/routes/hooks';
-import { useDebt } from '@/hooks/useDebts';
+import { useDebt, useDeleteDebt } from '@/hooks/useDebts';
+import { useAuth } from '@/hooks/useAuth';
 import { PayDebtModal } from '@/components/PayDebtModal';
 import { DebtPaymentHistory } from '@/components/debts/DebtPaymentHistory';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -33,6 +34,7 @@ import { Card } from '@/ui/card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/ui/button';
 import { CurrencyAmountCompact } from '@/components/currency';
+import { ConfirmModal } from '@/components/ConfirmModal';
 
 // ============================================
 // HELPER FUNCTIONS
@@ -90,12 +92,15 @@ const isOverdue = (dueDate: string | null, status: DebtStatus): boolean => {
 export default function ViewDebtPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const { isAdmin } = useAuth();
+  const deleteDebt = useDeleteDebt();
 
   // ============================================
   // DIALOG STATE
   // ============================================
 
   const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // ============================================
   // DATA FETCHING
@@ -146,6 +151,19 @@ export default function ViewDebtPage() {
   const handleRetry = useCallback(() => {
     refetch();
   }, [refetch]);
+
+  /**
+   * Handle delete debt (admin only)
+   */
+  const handleDelete = useCallback(async () => {
+    if (!id) return;
+    try {
+      await deleteDebt.mutateAsync(id);
+      router.push('/management/debts/list');
+    } catch (error) {
+      // Error handled by mutation hook
+    }
+  }, [id, deleteDebt, router]);
 
   // ============================================
   // LOADING STATE
@@ -306,6 +324,18 @@ export default function ViewDebtPage() {
               دفع دين
             </Button>
           )}
+          {/* Delete Button - Admin only */}
+          {isAdmin && (
+            <Button
+              variant="destructive"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="gap-2"
+              disabled={deleteDebt.isPending}
+            >
+              <Trash2 className="w-4 h-4" />
+              حذف
+            </Button>
+          )}
           <Button variant="ghost" size="sm" onClick={handleBack} className="gap-2">
             <ArrowLeft className="w-4 h-4" />
             رجوع
@@ -457,6 +487,19 @@ export default function ViewDebtPage() {
 
       {/* Pay Debt Dialog */}
       {debt && <PayDebtModal isOpen={isPayDialogOpen} onClose={handleClosePayDialog} debt={debt} />}
+
+      {/* Delete Confirmation Dialog - Admin only */}
+      <ConfirmModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
+        title="حذف الدين"
+        message={`هل أنت متأكد من حذف دين "${debt?.creditorName}"؟ لا يمكن التراجع عن هذا الإجراء.`}
+        confirmText="حذف"
+        cancelText="إلغاء"
+        variant="danger"
+        isLoading={deleteDebt.isPending}
+      />
     </div>
   );
 }

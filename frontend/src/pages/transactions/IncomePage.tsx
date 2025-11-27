@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { Alert } from '@/components/ui/Alert';
 import { TransactionType } from '../../types/transactions.types';
 import { CurrencyAmountCompact } from '@/components/currency';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 
 /**
  * Income Page - Example usage of IncomeForm
@@ -148,7 +149,7 @@ export const IncomePage = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                    {transaction.category || '-'}
+                    {getCategoryLabel(transaction.category)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                     {transaction.branch?.name || '-'}

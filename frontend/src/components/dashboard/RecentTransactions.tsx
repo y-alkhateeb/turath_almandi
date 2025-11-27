@@ -2,6 +2,7 @@ import { Card } from '@/ui/card';
 import { Badge } from '@/components/ui/Badge';
 import { Transaction } from '@/types/dashboard';
 import { formatCurrency, formatDateShort, cn } from '@/lib/utils';
+import { getCategoryLabel } from '@/constants/transactionCategories';
 
 interface RecentTransactionsProps {
   transactions: Transaction[];
@@ -52,7 +53,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                     {transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
                   </Badge>
                 </td>
-                <td className="py-3 text-sm text-[var(--text-primary)]">{transaction.category}</td>
+                <td className="py-3 text-sm text-[var(--text-primary)]">{getCategoryLabel(transaction.category)}</td>
                 <td className="py-3">
                   <span
                     className={cn(

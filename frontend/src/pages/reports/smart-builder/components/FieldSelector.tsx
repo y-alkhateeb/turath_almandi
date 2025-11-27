@@ -55,35 +55,35 @@ function SortableFieldItem({ field, onToggleVisibility, onRemove }: SortableFiel
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 p-2 bg-white border rounded-md"
+      className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md"
     >
       <button
         type="button"
-        className="cursor-grab hover:bg-gray-100 p-1 rounded"
+        className="cursor-grab hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded"
         {...attributes}
         {...listeners}
       >
-        <GripVertical className="h-4 w-4 text-gray-400" />
+        <GripVertical className="h-4 w-4 text-gray-400 dark:text-gray-500" />
       </button>
 
-      <span className="flex-1 text-sm">{field.displayName}</span>
+      <span className="flex-1 text-sm text-gray-900 dark:text-gray-100">{field.displayName}</span>
 
       <button
         type="button"
         onClick={() => onToggleVisibility(field.id)}
-        className="p-1 hover:bg-gray-100 rounded"
+        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
       >
         {field.visible ? (
-          <Eye className="h-4 w-4 text-green-600" />
+          <Eye className="h-4 w-4 text-green-600 dark:text-green-400" />
         ) : (
-          <EyeOff className="h-4 w-4 text-gray-400" />
+          <EyeOff className="h-4 w-4 text-gray-400 dark:text-gray-500" />
         )}
       </button>
 
       <button
         type="button"
         onClick={() => onRemove(field.id)}
-        className="p-1 hover:bg-red-100 rounded"
+        className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"
       >
         <X className="h-4 w-4 text-red-500" />
       </button>
@@ -178,9 +178,9 @@ export function FieldSelector({ availableFields, selectedFields, onChange }: Fie
     <div className="grid grid-cols-2 gap-4">
       {/* Available Fields */}
       <div className="space-y-2">
-        <h4 className="font-medium text-sm">الحقول المتاحة</h4>
+        <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">الحقول المتاحة</h4>
         <div className="relative">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <Input
             placeholder="بحث..."
             value={searchTerm}
@@ -188,30 +188,30 @@ export function FieldSelector({ availableFields, selectedFields, onChange }: Fie
             className="pr-9"
           />
         </div>
-        <div className="border rounded-md p-2 h-64 overflow-y-auto space-y-1">
+        <div className="border border-gray-200 dark:border-gray-700 rounded-md p-2 h-64 overflow-y-auto space-y-1 bg-white dark:bg-gray-900">
           {filteredAvailable.map((field) => (
             <div
               key={field.id}
-              className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+              className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded cursor-pointer"
               onClick={() => handleAddField(field)}
             >
               <Checkbox checked={false} />
-              <span className="text-sm">{field.displayName}</span>
-              <span className="text-xs text-gray-400">({field.fieldName})</span>
+              <span className="text-sm text-gray-900 dark:text-gray-100">{field.displayName}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">({field.fieldName})</span>
             </div>
           ))}
           {filteredAvailable.length === 0 && (
-            <p className="text-center text-gray-400 py-4">لا توجد حقول</p>
+            <p className="text-center text-gray-400 dark:text-gray-500 py-4">لا توجد حقول</p>
           )}
         </div>
       </div>
 
       {/* Selected Fields */}
       <div className="space-y-2">
-        <h4 className="font-medium text-sm">
+        <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">
           الحقول المحددة ({selectedFields.length})
         </h4>
-        <div className="border rounded-md p-2 h-72 overflow-y-auto">
+        <div className="border border-gray-200 dark:border-gray-700 rounded-md p-2 h-72 overflow-y-auto bg-white dark:bg-gray-900">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -234,7 +234,7 @@ export function FieldSelector({ availableFields, selectedFields, onChange }: Fie
             </SortableContext>
           </DndContext>
           {selectedFields.length === 0 && (
-            <p className="text-center text-gray-400 py-4">
+            <p className="text-center text-gray-400 dark:text-gray-500 py-4">
               اختر الحقول من القائمة اليسرى
             </p>
           )}

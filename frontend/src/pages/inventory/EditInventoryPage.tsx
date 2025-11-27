@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { InventoryForm } from '@/components/InventoryForm';
-import { useInventory } from '@/hooks/useInventory';
+import { useInventoryItem } from '@/hooks/useInventory';
 import { Card } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { PageLoading } from '@/components/loading';
@@ -15,10 +15,7 @@ import { ErrorAlert } from '@/components/layouts';
 export const EditInventoryPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { data: items = [], isLoading, refetch } = useInventory();
-
-  // Find the item to edit
-  const item = items.find((i) => i.id === id);
+  const { data: item, isLoading, refetch, error } = useInventoryItem(id!);
 
   const handleSuccess = () => {
     navigate('/inventory');
@@ -32,7 +29,7 @@ export const EditInventoryPage = () => {
     return <PageLoading message="جاري تحميل بيانات الصنف..." />;
   }
 
-  if (!item) {
+  if (error || !item) {
     return (
       <PageLayout title="تعديل صنف" description="الصنف غير موجود">
         <ErrorAlert error="لم يتم العثور على الصنف المطلوب" />

@@ -339,7 +339,7 @@ export const useResignEmployee = () => {
   const queryClient = useQueryClient();
 
   return useMutation<Employee, ApiError, { id: string; resignDate: string }>({
-    mutationFn: ({ id, resignDate }) => employeeService.resign(id, resignDate),
+    mutationFn: ({ id, resignDate }) => employeeService.resign(id, { resignDate }),
 
     onSuccess: (updatedEmployee) => {
       // Invalidate employee queries
@@ -425,8 +425,8 @@ export const useDeleteSalaryPayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, ApiError, { employeeId: string; paymentId: string }>({
-    mutationFn: ({ employeeId, paymentId }) =>
-      employeeService.deleteSalaryPayment(employeeId, paymentId),
+    mutationFn: ({ paymentId }) =>
+      employeeService.deleteSalaryPayment(paymentId),
 
     onSuccess: (_, { employeeId }) => {
       // Invalidate related queries

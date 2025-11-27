@@ -49,7 +49,8 @@ type BranchSelectorProps<T extends FieldValues = any> =
 
 export function BranchSelector<T extends FieldValues = any>(props: BranchSelectorProps<T>) {
   const { user, isAdmin } = useAuth();
-  const { data: branches = [], isLoading: branchesLoading } = useBranches();
+  // Only show active branches in selectors
+  const { data: branches = [], isLoading: branchesLoading } = useBranches({ isActive: true });
 
   // Form mode with react-hook-form
   if (props.mode === 'form') {

@@ -149,6 +149,10 @@ export const AdvancesList: React.FC<AdvancesListProps> = ({
     );
   }
 
+  // Calculate totals from advances data
+  const totalAmount = data.advances.reduce((sum, a) => sum + Number(a.amount), 0);
+  const paidAmount = totalAmount - data.summary.totalRemaining;
+
   return (
     <div className="space-y-6">
       {/* Summary Card */}
@@ -158,25 +162,25 @@ export const AdvancesList: React.FC<AdvancesListProps> = ({
           <div>
             <p className="text-xs text-[var(--text-secondary)]">إجمالي السلف</p>
             <p className="text-lg font-bold text-[var(--text-primary)]">
-              {formatCurrency(data.summary.totalAmount)}
+              {formatCurrency(totalAmount)}
             </p>
           </div>
           <div>
             <p className="text-xs text-[var(--text-secondary)]">المبلغ المسدد</p>
             <p className="text-lg font-bold text-green-600">
-              {formatCurrency(data.summary.paidAmount)}
+              {formatCurrency(paidAmount)}
             </p>
           </div>
           <div>
             <p className="text-xs text-[var(--text-secondary)]">المبلغ المتبقي</p>
             <p className="text-lg font-bold text-amber-600">
-              {formatCurrency(data.summary.remainingAmount)}
+              {formatCurrency(data.summary.totalRemaining)}
             </p>
           </div>
         </div>
-        {data.summary.activeCount > 0 && (
+        {data.summary.totalActiveAdvances > 0 && (
           <p className="mt-3 text-xs text-[var(--text-secondary)]">
-            عدد السلف النشطة: {data.summary.activeCount}
+            عدد السلف النشطة: {data.summary.totalActiveAdvances}
           </p>
         )}
       </div>

@@ -92,22 +92,30 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
 
   const onSubmit = async (data: InventoryFormData) => {
     try {
-      const inventoryData = {
-        name: data.name,
-        quantity: parseFloat(data.quantity),
-        unit: data.unit,
-        costPerUnit: parseFloat(data.costPerUnit),
-        notes: data.notes || undefined,
-        branchId: data.branchId,
-      };
+      // For create mode, branchId is required - don't send empty string
+      const branchIdValue = data.branchId && data.branchId.trim() !== '' ? data.branchId : undefined;
 
       if (isEditMode) {
+        // Don't send branchId when updating
         await updateInventory.mutateAsync({
           id: item.id,
-          data: inventoryData,
+          data: {
+            name: data.name,
+            quantity: parseFloat(data.quantity),
+            unit: data.unit,
+            costPerUnit: parseFloat(data.costPerUnit),
+            notes: data.notes || undefined,
+          },
         });
       } else {
-        await createInventory.mutateAsync(inventoryData);
+        await createInventory.mutateAsync({
+          name: data.name,
+          quantity: parseFloat(data.quantity),
+          unit: data.unit,
+          costPerUnit: parseFloat(data.costPerUnit),
+          notes: data.notes || undefined,
+          branchId: branchIdValue,
+        });
 
         // Reset form on success (only for create mode)
         reset({

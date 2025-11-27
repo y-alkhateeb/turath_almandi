@@ -20,7 +20,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useBranches } from '@/hooks/useBranches';
-import type { ReportConfiguration, ReportField, ReportFilter } from '@/types/smart-reports.types';
+import type { ReportConfiguration, ReportField, ReportFilter, ReportAggregation } from '@/types/smart-reports.types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Date period options
@@ -118,6 +118,24 @@ const TEMPLATE_FIELDS: Record<TemplateType, ReportField[]> = {
   ],
 };
 
+// Aggregation definitions for each template
+const TEMPLATE_AGGREGATIONS: Record<TemplateType, ReportAggregation[]> = {
+  transactions: [
+    { field: 'amount', function: 'sum', alias: 'إجمالي المبالغ' },
+    { field: 'amount', function: 'count', alias: 'عدد المعاملات' },
+  ],
+  debts: [
+    { field: 'originalAmount', function: 'sum', alias: 'إجمالي المبلغ الأصلي' },
+    { field: 'remainingAmount', function: 'sum', alias: 'إجمالي المبلغ المتبقي' },
+    { field: 'originalAmount', function: 'count', alias: 'عدد الديون' },
+  ],
+  inventory: [
+    { field: 'quantity', function: 'sum', alias: 'إجمالي الكمية' },
+    { field: 'costPerUnit', function: 'sum', alias: 'إجمالي التكلفة' },
+    { field: 'name', function: 'count', alias: 'عدد الأصناف' },
+  ],
+};
+
 export function QuickTemplates({ onApplyTemplate, onExecute, isExecuting }: QuickTemplatesProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType | null>(null);
   const [datePeriod, setDatePeriod] = useState<DatePeriod>('this_month');
@@ -165,6 +183,7 @@ export function QuickTemplates({ onApplyTemplate, onExecute, isExecuting }: Quic
       fields,
       filters,
       orderBy: [{ field: templateType === 'inventory' ? 'name' : 'date', direction: 'desc' }],
+      aggregations: TEMPLATE_AGGREGATIONS[templateType],
       exportOptions: {
         formats: ['excel', 'pdf', 'csv'],
         includeCharts: false,

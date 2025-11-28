@@ -16,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Modal } from '@/components/Modal';
 import { Button } from '@/components/ui/Button';
+import { FormFieldInput } from '@/components/form';
 import type { CreateCurrencyInput } from '#/settings.types';
 
 // ============================================
@@ -110,25 +111,6 @@ export function AddCurrencyModal({
     onClose();
   };
 
-  // Common input classes
-  const inputClasses = `
-    w-full px-4 py-3
-    border border-[var(--border-color)] rounded-lg
-    focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-    bg-[var(--bg-primary)] text-[var(--text-primary)]
-    transition-colors
-    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
-  `;
-
-  const errorInputClasses = `
-    w-full px-4 py-3
-    border border-red-500 rounded-lg
-    focus:ring-2 focus:ring-red-500 focus:border-red-500
-    bg-[var(--bg-primary)] text-[var(--text-primary)]
-    transition-colors
-    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
-  `;
-
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="إضافة عملة جديدة" size="lg">
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
@@ -157,76 +139,45 @@ export function AddCurrencyModal({
         </div>
 
         {/* Currency Code */}
-        <div>
-          <label htmlFor="code" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            رمز العملة (ISO 4217) <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="code"
-            type="text"
-            placeholder="مثال: USD, EUR, IQD"
-            disabled={isSubmitting}
-            className={`${errors.code ? errorInputClasses : inputClasses} uppercase`}
-            {...register('code')}
-          />
-          {errors.code && (
-            <p className="mt-1 text-sm text-red-600">{errors.code.message}</p>
-          )}
-        </div>
+        <FormFieldInput
+          label="رمز العملة (ISO 4217)"
+          placeholder="مثال: USD, EUR, IQD"
+          error={errors.code}
+          required
+          disabled={isSubmitting}
+          inputClassName="uppercase"
+          {...register('code')}
+        />
 
         {/* Currency Symbol */}
-        <div>
-          <label htmlFor="symbol" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            رمز العملة <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="symbol"
-            type="text"
-            placeholder="مثال: $, €, د.ع"
-            disabled={isSubmitting}
-            className={errors.symbol ? errorInputClasses : inputClasses}
-            {...register('symbol')}
-          />
-          {errors.symbol && (
-            <p className="mt-1 text-sm text-red-600">{errors.symbol.message}</p>
-          )}
-        </div>
+        <FormFieldInput
+          label="رمز العملة"
+          placeholder="مثال: $, €, د.ع"
+          error={errors.symbol}
+          required
+          disabled={isSubmitting}
+          {...register('symbol')}
+        />
 
         {/* Arabic Name */}
-        <div>
-          <label htmlFor="nameAr" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الاسم بالعربية <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="nameAr"
-            type="text"
-            placeholder="مثال: دولار أمريكي"
-            disabled={isSubmitting}
-            className={errors.nameAr ? errorInputClasses : inputClasses}
-            {...register('nameAr')}
-          />
-          {errors.nameAr && (
-            <p className="mt-1 text-sm text-red-600">{errors.nameAr.message}</p>
-          )}
-        </div>
+        <FormFieldInput
+          label="الاسم بالعربية"
+          placeholder="مثال: دولار أمريكي"
+          error={errors.nameAr}
+          required
+          disabled={isSubmitting}
+          {...register('nameAr')}
+        />
 
         {/* English Name */}
-        <div>
-          <label htmlFor="nameEn" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            الاسم بالإنجليزية <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="nameEn"
-            type="text"
-            placeholder="Example: US Dollar"
-            disabled={isSubmitting}
-            className={errors.nameEn ? errorInputClasses : inputClasses}
-            {...register('nameEn')}
-          />
-          {errors.nameEn && (
-            <p className="mt-1 text-sm text-red-600">{errors.nameEn.message}</p>
-          )}
-        </div>
+        <FormFieldInput
+          label="الاسم بالإنجليزية"
+          placeholder="Example: US Dollar"
+          error={errors.nameEn}
+          required
+          disabled={isSubmitting}
+          {...register('nameEn')}
+        />
 
         {/* Warning about non-default */}
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">

@@ -30,96 +30,96 @@ const CATEGORY_ICONS: Record<string, string> = {
   OTHER_EXPENSE: 'lucide:more-horizontal',
 };
 
-// ألوان الفئات (تدرجات ناعمة)
+// ألوان الفئات (تدرجات واضحة للوضع النهاري)
 const CATEGORY_COLORS: Record<string, { bg: string; border: string; icon: string }> = {
   // Income - ألوان خضراء/زرقاء
   INVENTORY_SALES: {
-    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-    border: 'border-emerald-200 dark:border-emerald-700',
+    bg: 'bg-emerald-100 dark:bg-emerald-900/20',
+    border: 'border-emerald-300 dark:border-emerald-700',
     icon: 'text-emerald-600 dark:text-emerald-400',
   },
   CAPITAL_ADDITION: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-700',
+    bg: 'bg-blue-100 dark:bg-blue-900/20',
+    border: 'border-blue-300 dark:border-blue-700',
     icon: 'text-blue-600 dark:text-blue-400',
   },
   APP_PURCHASES: {
-    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-    border: 'border-indigo-200 dark:border-indigo-700',
+    bg: 'bg-indigo-100 dark:bg-indigo-900/20',
+    border: 'border-indigo-300 dark:border-indigo-700',
     icon: 'text-indigo-600 dark:text-indigo-400',
   },
   DEBT_PAYMENT: {
-    bg: 'bg-teal-50 dark:bg-teal-900/20',
-    border: 'border-teal-200 dark:border-teal-700',
+    bg: 'bg-teal-100 dark:bg-teal-900/20',
+    border: 'border-teal-300 dark:border-teal-700',
     icon: 'text-teal-600 dark:text-teal-400',
   },
   // Expense - ألوان متنوعة
   EMPLOYEE_SALARIES: {
-    bg: 'bg-purple-50 dark:bg-purple-900/20',
-    border: 'border-purple-200 dark:border-purple-700',
+    bg: 'bg-purple-100 dark:bg-purple-900/20',
+    border: 'border-purple-300 dark:border-purple-700',
     icon: 'text-purple-600 dark:text-purple-400',
   },
   WORKER_DAILY: {
-    bg: 'bg-orange-50 dark:bg-orange-900/20',
-    border: 'border-orange-200 dark:border-orange-700',
+    bg: 'bg-orange-100 dark:bg-orange-900/20',
+    border: 'border-orange-300 dark:border-orange-700',
     icon: 'text-orange-600 dark:text-orange-400',
   },
   SUPPLIES: {
-    bg: 'bg-cyan-50 dark:bg-cyan-900/20',
-    border: 'border-cyan-200 dark:border-cyan-700',
+    bg: 'bg-cyan-100 dark:bg-cyan-900/20',
+    border: 'border-cyan-300 dark:border-cyan-700',
     icon: 'text-cyan-600 dark:text-cyan-400',
   },
   MAINTENANCE: {
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-700',
+    bg: 'bg-amber-100 dark:bg-amber-900/20',
+    border: 'border-amber-300 dark:border-amber-700',
     icon: 'text-amber-600 dark:text-amber-400',
   },
   INVENTORY: {
-    bg: 'bg-rose-50 dark:bg-rose-900/20',
-    border: 'border-rose-200 dark:border-rose-700',
+    bg: 'bg-rose-100 dark:bg-rose-900/20',
+    border: 'border-rose-300 dark:border-rose-700',
     icon: 'text-rose-600 dark:text-rose-400',
   },
   DEBT: {
-    bg: 'bg-red-50 dark:bg-red-900/20',
-    border: 'border-red-200 dark:border-red-700',
+    bg: 'bg-red-100 dark:bg-red-900/20',
+    border: 'border-red-300 dark:border-red-700',
     icon: 'text-red-600 dark:text-red-400',
   },
   COMPLIMENTARY: {
-    bg: 'bg-pink-50 dark:bg-pink-900/20',
-    border: 'border-pink-200 dark:border-pink-700',
+    bg: 'bg-pink-100 dark:bg-pink-900/20',
+    border: 'border-pink-300 dark:border-pink-700',
     icon: 'text-pink-600 dark:text-pink-400',
   },
   DISCOUNT: {
-    bg: 'bg-lime-50 dark:bg-lime-900/20',
-    border: 'border-lime-200 dark:border-lime-700',
+    bg: 'bg-lime-100 dark:bg-lime-900/20',
+    border: 'border-lime-300 dark:border-lime-700',
     icon: 'text-lime-600 dark:text-lime-400',
   },
   TABLE: {
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-    border: 'border-yellow-200 dark:border-yellow-700',
+    bg: 'bg-yellow-100 dark:bg-yellow-900/20',
+    border: 'border-yellow-300 dark:border-yellow-700',
     icon: 'text-yellow-600 dark:text-yellow-400',
   },
   CASHIER_SHORTAGE: {
-    bg: 'bg-slate-50 dark:bg-slate-900/20',
-    border: 'border-slate-200 dark:border-slate-700',
+    bg: 'bg-slate-100 dark:bg-slate-900/20',
+    border: 'border-slate-300 dark:border-slate-700',
     icon: 'text-slate-600 dark:text-slate-400',
   },
   RETURNS: {
-    bg: 'bg-violet-50 dark:bg-violet-900/20',
-    border: 'border-violet-200 dark:border-violet-700',
+    bg: 'bg-violet-100 dark:bg-violet-900/20',
+    border: 'border-violet-300 dark:border-violet-700',
     icon: 'text-violet-600 dark:text-violet-400',
   },
   OTHER_EXPENSE: {
-    bg: 'bg-gray-50 dark:bg-gray-900/20',
-    border: 'border-gray-200 dark:border-gray-700',
+    bg: 'bg-gray-100 dark:bg-gray-900/20',
+    border: 'border-gray-300 dark:border-gray-700',
     icon: 'text-gray-600 dark:text-gray-400',
   },
 };
 
 // الألوان الافتراضية
 const DEFAULT_COLORS = {
-  bg: 'bg-gray-50 dark:bg-gray-900/20',
-  border: 'border-gray-200 dark:border-gray-700',
+  bg: 'bg-gray-100 dark:bg-gray-900/20',
+  border: 'border-gray-300 dark:border-gray-700',
   icon: 'text-gray-600 dark:text-gray-400',
 };
 
@@ -171,14 +171,15 @@ export function CategorySelector({
                 disabled && 'opacity-50 cursor-not-allowed',
                 isSelected
                   ? cn(
-                      'ring-2 ring-primary-500 ring-offset-2 dark:ring-offset-gray-900',
+                      'ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900',
                       'border-primary-500 dark:border-primary-400',
                       'bg-primary-50 dark:bg-primary-900/30',
-                      'shadow-lg shadow-primary-100 dark:shadow-primary-900/20'
+                      'shadow-lg shadow-primary-200 dark:shadow-primary-900/20'
                     )
                   : cn(
                       colors.bg,
                       colors.border,
+                      'shadow-sm',
                       'hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600'
                     )
               )}
@@ -199,7 +200,7 @@ export function CategorySelector({
                   'p-2 rounded-lg',
                   isSelected
                     ? 'bg-primary-100 dark:bg-primary-800/50'
-                    : 'bg-white/50 dark:bg-gray-800/50'
+                    : 'bg-white dark:bg-gray-800/50 shadow-sm'
                 )}
               >
                 <Icon

@@ -99,8 +99,7 @@ const TEMPLATE_FIELDS: Record<TemplateType, ReportField[]> = {
     { id: uuidv4(), sourceField: 'category', displayName: 'الفئة', dataType: 'string', visible: true, order: 2 },
     { id: uuidv4(), sourceField: 'amount', displayName: 'المبلغ', dataType: 'number', visible: true, order: 3, format: 'currency' },
     { id: uuidv4(), sourceField: 'paymentMethod', displayName: 'طريقة الدفع', dataType: 'enum', visible: true, order: 4 },
-    { id: uuidv4(), sourceField: 'employeeVendorName', displayName: 'اسم الموظف/المورد', dataType: 'string', visible: true, order: 5 },
-    { id: uuidv4(), sourceField: 'notes', displayName: 'الملاحظات', dataType: 'string', visible: true, order: 6 },
+    { id: uuidv4(), sourceField: 'notes', displayName: 'الملاحظات', dataType: 'string', visible: true, order: 5 },
   ],
   debts: [
     { id: uuidv4(), sourceField: 'creditorName', displayName: 'اسم الدائن', dataType: 'string', visible: true, order: 0 },

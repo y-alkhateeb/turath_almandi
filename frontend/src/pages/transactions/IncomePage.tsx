@@ -6,6 +6,7 @@ import { Alert } from '@/components/ui/Alert';
 import { TransactionType } from '../../types/transactions.types';
 import { CurrencyAmountCompact } from '@/components/currency';
 import { getCategoryLabel } from '@/constants/transactionCategories';
+import { formatDate } from '@/utils/format';
 
 /**
  * Income Page - Example usage of IncomeForm
@@ -128,11 +129,7 @@ export const IncomePage = () => {
                   className="hover:bg-[var(--bg-tertiary)] transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                    {new Date(transaction.date).toLocaleDateString('ar-IQ', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    {formatDate(transaction.date)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
                     <CurrencyAmountCompact amount={transaction.amount} />

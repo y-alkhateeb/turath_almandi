@@ -248,9 +248,6 @@ export default function TransactionTable({
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   الفئة
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
-                  الاسم
-                </th>
                 {isAdmin && (
                   <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     الفرع
@@ -265,7 +262,7 @@ export default function TransactionTable({
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={isAdmin ? 8 : 7}
+                    colSpan={isAdmin ? 7 : 6}
                     className="px-6 py-12 text-center text-[var(--text-secondary)]"
                   >
                     <div className="flex justify-center items-center">
@@ -277,7 +274,7 @@ export default function TransactionTable({
               ) : transactions.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={isAdmin ? 8 : 7}
+                    colSpan={isAdmin ? 7 : 6}
                     className="px-6 py-12 text-center text-[var(--text-secondary)]"
                   >
                     لا توجد عمليات
@@ -305,9 +302,6 @@ export default function TransactionTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
                       {getCategoryLabel(transaction.category)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                      {transaction.employeeVendorName || '-'}
                     </td>
                     {isAdmin && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">

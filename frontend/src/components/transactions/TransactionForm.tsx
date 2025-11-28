@@ -65,7 +65,6 @@ const createTransactionSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   category: z.string().optional(),
   date: z.string().min(1, { message: 'التاريخ مطلوب' }),
-  employeeVendorName: z.string().optional(),
   notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
   branchId: z.string().optional(),
 });
@@ -97,7 +96,6 @@ const updateTransactionSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod).optional(),
   category: z.string().optional(),
   date: z.string().optional(),
-  employeeVendorName: z.string().optional(),
   notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
 });
 
@@ -168,7 +166,6 @@ export function TransactionForm({
             paymentMethod: initialData.paymentMethod || undefined,
             category: initialData.category || '',
             date: initialData.date.split('T')[0], // YYYY-MM-DD
-            employeeVendorName: initialData.employeeVendorName || '',
             notes: initialData.notes || '',
           }
         : {
@@ -177,7 +174,6 @@ export function TransactionForm({
             paymentMethod: PaymentMethod.CASH,
             category: 'SALES', // Default to first income category
             date: new Date().toISOString().split('T')[0], // Today
-            employeeVendorName: '',
             notes: '',
             branchId: isAdmin ? undefined : user?.branchId,
           },
@@ -191,7 +187,6 @@ export function TransactionForm({
         paymentMethod: initialData.paymentMethod || undefined,
         category: initialData.category || '',
         date: initialData.date.split('T')[0],
-        employeeVendorName: initialData.employeeVendorName || '',
         notes: initialData.notes || '',
       });
     }
@@ -229,7 +224,6 @@ export function TransactionForm({
           paymentMethod: createData.paymentMethod,
           category: createData.category || undefined,
           date: createData.date,
-          employeeVendorName: createData.employeeVendorName || undefined,
           notes: createData.notes || undefined,
           branchId: createData.branchId || undefined,
         };
@@ -243,7 +237,6 @@ export function TransactionForm({
           paymentMethod: updateData.paymentMethod,
           category: updateData.category || undefined,
           date: updateData.date,
-          employeeVendorName: updateData.employeeVendorName || undefined,
           notes: updateData.notes || undefined,
         };
         await onSubmit(submitData);
@@ -393,25 +386,6 @@ export function TransactionForm({
             required={mode === 'create'}
             disabled={isSubmitting}
           />
-
-          {/* Employee/Vendor Name - Show for expenses or if type not selected */}
-          {(mode === 'edit' ||
-            transactionType === TransactionType.EXPENSE ||
-            transactionType === undefined) && (
-            <FormInput
-              name="employeeVendorName"
-              label={
-                transactionType === TransactionType.EXPENSE
-                  ? 'اسم الموظف أو البائع'
-                  : 'اسم الموظف/البائع'
-              }
-              type="text"
-              placeholder="أدخل الاسم (اختياري)"
-              register={register}
-              error={errors.employeeVendorName}
-              disabled={isSubmitting}
-            />
-          )}
 
           {/* Notes */}
           <FormTextarea

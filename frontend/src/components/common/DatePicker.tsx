@@ -26,11 +26,11 @@
 
 import { forwardRef } from 'react';
 import dayjs from 'dayjs';
-import 'dayjs/locale/ar';
+import 'dayjs/locale/en';
 import { FieldError } from 'react-hook-form';
 
-// Configure dayjs to use Arabic locale
-dayjs.locale('ar');
+// Configure dayjs to use English locale
+dayjs.locale('en');
 
 // ============================================
 // TYPES
@@ -95,13 +95,13 @@ function formatDateForInput(date: string | Date | null | undefined): string {
 }
 
 /**
- * Format date to Arabic readable format for display
+ * Format date to readable format for display (DD/MM/YYYY)
  */
-function formatDateArabic(date: string | Date | null | undefined): string {
+function formatDateDisplay(date: string | Date | null | undefined): string {
   if (!date) return '';
 
   try {
-    return dayjs(date).locale('ar').format('DD MMMM YYYY');
+    return dayjs(date).format('DD/MM/YYYY');
   } catch {
     return '';
   }
@@ -148,8 +148,8 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     // Current value formatted for input
     const inputValue = formatDateForInput(value);
 
-    // Arabic formatted date for display (optional enhancement)
-    const arabicDate = inputValue ? formatDateArabic(inputValue) : '';
+    // Formatted date for display (optional enhancement)
+    const displayDate = inputValue ? formatDateDisplay(inputValue) : '';
 
     // Handle date change
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,10 +234,10 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
           )}
         </div>
 
-        {/* Arabic Date Display (Optional) */}
-        {arabicDate && !error && (
+        {/* Date Display (Optional) */}
+        {displayDate && !error && (
           <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">
-            {arabicDate}
+            {displayDate}
           </p>
         )}
 
@@ -260,14 +260,14 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
           <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">
             {minDateStr && maxDateStr && (
               <>
-                من {formatDateArabic(minDateStr)} إلى {formatDateArabic(maxDateStr)}
+                من {formatDateDisplay(minDateStr)} إلى {formatDateDisplay(maxDateStr)}
               </>
             )}
             {minDateStr && !maxDateStr && (
-              <>التاريخ يجب أن يكون من {formatDateArabic(minDateStr)}</>
+              <>التاريخ يجب أن يكون من {formatDateDisplay(minDateStr)}</>
             )}
             {!minDateStr && maxDateStr && (
-              <>التاريخ يجب أن يكون قبل {formatDateArabic(maxDateStr)}</>
+              <>التاريخ يجب أن يكون قبل {formatDateDisplay(maxDateStr)}</>
             )}
           </p>
         )}

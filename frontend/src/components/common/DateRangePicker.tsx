@@ -25,12 +25,12 @@
 
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import 'dayjs/locale/ar';
+import 'dayjs/locale/en';
 import { FieldError } from 'react-hook-form';
 import { DatePicker } from './DatePicker';
 
 // Configure dayjs
-dayjs.locale('ar');
+dayjs.locale('en');
 
 // ============================================
 // TYPES
@@ -303,8 +303,8 @@ export function DateRangePicker({
         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg" dir="rtl">
           <p className="text-sm text-blue-800">
             <span className="font-medium">الفترة المحددة:</span>{' '}
-            {dayjs(value.start).locale('ar').format('DD MMMM YYYY')} -{' '}
-            {dayjs(value.end).locale('ar').format('DD MMMM YYYY')}
+            {dayjs(value.start).format('DD/MM/YYYY')} -{' '}
+            {dayjs(value.end).format('DD/MM/YYYY')}
           </p>
           <p className="text-xs text-blue-700 mt-1">
             {dayjs(value.end).diff(dayjs(value.start), 'day') + 1} يوم

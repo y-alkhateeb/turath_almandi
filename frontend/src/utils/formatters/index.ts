@@ -3,6 +3,7 @@
  */
 
 import dayjs from 'dayjs';
+import 'dayjs/locale/en';
 import 'dayjs/locale/ar';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -10,7 +11,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 // Configure dayjs
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
-dayjs.locale('ar');
+dayjs.locale('en');
 
 /**
  * Format number as Iraqi Dinar currency
@@ -25,10 +26,10 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
- * Format date in Arabic (long format)
+ * Format date in English (DD/MM/YYYY format)
  */
 export function formatDate(date: string | Date): string {
-  return dayjs(date).format('D MMMM YYYY');
+  return dayjs(date).format('DD/MM/YYYY');
 }
 
 /**
@@ -39,10 +40,10 @@ export function formatDateShort(date: string | Date): string {
 }
 
 /**
- * Format date and time
+ * Format date and time (DD/MM/YYYY h:mm A)
  */
 export function formatDateTime(date: string | Date): string {
-  return dayjs(date).format('D MMMM YYYY، h:mm A');
+  return dayjs(date).format('DD/MM/YYYY h:mm A');
 }
 
 /**
@@ -56,7 +57,7 @@ export function formatTime(date: string | Date): string {
  * Format date relative to now (e.g., "منذ ساعتين")
  */
 export function formatRelativeTime(date: string | Date): string {
-  return dayjs(date).fromNow();
+  return dayjs(date).locale('ar').fromNow();
 }
 
 /**

@@ -7,6 +7,7 @@ import { TransactionType, PaymentMethod, type Transaction } from '../types/trans
 import { useUpdateTransaction } from '../hooks/useTransactions';
 import { CurrencyAmountCompact } from '@/components/currency';
 import { getCategoryLabel } from '@/constants/transactionCategories';
+import { formatDate } from '@/utils/format';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -22,7 +23,6 @@ const editTransactionSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod).nullable().optional(),
   category: z.string().optional(),
   date: z.date(),
-  employeeVendorName: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -57,7 +57,6 @@ export default function TransactionModal({
         paymentMethod: transaction.paymentMethod || undefined,
         category: transaction.category || '',
         date: new Date(transaction.date),
-        employeeVendorName: transaction.employeeVendorName || '',
         notes: transaction.notes || '',
       });
     }
@@ -74,19 +73,10 @@ export default function TransactionModal({
         paymentMethod: data.paymentMethod,
         category: data.category || undefined,
         date: data.date.toISOString().split('T')[0],
-        employeeVendorName: data.employeeVendorName || undefined,
         notes: data.notes || undefined,
       },
     });
     onClose();
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-IQ', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
   };
 
   const getTypeLabel = (type: TransactionType) => {
@@ -161,15 +151,6 @@ export default function TransactionModal({
               </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
                 {getCategoryLabel(transaction.category)}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                {transaction.type === 'INCOME' ? 'اسم العميل' : 'اسم الموظف/المورد'}
-              </label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.employeeVendorName || '-'}
               </div>
             </div>
 
@@ -318,19 +299,6 @@ export default function TransactionModal({
                 {...register('category')}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="مثال: مبيعات، رواتب، إيجار..."
-              />
-            </div>
-
-            {/* Employee/Vendor Name */}
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                {transactionType === 'INCOME' ? 'اسم العميل' : 'اسم الموظف/المورد'}
-              </label>
-              <input
-                type="text"
-                {...register('employeeVendorName')}
-                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="اسم..."
               />
             </div>
           </div>

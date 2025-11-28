@@ -13,6 +13,7 @@ import type { QueryResult, ReportField, ExportFormat } from '@/types/smart-repor
 import { useCurrencyStore } from '@/stores/currencyStore';
 import { formatCurrencyAuto } from '@/utils/currency.utils';
 import { getCategoryLabel } from '@/constants/transactionCategories';
+import { formatDate, formatDateTime } from '@/utils/format';
 
 interface ReportPreviewProps {
   result: QueryResult | null;
@@ -260,14 +261,14 @@ function formatCellValue(
   if (format === 'date-short') {
     const dateValue = value instanceof Date ? value : new Date(value as string);
     if (!isNaN(dateValue.getTime())) {
-      return dateValue.toLocaleDateString('ar-IQ');
+      return formatDate(dateValue);
     }
   }
 
   if (format === 'date-long') {
     const dateValue = value instanceof Date ? value : new Date(value as string);
     if (!isNaN(dateValue.getTime())) {
-      return dateValue.toLocaleString('ar-IQ');
+      return formatDateTime(dateValue);
     }
   }
 

@@ -21,14 +21,14 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
- * Format date in Arabic
+ * Format date in English (DD/MM/YYYY format)
  */
 export function formatDate(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('ar-IQ', {
+  return new Intl.DateTimeFormat('en-GB', {
     year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   }).format(dateObj);
 }
 
@@ -37,7 +37,7 @@ export function formatDate(date: string | Date): string {
  */
 export function formatDateShort(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('ar-IQ', {
+  return new Intl.DateTimeFormat('en-GB', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

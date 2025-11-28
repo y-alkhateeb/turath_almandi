@@ -127,12 +127,6 @@ export function TransactionList({
       render: (transaction) => transaction.branch?.name || '-',
     },
     {
-      key: 'employeeVendorName',
-      header: 'الاسم',
-      width: '150px',
-      render: (transaction) => transaction.employeeVendorName || '-',
-    },
-    {
       key: 'notes',
       header: 'ملاحظات',
       render: (transaction) => transaction.notes || '-',

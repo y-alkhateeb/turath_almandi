@@ -3,6 +3,7 @@
  */
 
 import dayjs from 'dayjs';
+import 'dayjs/locale/en';
 import 'dayjs/locale/ar';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -10,7 +11,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 // Configure dayjs
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
-dayjs.locale('ar');
+dayjs.locale('en');
 
 /**
  * Format number as Iraqi Dinar currency
@@ -38,20 +39,17 @@ export function formatCurrency(
 }
 
 /**
- * Format date in Arabic (long format)
+ * Format date in English (DD/MM/YYYY format)
  * @param date - Date to format (returns '-' if null/undefined)
- * @param locale - Locale string (default: 'ar-IQ')
  */
 export function formatDate(
-  date: string | Date | null | undefined,
-  locale: string = 'ar-IQ'
+  date: string | Date | null | undefined
 ): string {
   if (!date) return '-';
   const dayjsDate = dayjs(date);
   if (!dayjsDate.isValid()) return '-';
 
-  // Set locale for this specific formatting
-  return dayjsDate.locale(locale === 'ar-IQ' ? 'ar' : locale).format('D MMMM YYYY');
+  return dayjsDate.format('DD/MM/YYYY');
 }
 
 /**
@@ -62,7 +60,7 @@ export function formatDateShort(date: string | Date): string {
 }
 
 /**
- * Format date for table display (YYYY/MM/DD in Arabic numerals)
+ * Format date for table display (DD/MM/YYYY)
  * Used in tables and lists for consistent date display
  */
 export function formatDateTable(dateString: string | Date | null | undefined): string {
@@ -70,27 +68,21 @@ export function formatDateTable(dateString: string | Date | null | undefined): s
   const dayjsDate = dayjs(dateString);
   if (!dayjsDate.isValid()) return '-';
 
-  return new Date(dateString).toLocaleDateString('ar-IQ', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+  return dayjsDate.format('DD/MM/YYYY');
 }
 
 /**
- * Format date and time
+ * Format date and time (DD/MM/YYYY h:mm A)
  * @param date - Date to format (returns '-' if null/undefined)
- * @param locale - Locale string (default: 'ar-IQ')
  */
 export function formatDateTime(
-  date: string | Date | null | undefined,
-  locale: string = 'ar-IQ'
+  date: string | Date | null | undefined
 ): string {
   if (!date) return '-';
   const dayjsDate = dayjs(date);
   if (!dayjsDate.isValid()) return '-';
 
-  return dayjsDate.locale(locale === 'ar-IQ' ? 'ar' : locale).format('D MMMM YYYY، h:mm A');
+  return dayjsDate.format('DD/MM/YYYY h:mm A');
 }
 
 /**
@@ -103,17 +95,15 @@ export function formatTime(date: string | Date): string {
 /**
  * Format date relative to now (e.g., "منذ ساعتين")
  * @param date - Date to format (returns '-' if null/undefined)
- * @param locale - Locale string (default: 'ar')
  */
 export function formatRelativeTime(
-  date: string | Date | null | undefined,
-  locale: string = 'ar'
+  date: string | Date | null | undefined
 ): string {
   if (!date) return '-';
   const dayjsDate = dayjs(date);
   if (!dayjsDate.isValid()) return '-';
 
-  return dayjsDate.locale(locale).fromNow();
+  return dayjsDate.locale('ar').fromNow();
 }
 
 /**

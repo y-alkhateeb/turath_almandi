@@ -161,15 +161,6 @@ export const ViewTransactionPage = () => {
 
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                {transaction.type === 'INCOME' ? 'اسم العميل' : 'اسم الموظف/المورد'}
-              </label>
-              <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">
-                {transaction.employeeVendorName || '-'}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 الفرع
               </label>
               <div className="px-3 py-2 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md">

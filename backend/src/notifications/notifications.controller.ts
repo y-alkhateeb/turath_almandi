@@ -62,7 +62,7 @@ export class NotificationsController {
    */
   @Get('unread/count')
   async getUnreadCount(@CurrentUser() user: RequestUser) {
-    const count = await this.notificationsService.getUnreadCount(user.id);
+    const count = await this.notificationsService.getUnreadCount(user);
     return { count };
   }
 
@@ -71,7 +71,7 @@ export class NotificationsController {
    */
   @Get('unread')
   getUnreadNotifications(@CurrentUser() user: RequestUser) {
-    return this.notificationsService.getUnreadNotifications(user.id);
+    return this.notificationsService.getUnreadNotifications(user);
   }
 
   /**
@@ -88,7 +88,7 @@ export class NotificationsController {
   @Patch('read-all')
   @HttpCode(HttpStatus.OK)
   markAllAsRead(@CurrentUser() user: RequestUser) {
-    return this.notificationsService.markAllAsRead(user.id);
+    return this.notificationsService.markAllAsRead(user);
   }
 
   /**

@@ -5,6 +5,7 @@ import { NotificationSeverity, UserRole, TransactionType } from '../common/types
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
 import { BRANCH_SELECT, USER_SELECT } from '../common/constants/prisma-includes';
 import { getCurrentTimestamp } from '../common/utils/date.utils';
+import { RequestUser } from '../common/interfaces';
 
 export interface CreateNotificationDto {
   type: string;
@@ -204,15 +205,34 @@ export class NotificationsService {
   }
 
   /**
+   * Build where clause for notifications based on user role and branch
+   * Admins see all notifications, accountants only see their branch's notifications
+   */
+  private buildUserNotificationFilter(user: RequestUser): Prisma.NotificationWhereInput {
+    const filter: Prisma.NotificationWhereInput = {
+      isRead: false,
+    };
+
+    // Accountants only see notifications for their branch
+    if (user.role === UserRole.ACCOUNTANT && user.branchId) {
+      filter.branchId = user.branchId;
+    }
+    // Admins see all notifications (no branch filter)
+
+    return filter;
+  }
+
+  /**
    * Find all unread notifications for a user
-   * @param userId - User ID
+   * Admins see all notifications, accountants only see their branch's notifications
+   * @param user - Current user
    * @returns Array of unread notifications
    */
-  async getUnreadNotifications(userId: string): Promise<NotificationWithRelations[]> {
+  async getUnreadNotifications(user: RequestUser): Promise<NotificationWithRelations[]> {
+    const where = this.buildUserNotificationFilter(user);
+
     return this.prisma.notification.findMany({
-      where: {
-        isRead: false,
-      },
+      where,
       orderBy: {
         createdAt: 'desc',
       },
@@ -229,14 +249,15 @@ export class NotificationsService {
 
   /**
    * Get count of unread notifications for a user
-   * @param userId - User ID
+   * Admins see all notifications count, accountants only see their branch's count
+   * @param user - Current user
    * @returns Count of unread notifications
    */
-  async getUnreadCount(userId: string): Promise<number> {
+  async getUnreadCount(user: RequestUser): Promise<number> {
+    const where = this.buildUserNotificationFilter(user);
+
     return this.prisma.notification.count({
-      where: {
-        isRead: false,
-      },
+      where,
     });
   }
 
@@ -522,14 +543,13 @@ export class NotificationsService {
   }
 
   /**
-   * Mark all unread notifications as read
-   * @param userId - User ID (optional, currently notifications are global)
+   * Mark all unread notifications as read for a user
+   * Admins mark all as read, accountants only mark their branch's notifications
+   * @param user - Current user
    * @returns Count of updated notifications
    */
-  async markAllAsRead(userId?: string): Promise<{ count: number }> {
-    const where: Prisma.NotificationWhereInput = {
-      isRead: false,
-    };
+  async markAllAsRead(user: RequestUser): Promise<{ count: number }> {
+    const where = this.buildUserNotificationFilter(user);
 
     const result = await this.prisma.notification.updateMany({
       where,
@@ -539,7 +559,7 @@ export class NotificationsService {
       },
     });
 
-    this.logger.log(`Marked ${result.count} notifications as read`);
+    this.logger.log(`Marked ${result.count} notifications as read for user ${user.username}`);
 
     return { count: result.count };
   }

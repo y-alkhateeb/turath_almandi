@@ -251,9 +251,9 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
             )}
           />
           {errors.username && (
-            <p className="mt-1 text-sm text-red-600 text-right">{errors.username.message}</p>
+            <p className="mt-1 text-sm text-red-600" dir="rtl">{errors.username.message}</p>
           )}
-          <p className="mt-1 text-xs text-[var(--text-secondary)] text-right">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">
             3-50 حرف، أحرف إنجليزية وأرقام فقط
           </p>
         </div>
@@ -268,7 +268,7 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
           <div className="w-full px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)]">
             {initialData.username}
           </div>
-          <p className="mt-1 text-xs text-[var(--text-secondary)] text-right">لا يمكن تغيير اسم المستخدم</p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">لا يمكن تغيير اسم المستخدم</p>
         </div>
       )}
 
@@ -295,9 +295,9 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
           )}
         />
         {errors.password && (
-          <p className="mt-1 text-sm text-red-600 text-right">{errors.password.message}</p>
+          <p className="mt-1 text-sm text-red-600" dir="rtl">{errors.password.message}</p>
         )}
-        <p className="mt-1 text-xs text-[var(--text-secondary)] text-right">
+        <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">
           8 أحرف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص (@$!%*?&)
         </p>
       </div>
@@ -352,9 +352,9 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
             )}
           />
           {errors.branchId && (
-            <p className="mt-1 text-sm text-red-600 text-right">{errors.branchId.message}</p>
+            <p className="mt-1 text-sm text-red-600" dir="rtl">{errors.branchId.message}</p>
           )}
-          <p className="mt-1 text-xs text-[var(--text-secondary)] text-right">الفرع الذي سيعمل فيه المحاسب</p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">الفرع الذي سيعمل فيه المحاسب</p>
         </div>
       )}
 
@@ -402,7 +402,7 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
               </div>
             )}
           />
-          <p className="mt-1 text-xs text-[var(--text-secondary)] text-right">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">
             الحسابات المعطلة لا يمكنها تسجيل الدخول
           </p>
         </div>

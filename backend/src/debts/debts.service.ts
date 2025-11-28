@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { PayDebtDto } from './dto/pay-debt.dto';
 import { Prisma } from '@prisma/client';
-import { UserRole, DebtStatus } from '../common/types/prisma-enums';
+import { UserRole, DebtStatus, TransactionType, PaymentMethod } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebSocketGatewayService } from '../websocket/websocket.gateway';
@@ -335,6 +335,21 @@ export class DebtsService {
           paymentDate: formatDateForDB(payDebtDto.paymentDate),
           notes: payDebtDto.notes || null,
           recordedBy: user.id,
+        },
+      });
+
+      // Create income transaction for debt payment
+      const transactionNotes = `دفع دين - ${debt.creditorName}${payDebtDto.notes ? ` - ${payDebtDto.notes}` : ''}`;
+      await tx.transaction.create({
+        data: {
+          type: TransactionType.INCOME,
+          amount: payDebtDto.amountPaid,
+          paymentMethod: PaymentMethod.CASH,
+          category: 'DEBT_PAYMENT',
+          date: formatDateForDB(payDebtDto.paymentDate),
+          notes: transactionNotes,
+          branchId: debt.branchId,
+          createdBy: user.id,
         },
       });
 

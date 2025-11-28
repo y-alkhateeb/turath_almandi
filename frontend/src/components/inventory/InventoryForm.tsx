@@ -10,16 +10,15 @@
  * - BranchSelector for admins
  * - Arabic labels and error messages
  * - Strict typing matching backend DTOs
+ *
+ * Uses FormField components with forwardRef for proper react-hook-form integration
  */
 
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormInput } from '@/components/form/FormInput';
-import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
-import { FormTextarea } from '@/components/form/FormTextarea';
-import { BranchSelector } from '@/components/form/BranchSelector';
+import { BranchSelector, FormFieldInput, FormFieldSelect, FormFieldTextarea } from '@/components/form';
 import { useAuth } from '@/hooks/useAuth';
 import { InventoryUnit } from '@/types/enum';
 import { formatCurrency } from '@/utils/format';
@@ -103,7 +102,7 @@ export interface InventoryFormProps {
 /**
  * Unit options (Arabic)
  */
-const unitOptions: SelectOption[] = [
+const unitOptions = [
   { value: InventoryUnit.KG, label: 'كيلو (KG)' },
   { value: InventoryUnit.PIECE, label: 'قطعة (PIECE)' },
   { value: InventoryUnit.LITER, label: 'لتر (LITER)' },
@@ -219,40 +218,37 @@ export function InventoryForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
       {/* Item Name */}
-      <FormInput
-        name="name"
+      <FormFieldInput
         label="اسم الصنف"
-        type="text"
         placeholder="أدخل اسم الصنف"
-        register={register}
         error={errors.name}
         required
         disabled={isSubmitting}
+        {...register('name')}
       />
 
       {/* Unit */}
-      <FormSelect
-        name="unit"
+      <FormFieldSelect
         label="الوحدة"
         options={unitOptions}
-        register={register}
+        placeholder="اختر الوحدة"
         error={errors.unit}
         required
         disabled={isSubmitting}
+        {...register('unit')}
       />
 
       {/* Quantity - Edit mode only */}
       {mode === 'edit' && (
-        <FormInput
-          name="quantity"
+        <FormFieldInput
           label="الكمية"
           type="number"
           step="0.01"
           min="0"
           placeholder="أدخل الكمية"
-          register={register}
           error={errors.quantity}
           disabled={isSubmitting}
+          {...register('quantity', { valueAsNumber: true })}
         />
       )}
 
@@ -260,29 +256,27 @@ export function InventoryForm({
       {mode === 'edit' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Cost Per Unit (Purchase Price) */}
-          <FormInput
-            name="costPerUnit"
+          <FormFieldInput
             label="سعر الشراء"
             type="number"
             step="0.01"
             min="0"
             placeholder="أدخل سعر الشراء"
-            register={register}
             error={errors.costPerUnit}
             disabled={isSubmitting}
+            {...register('costPerUnit', { valueAsNumber: true })}
           />
 
           {/* Selling Price */}
-          <FormInput
-            name="sellingPrice"
+          <FormFieldInput
             label="سعر البيع"
             type="number"
             step="0.01"
             min="0"
             placeholder="أدخل سعر البيع (اختياري)"
-            register={register}
             error={errors.sellingPrice}
             disabled={isSubmitting}
+            {...register('sellingPrice', { valueAsNumber: true })}
           />
         </div>
       )}
@@ -338,15 +332,14 @@ export function InventoryForm({
       )}
 
       {/* Notes */}
-      <FormTextarea
-        name="notes"
+      <FormFieldTextarea
         label="ملاحظات"
-        placeholder="أدخل ملاحظات إضافية (اختياري)"
         rows={3}
         maxLength={1000}
-        register={register}
+        placeholder="أدخل ملاحظات إضافية (اختياري)"
         error={errors.notes}
         disabled={isSubmitting}
+        {...register('notes')}
       />
 
       {/* Form Actions */}

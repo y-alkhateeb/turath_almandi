@@ -290,6 +290,8 @@ export function TransactionFormRedesigned({
           quantity: selectedInventoryItem.quantity,
           operationType: inventoryOperationType,
           unitPrice: selectedInventoryItem.unitPrice,
+          // Include selling price for PURCHASE operations
+          sellingPrice: inventoryOperationType === 'PURCHASE' ? selectedInventoryItem.sellingPrice : undefined,
         };
       }
 

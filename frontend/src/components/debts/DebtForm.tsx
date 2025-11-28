@@ -9,14 +9,14 @@
  * - BranchSelector for admins
  * - Arabic labels and error messages
  * - Strict typing matching backend DTOs
+ *
+ * Uses FormField components with forwardRef for proper react-hook-form integration
  */
 
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormInput } from '@/components/form/FormInput';
-import { FormTextarea } from '@/components/form/FormTextarea';
-import { BranchSelector, DateInput } from '@/components/form';
+import { BranchSelector, FormFieldInput, FormFieldTextarea, FormFieldDate } from '@/components/form';
 import { useAuth } from '@/hooks/useAuth';
 import type { CreateDebtInput } from '#/entity';
 
@@ -128,29 +128,26 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
       {/* Creditor Name */}
-      <FormInput
-        name="creditorName"
+      <FormFieldInput
         label="اسم الدائن"
-        type="text"
         placeholder="أدخل اسم الدائن"
-        register={register}
         error={errors.creditorName}
         required
         disabled={isSubmitting}
+        {...register('creditorName')}
       />
 
       {/* Amount */}
-      <FormInput
-        name="amount"
+      <FormFieldInput
         label="المبلغ"
         type="number"
         step="0.01"
         min="0.01"
         placeholder="أدخل المبلغ"
-        register={register}
         error={errors.amount}
         required
         disabled={isSubmitting}
+        {...register('amount')}
       />
 
       {/* Branch Selector - Only for admins */}
@@ -182,37 +179,32 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
       )}
 
       {/* Debt Date */}
-      <DateInput
-        mode="form"
-        name="date"
+      <FormFieldDate
         label="تاريخ الدين"
-        register={register}
         error={errors.date}
         required
         disabled={isSubmitting}
+        {...register('date')}
       />
 
       {/* Due Date */}
-      <DateInput
-        mode="form"
-        name="dueDate"
+      <FormFieldDate
         label="تاريخ الاستحقاق"
-        register={register}
         error={errors.dueDate}
         required
         disabled={isSubmitting}
+        {...register('dueDate')}
       />
 
       {/* Notes */}
-      <FormTextarea
-        name="notes"
+      <FormFieldTextarea
         label="ملاحظات"
-        placeholder="أدخل ملاحظات إضافية (اختياري)"
         rows={4}
         maxLength={1000}
-        register={register}
+        placeholder="أدخل ملاحظات إضافية (اختياري)"
         error={errors.notes}
         disabled={isSubmitting}
+        {...register('notes')}
       />
 
       {/* Form Actions */}

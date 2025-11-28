@@ -15,8 +15,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Modal } from '@/components/Modal';
-import { FormInput } from '@/components/form/FormInput';
 import { Button } from '@/components/ui/Button';
+import { FormFieldInput } from '@/components/form';
 import type { CreateCurrencyInput } from '#/settings.types';
 
 // ============================================
@@ -139,52 +139,44 @@ export function AddCurrencyModal({
         </div>
 
         {/* Currency Code */}
-        <FormInput
-          name="code"
+        <FormFieldInput
           label="رمز العملة (ISO 4217)"
-          type="text"
           placeholder="مثال: USD, EUR, IQD"
-          register={register}
           error={errors.code}
           required
           disabled={isSubmitting}
-          className="uppercase"
+          inputClassName="uppercase"
+          {...register('code')}
         />
 
         {/* Currency Symbol */}
-        <FormInput
-          name="symbol"
+        <FormFieldInput
           label="رمز العملة"
-          type="text"
           placeholder="مثال: $, €, د.ع"
-          register={register}
           error={errors.symbol}
           required
           disabled={isSubmitting}
+          {...register('symbol')}
         />
 
         {/* Arabic Name */}
-        <FormInput
-          name="nameAr"
+        <FormFieldInput
           label="الاسم بالعربية"
-          type="text"
           placeholder="مثال: دولار أمريكي"
-          register={register}
           error={errors.nameAr}
           required
           disabled={isSubmitting}
+          {...register('nameAr')}
         />
 
         {/* English Name */}
-        <FormInput
-          name="nameEn"
+        <FormFieldInput
           label="الاسم بالإنجليزية"
-          type="text"
           placeholder="Example: US Dollar"
-          register={register}
           error={errors.nameEn}
           required
           disabled={isSubmitting}
+          {...register('nameEn')}
         />
 
         {/* Warning about non-default */}

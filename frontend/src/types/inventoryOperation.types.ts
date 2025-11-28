@@ -39,6 +39,8 @@ export interface TransactionWithInventoryRequest {
     quantity: number;
     operationType: 'PURCHASE' | 'CONSUMPTION';
     unitPrice: number;
+    /** سعر البيع (للمشتريات فقط - يحدث سعر البيع في المخزون) */
+    sellingPrice?: number;
   };
   createDebtForRemaining?: boolean;
   debtCreditorName?: string;

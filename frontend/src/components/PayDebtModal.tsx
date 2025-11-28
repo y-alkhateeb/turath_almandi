@@ -5,6 +5,7 @@ import { Modal } from './Modal';
 import { usePayDebt } from '../hooks/useDebts';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { CurrencyAmountCompact } from '@/components/currency';
+import { FormFieldInput, FormFieldTextarea, FormFieldDate } from '@/components/form';
 import type { Debt, PayDebtFormData } from '../types/debts.types';
 import { formatDateTable } from '@/utils/format';
 
@@ -101,25 +102,6 @@ const PayDebtForm = ({ debt, onClose }: PayDebtFormProps) => {
     onClose();
   };
 
-  // Common input classes
-  const inputClasses = `
-    w-full px-4 py-3
-    border border-[var(--border-color)] rounded-lg
-    focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-    bg-[var(--bg-primary)] text-[var(--text-primary)]
-    transition-colors
-    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
-  `;
-
-  const errorInputClasses = `
-    w-full px-4 py-3
-    border border-red-500 rounded-lg
-    focus:ring-2 focus:ring-red-500 focus:border-red-500
-    bg-[var(--bg-primary)] text-[var(--text-primary)]
-    transition-colors
-    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
-  `;
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Debt Details Card */}
@@ -181,64 +163,41 @@ const PayDebtForm = ({ debt, onClose }: PayDebtFormProps) => {
         )}
       </div>
 
-      {/* Amount to Pay Input - Using direct register */}
-      <div>
-        <label htmlFor="amountPaid" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-          المبلغ المراد دفعه <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="amountPaid"
-          type="number"
-          step="0.01"
-          min="0"
-          max={debt.remainingAmount}
-          placeholder="0.00"
-          disabled={isSubmitting || payDebt.isPending}
-          className={errors.amountPaid ? errorInputClasses : inputClasses}
-          {...register('amountPaid')}
-        />
-        {errors.amountPaid && (
-          <p className="mt-1 text-sm text-red-600">{errors.amountPaid.message}</p>
-        )}
-        <p className="mt-1 text-xs text-[var(--text-secondary)]">
-          الحد الأقصى: <CurrencyAmountCompact amount={debt.remainingAmount} decimals={2} as="span" />
-        </p>
-      </div>
+      {/* Amount to Pay Input */}
+      <FormFieldInput
+        label="المبلغ المراد دفعه"
+        type="number"
+        step="0.01"
+        min="0"
+        max={debt.remainingAmount}
+        placeholder="0.00"
+        error={errors.amountPaid}
+        required
+        disabled={isSubmitting || payDebt.isPending}
+        {...register('amountPaid')}
+      />
+      <p className="-mt-4 text-xs text-[var(--text-secondary)]">
+        الحد الأقصى: <CurrencyAmountCompact amount={debt.remainingAmount} decimals={2} as="span" />
+      </p>
 
-      {/* Payment Date - Using direct register */}
-      <div>
-        <label htmlFor="paymentDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-          تاريخ الدفع <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="paymentDate"
-          type="date"
-          disabled={isSubmitting || payDebt.isPending}
-          className={errors.paymentDate ? errorInputClasses : inputClasses}
-          {...register('paymentDate')}
-        />
-        {errors.paymentDate && (
-          <p className="mt-1 text-sm text-red-600">{errors.paymentDate.message}</p>
-        )}
-      </div>
+      {/* Payment Date */}
+      <FormFieldDate
+        label="تاريخ الدفع"
+        error={errors.paymentDate}
+        required
+        disabled={isSubmitting || payDebt.isPending}
+        {...register('paymentDate')}
+      />
 
-      {/* Notes - Using direct register */}
-      <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-          ملاحظات
-        </label>
-        <textarea
-          id="notes"
-          rows={3}
-          placeholder="أضف أي ملاحظات إضافية هنا..."
-          disabled={isSubmitting || payDebt.isPending}
-          className={`${inputClasses} resize-none`}
-          {...register('notes')}
-        />
-        {errors.notes && (
-          <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
-        )}
-      </div>
+      {/* Notes */}
+      <FormFieldTextarea
+        label="ملاحظات"
+        rows={3}
+        placeholder="أضف أي ملاحظات إضافية هنا..."
+        error={errors.notes}
+        disabled={isSubmitting || payDebt.isPending}
+        {...register('notes')}
+      />
 
       {/* Form Actions */}
       <div className="flex gap-3 pt-4">

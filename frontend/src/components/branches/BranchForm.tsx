@@ -8,14 +8,16 @@
  * - Zod schema matching backend CreateBranchDto and UpdateBranchDto
  * - Arabic labels and error messages
  * - No business logic
+ *
+ * Uses FormFieldInput components with forwardRef for proper react-hook-form integration
  */
 
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormInput } from '@/components/form/FormInput';
 import { Switch } from '@/components/ui/Switch';
+import { FormFieldInput } from '@/components/form';
 import type { Branch, CreateBranchInput, UpdateBranchInput } from '#/entity';
 
 // ============================================
@@ -163,41 +165,35 @@ export function BranchForm({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
-      {/* Branch Name */}
-      <FormInput
-        name="name"
+      {/* Branch Name - Using FormFieldInput with spread */}
+      <FormFieldInput
         label="اسم الفرع"
-        type="text"
         placeholder="أدخل اسم الفرع"
-        register={register}
         error={errors.name}
         required
         disabled={isSubmitting}
+        {...register('name')}
       />
 
-      {/* Location */}
-      <FormInput
-        name="location"
+      {/* Location - Using FormFieldInput with spread */}
+      <FormFieldInput
         label="الموقع"
-        type="text"
         placeholder="أدخل موقع الفرع"
-        register={register}
         error={errors.location}
+        helperText="العنوان الكامل للفرع"
         required
         disabled={isSubmitting}
-        helperText="العنوان الكامل للفرع"
+        {...register('location')}
       />
 
-      {/* Manager Name */}
-      <FormInput
-        name="managerName"
+      {/* Manager Name - Using FormFieldInput with spread */}
+      <FormFieldInput
         label="اسم المدير"
-        type="text"
         placeholder="أدخل اسم مدير الفرع"
-        register={register}
         error={errors.managerName}
         required
         disabled={isSubmitting}
+        {...register('managerName')}
       />
 
       {/* Is Active Toggle (Edit Only) */}

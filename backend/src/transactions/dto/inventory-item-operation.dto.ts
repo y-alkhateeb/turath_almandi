@@ -49,4 +49,15 @@ export class InventoryItemOperationDto {
   @IsNumber()
   @Min(0)
   unitPrice?: number;
+
+  /**
+   * سعر البيع (اختياري - للشراء فقط)
+   * يستخدم لتحديث سعر البيع في المخزون عند الشراء
+   * @example 7.5
+   * @minimum 0
+   */
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  sellingPrice?: number;
 }

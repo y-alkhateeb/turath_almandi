@@ -18,6 +18,8 @@ export interface SelectedInventoryItem {
   quantity: number;
   unitPrice: number;
   unit: string;
+  /** سعر البيع (للمشتريات فقط) */
+  sellingPrice?: number;
 }
 
 interface InventoryItemSectionProps {
@@ -48,6 +50,7 @@ export function InventoryItemSection({
   const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('');
   const [unitPrice, setUnitPrice] = useState<string>('');
+  const [sellingPrice, setSellingPrice] = useState<string>('');
 
   // Fetch inventory items for branch
   useEffect(() => {
@@ -82,6 +85,7 @@ export function InventoryItemSection({
     setSelectedItemId('');
     setQuantity('');
     setUnitPrice('');
+    setSellingPrice('');
     onItemChange(null);
     onTotalChange(0);
   }, [operationType, branchId]);
@@ -93,6 +97,7 @@ export function InventoryItemSection({
     const item = availableItems.find((i) => i.id === itemId);
     if (!item) {
       setUnitPrice('');
+      setSellingPrice('');
       return;
     }
 
@@ -101,9 +106,11 @@ export function InventoryItemSection({
       // Use selling price if available, otherwise use cost per unit
       const priceToUse = item.sellingPrice ?? item.costPerUnit;
       setUnitPrice(priceToUse.toString());
+      setSellingPrice('');
     } else {
-      // For PURCHASE: clear unit price for user input
+      // For PURCHASE: clear unit price for user input, prefill selling price if exists
       setUnitPrice('');
+      setSellingPrice(item.sellingPrice ? item.sellingPrice.toString() : '');
     }
   };
 
@@ -118,18 +125,21 @@ export function InventoryItemSection({
     if (selectedItemId && qty > 0 && price > 0) {
       const item = availableItems.find((i) => i.id === selectedItemId);
       if (item) {
+        const sellPrice = parseFloat(sellingPrice) || undefined;
         onItemChange({
           itemId: selectedItemId,
           itemName: item.name,
           quantity: qty,
           unitPrice: price,
           unit: item.unit,
+          // Include selling price only for PURCHASE operations
+          sellingPrice: operationType === 'PURCHASE' ? sellPrice : undefined,
         });
       }
     } else {
       onItemChange(null);
     }
-  }, [selectedItemId, quantity, unitPrice, availableItems]);
+  }, [selectedItemId, quantity, unitPrice, sellingPrice, availableItems, operationType]);
 
   // Validate quantity for CONSUMPTION
   const getMaxQuantity = (): number | undefined => {
@@ -204,7 +214,7 @@ export function InventoryItemSection({
             </div>
           )}
 
-          {/* Quantity and Unit Price */}
+          {/* Quantity and Prices */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
@@ -249,6 +259,28 @@ export function InventoryItemSection({
               )}
             </div>
           </div>
+
+          {/* Selling Price - Only for PURCHASE */}
+          {operationType === 'PURCHASE' && (
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                سعر البيع <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
+              </label>
+              <input
+                type="number"
+                value={sellingPrice}
+                onChange={(e) => setSellingPrice(e.target.value)}
+                min="0.01"
+                step="0.01"
+                placeholder="أدخل سعر البيع للصنف"
+                disabled={disabled || !selectedItemId}
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-brand-500 disabled:opacity-50"
+              />
+              <p className="text-xs text-[var(--text-secondary)] mt-1">
+                سعر البيع سيتم تحديثه في المخزون عند حفظ المعاملة
+              </p>
+            </div>
+          )}
 
           {/* Calculated Total */}
           {calculatedTotal > 0 && (

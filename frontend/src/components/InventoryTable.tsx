@@ -160,7 +160,10 @@ export default function InventoryTable({
                   الوحدة
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
-                  سعر الوحدة
+                  سعر الشراء
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                  سعر البيع
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   القيمة الإجمالية
@@ -185,7 +188,7 @@ export default function InventoryTable({
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={isAdmin ? 9 : 8}
+                    colSpan={isAdmin ? 10 : 9}
                     className="px-6 py-12 text-center text-[var(--text-secondary)]"
                   >
                     <div className="flex justify-center items-center">
@@ -197,7 +200,7 @@ export default function InventoryTable({
               ) : items.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={isAdmin ? 9 : 8}
+                    colSpan={isAdmin ? 10 : 9}
                     className="px-6 py-12 text-center text-[var(--text-secondary)]"
                   >
                     لا توجد أصناف مخزون
@@ -226,6 +229,15 @@ export default function InventoryTable({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-[var(--text-primary)]">
                           <CurrencyAmountCompact amount={Number(item.costPerUnit)} decimals={2} />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-[var(--text-primary)]">
+                          {item.sellingPrice ? (
+                            <CurrencyAmountCompact amount={Number(item.sellingPrice)} decimals={2} />
+                          ) : (
+                            <span className="text-[var(--text-tertiary)]">-</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

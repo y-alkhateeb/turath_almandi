@@ -21,6 +21,7 @@ const inventorySchema = z.object({
     message: 'الوحدة مطلوبة',
   }),
   costPerUnit: z.string().optional().default('0'),
+  sellingPrice: z.string().optional().default(''),
   notes: z.string(),
   branchId: z.string().optional(),
 });
@@ -68,6 +69,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
       quantity: item?.quantity?.toString() || '0',
       unit: item?.unit || InventoryUnit.KG,
       costPerUnit: item?.costPerUnit?.toString() || '0',
+      sellingPrice: item?.sellingPrice?.toString() || '',
       notes: '',
       branchId: isAdmin ? '' : user?.branchId,
     },
@@ -88,6 +90,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
             quantity: parseFloat(data.quantity),
             unit: data.unit,
             costPerUnit: parseFloat(data.costPerUnit),
+            sellingPrice: data.sellingPrice ? parseFloat(data.sellingPrice) : null,
             notes: data.notes || undefined,
           },
         });
@@ -97,6 +100,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           quantity: parseFloat(data.quantity),
           unit: data.unit,
           costPerUnit: parseFloat(data.costPerUnit),
+          sellingPrice: data.sellingPrice ? parseFloat(data.sellingPrice) : null,
           notes: data.notes || undefined,
           branchId: branchIdValue,
         });
@@ -107,6 +111,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           quantity: '',
           unit: InventoryUnit.KG,
           costPerUnit: '',
+          sellingPrice: '',
           notes: '',
           branchId: isAdmin ? '' : user?.branchId,
         });
@@ -226,27 +231,53 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         </div>
       </div>
 
-      {/* Cost Per Unit */}
-      <div>
-        <label
-          htmlFor="costPerUnit"
-          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-        >
-          سعر الوحدة <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
-        </label>
-        <input
-          id="costPerUnit"
-          type="number"
-          step="0.01"
-          {...register('costPerUnit')}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-            errors.costPerUnit ? 'border-red-500' : 'border-[var(--border-color)]'
-          }`}
-          placeholder="0.00"
-        />
-        {errors.costPerUnit && (
-          <p className="mt-1 text-sm text-red-500">{errors.costPerUnit.message}</p>
-        )}
+      {/* Prices Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Cost Per Unit (Purchase Price) */}
+        <div>
+          <label
+            htmlFor="costPerUnit"
+            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+          >
+            سعر الشراء <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
+          </label>
+          <input
+            id="costPerUnit"
+            type="number"
+            step="0.01"
+            {...register('costPerUnit')}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+              errors.costPerUnit ? 'border-red-500' : 'border-[var(--border-color)]'
+            }`}
+            placeholder="0.00"
+          />
+          {errors.costPerUnit && (
+            <p className="mt-1 text-sm text-red-500">{errors.costPerUnit.message}</p>
+          )}
+        </div>
+
+        {/* Selling Price */}
+        <div>
+          <label
+            htmlFor="sellingPrice"
+            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+          >
+            سعر البيع <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
+          </label>
+          <input
+            id="sellingPrice"
+            type="number"
+            step="0.01"
+            {...register('sellingPrice')}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+              errors.sellingPrice ? 'border-red-500' : 'border-[var(--border-color)]'
+            }`}
+            placeholder="0.00"
+          />
+          {errors.sellingPrice && (
+            <p className="mt-1 text-sm text-red-500">{errors.sellingPrice.message}</p>
+          )}
+        </div>
       </div>
 
       {/* Notes */}

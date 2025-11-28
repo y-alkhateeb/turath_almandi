@@ -25,7 +25,8 @@ export interface InventoryItem {
   name: string;
   quantity: number;
   unit: InventoryUnit;
-  costPerUnit: number;
+  costPerUnit: number; // سعر الشراء
+  sellingPrice: number | null; // سعر البيع
   lastUpdated: string;
   createdAt: string;
   updatedAt: string;
@@ -43,7 +44,8 @@ export interface CreateInventoryInput {
   name: string;
   quantity?: number; // اختياري - يتم تحديده من خلال معاملة مشتريات المخزون
   unit: InventoryUnit;
-  costPerUnit?: number; // اختياري - يتم تحديده من خلال معاملة مشتريات المخزون
+  costPerUnit?: number; // سعر الشراء - اختياري
+  sellingPrice?: number | null; // سعر البيع - اختياري
   notes?: string;
   branchId?: string;
 }
@@ -52,7 +54,8 @@ export interface UpdateInventoryInput {
   name?: string;
   quantity?: number;
   unit?: InventoryUnit;
-  costPerUnit?: number;
+  costPerUnit?: number; // سعر الشراء
+  sellingPrice?: number | null; // سعر البيع
   notes?: string;
 }
 
@@ -60,7 +63,8 @@ export interface InventoryFormData {
   name: string;
   quantity: string;
   unit: InventoryUnit;
-  costPerUnit: string;
+  costPerUnit: string; // سعر الشراء
+  sellingPrice: string; // سعر البيع
   notes: string;
   branchId?: string; // Optional - for admins to select branch, auto-filled for accountants
 }

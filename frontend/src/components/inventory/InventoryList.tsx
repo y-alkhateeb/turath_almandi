@@ -144,10 +144,21 @@ export function InventoryList({ items, isLoading, onEdit, onDelete }: InventoryL
     },
     {
       key: 'costPerUnit',
-      header: 'سعر الوحدة',
+      header: 'سعر الشراء',
       width: '120px',
       align: 'right',
       render: (item) => <span className="text-sm">{formatCurrency(item.costPerUnit)}</span>,
+    },
+    {
+      key: 'sellingPrice',
+      header: 'سعر البيع',
+      width: '120px',
+      align: 'right',
+      render: (item) => (
+        <span className="text-sm">
+          {item.sellingPrice ? formatCurrency(item.sellingPrice) : '-'}
+        </span>
+      ),
     },
     {
       key: 'totalCost',

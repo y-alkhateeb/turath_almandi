@@ -300,7 +300,8 @@ export interface InventoryItem {
   name: string;
   quantity: number; // Decimal in DB, returned as number
   unit: InventoryUnit;
-  costPerUnit: number; // Decimal in DB, returned as number
+  costPerUnit: number; // سعر الشراء - Decimal in DB, returned as number
+  sellingPrice: number | null; // سعر البيع - Decimal in DB, returned as number
   autoAdded: boolean; // True if auto-added via transaction, false if manually added
   lastUpdated: string;
   createdAt: string;
@@ -324,7 +325,8 @@ export interface CreateInventoryInput {
   name: string;
   quantity: number;
   unit: InventoryUnit;
-  costPerUnit: number;
+  costPerUnit: number; // سعر الشراء
+  sellingPrice?: number | null; // سعر البيع
   notes?: string;
   branchId?: string;
 }
@@ -333,7 +335,8 @@ export interface UpdateInventoryInput {
   name?: string;
   quantity?: number;
   unit?: InventoryUnit;
-  costPerUnit?: number;
+  costPerUnit?: number; // سعر الشراء
+  sellingPrice?: number | null; // سعر البيع
   notes?: string;
 }
 

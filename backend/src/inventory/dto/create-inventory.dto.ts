@@ -31,10 +31,16 @@ export class CreateInventoryDto {
   unit: InventoryUnit;
 
   @IsNumber()
-  @Min(0, { message: 'Cost per unit must be greater than or equal to 0' })
+  @Min(0, { message: 'سعر الشراء يجب أن يكون صفر أو أكبر' })
   @Transform(({ value }) => (value === undefined || value === null || value === '' ? 0 : parseFloat(value)))
   @IsOptional()
-  costPerUnit?: number = 0;
+  costPerUnit?: number = 0; // سعر الشراء
+
+  @IsNumber()
+  @Min(0, { message: 'سعر البيع يجب أن يكون صفر أو أكبر' })
+  @Transform(({ value }) => (value === undefined || value === null || value === '' ? null : parseFloat(value)))
+  @IsOptional()
+  sellingPrice?: number | null; // سعر البيع
 
   @Trim()
   @Escape()

@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useActiveEmployeesByBranch, useRecordSalaryPayment, useCreateBonus, useCreateAdvance } from '@/hooks/useEmployees';
+import { useActiveEmployeesByBranch, useRecordSalaryPayment, useCreateBonus, useCreateAdvance, useEmployeeAdvances } from '@/hooks/useEmployees';
 import { DateInput } from '@/components/form';
 import { formatCurrency } from '@/utils/format';
 import type { Employee } from '@/types';
@@ -46,6 +46,19 @@ export function EmployeeSalarySection({
 
   // Get selected employee details
   const selectedEmployee = employees.find((e) => e.id === selectedEmployeeId);
+
+  // Fetch employee advances for salary deduction preview
+  const { data: advancesData } = useEmployeeAdvances(selectedEmployeeId);
+  const totalRemainingAdvances = advancesData?.summary?.totalRemaining || 0;
+
+  // Calculate advance deduction preview for salary payments
+  const fullSalary = selectedEmployee
+    ? Number(selectedEmployee.baseSalary) + Number(selectedEmployee.allowance || 0)
+    : 0;
+  const paidAmount = parseFloat(amount) || 0;
+  const advanceDeductionPreview = actionType === 'SALARY' && paidAmount > 0 && paidAmount < fullSalary
+    ? Math.min(fullSalary - paidAmount, totalRemainingAdvances)
+    : 0;
 
   // Reset form when branch changes
   useEffect(() => {
@@ -255,6 +268,34 @@ export function EmployeeSalarySection({
               placeholder="0"
             />
           </div>
+
+          {/* Advance Deduction Preview - Only for Salary */}
+          {actionType === 'SALARY' && totalRemainingAdvances > 0 && (
+            <div className={`p-3 rounded-lg border ${
+              advanceDeductionPreview > 0
+                ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+                : paidAmount >= fullSalary
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+            }`}>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-[var(--text-secondary)]">إجمالي السلف المستحقة:</span>
+                  <span className="font-medium">{formatCurrency(totalRemainingAdvances)}</span>
+                </div>
+                {advanceDeductionPreview > 0 ? (
+                  <div className="flex justify-between text-amber-800 dark:text-amber-200 font-medium">
+                    <span>سيتم خصم من السلفة:</span>
+                    <span>{formatCurrency(advanceDeductionPreview)}</span>
+                  </div>
+                ) : paidAmount >= fullSalary ? (
+                  <p className="text-green-800 dark:text-green-200 font-medium">
+                    ✓ لن يتم خصم من السلفة (الراتب مدفوع بالكامل)
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          )}
 
           {/* Monthly Deduction - Only for Advance */}
           {actionType === 'ADVANCE' && (

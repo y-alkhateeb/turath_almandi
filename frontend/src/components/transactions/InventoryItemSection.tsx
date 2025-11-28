@@ -2,14 +2,15 @@
  * InventoryItemSection - قسم اختيار صنف المخزون
  *
  * الميزات:
- * - شراء (PURCHASE): سعر الوحدة قابل للتعديل
- * - استهلاك (CONSUMPTION): سعر الوحدة من المخزون (غير قابل للتعديل)
+ * - شراء (PURCHASE): سعر الشراء قابل للتعديل
+ * - استهلاك/بيع (CONSUMPTION): سعر البيع من المخزون (غير قابل للتعديل)
  */
 
 import { useState, useEffect } from 'react';
 import type { InventoryItem } from '@/types/inventory.types';
 import inventoryService from '@/api/services/inventoryService';
 import { CurrencyAmountCompact } from '@/components/currency';
+import { formatCurrency } from '@/utils/format';
 
 export interface SelectedInventoryItem {
   itemId: string;
@@ -31,6 +32,7 @@ interface InventoryItemSectionProps {
 interface InventoryItemWithDetails extends InventoryItem {
   availableQuantity: number;
   costPerUnit: number;
+  sellingPrice: number | null;
 }
 
 export function InventoryItemSection({
@@ -94,9 +96,11 @@ export function InventoryItemSection({
       return;
     }
 
-    // For CONSUMPTION: auto-fill unit price from inventory (readonly)
+    // For CONSUMPTION: auto-fill unit price from selling price (or cost if no selling price)
     if (operationType === 'CONSUMPTION') {
-      setUnitPrice(item.costPerUnit.toString());
+      // Use selling price if available, otherwise use cost per unit
+      const priceToUse = item.sellingPrice ?? item.costPerUnit;
+      setUnitPrice(priceToUse.toString());
     } else {
       // For PURCHASE: clear unit price for user input
       setUnitPrice('');
@@ -178,6 +182,28 @@ export function InventoryItemSection({
             </select>
           </div>
 
+          {/* Selected Item Price Info */}
+          {selectedItemDetails && (
+            <div className="p-3 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-color)]">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-[var(--text-secondary)]">سعر الشراء: </span>
+                  <span className="font-medium text-[var(--text-primary)]">
+                    {formatCurrency(selectedItemDetails.costPerUnit)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[var(--text-secondary)]">سعر البيع: </span>
+                  <span className="font-medium text-[var(--text-primary)]">
+                    {selectedItemDetails.sellingPrice
+                      ? formatCurrency(selectedItemDetails.sellingPrice)
+                      : 'غير محدد'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Quantity and Unit Price */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -204,7 +230,7 @@ export function InventoryItemSection({
 
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                سعر الوحدة <span className="text-red-500">*</span>
+                {operationType === 'PURCHASE' ? 'سعر الشراء' : 'سعر البيع'} <span className="text-red-500">*</span>
                 {operationType === 'CONSUMPTION' && (
                   <span className="text-xs text-[var(--text-secondary)] mr-2">(من المخزون)</span>
                 )}
@@ -215,7 +241,7 @@ export function InventoryItemSection({
                 onChange={(e) => setUnitPrice(e.target.value)}
                 min="0.01"
                 step="0.01"
-                placeholder={operationType === 'PURCHASE' ? 'أدخل سعر الوحدة' : 'سعر الوحدة'}
+                placeholder={operationType === 'PURCHASE' ? 'أدخل سعر الشراء' : 'سعر البيع'}
                 disabled={disabled || !selectedItemId || operationType === 'CONSUMPTION'}
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-brand-500 disabled:opacity-50 disabled:bg-[var(--bg-tertiary)]"
               />

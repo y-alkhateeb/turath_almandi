@@ -80,7 +80,7 @@ export default function TransactionModal({
   };
 
   const getTypeLabel = (type: TransactionType) => {
-    return type === 'INCOME' ? 'إيراد' : 'مصروف';
+    return type === 'INCOME' ? 'واردات صندوق' : 'صرفيات الصندوق';
   };
 
   const getPaymentMethodLabel = (method: PaymentMethod | null) => {
@@ -214,15 +214,15 @@ export default function TransactionModal({
             {/* Transaction Type */}
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-                نوع العملية <span className="text-red-500">*</span>
+                نوع الفاتورة <span className="text-red-500">*</span>
               </label>
               <select
                 {...register('type')}
                 dir="rtl"
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="INCOME">إيراد</option>
-                <option value="EXPENSE">مصروف</option>
+                <option value="INCOME">واردات صندوق</option>
+                <option value="EXPENSE">صرفيات الصندوق</option>
               </select>
               {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
             </div>

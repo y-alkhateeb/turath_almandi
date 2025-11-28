@@ -35,7 +35,8 @@ type TransactionDeletedPayload = WebSocketEventPayload['transaction:deleted'];
 const TRANSACTION_TYPE_LABELS: Record<string, string> = {
   SALE: 'بيع',
   PURCHASE: 'شراء',
-  EXPENSE: 'مصروف',
+  EXPENSE: 'صرفيات الصندوق',
+  INCOME: 'واردات صندوق',
   SALARY: 'راتب',
   DEBT_PAYMENT: 'دفع دين',
   OTHER: 'أخرى',

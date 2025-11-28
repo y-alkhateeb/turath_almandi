@@ -28,9 +28,15 @@ export class UpdateInventoryDto {
 
   @IsNumber()
   @IsOptional()
-  @Min(0, { message: 'Cost per unit must be greater than or equal to 0' })
+  @Min(0, { message: 'سعر الشراء يجب أن يكون صفر أو أكبر' })
   @Transform(({ value }) => parseFloat(value))
-  costPerUnit?: number;
+  costPerUnit?: number; // سعر الشراء
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0, { message: 'سعر البيع يجب أن يكون صفر أو أكبر' })
+  @Transform(({ value }) => (value === undefined || value === null ? null : parseFloat(value)))
+  sellingPrice?: number | null; // سعر البيع
 
   @IsString()
   @IsOptional()

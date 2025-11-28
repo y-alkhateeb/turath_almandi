@@ -10,7 +10,7 @@
  * Features:
  * - Admin-only access guard (redirect accountants)
  * - Fetch branch by ID
- * - Edit branch details (name, location, managerName, phone, isActive)
+ * - Edit branch details (name, location, managerName, isActive)
  * - Navigate to list on success
  * - Handle not found (404) error
  * - Breadcrumb navigation

@@ -3,7 +3,7 @@
  * Table displaying branches for admin management
  *
  * Features:
- * - Table: name, location, managerName, phone, isActive, createdAt, actions
+ * - Table: name, location, managerName, isActive, createdAt, actions
  * - Active/inactive badge (green/gray)
  * - Edit, delete, and toggle active actions
  * - Loading skeleton
@@ -11,7 +11,7 @@
  * - No business logic
  */
 
-import { Edit, Trash2, Calendar, MapPin, Phone, User } from 'lucide-react';
+import { Edit, Trash2, Calendar, MapPin, User } from 'lucide-react';
 import { Table, type Column } from '../ui/Table';
 import { formatDate } from '@/utils/format';
 import type { Branch } from '#/entity';
@@ -94,17 +94,6 @@ export function BranchList({
         <div className="flex items-center gap-1 text-sm">
           <User className="w-4 h-4 text-[var(--text-secondary)]" />
           <span className="text-[var(--text-primary)]">{branch.managerName}</span>
-        </div>
-      ),
-    },
-    {
-      key: 'phone',
-      header: 'الهاتف',
-      width: '140px',
-      render: (branch) => (
-        <div className="flex items-center gap-1 text-sm" dir="ltr">
-          <Phone className="w-4 h-4 text-[var(--text-secondary)]" />
-          <span className="text-[var(--text-primary)]">{branch.phone}</span>
         </div>
       ),
     },

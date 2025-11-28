@@ -4,8 +4,7 @@
  *
  * Features:
  * - Create/Edit modes
- * - Fields: name, location, managerName, phone, isActive (edit only)
- * - Phone format validation (Iraqi: 07XXXXXXXXX or International: +964...)
+ * - Fields: name, location, managerName, isActive (edit only)
  * - Zod schema matching backend CreateBranchDto and UpdateBranchDto
  * - Arabic labels and error messages
  * - No business logic
@@ -22,15 +21,6 @@ import type { Branch, CreateBranchInput, UpdateBranchInput } from '#/entity';
 // ============================================
 // ZOD VALIDATION SCHEMAS
 // ============================================
-
-/**
- * Phone validation regex
- * Accepts:
- * - Iraqi mobile: 07XXXXXXXXX (11 digits)
- * - International: +964XXXXXXXXXX
- * - With optional spaces/dashes
- */
-const phoneRegex = /^(\+?964|0)?7\d{9}$|^\+?\d{10,15}$/;
 
 /**
  * Zod schema for creating a branch
@@ -52,9 +42,6 @@ const createBranchSchema = z.object({
     .min(1, { message: 'اسم المدير مطلوب' })
     .min(2, { message: 'اسم المدير يجب أن يكون حرفين على الأقل' })
     .max(100, { message: 'اسم المدير يجب ألا يتجاوز 100 حرف' }),
-  phone: z.string().min(1, { message: 'رقم الهاتف مطلوب' }).regex(phoneRegex, {
-    message: 'رقم الهاتف غير صحيح. استخدم صيغة: 07XXXXXXXXX أو +964XXXXXXXXXX',
-  }),
 });
 
 /**
@@ -76,12 +63,6 @@ const updateBranchSchema = z.object({
     .string()
     .min(2, { message: 'اسم المدير يجب أن يكون حرفين على الأقل' })
     .max(100, { message: 'اسم المدير يجب ألا يتجاوز 100 حرف' })
-    .optional(),
-  phone: z
-    .string()
-    .regex(phoneRegex, {
-      message: 'رقم الهاتف غير صحيح. استخدم صيغة: 07XXXXXXXXX أو +964XXXXXXXXXX',
-    })
     .optional(),
   isActive: z.boolean().optional(),
 });
@@ -129,14 +110,12 @@ export function BranchForm({
             name: initialData.name,
             location: initialData.location,
             managerName: initialData.managerName,
-            phone: initialData.phone,
             isActive: initialData.isActive,
           }
         : {
             name: '',
             location: '',
             managerName: '',
-            phone: '',
           },
   });
 
@@ -147,7 +126,6 @@ export function BranchForm({
         name: initialData.name,
         location: initialData.location,
         managerName: initialData.managerName,
-        phone: initialData.phone,
         isActive: initialData.isActive,
       });
     }
@@ -161,7 +139,6 @@ export function BranchForm({
           name: createData.name,
           location: createData.location,
           managerName: createData.managerName,
-          phone: createData.phone,
         };
         await onSubmit(submitData);
         // Reset form after successful submission
@@ -172,7 +149,6 @@ export function BranchForm({
           name: updateData.name,
           location: updateData.location,
           managerName: updateData.managerName,
-          phone: updateData.phone,
           isActive: updateData.isActive,
         };
         await onSubmit(submitData);
@@ -222,20 +198,6 @@ export function BranchForm({
         error={errors.managerName}
         required
         disabled={isSubmitting}
-      />
-
-      {/* Phone */}
-      <FormInput
-        name="phone"
-        label="رقم الهاتف"
-        type="tel"
-        placeholder="07XXXXXXXXX أو +964XXXXXXXXXX"
-        register={register}
-        error={errors.phone}
-        required
-        disabled={isSubmitting}
-        helperText="رقم الهاتف العراقي (07XXXXXXXXX) أو الدولي (+964XXXXXXXXXX)"
-        dir="ltr"
       />
 
       {/* Is Active Toggle (Edit Only) */}

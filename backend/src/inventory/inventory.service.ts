@@ -129,6 +129,7 @@ export class InventoryService {
         quantity: createInventoryDto.quantity,
         unit: createInventoryDto.unit,
         costPerUnit: createInventoryDto.costPerUnit,
+        sellingPrice: createInventoryDto.sellingPrice ?? null,
         lastUpdated: getCurrentTimestamp(),
       },
       include: {
@@ -290,6 +291,8 @@ export class InventoryService {
     if (updateInventoryDto.unit !== undefined) updateData.unit = updateInventoryDto.unit;
     if (updateInventoryDto.costPerUnit !== undefined)
       updateData.costPerUnit = updateInventoryDto.costPerUnit;
+    if (updateInventoryDto.sellingPrice !== undefined)
+      updateData.sellingPrice = updateInventoryDto.sellingPrice;
 
     // Update the item
     const updatedItem = await this.prisma.inventoryItem.update({

@@ -224,7 +224,7 @@ export const useCreateTransaction = () => {
 
       // Show success toast based on type
       const message =
-        variables.type === 'INCOME' ? 'تم إضافة الإيراد بنجاح' : 'تم إضافة المصروف بنجاح';
+        variables.type === 'INCOME' ? 'تم إضافة واردات الصندوق بنجاح' : 'تم إضافة صرفيات الصندوق بنجاح';
       toast.success(message);
     },
   });

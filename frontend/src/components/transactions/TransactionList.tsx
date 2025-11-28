@@ -32,8 +32,8 @@ export interface TransactionListProps {
  */
 const getTypeLabel = (type: TransactionType): string => {
   const labels: Record<TransactionType, string> = {
-    [TransactionType.INCOME]: 'إيراد',
-    [TransactionType.EXPENSE]: 'مصروف',
+    [TransactionType.INCOME]: 'واردات صندوق',
+    [TransactionType.EXPENSE]: 'صرفيات الصندوق',
   };
   return labels[type];
 };
@@ -93,8 +93,8 @@ export function TransactionList({
     },
     {
       key: 'type',
-      header: 'النوع',
-      width: '100px',
+      header: 'نوع الفاتورة',
+      width: '120px',
       render: (transaction) => (
         <span className={getTypeColorClass(transaction.type)}>
           {getTypeLabel(transaction.type)}

@@ -35,7 +35,7 @@ export interface DashboardRecentTransactionsProps {
 // ============================================
 
 const getTypeLabel = (type: TransactionType) => {
-  return type === TransactionType.INCOME ? 'إيراد' : 'مصروف';
+  return type === TransactionType.INCOME ? 'واردات صندوق' : 'صرفيات الصندوق';
 };
 
 const getTypeColor = (type: TransactionType) => {
@@ -125,7 +125,7 @@ export function DashboardRecentTransactions({
                 التاريخ
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
-                النوع
+                نوع الفاتورة
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                 المبلغ

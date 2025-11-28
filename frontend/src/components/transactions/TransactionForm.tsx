@@ -22,6 +22,7 @@ import { FormRadioGroup, type RadioOption } from '@/components/form/FormRadioGro
 import { FormTextarea } from '@/components/form/FormTextarea';
 import { BranchSelector, DateInput } from '@/components/form';
 import { EmployeeSalarySection } from '@/components/transactions/EmployeeSalarySection';
+import { DebtSection } from '@/components/transactions/DebtSection';
 import { useAuth } from '@/hooks/useAuth';
 import { TransactionType, PaymentMethod } from '@/types/enum';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
@@ -122,8 +123,8 @@ export interface TransactionFormProps {
  * Transaction type options (Arabic)
  */
 const transactionTypeOptions: SelectOption[] = [
-  { value: TransactionType.INCOME, label: 'إيراد' },
-  { value: TransactionType.EXPENSE, label: 'مصروف' },
+  { value: TransactionType.INCOME, label: 'واردات صندوق' },
+  { value: TransactionType.EXPENSE, label: 'صرفيات الصندوق' },
 ];
 
 /**
@@ -202,6 +203,9 @@ export function TransactionForm({
 
   // Check if the employee salaries category is selected
   const isEmployeeSalariesCategory = category === 'EMPLOYEE_SALARIES' && transactionType === TransactionType.EXPENSE;
+
+  // Check if the debt category is selected
+  const isDebtCategory = category === 'DEBT' && transactionType === TransactionType.EXPENSE;
 
   // Auto-select first category when transaction type changes
   useEffect(() => {
@@ -346,8 +350,21 @@ export function TransactionForm({
         />
       )}
 
-      {/* Regular Transaction Fields - Hidden when EMPLOYEE_SALARIES is selected */}
-      {(!isEmployeeSalariesCategory || mode === 'edit') && (
+      {/* Debt Section - Shows when DEBT category is selected */}
+      {mode === 'create' && isDebtCategory && (
+        <DebtSection
+          branchId={effectiveBranchId || null}
+          onSuccess={() => {
+            reset();
+            // Call onCancel to go back or refresh
+            onCancel?.();
+          }}
+          disabled={isSubmitting}
+        />
+      )}
+
+      {/* Regular Transaction Fields - Hidden when special categories are selected */}
+      {(!isEmployeeSalariesCategory && !isDebtCategory || mode === 'edit') && (
         <>
           {/* Amount and Payment Method - Same line on large screens */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -401,8 +418,8 @@ export function TransactionForm({
         </>
       )}
 
-      {/* Form Actions - Hidden when EMPLOYEE_SALARIES is selected in create mode */}
-      {(!isEmployeeSalariesCategory || mode === 'edit') && (
+      {/* Form Actions - Hidden when special categories are selected in create mode */}
+      {((!isEmployeeSalariesCategory && !isDebtCategory) || mode === 'edit') && (
         <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
           {onCancel && (
             <button
@@ -446,8 +463,8 @@ export function TransactionForm({
         </div>
       )}
 
-      {/* Cancel button only when EMPLOYEE_SALARIES is selected */}
-      {mode === 'create' && isEmployeeSalariesCategory && onCancel && (
+      {/* Cancel button only when special categories are selected */}
+      {mode === 'create' && (isEmployeeSalariesCategory || isDebtCategory) && onCancel && (
         <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border-color)]">
           <button
             type="button"

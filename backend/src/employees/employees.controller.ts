@@ -124,11 +124,6 @@ export class EmployeesController {
     return this.salaryPaymentsService.findByEmployee(employeeId, filters, user);
   }
 
-  @Delete('salary-payments/:id')
-  deleteSalaryPayment(@Param('id') id: string, @CurrentUser() user: RequestUser) {
-    return this.salaryPaymentsService.remove(id, user);
-  }
-
   // Salary increase endpoints
   @Post(':id/salary-increases')
   recordSalaryIncrease(

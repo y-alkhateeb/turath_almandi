@@ -65,10 +65,18 @@ const updateInventorySchema = z.object({
   unit: z.nativeEnum(InventoryUnit).optional(),
   costPerUnit: z
     .number({
-      invalid_type_error: 'سعر الوحدة يجب أن يكون رقمًا',
+      invalid_type_error: 'سعر الشراء يجب أن يكون رقمًا',
     })
-    .min(0, { message: 'سعر الوحدة يجب أن يكون صفر أو أكبر' })
-    .nonnegative({ message: 'سعر الوحدة يجب أن يكون موجبًا' })
+    .min(0, { message: 'سعر الشراء يجب أن يكون صفر أو أكبر' })
+    .nonnegative({ message: 'سعر الشراء يجب أن يكون موجبًا' })
+    .optional(),
+  sellingPrice: z
+    .number({
+      invalid_type_error: 'سعر البيع يجب أن يكون رقمًا',
+    })
+    .min(0, { message: 'سعر البيع يجب أن يكون صفر أو أكبر' })
+    .nonnegative({ message: 'سعر البيع يجب أن يكون موجبًا' })
+    .nullable()
     .optional(),
   notes: z.string().max(1000, { message: 'الملاحظات يجب ألا تتجاوز 1000 حرف' }).optional(),
 });
@@ -134,6 +142,7 @@ export function InventoryForm({
             quantity: initialData.quantity,
             unit: initialData.unit,
             costPerUnit: initialData.costPerUnit,
+            sellingPrice: initialData.sellingPrice,
             notes: undefined, // Notes not returned from backend
           }
         : {
@@ -167,6 +176,7 @@ export function InventoryForm({
         quantity: initialData.quantity,
         unit: initialData.unit,
         costPerUnit: initialData.costPerUnit,
+        sellingPrice: initialData.sellingPrice,
         notes: undefined,
       });
     }
@@ -193,6 +203,7 @@ export function InventoryForm({
           quantity: updateData.quantity,
           unit: updateData.unit,
           costPerUnit: updateData.costPerUnit,
+          sellingPrice: updateData.sellingPrice,
           notes: updateData.notes || undefined,
         };
         await onSubmit(submitData);
@@ -245,19 +256,35 @@ export function InventoryForm({
         />
       )}
 
-      {/* Cost Per Unit - Edit mode only */}
+      {/* Prices - Edit mode only */}
       {mode === 'edit' && (
-        <FormInput
-          name="costPerUnit"
-          label="سعر الوحدة"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="أدخل سعر الوحدة"
-          register={register}
-          error={errors.costPerUnit}
-          disabled={isSubmitting}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Cost Per Unit (Purchase Price) */}
+          <FormInput
+            name="costPerUnit"
+            label="سعر الشراء"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="أدخل سعر الشراء"
+            register={register}
+            error={errors.costPerUnit}
+            disabled={isSubmitting}
+          />
+
+          {/* Selling Price */}
+          <FormInput
+            name="sellingPrice"
+            label="سعر البيع"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="أدخل سعر البيع (اختياري)"
+            register={register}
+            error={errors.sellingPrice}
+            disabled={isSubmitting}
+          />
+        </div>
       )}
 
       {/* Total Cost Display - Calculated (Edit mode only) */}
@@ -268,7 +295,7 @@ export function InventoryForm({
             <span className="text-lg font-bold text-blue-900 dark:text-blue-200">{formatCurrency(totalCost)}</span>
           </div>
           <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
-            الكمية × سعر الوحدة = {quantity?.toFixed(2)} × {formatCurrency(costPerUnit || 0)}
+            الكمية × سعر الشراء = {quantity?.toFixed(2)} × {formatCurrency(costPerUnit || 0)}
           </p>
         </div>
       )}

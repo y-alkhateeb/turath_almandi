@@ -66,7 +66,7 @@ export default function TransactionTable({
   };
 
   const getTypeLabel = (type: TransactionType) => {
-    return type === 'INCOME' ? 'إيراد' : 'مصروف';
+    return type === 'INCOME' ? 'واردات صندوق' : 'صرفيات الصندوق';
   };
 
   const getTypeColor = (type: TransactionType) => {
@@ -121,7 +121,7 @@ export default function TransactionTable({
 
           {/* Transaction Type Filter */}
           <div>
-            <label className="block text-sm font-medium mb-1">نوع العملية</label>
+            <label className="block text-sm font-medium mb-1">نوع الفاتورة</label>
             <select
               value={filters.type || ''}
               onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
@@ -129,8 +129,8 @@ export default function TransactionTable({
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>
-              <option value="INCOME">إيراد</option>
-              <option value="EXPENSE">مصروف</option>
+              <option value="INCOME">واردات صندوق</option>
+              <option value="EXPENSE">صرفيات الصندوق</option>
             </select>
           </div>
 
@@ -237,7 +237,7 @@ export default function TransactionTable({
                   التاريخ
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
-                  النوع
+                  نوع الفاتورة
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   المبلغ

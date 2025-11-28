@@ -56,7 +56,7 @@ export function DashboardRecentTransactions({
                   التاريخ
                 </th>
                 <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
-                  النوع
+                  نوع الفاتورة
                 </th>
                 <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                   الفئة
@@ -80,7 +80,7 @@ export function DashboardRecentTransactions({
                   </td>
                   <td className="py-3">
                     <Badge variant={transaction.type === 'INCOME' ? 'success' : 'destructive'}>
-                      {transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
+                      {transaction.type === 'INCOME' ? 'واردات صندوق' : 'صرفيات الصندوق'}
                     </Badge>
                   </td>
                   <td className="py-3 text-sm text-[var(--text-primary)]">

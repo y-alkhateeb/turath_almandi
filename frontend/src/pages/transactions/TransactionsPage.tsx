@@ -56,13 +56,13 @@ export default function TransactionsPage() {
   const getTransactionDescription = () => {
     if (!deletingTransaction) return '';
 
-    return `${deletingTransaction.type === 'INCOME' ? 'إيراد' : 'مصروف'} - ${formatCurrency(deletingTransaction.amount)} - ${formatDate(deletingTransaction.date)}`;
+    return `${deletingTransaction.type === 'INCOME' ? 'واردات صندوق' : 'صرفيات الصندوق'} - ${formatCurrency(deletingTransaction.amount)} - ${formatDate(deletingTransaction.date)}`;
   };
 
   return (
     <PageLayout
       title="إدارة العمليات المالية"
-      description="عرض وإدارة جميع الإيرادات والمصروفات"
+      description="عرض وإدارة جميع واردات وصرفيات الصندوق"
       onRetry={() => refetch()}
       actions={
         <Button onClick={() => navigate('/transactions/create')}>

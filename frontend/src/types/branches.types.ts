@@ -4,7 +4,6 @@ export interface Branch {
   name: string;
   location: string;
   managerName: string;
-  phone: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -15,7 +14,6 @@ export interface CreateBranchInput {
   name: string;
   location: string;
   managerName: string;
-  phone: string;
 }
 
 // Input type for updating a branch
@@ -23,7 +21,6 @@ export interface UpdateBranchInput {
   name?: string;
   location?: string;
   managerName?: string;
-  phone?: string;
   isActive?: boolean;
 }
 

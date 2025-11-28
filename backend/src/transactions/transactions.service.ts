@@ -290,10 +290,10 @@ export class TransactionsService {
     // Get total count for pagination
     const total = await this.prisma.transaction.count({ where });
 
-    // Get transactions
+    // Get transactions - sort by date first, then by createdAt for same-day transactions
     const transactions = await this.prisma.transaction.findMany({
       where,
-      orderBy: { date: 'desc' },
+      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
       skip,
       take: limit,
       include: {

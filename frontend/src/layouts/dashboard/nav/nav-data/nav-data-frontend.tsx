@@ -36,8 +36,14 @@ export const navData: NavItem[] = [
         path: '/transactions/list',
       },
       {
-        title: 'إضافة معاملة',
-        path: '/transactions/create',
+        title: 'إضافة مصروف',
+        path: '/transactions/create/expense',
+        icon: <Icon icon="lucide:trending-down" size={20} />,
+      },
+      {
+        title: 'إضافة إيراد',
+        path: '/transactions/create/income',
+        icon: <Icon icon="lucide:trending-up" size={20} />,
       },
     ],
   },

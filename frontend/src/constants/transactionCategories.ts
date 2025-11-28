@@ -32,6 +32,12 @@ export const EXPENSE_CATEGORIES: CategoryOption[] = [
   { value: 'SUPPLIES', label: 'مستلزمات', type: TransactionType.EXPENSE },
   { value: 'MAINTENANCE', label: 'صيانة', type: TransactionType.EXPENSE },
   { value: 'INVENTORY', label: 'مشتريات مخزون', type: TransactionType.EXPENSE },
+  { value: 'DEBT', label: 'دين', type: TransactionType.EXPENSE },
+  { value: 'COMPLIMENTARY', label: 'مجاملة', type: TransactionType.EXPENSE },
+  { value: 'DISCOUNT', label: 'خصم', type: TransactionType.EXPENSE },
+  { value: 'TABLE', label: 'طاولة', type: TransactionType.EXPENSE },
+  { value: 'CASHIER_SHORTAGE', label: 'نقص كاشير', type: TransactionType.EXPENSE },
+  { value: 'RETURNS', label: 'مرتجعات', type: TransactionType.EXPENSE },
   { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى', type: TransactionType.EXPENSE },
 ];
 

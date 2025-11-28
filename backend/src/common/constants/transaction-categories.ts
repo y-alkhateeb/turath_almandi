@@ -15,6 +15,12 @@ export const EXPENSE_CATEGORIES = [
   'SUPPLIES',          // مستلزمات
   'MAINTENANCE',       // صيانة
   'INVENTORY',         // مشتريات مخزون
+  'DEBT',              // دين
+  'COMPLIMENTARY',     // مجاملة
+  'DISCOUNT',          // خصم
+  'TABLE',             // طاولة
+  'CASHIER_SHORTAGE',  // نقص كاشير
+  'RETURNS',           // مرتجعات
   'OTHER_EXPENSE',     // مصروفات أخرى
 ] as const;
 
@@ -39,6 +45,12 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   SUPPLIES: 'مستلزمات',
   MAINTENANCE: 'صيانة',
   INVENTORY: 'مشتريات مخزون',
+  DEBT: 'دين',
+  COMPLIMENTARY: 'مجاملة',
+  DISCOUNT: 'خصم',
+  TABLE: 'طاولة',
+  CASHIER_SHORTAGE: 'نقص كاشير',
+  RETURNS: 'مرتجعات',
   OTHER_EXPENSE: 'مصروفات أخرى',
 };
 

@@ -3,27 +3,27 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateInventory, useUpdateInventory } from '../hooks/useInventory';
 import { InventoryUnit } from '../types/inventory.types';
-import type { InventoryFormData, InventoryItem } from '../types/inventory.types';
+import type { InventoryItem } from '../types/inventory.types';
 import { useAuth } from '../hooks/useAuth';
 import { BranchSelector } from '@/components/form/BranchSelector';
 
 /**
  * Zod Validation Schema for Inventory Form
- * All validation messages in Arabic
+ * Only name and unit are required - quantity and costPerUnit are managed by transactions
  */
 const inventorySchema = z.object({
   name: z
     .string()
     .min(1, { message: 'اسم الصنف مطلوب' })
     .min(2, { message: 'اسم الصنف يجب أن يكون حرفين على الأقل' }),
-  quantity: z.string().optional().default('0'),
   unit: z.nativeEnum(InventoryUnit, {
     message: 'الوحدة مطلوبة',
   }),
-  costPerUnit: z.string().optional().default('0'),
   notes: z.string(),
   branchId: z.string().optional(),
 });
+
+type InventoryFormValues = z.infer<typeof inventorySchema>;
 
 interface InventoryFormProps {
   item?: InventoryItem;
@@ -36,9 +36,7 @@ interface InventoryFormProps {
  *
  * Features:
  * - Item name validation (>= 2 chars)
- * - Quantity validation (>= 0)
  * - Unit selection (KG, PIECE, LITER, OTHER)
- * - Cost per unit validation (>= 0)
  * - Optional notes
  * - Auto-filled branch from user (read-only for accountant)
  * - Real-time validation
@@ -47,6 +45,8 @@ interface InventoryFormProps {
  * - Error handling
  * - Arabic interface with RTL layout
  * - Edit mode support
+ *
+ * Note: Quantity and costPerUnit are managed through transactions, not this form
  */
 export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps) => {
   const { user, isAdmin } = useAuth();
@@ -61,42 +61,39 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     formState: { errors, isSubmitting },
     reset,
     control,
-  } = useForm<InventoryFormData>({
+  } = useForm<InventoryFormValues>({
     resolver: zodResolver(inventorySchema),
     defaultValues: {
       name: item?.name || '',
-      quantity: item?.quantity?.toString() || '0',
       unit: item?.unit || InventoryUnit.KG,
-      costPerUnit: item?.costPerUnit?.toString() || '0',
       notes: '',
       branchId: isAdmin ? '' : user?.branchId,
     },
   });
 
-  const onSubmit = async (data: InventoryFormData) => {
+  const onSubmit = async (data: InventoryFormValues) => {
     try {
       // For admin users, use selected branchId; for accountants, use their assigned branch
       const effectiveBranchId = data.branchId || (isAdmin ? undefined : user?.branchId);
       const branchIdValue = effectiveBranchId && effectiveBranchId.trim() !== '' ? effectiveBranchId : undefined;
 
       if (isEditMode) {
-        // Don't send branchId when updating
+        // Don't send branchId when updating - only name, unit, and notes
         await updateInventory.mutateAsync({
           id: item.id,
           data: {
             name: data.name,
-            quantity: parseFloat(data.quantity),
             unit: data.unit,
-            costPerUnit: parseFloat(data.costPerUnit),
             notes: data.notes || undefined,
           },
         });
       } else {
+        // Create with initial quantity=0 and costPerUnit=0
         await createInventory.mutateAsync({
           name: data.name,
-          quantity: parseFloat(data.quantity),
+          quantity: 0,
           unit: data.unit,
-          costPerUnit: parseFloat(data.costPerUnit),
+          costPerUnit: 0,
           notes: data.notes || undefined,
           branchId: branchIdValue,
         });
@@ -104,9 +101,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         // Reset form on success (only for create mode)
         reset({
           name: '',
-          quantity: '',
           unit: InventoryUnit.KG,
-          costPerUnit: '',
           notes: '',
           branchId: isAdmin ? '' : user?.branchId,
         });
@@ -175,78 +170,36 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
       </div>
 
-      {/* Quantity and Unit Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Quantity */}
-        <div>
-          <label
-            htmlFor="quantity"
-            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-          >
-            الكمية <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
-          </label>
-          <input
-            id="quantity"
-            type="number"
-            step="0.001"
-            {...register('quantity')}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-              errors.quantity ? 'border-red-500' : 'border-[var(--border-color)]'
-            }`}
-            placeholder="0"
-          />
-          {errors.quantity && (
-            <p className="mt-1 text-sm text-red-500">{errors.quantity.message}</p>
-          )}
-        </div>
-
-        {/* Unit */}
-        <div>
-          <label
-            htmlFor="unit"
-            className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-          >
-            الوحدة <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="unit"
-            {...register('unit')}
-            dir="rtl"
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-              errors.unit ? 'border-red-500' : 'border-[var(--border-color)]'
-            }`}
-          >
-            {Object.entries(unitLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          {errors.unit && <p className="mt-1 text-sm text-red-500">{errors.unit.message}</p>}
-        </div>
-      </div>
-
-      {/* Cost Per Unit */}
+      {/* Unit */}
       <div>
         <label
-          htmlFor="costPerUnit"
+          htmlFor="unit"
           className="block text-sm font-medium text-[var(--text-primary)] mb-2"
         >
-          سعر الوحدة <span className="text-[var(--text-secondary)] text-xs">(اختياري)</span>
+          الوحدة <span className="text-red-500">*</span>
         </label>
-        <input
-          id="costPerUnit"
-          type="number"
-          step="0.01"
-          {...register('costPerUnit')}
+        <select
+          id="unit"
+          {...register('unit')}
+          dir="rtl"
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-            errors.costPerUnit ? 'border-red-500' : 'border-[var(--border-color)]'
+            errors.unit ? 'border-red-500' : 'border-[var(--border-color)]'
           }`}
-          placeholder="0.00"
-        />
-        {errors.costPerUnit && (
-          <p className="mt-1 text-sm text-red-500">{errors.costPerUnit.message}</p>
-        )}
+        >
+          {Object.entries(unitLabels).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        {errors.unit && <p className="mt-1 text-sm text-red-500">{errors.unit.message}</p>}
+      </div>
+
+      {/* Info Note */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" dir="rtl">
+        <p className="text-sm text-blue-800">
+          <strong>ملاحظة:</strong> الكمية والسعر يتم تحديثهما تلقائياً من خلال المعاملات (الشراء والبيع).
+        </p>
       </div>
 
       {/* Notes */}
@@ -260,7 +213,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         <textarea
           id="notes"
           {...register('notes')}
-          rows={4}
+          rows={3}
           className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
           placeholder="ملاحظات إضافية (اختياري)"
         />

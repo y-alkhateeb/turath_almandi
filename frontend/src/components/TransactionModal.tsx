@@ -7,6 +7,7 @@ import { TransactionType, PaymentMethod, type Transaction } from '../types/trans
 import { useUpdateTransaction } from '../hooks/useTransactions';
 import { CurrencyAmountCompact } from '@/components/currency';
 import { getCategoryLabel } from '@/constants/transactionCategories';
+import { formatDate } from '@/utils/format';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -79,14 +80,6 @@ export default function TransactionModal({
       },
     });
     onClose();
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ar-IQ', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
   };
 
   const getTypeLabel = (type: TransactionType) => {

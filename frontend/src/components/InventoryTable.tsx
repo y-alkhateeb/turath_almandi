@@ -7,6 +7,7 @@ import type {
 } from '../types/inventory.types';
 import { useAuth } from '../hooks/useAuth';
 import { CurrencyAmountCompact } from '@/components/currency';
+import { formatDateTime } from '@/utils/format';
 
 interface InventoryTableProps {
   items: InventoryItem[];
@@ -46,15 +47,6 @@ export default function InventoryTable({
     onFiltersChange({ ...filters, page: newPage });
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('ar-IQ', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   const formatNumber = (num: number) => {
     return num.toLocaleString('ar-IQ', {
@@ -243,7 +235,7 @@ export default function InventoryTable({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-[var(--text-secondary)]">
-                          {formatDate(item.lastUpdated)}
+                          {formatDateTime(item.lastUpdated)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

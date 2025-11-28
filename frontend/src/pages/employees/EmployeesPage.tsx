@@ -141,6 +141,7 @@ export const EmployeesPage = () => {
           variant="ghost"
           size="sm"
           onClick={() => navigate(`/employees/view/${employee.id}`)}
+          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
           title="عرض التفاصيل"
         >
           <Users className="w-4 h-4" />
@@ -152,6 +153,7 @@ export const EmployeesPage = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate(`/employees/edit/${employee.id}`)}
+              className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
               title="تعديل"
             >
               <Edit className="w-4 h-4" />

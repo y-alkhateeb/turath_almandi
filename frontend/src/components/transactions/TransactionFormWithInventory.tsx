@@ -141,6 +141,9 @@ export function TransactionFormWithInventory({
   // Is expense? (affects payment method options)
   const isExpense = transactionType === 'EXPENSE';
 
+  // Is this a DEBT category? (auto-enable debt registration)
+  const isDebtCategory = category === 'DEBT';
+
   // ============================================
   // EFFECTS
   // ============================================
@@ -155,6 +158,19 @@ export function TransactionFormWithInventory({
       setPaymentMethod('CASH');
     }
   }, [transactionType, setValue]);
+
+  // Auto-enable debt registration for DEBT category
+  useEffect(() => {
+    if (isDebtCategory) {
+      // For DEBT category: no payment, full amount as debt
+      setIsPartialPayment(false);
+      setPaidAmount(0);
+      setCreateDebt(true);
+    } else {
+      // Reset when switching away from DEBT
+      setCreateDebt(false);
+    }
+  }, [isDebtCategory]);
 
   // Update paid amount when total changes (if not partial payment)
   useEffect(() => {
@@ -391,6 +407,7 @@ export function TransactionFormWithInventory({
         onDebtDueDateChange={setDebtDueDate}
         disabled={createTransaction.isPending}
         isExpense={isExpense}
+        isDebtCategory={isDebtCategory}
       />
 
       {/* Notes */}

@@ -22,6 +22,7 @@ interface PaymentSectionProps {
   onDebtDueDateChange: (value: string) => void;
   disabled?: boolean;
   isExpense?: boolean; // المصروفات = نقدي فقط
+  isDebtCategory?: boolean; // فئة الدين - إظهار نموذج الدين مباشرة
 }
 
 export function PaymentSection({
@@ -40,6 +41,7 @@ export function PaymentSection({
   onDebtDueDateChange,
   disabled = false,
   isExpense = false,
+  isDebtCategory = false,
 }: PaymentSectionProps) {
   const [remainingAmount, setRemainingAmount] = useState(0);
 
@@ -63,6 +65,62 @@ export function PaymentSection({
       onPaidAmountChange(totalAmount);
     }
   }, [isPartialPayment, totalAmount, onPaidAmountChange]);
+
+  // For DEBT category, show debt form directly
+  if (isDebtCategory) {
+    return (
+      <div className="space-y-4 p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-color)]">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+          تسجيل الدين
+        </h3>
+
+        {/* المبلغ الإجمالي */}
+        <div className="p-3 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-color)]">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-[var(--text-secondary)]">
+              مبلغ الدين:
+            </span>
+            <CurrencyAmountCompact
+              amount={totalAmount}
+              decimals={2}
+              className="text-lg font-bold text-[var(--text-primary)]"
+            />
+          </div>
+        </div>
+
+        {/* حقول الدين مباشرة */}
+        <div className="space-y-4 p-4 bg-brand-gold-50 dark:bg-brand-gold-900/20 rounded-lg border border-brand-gold-200 dark:border-brand-gold-700">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              اسم الدائن <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={debtCreditorName}
+              onChange={(e) => onDebtCreditorNameChange(e.target.value)}
+              placeholder="أدخل اسم الدائن"
+              disabled={disabled}
+              className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              تاريخ الاستحقاق (اختياري)
+            </label>
+            <input
+              type="date"
+              value={debtDueDate}
+              onChange={(e) => onDebtDueDateChange(e.target.value)}
+              disabled={disabled}
+              className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors [color-scheme:light] dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:brightness-200"
+              dir="ltr"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 p-4 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-color)]">

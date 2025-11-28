@@ -111,11 +111,11 @@ export function formatRelativeTime(
  * @param value - Number to format (returns '0' if null/undefined)
  * @param decimals - Number of decimal places (default: 2)
  */
-export function formatNumber(value: number | null | undefined, decimals: number = 2): string {
+export function formatNumber(value: number | null | undefined, decimals: number = 0): string {
   if (value === null || value === undefined || isNaN(value)) {
     return '0';
   }
-  return new Intl.NumberFormat('ar-IQ', {
+  return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(value);
@@ -129,7 +129,7 @@ export function formatAmount(amount: number | null | undefined): string {
   if (amount === null || amount === undefined || isNaN(amount)) {
     return '0';
   }
-  return amount.toLocaleString('ar-IQ', {
+  return amount.toLocaleString('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });

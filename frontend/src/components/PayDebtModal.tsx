@@ -3,9 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Modal } from './Modal';
 import { usePayDebt } from '../hooks/useDebts';
-import { FormInput } from '@/components/form/FormInput';
-import { FormTextarea } from '@/components/form/FormTextarea';
-import { DateInput } from '@/components/form';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { CurrencyAmountCompact } from '@/components/currency';
 import type { Debt, PayDebtFormData } from '../types/debts.types';
@@ -76,7 +73,7 @@ const PayDebtForm = ({ debt, onClose }: PayDebtFormProps) => {
       // Convert form data to API format
       const paymentData = {
         amountPaid: parseFloat(data.amountPaid),
-        paymentDate: data.paymentDate, // Already in YYYY-MM-DD format
+        paymentDate: data.paymentDate,
         notes: data.notes || undefined,
       };
 
@@ -103,6 +100,25 @@ const PayDebtForm = ({ debt, onClose }: PayDebtFormProps) => {
     });
     onClose();
   };
+
+  // Common input classes
+  const inputClasses = `
+    w-full px-4 py-3
+    border border-[var(--border-color)] rounded-lg
+    focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
+
+  const errorInputClasses = `
+    w-full px-4 py-3
+    border border-red-500 rounded-lg
+    focus:ring-2 focus:ring-red-500 focus:border-red-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -165,46 +181,64 @@ const PayDebtForm = ({ debt, onClose }: PayDebtFormProps) => {
         )}
       </div>
 
-      {/* Amount to Pay Input */}
+      {/* Amount to Pay Input - Using direct register */}
       <div>
-        <FormInput
-          name="amountPaid"
-          label="المبلغ المراد دفعه"
+        <label htmlFor="amountPaid" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          المبلغ المراد دفعه <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="amountPaid"
           type="number"
-          register={register as unknown as Parameters<typeof FormInput>[0]['register']}
-          error={errors.amountPaid}
-          required
-          disabled={isSubmitting}
-          placeholder="0.00"
           step="0.01"
           min="0"
           max={debt.remainingAmount}
+          placeholder="0.00"
+          disabled={isSubmitting || payDebt.isPending}
+          className={errors.amountPaid ? errorInputClasses : inputClasses}
+          {...register('amountPaid')}
         />
+        {errors.amountPaid && (
+          <p className="mt-1 text-sm text-red-600">{errors.amountPaid.message}</p>
+        )}
         <p className="mt-1 text-xs text-[var(--text-secondary)]">
           الحد الأقصى: <CurrencyAmountCompact amount={debt.remainingAmount} decimals={2} as="span" />
         </p>
       </div>
 
-      {/* Payment Date */}
-      <DateInput
-        mode="form"
-        name="paymentDate"
-        label="تاريخ الدفع"
-        register={register as unknown as Parameters<typeof DateInput>[0]['register']}
-        error={errors.paymentDate}
-        required
-        disabled={isSubmitting}
-      />
+      {/* Payment Date - Using direct register */}
+      <div>
+        <label htmlFor="paymentDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          تاريخ الدفع <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="paymentDate"
+          type="date"
+          disabled={isSubmitting || payDebt.isPending}
+          className={errors.paymentDate ? errorInputClasses : inputClasses}
+          {...register('paymentDate')}
+        />
+        {errors.paymentDate && (
+          <p className="mt-1 text-sm text-red-600">{errors.paymentDate.message}</p>
+        )}
+      </div>
 
-      <FormTextarea
-        name="notes"
-        label="ملاحظات"
-        register={register as unknown as Parameters<typeof FormTextarea>[0]['register']}
-        error={errors.notes}
-        disabled={isSubmitting}
-        placeholder="أضف أي ملاحظات إضافية هنا..."
-        rows={3}
-      />
+      {/* Notes - Using direct register */}
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          ملاحظات
+        </label>
+        <textarea
+          id="notes"
+          rows={3}
+          placeholder="أضف أي ملاحظات إضافية هنا..."
+          disabled={isSubmitting || payDebt.isPending}
+          className={`${inputClasses} resize-none`}
+          {...register('notes')}
+        />
+        {errors.notes && (
+          <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
+        )}
+      </div>
 
       {/* Form Actions */}
       <div className="flex gap-3 pt-4">

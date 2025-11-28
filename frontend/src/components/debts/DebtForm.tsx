@@ -14,9 +14,7 @@
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormInput } from '@/components/form/FormInput';
-import { FormTextarea } from '@/components/form/FormTextarea';
-import { BranchSelector, DateInput } from '@/components/form';
+import { BranchSelector } from '@/components/form';
 import { useAuth } from '@/hooks/useAuth';
 import type { CreateDebtInput } from '#/entity';
 
@@ -125,33 +123,64 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
     }
   };
 
+  // Common input classes
+  const inputClasses = `
+    w-full px-4 py-3
+    border border-[var(--border-color)] rounded-lg
+    focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
+
+  const errorInputClasses = `
+    w-full px-4 py-3
+    border border-red-500 rounded-lg
+    focus:ring-2 focus:ring-red-500 focus:border-red-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
       {/* Creditor Name */}
-      <FormInput
-        name="creditorName"
-        label="اسم الدائن"
-        type="text"
-        placeholder="أدخل اسم الدائن"
-        register={register}
-        error={errors.creditorName}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="creditorName" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          اسم الدائن <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="creditorName"
+          type="text"
+          placeholder="أدخل اسم الدائن"
+          disabled={isSubmitting}
+          className={errors.creditorName ? errorInputClasses : inputClasses}
+          {...register('creditorName')}
+        />
+        {errors.creditorName && (
+          <p className="mt-1 text-sm text-red-600">{errors.creditorName.message}</p>
+        )}
+      </div>
 
       {/* Amount */}
-      <FormInput
-        name="amount"
-        label="المبلغ"
-        type="number"
-        step="0.01"
-        min="0.01"
-        placeholder="أدخل المبلغ"
-        register={register}
-        error={errors.amount}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="amount" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          المبلغ <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="amount"
+          type="number"
+          step="0.01"
+          min="0.01"
+          placeholder="أدخل المبلغ"
+          disabled={isSubmitting}
+          className={errors.amount ? errorInputClasses : inputClasses}
+          {...register('amount')}
+        />
+        {errors.amount && (
+          <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
+        )}
+      </div>
 
       {/* Branch Selector - Only for admins */}
       {isAdmin && (
@@ -182,38 +211,59 @@ export function DebtForm({ mode: _mode, onSubmit, onCancel, isSubmitting }: Debt
       )}
 
       {/* Debt Date */}
-      <DateInput
-        mode="form"
-        name="date"
-        label="تاريخ الدين"
-        register={register}
-        error={errors.date}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="date" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          تاريخ الدين <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="date"
+          type="date"
+          disabled={isSubmitting}
+          className={errors.date ? errorInputClasses : inputClasses}
+          dir="ltr"
+          {...register('date')}
+        />
+        {errors.date && (
+          <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
+        )}
+      </div>
 
       {/* Due Date */}
-      <DateInput
-        mode="form"
-        name="dueDate"
-        label="تاريخ الاستحقاق"
-        register={register}
-        error={errors.dueDate}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="dueDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          تاريخ الاستحقاق <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="dueDate"
+          type="date"
+          disabled={isSubmitting}
+          className={errors.dueDate ? errorInputClasses : inputClasses}
+          dir="ltr"
+          {...register('dueDate')}
+        />
+        {errors.dueDate && (
+          <p className="mt-1 text-sm text-red-600">{errors.dueDate.message}</p>
+        )}
+      </div>
 
       {/* Notes */}
-      <FormTextarea
-        name="notes"
-        label="ملاحظات"
-        placeholder="أدخل ملاحظات إضافية (اختياري)"
-        rows={4}
-        maxLength={1000}
-        register={register}
-        error={errors.notes}
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          ملاحظات
+        </label>
+        <textarea
+          id="notes"
+          rows={4}
+          maxLength={1000}
+          placeholder="أدخل ملاحظات إضافية (اختياري)"
+          disabled={isSubmitting}
+          className={`${errors.notes ? errorInputClasses : inputClasses} resize-none`}
+          {...register('notes')}
+        />
+        {errors.notes && (
+          <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
+        )}
+      </div>
 
       {/* Form Actions */}
       <div className="flex gap-3 pt-4">

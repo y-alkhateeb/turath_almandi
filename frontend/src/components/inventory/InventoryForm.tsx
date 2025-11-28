@@ -16,9 +16,6 @@ import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormInput } from '@/components/form/FormInput';
-import { FormSelect, type SelectOption } from '@/components/form/FormSelect';
-import { FormTextarea } from '@/components/form/FormTextarea';
 import { BranchSelector } from '@/components/form/BranchSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { InventoryUnit } from '@/types/enum';
@@ -103,7 +100,7 @@ export interface InventoryFormProps {
 /**
  * Unit options (Arabic)
  */
-const unitOptions: SelectOption[] = [
+const unitOptions = [
   { value: InventoryUnit.KG, label: 'كيلو (KG)' },
   { value: InventoryUnit.PIECE, label: 'قطعة (PIECE)' },
   { value: InventoryUnit.LITER, label: 'لتر (LITER)' },
@@ -216,74 +213,133 @@ export function InventoryForm({
     }
   };
 
+  // Common input classes
+  const inputClasses = `
+    w-full px-4 py-3
+    border border-[var(--border-color)] rounded-lg
+    focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
+
+  const errorInputClasses = `
+    w-full px-4 py-3
+    border border-red-500 rounded-lg
+    focus:ring-2 focus:ring-red-500 focus:border-red-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
       {/* Item Name */}
-      <FormInput
-        name="name"
-        label="اسم الصنف"
-        type="text"
-        placeholder="أدخل اسم الصنف"
-        register={register}
-        error={errors.name}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          اسم الصنف <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="name"
+          type="text"
+          placeholder="أدخل اسم الصنف"
+          disabled={isSubmitting}
+          className={errors.name ? errorInputClasses : inputClasses}
+          {...register('name')}
+        />
+        {errors.name && (
+          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+        )}
+      </div>
 
       {/* Unit */}
-      <FormSelect
-        name="unit"
-        label="الوحدة"
-        options={unitOptions}
-        register={register}
-        error={errors.unit}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="unit" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          الوحدة <span className="text-red-500">*</span>
+        </label>
+        <select
+          id="unit"
+          disabled={isSubmitting}
+          className={errors.unit ? errorInputClasses : inputClasses}
+          dir="rtl"
+          {...register('unit')}
+        >
+          <option value="">اختر الوحدة</option>
+          {unitOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {errors.unit && (
+          <p className="mt-1 text-sm text-red-600">{errors.unit.message}</p>
+        )}
+      </div>
 
       {/* Quantity - Edit mode only */}
       {mode === 'edit' && (
-        <FormInput
-          name="quantity"
-          label="الكمية"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="أدخل الكمية"
-          register={register}
-          error={errors.quantity}
-          disabled={isSubmitting}
-        />
+        <div>
+          <label htmlFor="quantity" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            الكمية
+          </label>
+          <input
+            id="quantity"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="أدخل الكمية"
+            disabled={isSubmitting}
+            className={errors.quantity ? errorInputClasses : inputClasses}
+            {...register('quantity', { valueAsNumber: true })}
+          />
+          {errors.quantity && (
+            <p className="mt-1 text-sm text-red-600">{errors.quantity.message}</p>
+          )}
+        </div>
       )}
 
       {/* Prices - Edit mode only */}
       {mode === 'edit' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Cost Per Unit (Purchase Price) */}
-          <FormInput
-            name="costPerUnit"
-            label="سعر الشراء"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="أدخل سعر الشراء"
-            register={register}
-            error={errors.costPerUnit}
-            disabled={isSubmitting}
-          />
+          <div>
+            <label htmlFor="costPerUnit" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              سعر الشراء
+            </label>
+            <input
+              id="costPerUnit"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="أدخل سعر الشراء"
+              disabled={isSubmitting}
+              className={errors.costPerUnit ? errorInputClasses : inputClasses}
+              {...register('costPerUnit', { valueAsNumber: true })}
+            />
+            {errors.costPerUnit && (
+              <p className="mt-1 text-sm text-red-600">{errors.costPerUnit.message}</p>
+            )}
+          </div>
 
           {/* Selling Price */}
-          <FormInput
-            name="sellingPrice"
-            label="سعر البيع"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="أدخل سعر البيع (اختياري)"
-            register={register}
-            error={errors.sellingPrice}
-            disabled={isSubmitting}
-          />
+          <div>
+            <label htmlFor="sellingPrice" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+              سعر البيع
+            </label>
+            <input
+              id="sellingPrice"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="أدخل سعر البيع (اختياري)"
+              disabled={isSubmitting}
+              className={errors.sellingPrice ? errorInputClasses : inputClasses}
+              {...register('sellingPrice', { valueAsNumber: true })}
+            />
+            {errors.sellingPrice && (
+              <p className="mt-1 text-sm text-red-600">{errors.sellingPrice.message}</p>
+            )}
+          </div>
         </div>
       )}
 
@@ -338,16 +394,23 @@ export function InventoryForm({
       )}
 
       {/* Notes */}
-      <FormTextarea
-        name="notes"
-        label="ملاحظات"
-        placeholder="أدخل ملاحظات إضافية (اختياري)"
-        rows={3}
-        maxLength={1000}
-        register={register}
-        error={errors.notes}
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          ملاحظات
+        </label>
+        <textarea
+          id="notes"
+          rows={3}
+          maxLength={1000}
+          placeholder="أدخل ملاحظات إضافية (اختياري)"
+          disabled={isSubmitting}
+          className={`${errors.notes ? errorInputClasses : inputClasses} resize-none`}
+          {...register('notes')}
+        />
+        {errors.notes && (
+          <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
+        )}
+      </div>
 
       {/* Form Actions */}
       <div className="flex gap-3 pt-4">

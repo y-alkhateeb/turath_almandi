@@ -14,7 +14,6 @@ import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormInput } from '@/components/form/FormInput';
 import { Switch } from '@/components/ui/Switch';
 import type { Branch, CreateBranchInput, UpdateBranchInput } from '#/entity';
 
@@ -161,44 +160,83 @@ export function BranchForm({
     }
   };
 
+  // Common input classes
+  const inputClasses = `
+    w-full px-4 py-3
+    border border-[var(--border-color)] rounded-lg
+    focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
+
+  const errorInputClasses = `
+    w-full px-4 py-3
+    border border-red-500 rounded-lg
+    focus:ring-2 focus:ring-red-500 focus:border-red-500
+    bg-[var(--bg-primary)] text-[var(--text-primary)]
+    transition-colors
+    disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed
+  `;
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" dir="rtl">
       {/* Branch Name */}
-      <FormInput
-        name="name"
-        label="اسم الفرع"
-        type="text"
-        placeholder="أدخل اسم الفرع"
-        register={register}
-        error={errors.name}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          اسم الفرع <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="name"
+          type="text"
+          placeholder="أدخل اسم الفرع"
+          disabled={isSubmitting}
+          className={errors.name ? errorInputClasses : inputClasses}
+          {...register('name')}
+        />
+        {errors.name && (
+          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+        )}
+      </div>
 
       {/* Location */}
-      <FormInput
-        name="location"
-        label="الموقع"
-        type="text"
-        placeholder="أدخل موقع الفرع"
-        register={register}
-        error={errors.location}
-        required
-        disabled={isSubmitting}
-        helperText="العنوان الكامل للفرع"
-      />
+      <div>
+        <label htmlFor="location" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          الموقع <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="location"
+          type="text"
+          placeholder="أدخل موقع الفرع"
+          disabled={isSubmitting}
+          className={errors.location ? errorInputClasses : inputClasses}
+          {...register('location')}
+        />
+        {errors.location && (
+          <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>
+        )}
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          العنوان الكامل للفرع
+        </p>
+      </div>
 
       {/* Manager Name */}
-      <FormInput
-        name="managerName"
-        label="اسم المدير"
-        type="text"
-        placeholder="أدخل اسم مدير الفرع"
-        register={register}
-        error={errors.managerName}
-        required
-        disabled={isSubmitting}
-      />
+      <div>
+        <label htmlFor="managerName" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+          اسم المدير <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="managerName"
+          type="text"
+          placeholder="أدخل اسم مدير الفرع"
+          disabled={isSubmitting}
+          className={errors.managerName ? errorInputClasses : inputClasses}
+          {...register('managerName')}
+        />
+        {errors.managerName && (
+          <p className="mt-1 text-sm text-red-600">{errors.managerName.message}</p>
+        )}
+      </div>
 
       {/* Is Active Toggle (Edit Only) */}
       {mode === 'edit' && (

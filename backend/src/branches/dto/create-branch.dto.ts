@@ -22,10 +22,4 @@ export class CreateBranchDto {
   @IsNotEmpty({ message: 'اسم المدير مطلوب' })
   @MaxLength(200, { message: 'اسم المدير يجب ألا يتجاوز 200 حرف' })
   managerName: string;
-
-  @Trim()
-  @IsString({ message: 'رقم الهاتف يجب أن يكون نصاً' })
-  @IsNotEmpty({ message: 'رقم الهاتف مطلوب' })
-  @MaxLength(50, { message: 'رقم الهاتف يجب ألا يتجاوز 50 حرف' })
-  phone: string;
 }

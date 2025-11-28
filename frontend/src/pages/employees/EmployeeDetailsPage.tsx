@@ -21,7 +21,6 @@ import {
   useSalaryPaymentHistory,
   useSalaryIncreaseHistory,
   useBonusHistory,
-  useDeleteSalaryPayment,
   useRecordSalaryPayment,
   useRecordSalaryIncrease,
   useCreateBonus,
@@ -55,7 +54,6 @@ export const EmployeeDetailsPage = () => {
   const { data: advancesData } = useEmployeeAdvances(id!);
 
   const resignEmployee = useResignEmployee();
-  const deletePayment = useDeleteSalaryPayment();
   const recordPayment = useRecordSalaryPayment();
   const recordIncrease = useRecordSalaryIncrease();
   const createBonus = useCreateBonus();
@@ -65,7 +63,6 @@ export const EmployeeDetailsPage = () => {
   const [showResignModal, setShowResignModal] = useState(false);
   const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
   const [resignDate, setResignDate] = useState('');
-  const [deletingPaymentId, setDeletingPaymentId] = useState<string | null>(null);
 
   // Payment modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -97,12 +94,6 @@ export const EmployeeDetailsPage = () => {
     await resignEmployee.mutateAsync({ id, resignDate });
     setShowResignModal(false);
     setResignDate('');
-  };
-
-  const handleDeletePayment = async () => {
-    if (!id || !deletingPaymentId) return;
-    await deletePayment.mutateAsync({ employeeId: id, paymentId: deletingPaymentId });
-    setDeletingPaymentId(null);
   };
 
   const handleRecordPayment = async () => {
@@ -198,30 +189,11 @@ export const EmployeeDetailsPage = () => {
       header: 'سجل بواسطة',
       render: (payment) => (
         <div className="text-sm text-[var(--text-secondary)]">
-          {payment.recordedBy?.username || '-'}
+          {payment.recorder?.username || '-'}
         </div>
       ),
     },
   ];
-
-  // Add delete action column if employee is active
-  if (employee?.status === EmployeeStatus.ACTIVE) {
-    paymentColumns.push({
-      key: 'actions',
-      header: 'إجراءات',
-      render: (payment) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setDeletingPaymentId(payment.id)}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4" />
-          حذف
-        </Button>
-      ),
-    });
-  }
 
   // Salary Increases Table Columns
   const increaseColumns: Column<SalaryIncrease>[] = [
@@ -657,19 +629,6 @@ export const EmployeeDetailsPage = () => {
           />
         </div>
       </ConfirmModal>
-
-      {/* Delete Payment Modal */}
-      <ConfirmModal
-        isOpen={!!deletingPaymentId}
-        onClose={() => setDeletingPaymentId(null)}
-        onConfirm={handleDeletePayment}
-        title="تأكيد حذف دفعة الراتب"
-        message="هل أنت متأكد من حذف هذه الدفعة؟ سيتم أيضاً حذف المعاملة المالية المرتبطة بها. لا يمكن التراجع عن هذا الإجراء."
-        confirmText="حذف"
-        cancelText="إلغاء"
-        variant="danger"
-        isLoading={deletePayment.isPending}
-      />
 
       {/* Record Payment Modal */}
       <ConfirmModal

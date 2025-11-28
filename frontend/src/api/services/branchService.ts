@@ -101,9 +101,8 @@ export const getOne = (id: string): Promise<Branch> => {
  * - name: Required, max 200 chars, trimmed, escaped
  * - location: Required, max 500 chars, trimmed, escaped
  * - managerName: Required, max 200 chars, trimmed, escaped
- * - phone: Required, max 50 chars, trimmed
  *
- * @param data - CreateBranchInput (name, location, managerName, phone)
+ * @param data - CreateBranchInput (name, location, managerName)
  * @returns Created Branch
  * @throws ApiError on 400 (validation error), 401, 403 (not admin)
  */
@@ -122,11 +121,10 @@ export const create = (data: CreateBranchInput): Promise<Branch> => {
  * - name: Optional, max 200 chars, trimmed, escaped
  * - location: Optional, max 500 chars, trimmed, escaped
  * - managerName: Optional, max 200 chars, trimmed, escaped
- * - phone: Optional, max 50 chars, trimmed
  * - isActive: Optional, boolean (can deactivate branch)
  *
  * @param id - Branch UUID
- * @param data - UpdateBranchInput (name?, location?, managerName?, phone?, isActive?)
+ * @param data - UpdateBranchInput (name?, location?, managerName?, isActive?)
  * @returns Updated Branch
  * @throws ApiError on 400 (validation error), 401, 403 (not admin), 404 (not found)
  */

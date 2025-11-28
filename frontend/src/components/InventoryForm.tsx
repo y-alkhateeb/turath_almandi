@@ -3,20 +3,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateInventory, useUpdateInventory } from '../hooks/useInventory';
 import { InventoryUnit } from '../types/inventory.types';
-import type { InventoryFormData, InventoryItem } from '../types/inventory.types';
+import type { InventoryItem } from '../types/inventory.types';
 import { useAuth } from '../hooks/useAuth';
 import { BranchSelector } from '@/components/form/BranchSelector';
 
 /**
  * Zod Validation Schema for Inventory Form
- * All validation messages in Arabic
+ * Only name and unit are required - quantity and costPerUnit are managed by transactions
  */
 const inventorySchema = z.object({
   name: z
     .string()
     .min(1, { message: 'اسم الصنف مطلوب' })
     .min(2, { message: 'اسم الصنف يجب أن يكون حرفين على الأقل' }),
-  quantity: z.string().optional().default('0'),
   unit: z.nativeEnum(InventoryUnit, {
     message: 'الوحدة مطلوبة',
   }),
@@ -25,6 +24,8 @@ const inventorySchema = z.object({
   notes: z.string(),
   branchId: z.string().optional(),
 });
+
+type InventoryFormValues = z.infer<typeof inventorySchema>;
 
 interface InventoryFormProps {
   item?: InventoryItem;
@@ -37,9 +38,7 @@ interface InventoryFormProps {
  *
  * Features:
  * - Item name validation (>= 2 chars)
- * - Quantity validation (>= 0)
  * - Unit selection (KG, PIECE, LITER, OTHER)
- * - Cost per unit validation (>= 0)
  * - Optional notes
  * - Auto-filled branch from user (read-only for accountant)
  * - Real-time validation
@@ -48,6 +47,8 @@ interface InventoryFormProps {
  * - Error handling
  * - Arabic interface with RTL layout
  * - Edit mode support
+ *
+ * Note: Quantity and costPerUnit are managed through transactions, not this form
  */
 export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps) => {
   const { user, isAdmin } = useAuth();
@@ -62,11 +63,10 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     formState: { errors, isSubmitting },
     reset,
     control,
-  } = useForm<InventoryFormData>({
+  } = useForm<InventoryFormValues>({
     resolver: zodResolver(inventorySchema),
     defaultValues: {
       name: item?.name || '',
-      quantity: item?.quantity?.toString() || '0',
       unit: item?.unit || InventoryUnit.KG,
       costPerUnit: item?.costPerUnit?.toString() || '0',
       sellingPrice: item?.sellingPrice?.toString() || '',
@@ -75,19 +75,18 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
     },
   });
 
-  const onSubmit = async (data: InventoryFormData) => {
+  const onSubmit = async (data: InventoryFormValues) => {
     try {
       // For admin users, use selected branchId; for accountants, use their assigned branch
       const effectiveBranchId = data.branchId || (isAdmin ? undefined : user?.branchId);
       const branchIdValue = effectiveBranchId && effectiveBranchId.trim() !== '' ? effectiveBranchId : undefined;
 
       if (isEditMode) {
-        // Don't send branchId when updating
+        // Don't send branchId when updating - only name, unit, and notes
         await updateInventory.mutateAsync({
           id: item.id,
           data: {
             name: data.name,
-            quantity: parseFloat(data.quantity),
             unit: data.unit,
             costPerUnit: parseFloat(data.costPerUnit),
             sellingPrice: data.sellingPrice ? parseFloat(data.sellingPrice) : null,
@@ -95,9 +94,10 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           },
         });
       } else {
+        // Create with initial quantity=0 and costPerUnit=0
         await createInventory.mutateAsync({
           name: data.name,
-          quantity: parseFloat(data.quantity),
+          quantity: 0,
           unit: data.unit,
           costPerUnit: parseFloat(data.costPerUnit),
           sellingPrice: data.sellingPrice ? parseFloat(data.sellingPrice) : null,
@@ -108,7 +108,6 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         // Reset form on success (only for create mode)
         reset({
           name: '',
-          quantity: '',
           unit: InventoryUnit.KG,
           costPerUnit: '',
           sellingPrice: '',
@@ -291,7 +290,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
         <textarea
           id="notes"
           {...register('notes')}
-          rows={4}
+          rows={3}
           className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
           placeholder="ملاحظات إضافية (اختياري)"
         />

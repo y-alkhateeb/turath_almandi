@@ -3,7 +3,7 @@
  *
  * الميزات:
  * - شراء (PURCHASE): سعر الشراء قابل للتعديل
- * - استهلاك/بيع (CONSUMPTION): سعر البيع من المخزون (غير قابل للتعديل)
+ * - استهلاك/بيع (CONSUMPTION): سعر البيع قابل للتعديل (يتم تعبئته تلقائياً من المخزون)
  */
 
 import { useState, useEffect } from 'react';
@@ -231,9 +231,6 @@ export function InventoryItemSection({
             <div>
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                 {operationType === 'PURCHASE' ? 'سعر الشراء' : 'سعر البيع'} <span className="text-red-500">*</span>
-                {operationType === 'CONSUMPTION' && (
-                  <span className="text-xs text-[var(--text-secondary)] mr-2">(من المخزون)</span>
-                )}
               </label>
               <input
                 type="number"
@@ -241,10 +238,15 @@ export function InventoryItemSection({
                 onChange={(e) => setUnitPrice(e.target.value)}
                 min="0.01"
                 step="0.01"
-                placeholder={operationType === 'PURCHASE' ? 'أدخل سعر الشراء' : 'سعر البيع'}
-                disabled={disabled || !selectedItemId || operationType === 'CONSUMPTION'}
-                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-brand-500 disabled:opacity-50 disabled:bg-[var(--bg-tertiary)]"
+                placeholder={operationType === 'PURCHASE' ? 'أدخل سعر الشراء' : 'أدخل سعر البيع'}
+                disabled={disabled || !selectedItemId}
+                className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-brand-500 disabled:opacity-50"
               />
+              {operationType === 'CONSUMPTION' && selectedItemDetails && (
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  السعر المقترح: {selectedItemDetails.sellingPrice ? formatCurrency(selectedItemDetails.sellingPrice) : formatCurrency(selectedItemDetails.costPerUnit)}
+                </p>
+              )}
             </div>
           </div>
 

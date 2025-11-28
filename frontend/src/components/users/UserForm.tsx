@@ -245,7 +245,7 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
                 type="text"
                 placeholder="أدخل اسم المستخدم"
                 disabled={isSubmitting}
-                className={getInputClasses(!!errors.username)}
+                className={`${getInputClasses(!!errors.username)} text-left placeholder:text-right`}
                 dir="ltr"
               />
             )}
@@ -289,7 +289,7 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
               type="password"
               placeholder={isCreateMode ? 'أدخل كلمة المرور' : 'اتركها فارغة للإبقاء على كلمة المرور الحالية'}
               disabled={isSubmitting}
-              className={getInputClasses(!!errors.password)}
+              className={`${getInputClasses(!!errors.password)} text-left placeholder:text-right`}
               dir="ltr"
             />
           )}
@@ -317,6 +317,7 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
               value={field.value ?? UserRole.ACCOUNTANT}
               onChange={(e) => field.onChange(e.target.value as UserRole)}
               disabled={isSubmitting}
+              dir="rtl"
               className={getInputClasses(!!errors.role)}
             >
               {roleOptions.map((option) => (
@@ -378,12 +379,15 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
             control={control as typeof editForm.control}
             render={({ field }) => (
               <div className="flex items-center gap-3">
+                <span className="text-sm text-[var(--text-primary)]">
+                  {field.value ? 'نشط' : 'معطل'}
+                </span>
                 <button
                   type="button"
                   onClick={() => field.onChange(!field.value)}
                   disabled={isSubmitting}
                   className={`
-                    relative inline-flex h-7 w-14 items-center rounded-full transition-colors
+                    relative inline-flex h-7 w-14 shrink-0 items-center rounded-full transition-colors
                     focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
                     ${field.value ? 'bg-green-600' : 'bg-gray-300'}
                     ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
@@ -391,14 +395,11 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
                 >
                   <span
                     className={`
-                      inline-block h-5 w-5 transform rounded-full bg-white transition-transform
+                      inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform
                       ${field.value ? 'translate-x-1' : 'translate-x-8'}
                     `}
                   />
                 </button>
-                <span className="text-sm text-[var(--text-primary)]">
-                  {field.value ? 'نشط' : 'معطل'}
-                </span>
               </div>
             )}
           />

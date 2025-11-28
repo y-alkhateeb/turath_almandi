@@ -211,6 +211,7 @@ export const InventoryForm = ({ item, onSuccess, onCancel }: InventoryFormProps)
           <select
             id="unit"
             {...register('unit')}
+            dir="rtl"
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
               errors.unit ? 'border-red-500' : 'border-[var(--border-color)]'
             }`}

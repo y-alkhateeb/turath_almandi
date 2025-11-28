@@ -119,6 +119,7 @@ export const UserBranchAssignment = () => {
                       value={user.branchId || ''}
                       onChange={(e) => handleAssignBranch(user.id, e.target.value || null)}
                       disabled={saving === user.id}
+                      dir="rtl"
                       className="px-3 py-1 border border-[var(--border-color)] rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[var(--bg-tertiary)]"
                     >
                       <option value="">No Branch</option>

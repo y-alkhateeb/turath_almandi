@@ -125,6 +125,7 @@ export default function TransactionTable({
             <select
               value={filters.type || ''}
               onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
+              dir="rtl"
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>
@@ -139,6 +140,7 @@ export default function TransactionTable({
             <select
               value={filters.paymentMethod || ''}
               onChange={(e) => handleFilterChange('paymentMethod', e.target.value || undefined)}
+              dir="rtl"
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>

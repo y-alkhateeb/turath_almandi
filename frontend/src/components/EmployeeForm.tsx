@@ -220,6 +220,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
             <select
               {...register('branchId')}
               disabled={isLoading || isBranchesLoading}
+              dir="rtl"
               className={`w-full px-4 py-3 border ${
                 errors.branchId ? 'border-red-500' : 'border-[var(--border-color)]'
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed`}

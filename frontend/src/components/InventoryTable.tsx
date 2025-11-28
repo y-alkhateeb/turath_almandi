@@ -125,6 +125,7 @@ export default function InventoryTable({
             <select
               value={filters.unit || ''}
               onChange={(e) => handleFilterChange('unit', e.target.value || undefined)}
+              dir="rtl"
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>

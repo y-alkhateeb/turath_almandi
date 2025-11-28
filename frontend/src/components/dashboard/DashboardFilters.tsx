@@ -151,9 +151,12 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
       parts.push(`من ${formatDateTable(filters.startDate)}`);
     } else if (filters.endDate) {
       parts.push(`حتى ${formatDateTable(filters.endDate)}`);
+    } else if (filters.date) {
+      // Show single date filter (initial today's date)
+      parts.push(`التاريخ: ${formatDateTable(filters.date)}`);
     }
 
-    return parts.length > 0 ? parts.join(' • ') : 'لم يتم تطبيق فلاتر';
+    return parts.length > 0 ? parts.join(' • ') : 'جميع الفترات';
   }, [filters, branches, isAdmin]);
 
   return (
@@ -184,7 +187,7 @@ export function DashboardFilters({ filters, branches: _branches, onChange }: Das
         <div className="px-6 pb-6 space-y-6 border-t border-[var(--border-color)] pt-6">
           {/* Branch Selector - Admin Only */}
           {isAdmin && (
-            <div>
+            <div className="max-w-xs">
               <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                 الفرع
               </label>

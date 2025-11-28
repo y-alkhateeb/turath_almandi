@@ -134,7 +134,7 @@ export default function DashboardWorkbench() {
       <div className="space-y-6">
         <div className="flex items-center justify-between" dir="rtl">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">نظرة عامة</h1>
             <p className="text-[var(--text-secondary)] mt-1">
               مرحباً بك، {userInfo?.username || 'المستخدم'}
             </p>
@@ -154,7 +154,7 @@ export default function DashboardWorkbench() {
       <div className="space-y-6">
         <div className="flex items-center justify-between" dir="rtl">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">نظرة عامة</h1>
             <p className="text-[var(--text-secondary)] mt-1">
               مرحباً بك، {userInfo?.username || 'المستخدم'}
             </p>
@@ -182,7 +182,7 @@ export default function DashboardWorkbench() {
         {/* Page Header */}
         <div className="flex items-center justify-between" dir="rtl">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">نظرة عامة</h1>
             <p className="text-[var(--text-secondary)] mt-1">
               مرحباً بك، {userInfo?.username || 'المستخدم'}
             </p>
@@ -212,7 +212,7 @@ export default function DashboardWorkbench() {
       {/* Page Header */}
       <div className="flex items-center justify-between" dir="rtl">
         <div>
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">لوحة التحكم</h1>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">نظرة عامة</h1>
           <p className="text-[var(--text-secondary)] mt-1">
             مرحباً بك، {userInfo?.username || 'المستخدم'}
           </p>

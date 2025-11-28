@@ -347,6 +347,7 @@ export class DebtsService {
           paymentMethod: PaymentMethod.CASH,
           category: 'DEBT_PAYMENT',
           date: formatDateForDB(payDebtDto.paymentDate),
+          employeeVendorName: debt.creditorName,
           notes: transactionNotes,
           branchId: debt.branchId,
           createdBy: user.id,

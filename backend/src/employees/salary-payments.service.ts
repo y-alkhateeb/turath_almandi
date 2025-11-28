@@ -70,7 +70,12 @@ export class SalaryPaymentsService {
     employeeId: string,
     createSalaryPaymentDto: CreateSalaryPaymentDto,
     user: RequestUser,
-  ): Promise<SalaryPaymentWithRelations & { advanceDeductions?: AdvanceDeductionInfo[] }> {
+  ): Promise<SalaryPaymentWithRelations & {
+    fullSalary: number;
+    paidAmount: number;
+    advanceDeductionAmount: number;
+    advanceDeductions?: AdvanceDeductionInfo[];
+  }> {
     // Validate amount is positive
     if (createSalaryPaymentDto.amount <= 0) {
       throw new BadRequestException(ERROR_MESSAGES.SALARY_PAYMENT.AMOUNT_POSITIVE);

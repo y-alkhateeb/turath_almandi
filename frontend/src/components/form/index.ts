@@ -1,9 +1,28 @@
 // Form components barrel export
+
+// NEW: forwardRef-based components that work with {...register('fieldName')} spread
+// These are the RECOMMENDED components to use with react-hook-form
+export {
+  FormFieldInput,
+  FormFieldTextarea,
+  FormFieldSelect,
+  FormFieldDate,
+} from './FormField';
+export type {
+  FormFieldInputProps,
+  FormFieldTextareaProps,
+  FormFieldSelectProps,
+  FormFieldDateProps,
+  SelectOption,
+} from './FormField';
+
+// Legacy components (kept for backwards compatibility)
+// Consider migrating to FormField* components
 export { FormInput } from './FormInput';
 export type { FormInputProps } from './FormInput';
 
 export { FormSelect } from './FormSelect';
-export type { FormSelectProps, SelectOption } from './FormSelect';
+export type { FormSelectProps } from './FormSelect';
 
 export { FormDatePicker } from './FormDatePicker';
 export type { FormDatePickerProps } from './FormDatePicker';

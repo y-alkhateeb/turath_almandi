@@ -115,8 +115,12 @@ export function TransactionFormWithInventory({
   // ============================================
 
   // Category options based on transaction type
+  // Filter out DEBT_PAYMENT from income (it's auto-created when paying debts)
   const categoryOptions = useMemo(() => {
-    return transactionType === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    if (transactionType === 'INCOME') {
+      return INCOME_CATEGORIES.filter(cat => cat.value !== 'DEBT_PAYMENT');
+    }
+    return EXPENSE_CATEGORIES;
   }, [transactionType]);
 
   // Is this an inventory transaction?
@@ -143,6 +147,17 @@ export function TransactionFormWithInventory({
 
   // Is this a DEBT category? (auto-enable debt registration)
   const isDebtCategory = category === 'DEBT';
+
+  // Categories that allow partial payment (expenses only)
+  // مستلزمات, صيانة, مشتريات مخزون, دين, مصروفات أخرى
+  const PARTIAL_PAYMENT_ALLOWED_CATEGORIES = ['SUPPLIES', 'MAINTENANCE', 'INVENTORY', 'DEBT', 'OTHER_EXPENSE'];
+  const allowPartialPayment = useMemo(() => {
+    if (transactionType === 'INCOME') {
+      // Income categories don't allow partial payment
+      return false;
+    }
+    return PARTIAL_PAYMENT_ALLOWED_CATEGORIES.includes(category);
+  }, [transactionType, category]);
 
   // ============================================
   // EFFECTS
@@ -171,6 +186,16 @@ export function TransactionFormWithInventory({
       setCreateDebt(false);
     }
   }, [isDebtCategory]);
+
+  // Reset partial payment when switching to a category that doesn't allow it
+  useEffect(() => {
+    if (!allowPartialPayment) {
+      setIsPartialPayment(false);
+      setCreateDebt(false);
+      setDebtCreditorName('');
+      setDebtDueDate('');
+    }
+  }, [allowPartialPayment]);
 
   // Update paid amount when total changes (if not partial payment)
   useEffect(() => {
@@ -408,6 +433,7 @@ export function TransactionFormWithInventory({
         disabled={createTransaction.isPending}
         isExpense={isExpense}
         isDebtCategory={isDebtCategory}
+        allowPartialPayment={allowPartialPayment}
       />
 
       {/* Notes */}

@@ -23,6 +23,7 @@ interface PaymentSectionProps {
   disabled?: boolean;
   isExpense?: boolean; // المصروفات = نقدي فقط
   isDebtCategory?: boolean; // فئة الدين - إظهار نموذج الدين مباشرة
+  allowPartialPayment?: boolean; // السماح بالدفع الجزئي
 }
 
 export function PaymentSection({
@@ -42,6 +43,7 @@ export function PaymentSection({
   disabled = false,
   isExpense = false,
   isDebtCategory = false,
+  allowPartialPayment = true,
 }: PaymentSectionProps) {
   const [remainingAmount, setRemainingAmount] = useState(0);
 
@@ -183,21 +185,25 @@ export function PaymentSection({
         )}
       </div>
 
-      <div className="border-t border-[var(--border-color)] my-4"></div>
+      {/* خيار الدفع الجزئي - فقط للفئات المسموح بها */}
+      {allowPartialPayment && (
+        <>
+          <div className="border-t border-[var(--border-color)] my-4"></div>
 
-      {/* خيار الدفع الجزئي */}
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isPartialPayment}
-          onChange={(e) => onPartialPaymentChange(e.target.checked)}
-          disabled={disabled || totalAmount === 0}
-          className="w-4 h-4 text-brand-gold-600 border-[var(--border-color)] rounded focus:ring-brand-gold-500"
-        />
-        <span className="text-sm font-medium text-[var(--text-primary)]">
-          دفع جزئي
-        </span>
-      </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isPartialPayment}
+              onChange={(e) => onPartialPaymentChange(e.target.checked)}
+              disabled={disabled || totalAmount === 0}
+              className="w-4 h-4 text-brand-gold-600 border-[var(--border-color)] rounded focus:ring-brand-gold-500"
+            />
+            <span className="text-sm font-medium text-[var(--text-primary)]">
+              دفع جزئي
+            </span>
+          </label>
+        </>
+      )}
 
       {/* حقول الدفع الجزئي */}
       {isPartialPayment && (

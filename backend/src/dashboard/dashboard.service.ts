@@ -486,9 +486,10 @@ export class DashboardService {
 
     const transactions = await this.prisma.transaction.findMany({
       where: baseWhere,
-      orderBy: {
-        date: 'desc',
-      },
+      orderBy: [
+        { date: 'desc' },
+        { createdAt: 'desc' },
+      ],
       take: limit,
       include: {
         branch: {

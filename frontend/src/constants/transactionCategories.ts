@@ -20,6 +20,7 @@ export const INCOME_CATEGORIES: CategoryOption[] = [
   { value: 'INVENTORY_SALES', label: 'مبيعات المخزون', type: TransactionType.INCOME },
   { value: 'CAPITAL_ADDITION', label: 'إضافة رأس مال', type: TransactionType.INCOME },
   { value: 'APP_PURCHASES', label: 'مبيعات التطبيق', type: TransactionType.INCOME },
+  { value: 'DEBT_PAYMENT', label: 'دفع دين', type: TransactionType.INCOME },
 ];
 
 /**

@@ -7,6 +7,7 @@ export const INCOME_CATEGORIES = [
   'INVENTORY_SALES',   // مبيعات المخزون
   'CAPITAL_ADDITION',  // إضافة رأس مال
   'APP_PURCHASES',     // مبيعات التطبيق
+  'DEBT_PAYMENT',      // دفع دين
 ] as const;
 
 export const EXPENSE_CATEGORIES = [
@@ -39,6 +40,7 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   INVENTORY_SALES: 'مبيعات المخزون',
   CAPITAL_ADDITION: 'إضافة رأس مال',
   APP_PURCHASES: 'مبيعات التطبيق',
+  DEBT_PAYMENT: 'دفع دين',
   // EXPENSE
   EMPLOYEE_SALARIES: 'رواتب الموظفين',
   WORKER_DAILY: 'يوميات العمال',

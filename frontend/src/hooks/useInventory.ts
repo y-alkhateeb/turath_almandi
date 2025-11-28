@@ -173,7 +173,7 @@ export const useCreateInventory = () => {
       queryClient.setQueriesData<PaginatedResponse<InventoryItem>>(
         { queryKey: queryKeys.inventory.all },
         (old) => {
-          if (!old) return old;
+          if (!old || !old.data) return old;
 
           // Create temporary item with optimistic ID
           const tempItem: InventoryItem = {
@@ -293,7 +293,7 @@ export const useUpdateInventory = () => {
       queryClient.setQueriesData<PaginatedResponse<InventoryItem>>(
         { queryKey: queryKeys.inventory.all },
         (old) => {
-          if (!old) return old;
+          if (!old || !old.data) return old;
 
           return {
             ...old,
@@ -402,7 +402,7 @@ export const useDeleteInventory = () => {
       queryClient.setQueriesData<PaginatedResponse<InventoryItem>>(
         { queryKey: queryKeys.inventory.all },
         (old) => {
-          if (!old) return old;
+          if (!old || !old.data) return old;
 
           return {
             ...old,

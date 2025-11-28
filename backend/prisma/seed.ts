@@ -16,7 +16,6 @@ async function main() {
       name: 'الفرع الرئيسي',
       location: 'بغداد - المنصور',
       managerName: 'أحمد محمد',
-      phone: '+964 770 123 4567',
       isActive: true,
     },
   });
@@ -29,7 +28,6 @@ async function main() {
       name: 'فرع الكرادة',
       location: 'بغداد - الكرادة',
       managerName: 'علي حسن',
-      phone: '+964 771 234 5678',
       isActive: true,
     },
   });

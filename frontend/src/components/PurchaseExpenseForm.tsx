@@ -304,6 +304,7 @@ export const PurchaseExpenseForm = ({ onSuccess, onCancel }: PurchaseExpenseForm
             <select
               id="unit"
               {...register('unit')}
+              dir="rtl"
               className={`w-full px-4 py-3 border ${
                 errors.unit ? 'border-red-500' : 'border-[var(--border-color)]'
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent`}

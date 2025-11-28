@@ -276,6 +276,7 @@ export function TransactionFormWithInventory({
           <select
             {...register('type')}
             disabled={createTransaction.isPending}
+            dir="rtl"
             className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-[var(--bg-primary)] text-[var(--text-primary)] disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
           >
             <option value="EXPENSE">مصروف</option>
@@ -316,6 +317,7 @@ export function TransactionFormWithInventory({
           <select
             {...register('category')}
             disabled={createTransaction.isPending}
+            dir="rtl"
             className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-[var(--bg-primary)] text-[var(--text-primary)] disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
           >
             {categoryOptions.map((cat) => (

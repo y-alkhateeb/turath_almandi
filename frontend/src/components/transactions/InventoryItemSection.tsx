@@ -166,6 +166,7 @@ export function InventoryItemSection({
               value={selectedItemId}
               onChange={(e) => handleItemSelect(e.target.value)}
               disabled={disabled}
+              dir="rtl"
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-brand-500"
             >
               <option value="">اختر صنفاً</option>

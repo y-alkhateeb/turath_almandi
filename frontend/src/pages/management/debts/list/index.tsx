@@ -314,6 +314,7 @@ export default function DebtsListPage() {
             <select
               value={filters.status || ''}
               onChange={(e) => handleFiltersChange('status', e.target.value || undefined)}
+              dir="rtl"
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>
@@ -333,6 +334,7 @@ export default function DebtsListPage() {
               <select
                 value={filters.branchId || ''}
                 onChange={(e) => handleFiltersChange('branchId', e.target.value || undefined)}
+                dir="rtl"
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">جميع الفروع</option>

@@ -102,6 +102,7 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 id="filter-type"
                 value={filters.type || ''}
                 onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
+                dir="rtl"
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
@@ -122,6 +123,7 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 id="filter-category"
                 value={filters.category || ''}
                 onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
+                dir="rtl"
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
@@ -145,6 +147,7 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 id="filter-payment-method"
                 value={filters.paymentMethod || ''}
                 onChange={(e) => handleFilterChange('paymentMethod', e.target.value || undefined)}
+                dir="rtl"
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
@@ -166,6 +169,7 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                   id="filter-branch"
                   value={filters.branchId || ''}
                   onChange={(e) => handleFilterChange('branchId', e.target.value || undefined)}
+                  dir="rtl"
                   className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">جميع الفروع</option>

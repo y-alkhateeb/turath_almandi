@@ -237,6 +237,7 @@ export default function TransactionModal({
               </label>
               <select
                 {...register('type')}
+                dir="rtl"
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="INCOME">إيراد</option>

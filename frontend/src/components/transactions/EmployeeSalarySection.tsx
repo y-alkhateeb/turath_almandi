@@ -169,6 +169,7 @@ export function EmployeeSalarySection({
             value={selectedEmployeeId}
             onChange={(e) => setSelectedEmployeeId(e.target.value)}
             disabled={disabled || isSubmitting}
+            dir="rtl"
             className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
           >
             <option value="">-- اختر الموظف --</option>

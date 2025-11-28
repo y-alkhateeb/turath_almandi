@@ -345,6 +345,7 @@ export default function InventoryListPage() {
             <select
               value={filters.unit || ''}
               onChange={(e) => handleUnitChange(e.target.value)}
+              dir="rtl"
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">جميع الوحدات</option>
@@ -363,6 +364,7 @@ export default function InventoryListPage() {
             <select
               value={autoAddedFilterValue}
               onChange={(e) => handleAutoAddedChange(e.target.value)}
+              dir="rtl"
               className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">الكل</option>
@@ -380,6 +382,7 @@ export default function InventoryListPage() {
               <select
                 value={filters.branchId || ''}
                 onChange={(e) => handleBranchChange(e.target.value)}
+                dir="rtl"
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">جميع الفروع</option>

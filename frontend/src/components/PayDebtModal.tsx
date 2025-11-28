@@ -18,12 +18,8 @@ import { formatDateTable } from '@/utils/format';
 const createPayDebtSchema = (maxAmount: number) =>
   z.object({
     amountPaid: z
-      .union([z.string(), z.number()])
-      .transform((val) => String(val))
-      .refine(
-        (val) => val.trim().length > 0,
-        { message: 'المبلغ المدفوع مطلوب' }
-      )
+      .string()
+      .min(1, { message: 'المبلغ المدفوع مطلوب' })
       .refine(
         (val) => {
           const num = parseFloat(val);
@@ -39,7 +35,7 @@ const createPayDebtSchema = (maxAmount: number) =>
         { message: `المبلغ المدفوع لا يمكن أن يتجاوز المبلغ المتبقي (${maxAmount})` }
       ),
     paymentDate: z.string().min(1, { message: 'تاريخ الدفع مطلوب' }),
-    notes: z.string(),
+    notes: z.string().optional().default(''),
   });
 
 interface PayDebtModalProps {

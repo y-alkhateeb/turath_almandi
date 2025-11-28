@@ -115,8 +115,12 @@ export function TransactionFormWithInventory({
   // ============================================
 
   // Category options based on transaction type
+  // Filter out DEBT_PAYMENT from income (it's auto-created when paying debts)
   const categoryOptions = useMemo(() => {
-    return transactionType === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    if (transactionType === 'INCOME') {
+      return INCOME_CATEGORIES.filter(cat => cat.value !== 'DEBT_PAYMENT');
+    }
+    return EXPENSE_CATEGORIES;
   }, [transactionType]);
 
   // Is this an inventory transaction?

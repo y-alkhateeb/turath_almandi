@@ -32,6 +32,9 @@ import {
   getCategoriesByType,
 } from '@/constants/transactionCategories';
 
+// Filter out DEBT_PAYMENT from income categories (it's auto-created when paying debts)
+const SELECTABLE_INCOME_CATEGORIES = INCOME_CATEGORIES.filter(cat => cat.value !== 'DEBT_PAYMENT');
+
 // ============================================
 // ZOD VALIDATION SCHEMAS
 // ============================================
@@ -323,13 +326,13 @@ export function TransactionForm({
           options={
             mode === 'edit' && initialData
               ? initialData.type === TransactionType.INCOME
-                ? INCOME_CATEGORIES
+                ? INCOME_CATEGORIES // Show all categories when editing (including auto-created ones)
                 : EXPENSE_CATEGORIES
               : transactionType === TransactionType.INCOME
-              ? INCOME_CATEGORIES
+              ? SELECTABLE_INCOME_CATEGORIES
               : transactionType === TransactionType.EXPENSE
               ? EXPENSE_CATEGORIES
-              : INCOME_CATEGORIES // Default to income if not selected yet
+              : SELECTABLE_INCOME_CATEGORIES // Default to income if not selected yet
           }
           register={register}
           error={errors.category}

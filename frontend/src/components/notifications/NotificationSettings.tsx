@@ -16,6 +16,7 @@
 
 import { useState } from 'react';
 import { Bell, DollarSign, CheckCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/Switch';
 import { NotificationType, DisplayMethod } from '@/types/enum';
 import type { NotificationSettings, UpdateNotificationSettingsInput, Branch } from '#/entity';
 
@@ -243,23 +244,12 @@ export function NotificationSettings({
               </div>
 
               {/* Toggle Switch */}
-              <button
-                type="button"
-                onClick={() => handleToggle(typeConfig.type)}
+              <Switch
+                checked={typeSetting.isEnabled}
+                onChange={() => handleToggle(typeConfig.type)}
                 disabled={isSubmitting}
-                className={`
-                  relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
-                  ${typeSetting.isEnabled ? 'bg-primary-600' : 'bg-gray-300'}
-                  ${isSubmitting && 'opacity-50 cursor-not-allowed'}
-                `}
-              >
-                <span
-                  className={`
-                    inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                    ${typeSetting.isEnabled ? 'translate-x-1' : 'translate-x-6'}
-                  `}
-                />
-              </button>
+                size="md"
+              />
             </div>
 
             {/* Settings (shown only when enabled) */}

@@ -16,6 +16,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { BranchSelector } from '@/components/form/BranchSelector';
+import { Switch } from '@/components/ui/Switch';
 import { UserRole } from '@/types/enum';
 import type { User } from '@/types/auth.types';
 import type { CreateUserInput, UpdateUserInput } from '#/entity';
@@ -378,29 +379,14 @@ export function UserForm({ mode, initialData, onSubmit, onCancel, isSubmitting }
             name="isActive"
             control={control as typeof editForm.control}
             render={({ field }) => (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-[var(--text-primary)]">
-                  {field.value ? 'نشط' : 'معطل'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => field.onChange(!field.value)}
-                  disabled={isSubmitting}
-                  className={`
-                    relative inline-flex h-7 w-14 shrink-0 items-center rounded-full transition-colors
-                    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
-                    ${field.value ? 'bg-green-600' : 'bg-gray-300'}
-                    ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
-                  `}
-                >
-                  <span
-                    className={`
-                      inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform
-                      ${field.value ? 'translate-x-1' : 'translate-x-8'}
-                    `}
-                  />
-                </button>
-              </div>
+              <Switch
+                checked={field.value ?? false}
+                onChange={field.onChange}
+                disabled={isSubmitting}
+                label={field.value ? 'نشط' : 'معطل'}
+                labelPosition="start"
+                size="lg"
+              />
             )}
           />
           <p className="mt-1 text-xs text-[var(--text-secondary)]" dir="rtl">

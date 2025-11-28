@@ -1020,6 +1020,8 @@ export class TransactionsService {
                 increment: item.quantity,
               },
               costPerUnit: newCost,
+              // Update selling price if provided
+              ...(item.sellingPrice !== undefined && { sellingPrice: item.sellingPrice }),
               lastUpdated: getCurrentTimestamp(),
             },
           });

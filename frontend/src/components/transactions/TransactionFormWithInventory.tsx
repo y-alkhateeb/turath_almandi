@@ -271,7 +271,7 @@ export function TransactionFormWithInventory({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-            نوع العملية <span className="text-red-500">*</span>
+            نوع الفاتورة <span className="text-red-500">*</span>
           </label>
           <select
             {...register('type')}
@@ -279,8 +279,8 @@ export function TransactionFormWithInventory({
             dir="rtl"
             className="w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors bg-[var(--bg-primary)] text-[var(--text-primary)] disabled:bg-[var(--bg-tertiary)] disabled:cursor-not-allowed"
           >
-            <option value="EXPENSE">مصروف</option>
-            <option value="INCOME">إيراد</option>
+            <option value="EXPENSE">صرفيات الصندوق</option>
+            <option value="INCOME">واردات صندوق</option>
           </select>
         </div>
 

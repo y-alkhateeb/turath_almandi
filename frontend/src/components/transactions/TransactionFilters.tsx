@@ -96,7 +96,7 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 htmlFor="filter-type"
                 className="block text-sm font-medium text-[var(--text-primary)] mb-2"
               >
-                نوع العملية
+                نوع الفاتورة
               </label>
               <select
                 id="filter-type"
@@ -106,8 +106,8 @@ export function TransactionFilters({ filters, onChange, branches }: TransactionF
                 className="w-full px-3 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">الكل</option>
-                <option value={TransactionType.INCOME}>إيراد</option>
-                <option value={TransactionType.EXPENSE}>مصروف</option>
+                <option value={TransactionType.INCOME}>واردات صندوق</option>
+                <option value={TransactionType.EXPENSE}>صرفيات الصندوق</option>
               </select>
             </div>
 

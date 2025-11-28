@@ -123,8 +123,8 @@ export interface TransactionFormProps {
  * Transaction type options (Arabic)
  */
 const transactionTypeOptions: SelectOption[] = [
-  { value: TransactionType.INCOME, label: 'إيراد' },
-  { value: TransactionType.EXPENSE, label: 'مصروف' },
+  { value: TransactionType.INCOME, label: 'واردات صندوق' },
+  { value: TransactionType.EXPENSE, label: 'صرفيات الصندوق' },
 ];
 
 /**

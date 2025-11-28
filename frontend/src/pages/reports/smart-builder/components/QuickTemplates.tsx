@@ -74,7 +74,7 @@ const TEMPLATE_INFO: Record<TemplateType, { icon: typeof Receipt; title: string;
   transactions: {
     icon: Receipt,
     title: 'تقرير المعاملات',
-    description: 'جميع المعاملات المالية (إيرادات ومصروفات)',
+    description: 'جميع المعاملات المالية (واردات وصرفيات الصندوق)',
     color: 'text-blue-600 dark:text-blue-400',
   },
   debts: {
@@ -95,7 +95,7 @@ const TEMPLATE_INFO: Record<TemplateType, { icon: typeof Receipt; title: string;
 const TEMPLATE_FIELDS: Record<TemplateType, ReportField[]> = {
   transactions: [
     { id: uuidv4(), sourceField: 'date', displayName: 'التاريخ', dataType: 'date', visible: true, order: 0, format: 'date-short' },
-    { id: uuidv4(), sourceField: 'type', displayName: 'النوع', dataType: 'enum', visible: true, order: 1 },
+    { id: uuidv4(), sourceField: 'type', displayName: 'نوع الفاتورة', dataType: 'enum', visible: true, order: 1 },
     { id: uuidv4(), sourceField: 'category', displayName: 'الفئة', dataType: 'string', visible: true, order: 2 },
     { id: uuidv4(), sourceField: 'amount', displayName: 'المبلغ', dataType: 'number', visible: true, order: 3, format: 'currency' },
     { id: uuidv4(), sourceField: 'paymentMethod', displayName: 'طريقة الدفع', dataType: 'enum', visible: true, order: 4 },

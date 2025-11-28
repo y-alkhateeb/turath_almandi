@@ -38,7 +38,7 @@ export const ViewTransactionPage = () => {
   };
 
   const getTypeLabel = (type: TransactionType) => {
-    return type === 'INCOME' ? 'إيراد' : 'مصروف';
+    return type === 'INCOME' ? 'واردات صندوق' : 'صرفيات الصندوق';
   };
 
   const getPaymentMethodLabel = (method: PaymentMethod | null) => {

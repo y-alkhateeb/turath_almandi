@@ -26,7 +26,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 التاريخ
               </th>
               <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
-                النوع
+                نوع الفاتورة
               </th>
               <th className="text-right text-sm font-medium text-[var(--text-primary)] pb-3">
                 الفئة
@@ -50,7 +50,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 </td>
                 <td className="py-3">
                   <Badge variant={transaction.type === 'INCOME' ? 'success' : 'danger'}>
-                    {transaction.type === 'INCOME' ? 'إيراد' : 'مصروف'}
+                    {transaction.type === 'INCOME' ? 'واردات صندوق' : 'صرفيات الصندوق'}
                   </Badge>
                 </td>
                 <td className="py-3 text-sm text-[var(--text-primary)]">{getCategoryLabel(transaction.category)}</td>

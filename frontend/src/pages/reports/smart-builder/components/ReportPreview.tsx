@@ -198,8 +198,8 @@ interface CurrencySettings {
 // Labels for enum values
 const ENUM_LABELS: Record<string, Record<string, string>> = {
   type: {
-    INCOME: 'إيراد',
-    EXPENSE: 'مصروف',
+    INCOME: 'واردات صندوق',
+    EXPENSE: 'صرفيات الصندوق',
   },
   status: {
     ACTIVE: 'نشط',

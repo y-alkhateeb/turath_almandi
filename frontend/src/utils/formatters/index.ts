@@ -4,6 +4,7 @@
 
 import dayjs from 'dayjs';
 import 'dayjs/locale/en';
+import 'dayjs/locale/ar';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
@@ -53,10 +54,10 @@ export function formatTime(date: string | Date): string {
 }
 
 /**
- * Format date relative to now (e.g., "2 hours ago")
+ * Format date relative to now (e.g., "منذ ساعتين")
  */
 export function formatRelativeTime(date: string | Date): string {
-  return dayjs(date).locale('en').fromNow();
+  return dayjs(date).locale('ar').fromNow();
 }
 
 /**

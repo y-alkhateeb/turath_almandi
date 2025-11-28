@@ -107,12 +107,13 @@ export class InventoryService {
       throw new BadRequestException(ERROR_MESSAGES.VALIDATION.COST_NON_NEGATIVE);
     }
 
-    // Check if item with same name and unit already exists in this branch
+    // Check if item with same name and unit already exists in this branch (only active items)
     const existingItem = await this.prisma.inventoryItem.findFirst({
       where: {
         branchId: branchId,
         name: createInventoryDto.name,
         unit: createInventoryDto.unit,
+        deletedAt: null, // Only check active (non-deleted) items
       },
     });
 
@@ -388,12 +389,13 @@ export class InventoryService {
     // Calculate cost per unit
     const costPerUnit = totalAmount / quantity;
 
-    // Try to find existing inventory item with same name and unit
+    // Try to find existing active inventory item with same name and unit
     const existingItem = await prisma.inventoryItem.findFirst({
       where: {
         branchId,
         name: itemName,
         unit,
+        deletedAt: null, // Only check active (non-deleted) items
       },
     });
 

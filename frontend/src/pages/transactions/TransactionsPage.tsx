@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { TrendingDown, TrendingUp } from 'lucide-react';
 import { useTransactions, useDeleteTransaction } from '@/hooks/useTransactions';
 import TransactionTable from '@/components/TransactionTable';
 import { PageLayout } from '@/components/layouts';
@@ -65,10 +65,23 @@ export default function TransactionsPage() {
       description="عرض وإدارة جميع واردات وصرفيات الصندوق"
       onRetry={() => refetch()}
       actions={
-        <Button onClick={() => navigate('/transactions/create')}>
-          <Plus className="w-5 h-5" />
-          إضافة عملية جديدة
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/transactions/create/expense')}
+            className="gap-2"
+          >
+            <TrendingDown className="w-4 h-4" />
+            إضافة مصروف
+          </Button>
+          <Button
+            onClick={() => navigate('/transactions/create/income')}
+            className="gap-2"
+          >
+            <TrendingUp className="w-4 h-4" />
+            إضافة إيراد
+          </Button>
+        </div>
       }
     >
       {/* Table */}

@@ -30,7 +30,8 @@ const DashboardPage = lazy(() => import('@/pages/dashboard/workbench'));
 
 // Transactions
 const TransactionsListPage = lazy(() => import('@/pages/transactions/TransactionsPage'));
-const TransactionsCreatePage = lazy(() => import('@/pages/transactions/CreateIncomePage'));
+const TransactionsCreateIncomePage = lazy(() => import('@/pages/transactions/CreateIncomePage'));
+const TransactionsCreateExpensePage = lazy(() => import('@/pages/transactions/CreateExpensePage'));
 const TransactionsViewPage = lazy(() => import('@/pages/transactions/ViewTransactionPage'));
 const TransactionsEditPage = lazy(() => import('@/pages/transactions/EditTransactionPage'));
 
@@ -135,13 +136,32 @@ export const dashboardRoutes: RouteObject[] = [
                   </LazyPage>
                 ),
               },
+              // Create routes - separate pages for income and expense
               {
                 path: 'create',
-                element: (
-                  <LazyPage>
-                    <TransactionsCreatePage />
-                  </LazyPage>
-                ),
+                children: [
+                  // Redirect /transactions/create to /transactions/create/expense (default)
+                  {
+                    index: true,
+                    element: <Navigate to="/transactions/create/expense" replace />,
+                  },
+                  {
+                    path: 'income',
+                    element: (
+                      <LazyPage>
+                        <TransactionsCreateIncomePage />
+                      </LazyPage>
+                    ),
+                  },
+                  {
+                    path: 'expense',
+                    element: (
+                      <LazyPage>
+                        <TransactionsCreateExpensePage />
+                      </LazyPage>
+                    ),
+                  },
+                ],
               },
               {
                 path: 'view/:id',

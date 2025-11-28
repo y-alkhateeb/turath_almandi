@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdvanceDto } from './dto/create-advance.dto';
 import { RecordDeductionDto } from './dto/record-deduction.dto';
 import { Prisma } from '@prisma/client';
-import { AdvanceStatus, UserRole } from '../common/types/prisma-enums';
+import { AdvanceStatus, UserRole, TransactionType } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { formatDateForDB } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
@@ -64,32 +64,56 @@ export class AdvancesService {
       warning = `تنبيه: إجمالي السلفات (${newTotalAdvances.toFixed(2)}) يتجاوز راتب شهرين (${twoMonthsSalary.toFixed(2)})`;
     }
 
-    // إنشاء السلفة
-    const advance = await this.prisma.employeeAdvance.create({
-      data: {
-        employeeId: dto.employeeId,
-        amount: dto.amount,
-        remainingAmount: dto.amount, // المبلغ المتبقي = المبلغ الكامل عند الإنشاء
-        monthlyDeduction: dto.monthlyDeduction,
-        advanceDate: formatDateForDB(dto.advanceDate),
-        reason: dto.reason,
-        status: AdvanceStatus.ACTIVE,
-        recordedBy: user.id,
-      },
-      include: {
-        employee: {
-          select: {
-            id: true,
-            name: true,
-            baseSalary: true,
-            allowance: true,
+    // إنشاء السلفة مع معاملة المصروفات في transaction واحد
+    const advance = await this.prisma.$transaction(async (prisma) => {
+      // إنشاء معاملة المصروفات (السلفة = مبلغ خارج)
+      const transaction = await prisma.transaction.create({
+        data: {
+          type: TransactionType.EXPENSE,
+          amount: dto.amount,
+          paymentMethod: null,
+          category: 'EMPLOYEE_SALARIES',
+          date: formatDateForDB(dto.advanceDate),
+          employeeVendorName: employee.name,
+          notes: dto.reason
+            ? `سلفة للموظف ${employee.name}: ${dto.reason}`
+            : `سلفة للموظف ${employee.name}`,
+          branchId: employee.branchId,
+          createdBy: user.id,
+        },
+      });
+
+      // إنشاء سجل السلفة
+      const newAdvance = await prisma.employeeAdvance.create({
+        data: {
+          employeeId: dto.employeeId,
+          amount: dto.amount,
+          remainingAmount: dto.amount, // المبلغ المتبقي = المبلغ الكامل عند الإنشاء
+          monthlyDeduction: dto.monthlyDeduction,
+          advanceDate: formatDateForDB(dto.advanceDate),
+          reason: dto.reason,
+          status: AdvanceStatus.ACTIVE,
+          recordedBy: user.id,
+          transactionId: transaction.id, // ربط السلفة بالمعاملة
+        },
+        include: {
+          employee: {
+            select: {
+              id: true,
+              name: true,
+              baseSalary: true,
+              allowance: true,
+            },
           },
+          recorder: {
+            select: USER_SELECT,
+          },
+          deductions: true,
+          transaction: true,
         },
-        recorder: {
-          select: USER_SELECT,
-        },
-        deductions: true,
-      },
+      });
+
+      return newAdvance;
     });
 
     // تسجيل في سجل التدقيق

@@ -102,38 +102,49 @@ export class SalaryPaymentsService {
       }
     }
 
-    // Calculate total monthly deductions from active advances
+    // Calculate employee's full salary
+    const fullSalary = Number(employee.baseSalary) + Number(employee.allowance);
+    const paidAmount = createSalaryPaymentDto.amount;
+
+    // Calculate advance deduction based on salary difference
+    // Deduction = fullSalary - paidAmount (only if paidAmount < fullSalary)
     const activeAdvances = employee.advances;
-    const totalMonthlyDeduction = activeAdvances.reduce(
-      (sum, adv) => sum + Math.min(Number(adv.monthlyDeduction), Number(adv.remainingAmount)),
-      0,
-    );
+    let advanceDeductionAmount = 0;
 
-    // Net salary after deductions
-    const netSalaryPaid = createSalaryPaymentDto.amount - totalMonthlyDeduction;
+    if (paidAmount < fullSalary) {
+      // Calculate deduction only if paid less than full salary
+      advanceDeductionAmount = fullSalary - paidAmount;
 
-    if (netSalaryPaid < 0) {
-      throw new BadRequestException(
-        `إجمالي خصومات السلف (${totalMonthlyDeduction.toFixed(2)}) يتجاوز مبلغ الراتب (${createSalaryPaymentDto.amount.toFixed(2)})`,
+      // Check if total remaining advances can cover the deduction
+      const totalRemainingAdvances = activeAdvances.reduce(
+        (sum, adv) => sum + Number(adv.remainingAmount),
+        0,
       );
+
+      // Limit deduction to available remaining advances
+      if (advanceDeductionAmount > totalRemainingAdvances) {
+        advanceDeductionAmount = totalRemainingAdvances;
+      }
     }
+    // If paidAmount >= fullSalary, no advance deduction (advanceDeductionAmount stays 0)
 
     // Track deduction info for response
     const advanceDeductionsInfo: AdvanceDeductionInfo[] = [];
 
     // Use Prisma transaction to ensure atomicity
     const result = await this.prisma.$transaction(async (prisma) => {
-      // Create transaction record for salary payment (net amount)
+      // Create transaction record for salary payment
+      // The amount recorded is what was actually paid
       const transaction = await prisma.transaction.create({
         data: {
           type: TransactionType.EXPENSE,
-          amount: createSalaryPaymentDto.amount, // Full salary as expense
+          amount: paidAmount, // Record only what was actually paid
           paymentMethod: null,
-          category: 'salaries',
+          category: 'EMPLOYEE_SALARIES',
           date: formatDateForDB(createSalaryPaymentDto.paymentDate),
           employeeVendorName: employee.name,
-          notes: totalMonthlyDeduction > 0
-            ? `راتب ${employee.position} (صافي: ${netSalaryPaid.toFixed(2)} بعد خصم سلف: ${totalMonthlyDeduction.toFixed(2)})`
+          notes: advanceDeductionAmount > 0
+            ? `راتب ${employee.position} (الراتب الكامل: ${fullSalary.toFixed(2)}، المدفوع: ${paidAmount.toFixed(2)}، خصم سلفة: ${advanceDeductionAmount.toFixed(2)})`
             : createSalaryPaymentDto.notes
               ? `راتب ${employee.position}: ${createSalaryPaymentDto.notes}`
               : `راتب ${employee.position}`,
@@ -154,30 +165,37 @@ export class SalaryPaymentsService {
         },
       });
 
-      // Process advance deductions
+      // Process advance deductions only if there's a deduction amount
+      // (i.e., paid less than full salary and there are active advances)
+      let remainingDeduction = advanceDeductionAmount;
+
       for (const advance of activeAdvances) {
-        // Calculate deduction amount (min of monthly deduction and remaining)
-        const deductionAmount = Math.min(
-          Number(advance.monthlyDeduction),
+        // Stop if no more deduction to distribute
+        if (remainingDeduction <= 0) break;
+
+        // Calculate deduction for this advance
+        // Deduct min of remaining deduction amount and this advance's remaining balance
+        const deductionForThisAdvance = Math.min(
+          remainingDeduction,
           Number(advance.remainingAmount),
         );
 
-        if (deductionAmount <= 0) continue;
+        if (deductionForThisAdvance <= 0) continue;
 
         // Create deduction record
         await prisma.advanceDeduction.create({
           data: {
             advanceId: advance.id,
-            amount: deductionAmount,
+            amount: deductionForThisAdvance,
             deductionDate: formatDateForDB(createSalaryPaymentDto.paymentDate),
             salaryPaymentId: salaryPayment.id,
-            notes: `خصم تلقائي من راتب ${formatDateForDB(createSalaryPaymentDto.paymentDate)}`,
+            notes: `خصم من السلفة - الراتب الكامل: ${fullSalary.toFixed(2)}، المدفوع: ${paidAmount.toFixed(2)}`,
             recordedBy: user.id,
           },
         });
 
         // Calculate new remaining amount and status
-        const newRemainingAmount = Number(advance.remainingAmount) - deductionAmount;
+        const newRemainingAmount = Number(advance.remainingAmount) - deductionForThisAdvance;
         const newStatus = newRemainingAmount <= 0 ? AdvanceStatus.PAID : AdvanceStatus.ACTIVE;
 
         // Update advance
@@ -191,11 +209,14 @@ export class SalaryPaymentsService {
 
         advanceDeductionsInfo.push({
           advanceId: advance.id,
-          deductionAmount,
+          deductionAmount: deductionForThisAdvance,
           previousRemaining: Number(advance.remainingAmount),
           newRemaining: newRemainingAmount,
           status: newStatus,
         });
+
+        // Reduce remaining deduction
+        remainingDeduction -= deductionForThisAdvance;
       }
 
       // Fetch the complete salary payment with relations
@@ -221,8 +242,9 @@ export class SalaryPaymentsService {
     const auditData = JSON.parse(JSON.stringify({
       ...result,
       advanceDeductions: advanceDeductionsInfo,
-      totalMonthlyDeduction,
-      netSalaryPaid,
+      fullSalary,
+      paidAmount,
+      advanceDeductionAmount,
     }));
 
     await this.auditLogService.logCreate(
@@ -234,6 +256,9 @@ export class SalaryPaymentsService {
 
     return {
       ...result,
+      fullSalary,
+      paidAmount,
+      advanceDeductionAmount,
       advanceDeductions: advanceDeductionsInfo.length > 0 ? advanceDeductionsInfo : undefined,
     };
   }

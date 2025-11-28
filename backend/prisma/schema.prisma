@@ -220,6 +220,7 @@ model Transaction {
   linkedDebt                Debt?                       @relation("TransactionDebt", fields: [linkedDebtId], references: [id], onDelete: SetNull)
   salaryPayments            SalaryPayment[]
   bonuses                   Bonus[]
+  advances                  EmployeeAdvance?            @relation("AdvanceTransaction")
   transactionInventoryItems TransactionInventoryItem[]
 
   @@index([branchId])
@@ -565,20 +566,23 @@ model EmployeeAdvance {
   advanceDate      DateTime       @map("advance_date") @db.Date
   reason           String?        @db.Text
   status           AdvanceStatus  @default(ACTIVE)
+  transactionId    String?        @unique @map("transaction_id") @db.Uuid
   recordedBy       String         @map("recorded_by") @db.Uuid
   createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt        DateTime?      @map("deleted_at") @db.Timestamptz
 
   // Relations
-  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  recorder   User               @relation("AdvanceRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
-  deductions AdvanceDeduction[]
+  employee    Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  recorder    User               @relation("AdvanceRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  transaction Transaction?       @relation("AdvanceTransaction", fields: [transactionId], references: [id], onDelete: SetNull)
+  deductions  AdvanceDeduction[]
 
   @@index([employeeId])
   @@index([advanceDate])
   @@index([status])
   @@index([recordedBy])
+  @@index([transactionId])
   @@index([deletedAt])
   @@index([employeeId, status])
   @@map("employee_advances")

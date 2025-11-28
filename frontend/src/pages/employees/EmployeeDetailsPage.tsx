@@ -679,14 +679,33 @@ export const EmployeeDetailsPage = () => {
                 <p>
                   الراتب الكامل: <CurrencyAmountCompact amount={Number(employee.baseSalary) + Number(employee.allowance)} />
                 </p>
-                {advancesData?.summary?.totalMonthlyDeduction && advancesData.summary.totalMonthlyDeduction > 0 && (
+                {advancesData?.summary?.totalRemaining && advancesData.summary.totalRemaining > 0 && (
                   <>
-                    <p className="text-amber-600">
-                      خصم السلفة الشهري: <CurrencyAmountCompact amount={advancesData.summary.totalMonthlyDeduction} />
+                    <p>
+                      إجمالي السلف المستحقة: <CurrencyAmountCompact amount={advancesData.summary.totalRemaining} />
                     </p>
-                    <p className="text-green-600 font-medium">
-                      صافي الراتب بعد الخصم: <CurrencyAmountCompact amount={advancesData.summary.netSalaryAfterDeduction || (Number(employee.baseSalary) + Number(employee.allowance) - advancesData.summary.totalMonthlyDeduction)} />
-                    </p>
+                    {(() => {
+                      const fullSalary = Number(employee.baseSalary) + Number(employee.allowance);
+                      const paidAmount = parseFloat(paymentData.amount) || 0;
+                      const totalRemaining = advancesData.summary.totalRemaining;
+
+                      if (paidAmount > 0 && paidAmount < fullSalary) {
+                        const deduction = Math.min(fullSalary - paidAmount, totalRemaining);
+                        return (
+                          <p className="text-amber-600 font-medium">
+                            سيتم خصم من السلفة: <CurrencyAmountCompact amount={deduction} />
+                            <span className="text-[var(--text-tertiary)]"> (الراتب - المدفوع)</span>
+                          </p>
+                        );
+                      } else if (paidAmount >= fullSalary) {
+                        return (
+                          <p className="text-green-600 font-medium">
+                            ✓ لن يتم خصم من السلفة (الراتب مدفوع بالكامل)
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                   </>
                 )}
               </div>

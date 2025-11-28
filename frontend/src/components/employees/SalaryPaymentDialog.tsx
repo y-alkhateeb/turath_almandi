@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Dialog } from '@/components/ui/Dialog';
 import { DateInput } from '@/components/form';
 import { useRecordSalaryPayment } from '@/hooks/useEmployees';
+import { formatCurrency } from '@/utils/format';
 import type { CreateSalaryPaymentInput } from '@/types';
 
 const salaryPaymentSchema = z.object({
@@ -24,6 +24,7 @@ interface SalaryPaymentDialogProps {
   employeeId: string;
   employeeName: string;
   currentSalary: number;
+  totalRemainingAdvances?: number;
 }
 
 export const SalaryPaymentDialog: React.FC<SalaryPaymentDialogProps> = ({
@@ -32,12 +33,14 @@ export const SalaryPaymentDialog: React.FC<SalaryPaymentDialogProps> = ({
   employeeId,
   employeeName,
   currentSalary,
+  totalRemainingAdvances = 0,
 }) => {
   const recordPayment = useRecordSalaryPayment();
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
   } = useForm<SalaryPaymentFormData>({
@@ -48,6 +51,15 @@ export const SalaryPaymentDialog: React.FC<SalaryPaymentDialogProps> = ({
       notes: '',
     },
   });
+
+  // Watch amount to calculate advance deduction preview
+  const watchedAmount = useWatch({ control, name: 'amount' });
+  const paidAmount = Number(watchedAmount) || 0;
+
+  // Calculate advance deduction preview
+  const advanceDeductionPreview = paidAmount < currentSalary
+    ? Math.min(currentSalary - paidAmount, totalRemainingAdvances)
+    : 0;
 
   const handleFormSubmit = async (data: SalaryPaymentFormData) => {
     const paymentData: CreateSalaryPaymentInput = {
@@ -124,6 +136,37 @@ export const SalaryPaymentDialog: React.FC<SalaryPaymentDialogProps> = ({
           />
           {errors.notes && <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>}
         </div>
+
+        {/* Advance Deduction Preview */}
+        {totalRemainingAdvances > 0 && (
+          <div className={`border rounded-lg p-4 ${
+            advanceDeductionPreview > 0
+              ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+              : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+          }`}>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-[var(--text-secondary)]">إجمالي السلف المستحقة:</span>
+                <span className="font-medium">{formatCurrency(totalRemainingAdvances)}</span>
+              </div>
+              {advanceDeductionPreview > 0 ? (
+                <>
+                  <div className="flex justify-between text-amber-800 dark:text-amber-200">
+                    <span>سيتم خصم من السلفة:</span>
+                    <span className="font-bold">{formatCurrency(advanceDeductionPreview)}</span>
+                  </div>
+                  <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                    (الراتب الكامل {formatCurrency(currentSalary)} - المدفوع {formatCurrency(paidAmount)} = {formatCurrency(currentSalary - paidAmount)})
+                  </p>
+                </>
+              ) : (
+                <p className="text-green-800 dark:text-green-200">
+                  ✓ لن يتم خصم أي مبلغ من السلفة (الراتب مدفوع بالكامل أو أكثر)
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Info Box */}
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

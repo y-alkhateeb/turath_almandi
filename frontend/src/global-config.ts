@@ -55,10 +55,10 @@ const defaultRoute = '/dashboard';
 const appName = 'تراث المندي';
 const appDescription = 'نظام المحاسبة لمطاعم تراث المندي';
 
-// Branding assets
-const loginBackgroundImage =
-  'https://scontent-ham3-1.xx.fbcdn.net/v/t39.30808-6/490910684_606105959129344_589045621789059215_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=XyunuxQxn-4Q7kNvwHHmV0s&_nc_oc=Admc3MkNuTk7L14zxbrvoEmFr28NelBAfDaY8lmeuuAVV8rvVvrU8EIlOzijUSC_0OA&_nc_zt=23&_nc_ht=scontent-ham3-1.xx&_nc_gid=vzZ1ZuF2EPOludLIPQkBRQ&oh=00_AfiWqkTMuSX7YW3p68dAjm9PlyqHajlah6LodsUALpgPfQ&oe=691FA85E'; // Admin can change this from dashboard
-const useFallbackGradient = false; // Set to false once image is uploaded
+// Branding assets - served from frontend public directory
+const logoUrl = '/logo.jpg';
+const loginBackgroundUrl = '/logo.jpg';
+const useFallbackGradient = false;
 
 // Storage keys
 const storageKeys = {
@@ -76,7 +76,8 @@ const GLOBAL_CONFIG = {
   defaultRoute,
   appName,
   appDescription,
-  loginBackgroundImage,
+  logoUrl,
+  loginBackgroundUrl,
   useFallbackGradient,
   storageKeys,
   routerMode,

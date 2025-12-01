@@ -6,8 +6,9 @@ import {
   IsDateString,
   Min,
   ValidateIf,
+  MaxLength,
 } from 'class-validator';
-import { TransactionType, PaymentMethod } from '../../common/types/prisma-enums';
+import { TransactionType, PaymentMethod, DiscountType } from '../../common/types/prisma-enums';
 import { Transform } from 'class-transformer';
 import { IsValidCategory } from '../../common/decorators/is-valid-category.decorator';
 
@@ -43,4 +44,19 @@ export class UpdateTransactionDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  // Discount fields
+  @IsOptional()
+  @IsEnum(DiscountType, { message: 'نوع الخصم غير صالح' })
+  discountType?: DiscountType;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0, { message: 'قيمة الخصم يجب أن تكون صفر أو أكبر' })
+  discountValue?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200, { message: 'سبب الخصم يجب ألا يتجاوز 200 حرف' })
+  discountReason?: string;
 }

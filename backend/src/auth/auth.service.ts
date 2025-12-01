@@ -53,7 +53,7 @@ export class AuthService {
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
         createdAt: true,
       },
     });
@@ -104,9 +104,9 @@ export class AuthService {
       );
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      // Record failed attempt for inactive user
+    // Check if user is soft deleted
+    if (user.isDeleted) {
+      // Record failed attempt for deleted user
       await this.loginThrottleGuard.recordFailedAttempt(ip);
       throw new UnauthorizedException('الحساب معطل. يرجى التواصل مع المسؤول');
     }
@@ -177,7 +177,6 @@ export class AuthService {
         username: user.username,
         role: user.role,
         branchId: user.branchId,
-        isActive: user.isActive,
       },
       access_token,
       refresh_token,
@@ -215,8 +214,8 @@ export class AuthService {
       return null;
     }
 
-    // Check if user is active
-    if (!user.isActive) {
+    // Check if user is not deleted
+    if (user.isDeleted) {
       return null;
     }
 
@@ -307,8 +306,8 @@ export class AuthService {
       throw new UnauthorizedException('رمز التحديث منتهي الصلاحية');
     }
 
-    // Check if user is active
-    if (!tokenRecord.user.isActive) {
+    // Check if user is not deleted
+    if (tokenRecord.user.isDeleted) {
       throw new UnauthorizedException('الحساب معطل');
     }
 

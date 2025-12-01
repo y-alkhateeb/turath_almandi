@@ -17,6 +17,24 @@ import apiClient from '../apiClient';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
 import type { PaginatedResponse, TransactionQueryFilters, TransactionStatsResponse } from '#/api';
 import type { TransactionWithInventoryRequest } from '@/types/inventoryOperation.types';
+import { DiscountType, InventoryOperationType } from '@/types/enum';
+
+// ============================================
+// TYPES
+// ============================================
+
+/**
+ * Transaction Item DTO for multi-item transactions
+ * Matches backend TransactionItemDto exactly
+ */
+export interface TransactionItemDto {
+  inventoryItemId: string;
+  quantity: number;
+  unitPrice: number;
+  operationType: InventoryOperationType;
+  discountType?: DiscountType;
+  discountValue?: number;
+}
 
 // ============================================
 // API ENDPOINTS

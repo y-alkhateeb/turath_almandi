@@ -73,3 +73,60 @@ export const TRANSACTION_SELECT_MINIMAL = {
   date: true,
   employeeVendorName: true,
 };
+
+/**
+ * Standard contact select object
+ * Used when including contact relations
+ */
+export const CONTACT_SELECT = {
+  id: true,
+  name: true,
+  type: true,
+  phone: true,
+  email: true,
+};
+
+/**
+ * Extended contact select including credit limit
+ */
+export const CONTACT_EXTENDED_SELECT = {
+  ...CONTACT_SELECT,
+  address: true,
+  taxNumber: true,
+  creditLimit: true,
+};
+
+/**
+ * Standard includes for entities with branch, creator, and contact
+ */
+export const STANDARD_INCLUDES_WITH_CONTACT = {
+  ...STANDARD_INCLUDES,
+  contact: {
+    select: CONTACT_SELECT,
+  },
+};
+
+/**
+ * Standard account payable/receivable select object
+ */
+export const PAYABLE_RECEIVABLE_SELECT = {
+  id: true,
+  originalAmount: true,
+  remainingAmount: true,
+  date: true,
+  dueDate: true,
+  status: true,
+  description: true,
+  invoiceNumber: true,
+};
+
+/**
+ * Standard payment select object (for PayablePayment/ReceivablePayment)
+ */
+export const PAYMENT_SELECT = {
+  id: true,
+  amountPaid: true,
+  paymentDate: true,
+  paymentMethod: true,
+  notes: true,
+};

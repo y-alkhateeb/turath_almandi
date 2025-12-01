@@ -51,10 +51,10 @@ export class BranchesService {
       where.id = branchId;
     }
 
-    // By default, show only active branches
-    // Admin users can optionally see all branches (including inactive) by setting includeInactive=true
+    // By default, show only non-deleted branches
+    // Admin users can optionally see all branches (including deleted) by setting includeInactive=true
     if (!includeInactive || user?.role !== UserRole.ADMIN) {
-      where.isActive = true;
+      where.isDeleted = false;
     }
 
     return this.prisma.branch.findMany({
@@ -81,7 +81,7 @@ export class BranchesService {
             id: true,
             username: true,
             role: true,
-            isActive: true,
+            isDeleted: true,
           },
         },
         _count: {
@@ -125,10 +125,14 @@ export class BranchesService {
   async remove(id: string, currentUserId?: string) {
     const existingBranch = await this.findOne(id); // Check existence
 
-    // Soft delete: set isActive to false
+    // Soft delete: set soft delete fields
     const deletedBranch = await this.prisma.branch.update({
       where: { id },
-      data: { isActive: false },
+      data: {
+        deletedAt: new Date(),
+        deletedBy: currentUserId || null,
+        isDeleted: true,
+      },
     });
 
     // Log the deletion in audit log if currentUserId is provided

@@ -40,25 +40,6 @@ type EmployeeWithRelations = Prisma.EmployeeGetPayload<{
     creator: {
       select: typeof USER_SELECT;
     };
-    salaryPayments: {
-      where: { deletedAt: null };
-      orderBy: { paymentDate: 'desc' };
-      take: 10;
-      include: {
-        recorder: {
-          select: typeof USER_SELECT;
-        };
-      };
-    };
-    salaryIncreases: {
-      orderBy: { effectiveDate: 'desc' };
-      take: 10;
-      include: {
-        recorder: {
-          select: typeof USER_SELECT;
-        };
-      };
-    };
   };
 }>;
 
@@ -126,25 +107,6 @@ export class EmployeesService {
         creator: {
           select: USER_SELECT,
         },
-        salaryPayments: {
-          where: { deletedAt: null },
-          orderBy: { paymentDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
-        },
-        salaryIncreases: {
-          orderBy: { effectiveDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
-        },
       },
     });
 
@@ -206,15 +168,6 @@ export class EmployeesService {
           creator: {
             select: USER_SELECT,
           },
-          salaryPayments: {
-            where: { deletedAt: null },
-            orderBy: { paymentDate: 'desc' },
-            take: 1,
-          },
-          salaryIncreases: {
-            orderBy: { effectiveDate: 'desc' },
-            take: 1,
-          },
         },
       }),
       this.prisma.employee.count({ where }),
@@ -243,25 +196,6 @@ export class EmployeesService {
         },
         creator: {
           select: USER_SELECT,
-        },
-        salaryPayments: {
-          where: { deletedAt: null },
-          orderBy: { paymentDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
-        },
-        salaryIncreases: {
-          orderBy: { effectiveDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
         },
       },
     });
@@ -349,25 +283,6 @@ export class EmployeesService {
         },
         creator: {
           select: USER_SELECT,
-        },
-        salaryPayments: {
-          where: { deletedAt: null },
-          orderBy: { paymentDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
-        },
-        salaryIncreases: {
-          orderBy: { effectiveDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
         },
       },
     });
@@ -489,25 +404,6 @@ export class EmployeesService {
         },
         creator: {
           select: USER_SELECT,
-        },
-        salaryPayments: {
-          where: { deletedAt: null },
-          orderBy: { paymentDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
-        },
-        salaryIncreases: {
-          orderBy: { effectiveDate: 'desc' },
-          take: 10,
-          include: {
-            recorder: {
-              select: USER_SELECT,
-            },
-          },
         },
       },
     });

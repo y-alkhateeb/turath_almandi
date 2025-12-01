@@ -11,7 +11,10 @@ import { AuthModule } from './auth/auth.module';
 import { BranchesModule } from './branches/branches.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
-import { DebtsModule } from './debts/debts.module';
+import { ContactsModule } from './contacts/contacts.module';
+import { PayablesModule } from './payables/payables.module';
+import { ReceivablesModule } from './receivables/receivables.module';
+import { InventorySubUnitsModule } from './inventory-sub-units/inventory-sub-units.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { TasksModule } from './tasks/tasks.module';
 import { InventoryModule } from './inventory/inventory.module';
@@ -19,8 +22,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmployeesModule } from './employees/employees.module';
-import { UploadModule } from './upload/upload.module';
 import { SmartReportsModule } from './reports/smart-reports.module';
+import { DiscountReasonsModule } from './discount-reasons/discount-reasons.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
@@ -38,8 +41,18 @@ import { envValidationSchema } from './common/config/env.validation';
       },
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',
+      rootPath: join(__dirname, '..', 'uploads', 'app-assets'),
+      serveRoot: '/app-assets',
+      serveStaticOptions: {
+        index: false,
+        cacheControl: true,
+        maxAge: 86400000, // 24 hours in milliseconds
+        setHeaders: (res) => {
+          // Add CORS headers for static files
+          res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3001');
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+        },
+      },
     }),
     ThrottlerModule.forRoot([
       {
@@ -52,7 +65,10 @@ import { envValidationSchema } from './common/config/env.validation';
     BranchesModule,
     TransactionsModule,
     UsersModule,
-    DebtsModule,
+    ContactsModule,
+    PayablesModule,
+    ReceivablesModule,
+    InventorySubUnitsModule,
     NotificationsModule,
     TasksModule,
     InventoryModule,
@@ -60,9 +76,8 @@ import { envValidationSchema } from './common/config/env.validation';
     WebSocketModule,
     SettingsModule,
     EmployeesModule,
-    UploadModule,
     SmartReportsModule,
-  ],
+    DiscountReasonsModule,],
   controllers: [AppController],
   providers: [
     AppService,

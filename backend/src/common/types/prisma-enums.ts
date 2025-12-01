@@ -86,3 +86,17 @@ export const ReportType = {
   CUSTOM: 'CUSTOM',
 } as const;
 export type ReportType = (typeof ReportType)[keyof typeof ReportType];
+
+export const ContactType = {
+  SUPPLIER: 'SUPPLIER',
+  CUSTOMER: 'CUSTOMER',
+  BOTH: 'BOTH',
+  OTHER: 'OTHER',
+} as const;
+export type ContactType = (typeof ContactType)[keyof typeof ContactType];
+
+export const DiscountType = {
+  PERCENTAGE: 'PERCENTAGE',
+  AMOUNT: 'AMOUNT',
+} as const;
+export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType];

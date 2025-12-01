@@ -69,6 +69,44 @@ export const ARABIC_ERRORS: Record<string, string> = {
   invalidUserReference: 'معرف المستخدم المحدد غير موجود أو غير صالح',
   invalidInventoryItemReference: 'معرف عنصر المخزون المحدد غير موجود أو غير صالح',
   invalidDebtReference: 'معرف الدين المحدد غير موجود أو غير صالح',
+  invalidContactReference: 'معرف جهة الاتصال المحدد غير موجود أو غير صالح',
+  invalidPayableReference: 'معرف الحساب الدائن المحدد غير موجود أو غير صالح',
+  invalidReceivableReference: 'معرف الحساب المدين المحدد غير موجود أو غير صالح',
+
+  // Contact Errors
+  contactNotFound: 'جهة الاتصال غير موجودة',
+  userMustBeAssignedToBranchToCreateContacts: 'يجب تعيين فرع للمستخدم لإنشاء جهات الاتصال',
+  contactWithSameNameAlreadyExistsInBranch: 'يوجد بالفعل جهة اتصال بنفس الاسم في هذا الفرع',
+  cannotDeleteContactWithLinkedPayables: 'لا يمكن حذف جهة اتصال مرتبطة بحسابات دائنة',
+  cannotDeleteContactWithLinkedReceivables: 'لا يمكن حذف جهة اتصال مرتبطة بحسابات مدينة',
+  noAccessToContact: 'ليس لديك صلاحية للوصول إلى جهة الاتصال هذه',
+
+  // Account Payable Errors
+  payableNotFound: 'الحساب الدائن غير موجود',
+  userMustBeAssignedToBranchToCreatePayables: 'يجب تعيين فرع للمستخدم لإنشاء الحسابات الدائنة',
+  userMustBeAssignedToBranchToPayPayables: 'يجب تعيين فرع للمستخدم لسداد الحسابات الدائنة',
+  canOnlyPayPayablesFromYourBranch: 'يمكنك فقط دفع الحسابات الدائنة من فرعك',
+  noAccessToPayable: 'ليس لديك صلاحية للوصول إلى هذا الحساب الدائن',
+  contactIdRequiredForPayable: 'معرف جهة الاتصال مطلوب للحساب الدائن',
+
+  // Account Receivable Errors
+  receivableNotFound: 'الحساب المدين غير موجود',
+  userMustBeAssignedToBranchToCreateReceivables: 'يجب تعيين فرع للمستخدم لإنشاء الحسابات المدينة',
+  userMustBeAssignedToBranchToReceivePayments: 'يجب تعيين فرع للمستخدم لاستلام المدفوعات',
+  canOnlyReceivePaymentsFromYourBranch: 'يمكنك فقط استلام المدفوعات من فرعك',
+  noAccessToReceivable: 'ليس لديك صلاحية للوصول إلى هذا الحساب المدين',
+  contactIdRequiredForReceivable: 'معرف جهة الاتصال مطلوب للحساب المدين',
+
+  // Employee & Payroll Errors
+  employeeNotFound: 'الموظف غير موجود',
+  employeeIdRequiredForSalary: 'معرف الموظف مطلوب لمعاملات الرواتب',
+  noAccessToEmployee: 'ليس لديك صلاحية للوصول إلى بيانات هذا الموظف',
+  cannotCreateSalaryForResignedEmployee: 'لا يمكن إنشاء راتب لموظف مستقيل',
+  adjustmentNotFound: 'التسوية المالية غير موجودة',
+  invalidAdjustmentType: 'نوع التسوية المالية غير صالح',
+  adjustmentAmountMustBePositive: 'مبلغ التسوية يجب أن يكون أكبر من صفر',
+  cannotDeleteEmployeeWithAdjustments: 'لا يمكن حذف موظف لديه تسويات مالية مرتبطة',
+  cannotDeleteEmployeeWithTransactions: 'لا يمكن حذف موظف لديه معاملات مالية مرتبطة',
 
   // Currency Errors
   onlyUSDCurrencyIsAllowed: 'العملة المسموح بها فقط هي الدولار الأمريكي',
@@ -114,6 +152,16 @@ export const ARABIC_ERRORS: Record<string, string> = {
   vendorName: 'اسم المورد',
   description: 'الوصف',
   notes: 'الملاحظات',
+  contactId: 'معرف جهة الاتصال',
+  contactName: 'اسم جهة الاتصال',
+  contactType: 'نوع جهة الاتصال',
+  taxNumber: 'الرقم الضريبي',
+  address: 'العنوان',
+  creditLimit: 'حد الائتمان',
+  originalAmount: 'المبلغ الأصلي',
+  remainingAmount: 'المبلغ المتبقي',
+  status: 'الحالة',
+  invoiceNumber: 'رقم الفاتورة',
 } as const;
 
 /**

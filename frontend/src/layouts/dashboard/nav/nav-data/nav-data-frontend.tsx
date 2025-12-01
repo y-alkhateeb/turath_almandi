@@ -33,7 +33,7 @@ export const navData: NavItem[] = [
     children: [
       {
         title: 'قائمة المعاملات',
-        path: '/transactions/list',
+        path: '/transactions',
       },
       {
         title: 'إضافة مصروف',
@@ -48,18 +48,38 @@ export const navData: NavItem[] = [
     ],
   },
   {
-    title: 'الديون',
-    path: '/debts',
-    icon: <Icon icon="lucide:wallet" size={24} />,
-    caption: 'إدارة الديون والدفعات',
+    title: 'جهات الاتصال',
+    path: '/management/contacts',
+    icon: <Icon icon="lucide:contact" size={24} />,
+    caption: 'إدارة الموردين والعملاء',
     children: [
       {
-        title: 'قائمة الديون',
-        path: '/debts/list',
+        title: 'قائمة جهات الاتصال',
+        path: '/management/contacts/list',
       },
+    ],
+  },
+  {
+    title: 'الحسابات الدائنة',
+    path: '/management/payables',
+    icon: <Icon icon="lucide:arrow-up-circle" size={24} />,
+    caption: 'المبالغ المستحقة للموردين',
+    children: [
       {
-        title: 'إضافة دين',
-        path: '/debts/create',
+        title: 'قائمة الحسابات الدائنة',
+        path: '/management/payables/list',
+      },
+    ],
+  },
+  {
+    title: 'الحسابات المدينة',
+    path: '/management/receivables',
+    icon: <Icon icon="lucide:arrow-down-circle" size={24} />,
+    caption: 'المبالغ المستحقة من العملاء',
+    children: [
+      {
+        title: 'قائمة الحسابات المدينة',
+        path: '/management/receivables/list',
       },
     ],
   },

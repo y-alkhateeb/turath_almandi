@@ -91,6 +91,44 @@ export const ERROR_MESSAGES = {
     TRANSACTION_CREATION_FAILED: 'failedToCreateTransactionForBonus',
   },
 
+  // Contact-related errors
+  CONTACT: {
+    NOT_FOUND: 'contactNotFound',
+    BRANCH_REQUIRED: 'userMustBeAssignedToBranchToCreateContacts',
+    DUPLICATE_NAME: 'contactWithSameNameAlreadyExistsInBranch',
+    LINKED_PAYABLES: 'cannotDeleteContactWithLinkedPayables',
+    LINKED_RECEIVABLES: 'cannotDeleteContactWithLinkedReceivables',
+    NO_ACCESS: 'noAccessToContact',
+  },
+
+  // Account Payable-related errors
+  PAYABLE: {
+    NOT_FOUND: 'payableNotFound',
+    BRANCH_REQUIRED_CREATE: 'userMustBeAssignedToBranchToCreatePayables',
+    BRANCH_REQUIRED_PAY: 'userMustBeAssignedToBranchToPayPayables',
+    DUE_DATE_INVALID: 'dueDateMustBeGreaterThanOrEqualToDate',
+    PAYMENT_EXCEEDS_REMAINING: (paid: number, remaining: number) =>
+      `paymentAmount${paid}CannotExceedRemainingAmount${remaining}`,
+    ONLY_PAY_OWN_BRANCH: 'canOnlyPayPayablesFromYourBranch',
+    NO_ACCESS: 'noAccessToPayable',
+    CONTACT_REQUIRED: 'contactIdRequiredForPayable',
+  },
+
+  // Account Receivable-related errors
+  RECEIVABLE: {
+    NOT_FOUND: 'receivableNotFound',
+    BRANCH_REQUIRED_CREATE: 'userMustBeAssignedToBranchToCreateReceivables',
+    BRANCH_REQUIRED_PAY: 'userMustBeAssignedToBranchToReceivePayments',
+    DUE_DATE_INVALID: 'dueDateMustBeGreaterThanOrEqualToDate',
+    PAYMENT_EXCEEDS_REMAINING: (paid: number, remaining: number) =>
+      `paymentAmount${paid}CannotExceedRemainingAmount${remaining}`,
+    ONLY_RECEIVE_OWN_BRANCH: 'canOnlyReceivePaymentsFromYourBranch',
+    NO_ACCESS: 'noAccessToReceivable',
+    CONTACT_REQUIRED: 'contactIdRequiredForReceivable',
+    CREDIT_LIMIT_EXCEEDED: (amount: number, limit: number) =>
+      `amountExceedsContactCreditLimit${amount}Limit${limit}`,
+  },
+
   // Permission errors
   PERMISSION: {
     BRANCH_ACCESS: 'cannotAccessOtherBranches',
@@ -123,6 +161,9 @@ export const ERROR_MESSAGES = {
     INVALID_USER_REFERENCE: 'invalidUserReference',
     INVALID_INVENTORY_REFERENCE: 'invalidInventoryItemReference',
     INVALID_DEBT_REFERENCE: 'invalidDebtReference',
+    INVALID_CONTACT_REFERENCE: 'invalidContactReference',
+    INVALID_PAYABLE_REFERENCE: 'invalidPayableReference',
+    INVALID_RECEIVABLE_REFERENCE: 'invalidReceivableReference',
   },
 
   // HTTP errors

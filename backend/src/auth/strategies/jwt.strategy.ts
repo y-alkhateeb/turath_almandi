@@ -43,7 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('تم إبطال هذا الرمز. يرجى تسجيل الدخول مرة أخرى');
     }
 
-    // Validate user exists and is active
+    // Validate user exists and is not deleted
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       select: {
@@ -51,11 +51,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
       },
     });
 
-    if (!user || !user.isActive) {
+    if (!user || user.isDeleted) {
       throw new UnauthorizedException('الرمز غير صالح أو منتهي الصلاحية');
     }
 

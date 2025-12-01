@@ -3,7 +3,7 @@
  * Authentication page for user login
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,7 +17,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { Icon } from '@/components/icon';
 import GLOBAL_CONFIG from '@/global-config';
 import { ApiError } from '@/api/apiClient';
-import { getAppSettings } from '@/api/services/settingsService';
 
 // Validation schema - matches backend validation rules
 const loginSchema = z.object({
@@ -33,7 +32,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [error, setError] = useState('');
-  const [loginBackgroundUrl, setLoginBackgroundUrl] = useState<string | null>(null);
   const router = useRouter();
   const { login, isLoggingIn } = useAuth();
 
@@ -45,22 +43,6 @@ export default function LoginPage() {
       rememberMe: false,
     },
   });
-
-  // Fetch app settings on mount to get login background image
-  useEffect(() => {
-    const fetchAppSettings = async () => {
-      try {
-        const settings = await getAppSettings();
-        setLoginBackgroundUrl(settings.loginBackgroundUrl);
-      } catch (err) {
-        // If settings fetch fails, use fallback gradient
-        console.error('Failed to fetch app settings:', err);
-        setLoginBackgroundUrl(null);
-      }
-    };
-
-    fetchAppSettings();
-  }, []);
 
   const onSubmit = async (data: LoginFormData) => {
     setError('');
@@ -81,24 +63,10 @@ export default function LoginPage() {
       // Navigate to dashboard after ensuring tokens are persisted
       router.replace(GLOBAL_CONFIG.defaultRoute);
     } catch (err) {
-      // Handle specific error cases with Arabic messages
+      // Display error message from server
       if (err instanceof ApiError) {
-        switch (err.statusCode) {
-          case 401:
-            setError('اسم المستخدم أو كلمة المرور غير صحيحة');
-            break;
-          case 400:
-            setError(err.message || 'البيانات المدخلة غير صحيحة. يرجى التحقق والمحاولة مرة أخرى');
-            break;
-          case 429:
-            setError('تم تجاوز عدد المحاولات المسموح به. يرجى المحاولة لاحقاً');
-            break;
-          case 503:
-            setError('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً');
-            break;
-          default:
-            setError(err.message || 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى');
-        }
+        // Use the actual error message from the server for better UX
+        setError(err.message || 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى');
       } else {
         // Generic error fallback
         setError('حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى');
@@ -221,10 +189,10 @@ export default function LoginPage() {
       {/* Right Side - Image/Gradient */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden">
         {/* Background Image or Gradient */}
-        {loginBackgroundUrl ? (
+        {GLOBAL_CONFIG.loginBackgroundUrl && !GLOBAL_CONFIG.useFallbackGradient ? (
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${loginBackgroundUrl})` }}
+            style={{ backgroundImage: `url(${GLOBAL_CONFIG.loginBackgroundUrl})` }}
           />
         ) : (
           <>

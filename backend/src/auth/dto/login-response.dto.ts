@@ -4,7 +4,6 @@ export class LoginResponseDto {
     username: string;
     role: string;
     branchId: string | null;
-    isActive: boolean;
   };
 
   access_token: string;

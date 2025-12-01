@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(npm run:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(cat:*)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\" npx prisma migrate:*)",
+      "Bash(npx prisma db seed)",
+      "Bash(pkill:*)",
+      "Bash(tee:*)",
+      "Bash(jq:*)",
+      "Bash(bash:*)",
+      "Bash(npx prisma db execute:*)",
+      "Bash(psql:*)",
+      "Bash(npx nest g module:*)",
+      "Bash(npx @nestjs/cli g module:*)",
+      "Bash(npx @nestjs/cli g service:*)",
+      "Bash(npx @nestjs/cli g controller:*)",
+      "Bash(npm --prefix backend run build)",
+      "Bash(ls:*)",
+      "Bash(npm install)",
+      "Bash(redis-cli:*)",
+      "Bash(npm install:*)",
+      "Bash(for file in UnifiedTransactionForm.tsx TransactionCardList.tsx TransactionCard.tsx MultiItemCardSelector.tsx)",
+      "Bash(do sed -i '' \"s|from ''@/utils/cn''|from ''@/utils''|g\" \"$file\")",
+      "Bash(done)",
+      "Bash(git restore:*)",
+      "Bash(git checkout:*)",
+      "Bash(python3:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

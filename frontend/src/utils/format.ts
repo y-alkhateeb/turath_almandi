@@ -7,11 +7,20 @@ import 'dayjs/locale/en';
 import 'dayjs/locale/ar';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import updateLocale from 'dayjs/plugin/updateLocale';
 
 // Configure dayjs
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+dayjs.extend(updateLocale);
 dayjs.locale('en');
+
+// Configure custom Arabic meridiem (AM/PM) to display ص/م
+dayjs.updateLocale('en', {
+  meridiem: (hour: number) => {
+    return hour < 12 ? 'ص' : 'م';
+  }
+});
 
 /**
  * Format number as Iraqi Dinar currency
@@ -72,8 +81,12 @@ export function formatDateTable(dateString: string | Date | null | undefined): s
 }
 
 /**
- * Format date and time (DD/MM/YYYY h:mm A)
+ * Format date and time with Arabic AM/PM (DD/MM/YYYY h:mm ص/م)
  * @param date - Date to format (returns '-' if null/undefined)
+ * @returns Formatted string like "15/01/2025 3:30 ص" or "15/01/2025 3:30 م"
+ * @example
+ * formatDateTime('2025-01-15T09:30:00') // "15/01/2025 9:30 ص"
+ * formatDateTime('2025-01-15T15:30:00') // "15/01/2025 3:30 م"
  */
 export function formatDateTime(
   date: string | Date | null | undefined
@@ -86,7 +99,12 @@ export function formatDateTime(
 }
 
 /**
- * Format time only
+ * Format time only with Arabic AM/PM (h:mm ص/م)
+ * @param date - Date to format
+ * @returns Formatted time string like "9:30 ص" or "3:30 م"
+ * @example
+ * formatTime('2025-01-15T09:30:00') // "9:30 ص"
+ * formatTime('2025-01-15T15:30:00') // "3:30 م"
  */
 export function formatTime(date: string | Date): string {
   return dayjs(date).format('h:mm A');

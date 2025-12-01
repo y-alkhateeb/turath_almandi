@@ -169,7 +169,8 @@ export const useCreateBranch = () => {
         const tempBranch: Branch = {
           id: `temp-${Date.now()}`,
           name: newBranch.name,
-          location: newBranch.location || null,
+          location: newBranch.location,
+          managerName: newBranch.managerName,
           isActive: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

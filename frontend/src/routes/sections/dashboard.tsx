@@ -5,11 +5,13 @@
  * Route Structure:
  * - /dashboard - Main dashboard
  * - /transactions/* - Transaction management (list, create, view, edit)
- * - /debts/* - Debt management (list, create, pay)
  * - /inventory/* - Inventory management (list, create, edit)
  * - /employees/* - Employee management (list, create, edit, view)
  * - /reports - Reports page
  * - /notifications - Notifications (main and settings)
+ * - /management/contacts/* - Contacts management (suppliers and customers)
+ * - /management/payables/* - Payables management (accounts payable)
+ * - /management/receivables/* - Receivables management (accounts receivable)
  * - /management/system/* - System management (admin-only: users, branches, audit, currency)
  * - /profile - User profile
  */
@@ -28,17 +30,21 @@ import type { RouteObject } from 'react-router-dom';
 // Dashboard
 const DashboardPage = lazy(() => import('@/pages/dashboard/workbench'));
 
-// Transactions
-const TransactionsListPage = lazy(() => import('@/pages/transactions/TransactionsPage'));
+// Transactions - New unified design
+const TransactionsListPage = lazy(() => import('@/pages/transactions/TransactionListPage'));
 const TransactionsCreateIncomePage = lazy(() => import('@/pages/transactions/CreateIncomePage'));
 const TransactionsCreateExpensePage = lazy(() => import('@/pages/transactions/CreateExpensePage'));
-const TransactionsViewPage = lazy(() => import('@/pages/transactions/ViewTransactionPage'));
+const TransactionsViewPage = lazy(() => import('@/pages/transactions/ViewTransactionDetailPage'));
 const TransactionsEditPage = lazy(() => import('@/pages/transactions/EditTransactionPage'));
 
-// Debts (management section)
-const DebtsListPage = lazy(() => import('@/pages/management/debts/list'));
-const DebtsCreatePage = lazy(() => import('@/pages/management/debts/create'));
-const DebtsViewPage = lazy(() => import('@/pages/management/debts/view/[id]'));
+// Contacts (management section)
+const ContactsListPage = lazy(() => import('@/pages/management/contacts/list'));
+
+// Payables (management section)
+const PayablesListPage = lazy(() => import('@/pages/management/payables/list'));
+
+// Receivables (management section)
+const ReceivablesListPage = lazy(() => import('@/pages/management/receivables/list'));
 
 // Inventory
 const InventoryListPage = lazy(() => import('@/pages/inventory/Inventory'));
@@ -123,13 +129,9 @@ export const dashboardRoutes: RouteObject[] = [
           {
             path: 'transactions',
             children: [
-              // Redirect /transactions to /transactions/list
+              // Main list page
               {
                 index: true,
-                element: <Navigate to="/transactions/list" replace />,
-              },
-              {
-                path: 'list',
                 element: (
                   <LazyPage>
                     <TransactionsListPage />
@@ -176,44 +178,6 @@ export const dashboardRoutes: RouteObject[] = [
                 element: (
                   <LazyPage>
                     <TransactionsEditPage />
-                  </LazyPage>
-                ),
-              },
-            ],
-          },
-
-          // ============================================
-          // DEBTS
-          // ============================================
-          {
-            path: 'debts',
-            children: [
-              // Redirect /debts to /debts/list
-              {
-                index: true,
-                element: <Navigate to="/debts/list" replace />,
-              },
-              {
-                path: 'list',
-                element: (
-                  <LazyPage>
-                    <DebtsListPage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'create',
-                element: (
-                  <LazyPage>
-                    <DebtsCreatePage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'view/:id',
-                element: (
-                  <LazyPage>
-                    <DebtsViewPage />
                   </LazyPage>
                 ),
               },
@@ -348,36 +312,57 @@ export const dashboardRoutes: RouteObject[] = [
           {
             path: 'management',
             children: [
-              // Debts Management (same as /debts, but under /management for consistency)
+              // Contacts Management
               {
-                path: 'debts',
+                path: 'contacts',
                 children: [
-                  // Redirect /management/debts to /management/debts/list
                   {
                     index: true,
-                    element: <Navigate to="/management/debts/list" replace />,
+                    element: <Navigate to="/management/contacts/list" replace />,
                   },
                   {
                     path: 'list',
                     element: (
                       <LazyPage>
-                        <DebtsListPage />
+                        <ContactsListPage />
                       </LazyPage>
                     ),
                   },
+                ],
+              },
+
+              // Payables Management (Accounts Payable)
+              {
+                path: 'payables',
+                children: [
                   {
-                    path: 'create',
+                    index: true,
+                    element: <Navigate to="/management/payables/list" replace />,
+                  },
+                  {
+                    path: 'list',
                     element: (
                       <LazyPage>
-                        <DebtsCreatePage />
+                        <PayablesListPage />
                       </LazyPage>
                     ),
                   },
+                ],
+              },
+
+              // Receivables Management (Accounts Receivable)
+              {
+                path: 'receivables',
+                children: [
                   {
-                    path: 'view/:id',
+                    index: true,
+                    element: <Navigate to="/management/receivables/list" replace />,
+                  },
+                  {
+                    path: 'list',
                     element: (
                       <LazyPage>
-                        <DebtsViewPage />
+                        <ReceivablesListPage />
                       </LazyPage>
                     ),
                   },

@@ -1,12 +1,12 @@
 /**
- * Predefined transaction categories
+ * Transaction Categories with Multi-Item and Discount Support
  * Categories are organized by transaction type (INCOME/EXPENSE)
  */
 
 export const INCOME_CATEGORIES = [
-  'INVENTORY_SALES',   // مبيعات المخزون
+  'INVENTORY_SALES',   // مبيعات المخزون - Multi-item ✓ Discount ✓
   'CAPITAL_ADDITION',  // إضافة رأس مال
-  'APP_PURCHASES',     // مبيعات التطبيق
+  'APP_PURCHASES',     // مبيعات التطبيق - Multi-item ✓ Discount ✓
   'DEBT_PAYMENT',      // دفع دين
 ] as const;
 
@@ -15,11 +15,9 @@ export const EXPENSE_CATEGORIES = [
   'WORKER_DAILY',      // يوميات العمال
   'SUPPLIES',          // مستلزمات
   'MAINTENANCE',       // صيانة
-  'INVENTORY',         // مشتريات مخزون
+  'INVENTORY',         // مشتريات مخزون - Multi-item ✓
   'DEBT',              // دين
-  'COMPLIMENTARY',     // مجاملة
-  'DISCOUNT',          // خصم
-  'TABLE',             // طاولة
+  // REMOVED: 'COMPLIMENTARY', 'DISCOUNT', 'TABLE' - now handled as discount reasons
   'CASHIER_SHORTAGE',  // نقص كاشير
   'RETURNS',           // مرتجعات
   'OTHER_EXPENSE',     // مصروفات أخرى
@@ -31,6 +29,23 @@ export const TRANSACTION_CATEGORIES = [
 ] as const;
 
 export type TransactionCategory = typeof TRANSACTION_CATEGORIES[number];
+
+/**
+ * Categories that support multi-item transactions
+ */
+export const MULTI_ITEM_CATEGORIES = [
+  'INVENTORY_SALES',  // مبيعات المخزون
+  'APP_PURCHASES',    // مبيعات التطبيق
+  'INVENTORY',        // مشتريات مخزون
+] as const;
+
+/**
+ * Categories that support discount (INCOME only)
+ */
+export const DISCOUNT_ENABLED_CATEGORIES = [
+  'INVENTORY_SALES',
+  'APP_PURCHASES',
+] as const;
 
 /**
  * Category labels in Arabic for display purposes
@@ -48,13 +63,24 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   MAINTENANCE: 'صيانة',
   INVENTORY: 'مشتريات مخزون',
   DEBT: 'دين',
-  COMPLIMENTARY: 'مجاملة',
-  DISCOUNT: 'خصم',
-  TABLE: 'طاولة',
   CASHIER_SHORTAGE: 'نقص كاشير',
   RETURNS: 'مرتجعات',
   OTHER_EXPENSE: 'مصروفات أخرى',
 };
+
+/**
+ * Check if category supports multi-item transactions
+ */
+export function supportsMultiItem(category: string): boolean {
+  return MULTI_ITEM_CATEGORIES.includes(category as any);
+}
+
+/**
+ * Check if category supports discount
+ */
+export function supportsDiscount(category: string): boolean {
+  return DISCOUNT_ENABLED_CATEGORIES.includes(category as any);
+}
 
 /**
  * Helper function to get income categories

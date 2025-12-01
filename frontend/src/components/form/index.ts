@@ -40,3 +40,6 @@ export type { FormRadioGroupProps, RadioOption } from './FormRadioGroup';
 
 export { BranchSelector } from './BranchSelector';
 export type { BranchSelectorProps } from './BranchSelector';
+
+export { ContactSelector } from './ContactSelector';
+export type { ContactSelectorProps } from './ContactSelector';

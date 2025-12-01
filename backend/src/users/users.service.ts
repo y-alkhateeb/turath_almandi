@@ -45,14 +45,13 @@ export class UsersService {
         passwordHash,
         role: createUserDto.role,
         branchId: createUserDto.branchId || null,
-        isActive: true,
       },
       select: {
         id: true,
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
         branch: {
@@ -80,12 +79,13 @@ export class UsersService {
 
   async findAll() {
     return this.prisma.user.findMany({
+      where: { isDeleted: false },
       select: {
         id: true,
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
         branch: {
@@ -101,14 +101,14 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
+    const user = await this.prisma.user.findFirst({
+      where: { id, isDeleted: false },
       select: {
         id: true,
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
         branch: {
@@ -149,7 +149,7 @@ export class UsersService {
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
         branch: {
@@ -183,16 +183,21 @@ export class UsersService {
   async remove(id: string, currentUserId?: string) {
     const existingUser = await this.findOne(id); // Check existence
 
-    // Soft delete by setting isActive to false
+    // Soft delete using soft delete pattern
     const deletedUser = await this.prisma.user.update({
       where: { id },
-      data: { isActive: false },
+      data: {
+        deletedAt: new Date(),
+        deletedBy: currentUserId || null,
+        isDeleted: true,
+      },
       select: {
         id: true,
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
+        deletedAt: true,
         createdAt: true,
         updatedAt: true,
         branch: {
@@ -219,22 +224,33 @@ export class UsersService {
   }
 
   /**
-   * Reactivate a deactivated user
-   * Sets isActive to true
+   * Reactivate a soft-deleted user
+   * Restores the user by clearing soft delete fields
    */
   async reactivate(id: string, currentUserId?: string) {
-    const existingUser = await this.findOne(id); // Check existence
+    // Find even deleted users
+    const existingUser = await this.prisma.user.findFirst({
+      where: { id },
+    });
 
-    // Reactivate user by setting isActive to true
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Reactivate user by clearing soft delete fields
     const reactivatedUser = await this.prisma.user.update({
       where: { id },
-      data: { isActive: true },
+      data: {
+        deletedAt: null,
+        deletedBy: null,
+        isDeleted: false,
+      },
       select: {
         id: true,
         username: true,
         role: true,
         branchId: true,
-        isActive: true,
+        isDeleted: true,
         createdAt: true,
         updatedAt: true,
         branch: {
@@ -253,8 +269,8 @@ export class UsersService {
         currentUserId,
         AuditEntityType.USER,
         id,
-        existingUser,
-        reactivatedUser,
+        { isDeleted: existingUser.isDeleted, deletedAt: existingUser.deletedAt, deletedBy: existingUser.deletedBy },
+        { isDeleted: reactivatedUser.isDeleted, deletedAt: null, deletedBy: null },
       );
     }
 

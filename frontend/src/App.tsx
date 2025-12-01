@@ -5,7 +5,7 @@
  * Features:
  * - Renders application routes
  * - Initializes WebSocket connection when authenticated
- * - Sets up all real-time listeners (notifications, transactions, debts)
+ * - Sets up all real-time listeners (notifications, transactions)
  * - Handles connection state globally
  * - Provides real-time sync across all features
  * - Displays offline banner when network is unavailable
@@ -27,7 +27,6 @@ function App() {
   // - Sets up all real-time listeners:
   //   * Notifications (toast, sound, badge)
   //   * Transactions (cross-branch updates)
-  //   * Debts (payment alerts, overdue notifications)
   // - Handles connection errors with auto-retry
   // - Invalidates queries for real-time data updates
   // - Disconnects on unmount or logout

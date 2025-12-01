@@ -22,6 +22,9 @@ import type {
   NotificationQueryFilters,
   AuditLogQueryFilters,
   DashboardQueryFilters,
+  ContactQueryFilters,
+  PayableQueryFilters,
+  ReceivableQueryFilters,
 } from '#/api';
 
 // ============================================
@@ -412,6 +415,127 @@ export const auditKeys = {
 } as const;
 
 // ============================================
+// CONTACT QUERY KEYS
+// ============================================
+
+/**
+ * Contact query keys
+ * Used for contact queries (customers and suppliers)
+ */
+export const contactKeys = {
+  /** Contacts namespace root */
+  all: ['contacts'] as const,
+
+  /**
+   * Contacts list with optional filters
+   * @param filters - Optional ContactQueryFilters
+   * @returns ['contacts', filters]
+   */
+  list: (filters?: ContactQueryFilters) => ['contacts', filters] as const,
+
+  /**
+   * Single contact by ID
+   * @param id - Contact UUID
+   * @returns ['contacts', id]
+   */
+  detail: (id: string) => ['contacts', id] as const,
+
+  /**
+   * Active suppliers only (type = SUPPLIER, isActive = true)
+   * @returns ['contacts', 'suppliers']
+   */
+  suppliers: () => ['contacts', 'suppliers'] as const,
+
+  /**
+   * Active customers only (type = CUSTOMER, isActive = true)
+   * @returns ['contacts', 'customers']
+   */
+  customers: () => ['contacts', 'customers'] as const,
+} as const;
+
+// ============================================
+// PAYABLE QUERY KEYS
+// ============================================
+
+/**
+ * Payable query keys
+ * Used for payable queries and payments
+ */
+export const payableKeys = {
+  /** Payables namespace root */
+  all: ['payables'] as const,
+
+  /**
+   * Payables list with optional filters
+   * @param filters - Optional PayableQueryFilters
+   * @returns ['payables', filters]
+   */
+  list: (filters?: PayableQueryFilters) => ['payables', filters] as const,
+
+  /**
+   * Single payable by ID
+   * @param id - Payable UUID
+   * @returns ['payables', id]
+   */
+  detail: (id: string) => ['payables', id] as const,
+
+  /**
+   * Payable summary statistics
+   * @param branchId - Optional branch UUID
+   * @returns ['payables', 'summary', branchId]
+   */
+  summary: (branchId?: string) => ['payables', 'summary', branchId] as const,
+
+  /**
+   * Payable payments for a specific payable
+   * @param payableId - Payable UUID
+   * @returns ['payables', payableId, 'payments']
+   */
+  payments: (payableId: string) => ['payables', payableId, 'payments'] as const,
+} as const;
+
+// ============================================
+// RECEIVABLE QUERY KEYS
+// ============================================
+
+/**
+ * Receivable query keys
+ * Used for receivable queries and collections
+ */
+export const receivableKeys = {
+  /** Receivables namespace root */
+  all: ['receivables'] as const,
+
+  /**
+   * Receivables list with optional filters
+   * @param filters - Optional ReceivableQueryFilters
+   * @returns ['receivables', filters]
+   */
+  list: (filters?: ReceivableQueryFilters) => ['receivables', filters] as const,
+
+  /**
+   * Single receivable by ID
+   * @param id - Receivable UUID
+   * @returns ['receivables', id]
+   */
+  detail: (id: string) => ['receivables', id] as const,
+
+  /**
+   * Receivable summary statistics
+   * @param branchId - Optional branch UUID
+   * @returns ['receivables', 'summary', branchId]
+   */
+  summary: (branchId?: string) => ['receivables', 'summary', branchId] as const,
+
+  /**
+   * Receivable payments for a specific receivable
+   * @param receivableId - Receivable UUID
+   * @returns ['receivables', receivableId, 'payments']
+   */
+  payments: (receivableId: string) => ['receivables', receivableId, 'payments'] as const,
+} as const;
+
+// ============================================
 // SETTINGS QUERY KEYS
 // ============================================
 
@@ -437,6 +561,26 @@ export const settingsKeys = {
    * All currencies list: ['settings', 'currencies', 'all']
    */
   allCurrencies: () => ['settings', 'currencies', 'all'] as const,
+} as const;
+
+// ============================================
+// DISCOUNT REASON QUERY KEYS
+// ============================================
+
+/**
+ * Discount Reason query keys
+ * Used for discount reason queries and management
+ */
+export const discountReasonKeys = {
+  /** Discount reasons namespace root */
+  all: ['discount-reasons'] as const,
+
+  /**
+   * Single discount reason by ID
+   * @param id - Discount reason UUID
+   * @returns ['discount-reasons', id]
+   */
+  detail: (id: string) => ['discount-reasons', id] as const,
 } as const;
 
 // ============================================
@@ -467,12 +611,16 @@ export const queryKeys = {
   branches: branchKeys,
   transactions: transactionKeys,
   debts: debtKeys,
+  contacts: contactKeys,
+  payables: payableKeys,
+  receivables: receivableKeys,
   inventory: inventoryKeys,
   employees: employeeKeys,
   notifications: notificationKeys,
   dashboard: dashboardKeys,
   audit: auditKeys,
   settings: settingsKeys,
+  discountReasons: discountReasonKeys,
 } as const;
 
 /**

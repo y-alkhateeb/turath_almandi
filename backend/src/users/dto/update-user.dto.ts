@@ -19,10 +19,6 @@ export class UpdateUserDto {
   @IsOptional()
   branchId?: string | null;
 
-  @IsBoolean()
-  @IsOptional()
-  isActive?: boolean;
-
   @IsString({ message: 'كلمة المرور يجب أن تكون نصاً' })
   @IsOptional()
   @MinLength(8, { message: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })

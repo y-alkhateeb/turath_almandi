@@ -356,7 +356,11 @@ axiosInstance.interceptors.response.use(
     const apiError = ApiError.fromAxiosError(error);
 
     // Handle 401 Unauthorized - Token refresh logic
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    // Skip token refresh for login and refresh endpoints to avoid infinite loops
+    const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') ||
+                          originalRequest?.url?.includes('/auth/refresh');
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthEndpoint) {
       // Check if we're already refreshing
       if (isRefreshing) {
         // Queue this request to be retried after refresh completes

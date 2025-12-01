@@ -62,7 +62,38 @@ export enum PaymentMethod {
  */
 
 /**
- * Debt status
+ * Contact types
+ * Matches backend Prisma enum: ContactType
+ */
+export enum ContactType {
+  SUPPLIER = 'SUPPLIER',
+  CUSTOMER = 'CUSTOMER',
+  BOTH = 'BOTH',
+  OTHER = 'OTHER',
+}
+
+/**
+ * Payable status (Accounts Payable - money we owe)
+ * Matches backend Prisma enum: PayableStatus
+ */
+export enum PayableStatus {
+  PENDING = 'PENDING',
+  PARTIAL = 'PARTIAL',
+  PAID = 'PAID',
+}
+
+/**
+ * Receivable status (Accounts Receivable - money owed to us)
+ * Matches backend Prisma enum: ReceivableStatus
+ */
+export enum ReceivableStatus {
+  PENDING = 'PENDING',
+  PARTIAL = 'PARTIAL',
+  PAID = 'PAID',
+}
+
+/**
+ * Debt status (DEPRECATED - use PayableStatus/ReceivableStatus)
  * Matches backend Prisma enum: DebtStatus
  */
 export enum DebtStatus {
@@ -80,6 +111,24 @@ export enum InventoryUnit {
   PIECE = 'PIECE',
   LITER = 'LITER',
   OTHER = 'OTHER',
+}
+
+/**
+ * Inventory operation types
+ * Matches backend Prisma enum: InventoryOperationType
+ */
+export enum InventoryOperationType {
+  PURCHASE = 'PURCHASE',
+  CONSUMPTION = 'CONSUMPTION',
+}
+
+/**
+ * Discount types
+ * Matches backend Prisma enum: DiscountType
+ */
+export enum DiscountType {
+  PERCENTAGE = 'PERCENTAGE',
+  AMOUNT = 'AMOUNT',
 }
 
 /**
@@ -164,8 +213,14 @@ export enum AuditEntityType {
   TRANSACTION = 'TRANSACTION',
   DEBT = 'DEBT',
   DEBT_PAYMENT = 'DEBT_PAYMENT',
+  CONTACT = 'CONTACT',
+  PAYABLE = 'PAYABLE',
+  PAYABLE_PAYMENT = 'PAYABLE_PAYMENT',
+  RECEIVABLE = 'RECEIVABLE',
+  RECEIVABLE_PAYMENT = 'RECEIVABLE_PAYMENT',
   INVENTORY_ITEM = 'INVENTORY_ITEM',
   INVENTORY = 'INVENTORY',
+  INVENTORY_SUB_UNIT = 'INVENTORY_SUB_UNIT',
   EMPLOYEE = 'EMPLOYEE',
   SALARY_PAYMENT = 'SALARY_PAYMENT',
   SALARY_INCREASE = 'SALARY_INCREASE',

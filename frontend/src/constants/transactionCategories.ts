@@ -34,9 +34,7 @@ export const EXPENSE_CATEGORIES: CategoryOption[] = [
   { value: 'MAINTENANCE', label: 'صيانة', type: TransactionType.EXPENSE },
   { value: 'INVENTORY', label: 'مشتريات مخزون', type: TransactionType.EXPENSE },
   { value: 'DEBT', label: 'دين', type: TransactionType.EXPENSE },
-  { value: 'COMPLIMENTARY', label: 'مجاملة', type: TransactionType.EXPENSE },
-  { value: 'DISCOUNT', label: 'خصم', type: TransactionType.EXPENSE },
-  { value: 'TABLE', label: 'طاولة', type: TransactionType.EXPENSE },
+  // REMOVED: 'COMPLIMENTARY', 'DISCOUNT', 'TABLE' - now handled as discount reasons
   { value: 'CASHIER_SHORTAGE', label: 'نقص كاشير', type: TransactionType.EXPENSE },
   { value: 'RETURNS', label: 'مرتجعات', type: TransactionType.EXPENSE },
   { value: 'OTHER_EXPENSE', label: 'مصروفات أخرى', type: TransactionType.EXPENSE },
@@ -95,4 +93,37 @@ export const getCategoryValue = (label: string): string | null => {
  */
 export const isValidCategory = (categoryValue: string): boolean => {
   return ALL_CATEGORIES.some((cat) => cat.value === categoryValue);
+};
+
+/**
+ * Categories that support multi-item transactions
+ */
+export const MULTI_ITEM_CATEGORIES = [
+  'INVENTORY_SALES',
+  'APP_PURCHASES',
+  'INVENTORY',
+];
+
+/**
+ * Categories that support discount (INCOME only)
+ */
+export const DISCOUNT_ENABLED_CATEGORIES = [
+  'INVENTORY_SALES',
+  'APP_PURCHASES',
+];
+
+/**
+ * Check if category supports multi-item transactions
+ */
+export const supportsMultiItem = (category: string | null): boolean => {
+  if (!category) return false;
+  return MULTI_ITEM_CATEGORIES.includes(category);
+};
+
+/**
+ * Check if category supports discount
+ */
+export const supportsDiscount = (category: string | null): boolean => {
+  if (!category) return false;
+  return DISCOUNT_ENABLED_CATEGORIES.includes(category);
 };

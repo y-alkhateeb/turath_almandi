@@ -102,7 +102,7 @@ export function DashboardCategoryChart({ data }: DashboardCategoryChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={data?[]:data}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -124,7 +124,7 @@ export function DashboardCategoryChart({ data }: DashboardCategoryChartProps) {
                 wrapperStyle={{ fontSize: '14px' }}
                 iconType="circle"
                 formatter={(value) => {
-                  const item = data.find((d) => d.category === value);
+                  const item = data.find((d) => d.value === value);
                   return (
                     <span className="text-sm">
                       {value} - {item ? formatCurrency(item.value) : ''}

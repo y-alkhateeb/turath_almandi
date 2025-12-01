@@ -56,7 +56,6 @@ export class TasksService {
             username: 'system',
             passwordHash: passwordHash,
             role: UserRole.ADMIN, // Admin role for necessary permissions
-            isActive: true,
           },
           select: { id: true },
         });
@@ -74,7 +73,7 @@ export class TasksService {
       this.logger.warn('Attempting to use existing admin user as fallback...');
       try {
         const adminUser = await this.prisma.user.findFirst({
-          where: { role: 'ADMIN', isActive: true },
+          where: { role: 'ADMIN', isDeleted: false },
           select: { id: true },
         });
 

@@ -48,9 +48,9 @@ export class LoginThrottleGuard implements CanActivate, OnModuleInit {
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   // Configuration constants
-  private readonly MAX_ATTEMPTS = 5; // Maximum failed attempts before blocking
-  private readonly BLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
-  private readonly WINDOW_MS = 15 * 60 * 1000; // 15 minute sliding window
+  private readonly MAX_ATTEMPTS = 8; // Maximum failed attempts before blocking
+  private readonly BLOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes in milliseconds
+  private readonly WINDOW_MS = 5 * 60 * 1000; // 5 minute sliding window
   private readonly CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // Cleanup every 5 minutes
 
   constructor(private readonly configService: ConfigService) {}

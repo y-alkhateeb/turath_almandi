@@ -56,6 +56,18 @@ export class CreateTransactionWithInventoryDto {
   category?: string;
 
   /**
+   * معرف الموظف (مطلوب إذا كانت الفئة 'EMPLOYEE_SALARIES')
+   * @example '550e8400-e29b-41d4-a716-446655440000'
+   */
+  @ValidateIf((o) => o.category === 'EMPLOYEE_SALARIES')
+  @IsNotEmpty({
+    message: 'معرف الموظف مطلوب لمعاملات الرواتب',
+  })
+  @IsUUID()
+  @IsOptional() // IsOptional is needed to allow the field to be absent for other categories
+  employeeId?: string;
+
+  /**
    * طريقة الدفع للمبلغ المدفوع
    * @example 'CASH'
    */
@@ -103,13 +115,13 @@ export class CreateTransactionWithInventoryDto {
   createDebtForRemaining?: boolean;
 
   /**
-   * اسم الدائن (مطلوب إذا كان createDebtForRemaining = true)
-   * @example 'شركة المواد الغذائية'
+   * معرف جهة الاتصال (الدائن) (مطلوب إذا كان createDebtForRemaining = true)
+   * @example '550e8400-e29b-41d4-a716-446655440000'
    */
   @ValidateIf((o) => o.createDebtForRemaining === true)
-  @IsString()
-  @IsNotEmpty()
-  debtCreditorName?: string;
+  @IsUUID()
+  @IsNotEmpty({ message: 'يجب تحديد جهة الاتصال (الدائن) عند إنشاء دين' })
+  contactId?: string;
 
   /**
    * تاريخ استحقاق الدين (اختياري)
@@ -117,13 +129,5 @@ export class CreateTransactionWithInventoryDto {
    */
   @IsOptional()
   @IsDateString()
-  debtDueDate?: string;
-
-  /**
-   * ملاحظات الدين
-   * @example 'دين على دفعة المواد الخام'
-   */
-  @IsOptional()
-  @IsString()
-  debtNotes?: string;
+  payableDueDate?: string;
 }

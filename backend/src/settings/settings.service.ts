@@ -4,6 +4,7 @@ import { CreateCurrencyDto } from './dto/create-currency.dto';
 import { SetDefaultCurrencyDto } from './dto/set-default-currency.dto';
 import { UpdateAppSettingsDto } from './dto/update-app-settings.dto';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { APP_CONSTANTS } from '../common/constants/app.constants';
 
 @Injectable()
 export class SettingsService {
@@ -156,7 +157,7 @@ export class SettingsService {
 
   /**
    * Get app settings
-   * Returns the first settings record or creates one if none exists
+   * Returns static app name and icon URL, plus dynamic loginBackgroundUrl
    * @returns The app settings
    */
   async getAppSettings() {
@@ -171,11 +172,20 @@ export class SettingsService {
       });
     }
 
-    return settings;
+    // Return static values for app name and icon, dynamic loginBackgroundUrl
+    return {
+      id: settings.id,
+      appName: APP_CONSTANTS.APP_NAME,
+      appIconUrl: APP_CONSTANTS.APP_ICON_URL,
+      loginBackgroundUrl: settings.loginBackgroundUrl,
+      createdAt: settings.createdAt,
+      updatedAt: settings.updatedAt,
+    };
   }
 
   /**
    * Update app settings
+   * Only loginBackgroundUrl is updatable - appName and appIconUrl are static
    * @param dto - App settings data to update
    * @param currentUserId - User ID for audit logging
    * @returns The updated app settings
@@ -189,8 +199,6 @@ export class SettingsService {
       settings = await this.prisma.appSettings.create({
         data: {
           loginBackgroundUrl: dto.loginBackgroundUrl || null,
-          appName: dto.appName || null,
-          appIconUrl: dto.appIconUrl || null,
         },
       });
 
@@ -204,15 +212,13 @@ export class SettingsService {
         );
       }
     } else {
-      // Update existing settings
+      // Update existing settings (only loginBackgroundUrl)
       const oldSettings = { ...settings };
 
       settings = await this.prisma.appSettings.update({
         where: { id: settings.id },
         data: {
           loginBackgroundUrl: dto.loginBackgroundUrl !== undefined ? dto.loginBackgroundUrl : settings.loginBackgroundUrl,
-          appName: dto.appName !== undefined ? dto.appName : settings.appName,
-          appIconUrl: dto.appIconUrl !== undefined ? dto.appIconUrl : settings.appIconUrl,
         },
       });
 
@@ -228,6 +234,14 @@ export class SettingsService {
       }
     }
 
-    return settings;
+    // Return with static values
+    return {
+      id: settings.id,
+      appName: APP_CONSTANTS.APP_NAME,
+      appIconUrl: APP_CONSTANTS.APP_ICON_URL,
+      loginBackgroundUrl: settings.loginBackgroundUrl,
+      createdAt: settings.createdAt,
+      updatedAt: settings.updatedAt,
+    };
   }
 }

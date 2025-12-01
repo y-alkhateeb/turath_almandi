@@ -6,7 +6,9 @@
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/icon';
+import { Badge } from '@/components/ui/badge';
 import type { CategoryOption } from '@/constants/transactionCategories';
+import { supportsMultiItem, supportsDiscount } from '@/constants/transactionCategories';
 
 // أيقونات الفئات
 const CATEGORY_ICONS: Record<string, string> = {
@@ -223,6 +225,28 @@ export function CategorySelector({
               >
                 {category.label}
               </span>
+
+              {/* Feature badges */}
+              <div className="flex flex-wrap gap-1 justify-center mt-1">
+                {supportsMultiItem(category.value) && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                  >
+                    <Icon icon="lucide:layers" className="w-3 h-3 mr-1" />
+                    عدة أصناف
+                  </Badge>
+                )}
+                {supportsDiscount(category.value) && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                  >
+                    <Icon icon="lucide:percent" className="w-3 h-3 mr-1" />
+                    خصم
+                  </Badge>
+                )}
+              </div>
             </button>
           );
         })}

@@ -5,7 +5,7 @@ import { TransactionsService } from '../transactions/transactions.service';
 import { CreateAdjustmentDto } from './dto/create-adjustment.dto';
 import { PaySalaryDto } from './dto/pay-salary.dto';
 import { RequestUser } from '../common/interfaces';
-import { ARABIC_ERRORS } from '../common/constants/error-messages';
+import { ARABIC_ERRORS } from '../common/constants/arabic-errors';
 import { EmployeeStatus, EmployeeAdjustmentType, TransactionType, EmployeeAdjustmentStatus } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { getStartOfMonth, getEndOfMonth } from '../common/utils/date.utils';
@@ -92,8 +92,12 @@ export class PayrollService {
       throw new ForbiddenException(ARABIC_ERRORS.noAccessToEmployee);
     }
 
-    const startDate = getStartOfMonth(month);
-    const endDate = getEndOfMonth(month);
+    // Parse month string (YYYY-MM) to Date
+    const [year, monthNum] = month.split('-').map(Number);
+    const monthDate = new Date(year, monthNum - 1, 1);
+
+    const startDate = getStartOfMonth(monthDate);
+    const endDate = getEndOfMonth(monthDate);
 
     const pendingAdjustments = await this.prisma.employeeAdjustment.findMany({
       where: {

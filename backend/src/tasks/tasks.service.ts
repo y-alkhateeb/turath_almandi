@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { DebtStatus, UserRole } from '../common/types/prisma-enums';
+import { UserRole } from '../common/types/prisma-enums';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 
@@ -20,10 +20,10 @@ export class TasksService {
   ) {
     // Get CRON schedule from environment variable, default to 9 AM daily
     this.cronSchedule = this.configService.get<string>(
-      'OVERDUE_DEBT_CHECK_CRON',
+      'OVERDUE_ACCOUNTS_CHECK_CRON',
       '0 9 * * *', // Default: Every day at 9:00 AM
     );
-    this.logger.log(`Overdue debt check scheduled with CRON: ${this.cronSchedule}`);
+    this.logger.log(`Overdue accounts check scheduled with CRON: ${this.cronSchedule}`);
   }
 
   /**
@@ -93,125 +93,141 @@ export class TasksService {
   }
 
   /**
-   * CRON job to check for overdue debts and create notifications
+   * CRON job to check for overdue payables and receivables
    * Runs daily at 9 AM (or custom schedule from environment variable)
    */
   @Cron(CronExpression.EVERY_DAY_AT_9AM, {
-    name: 'checkOverdueDebts',
+    name: 'checkOverdueAccounts',
     timeZone: 'UTC',
   })
-  async checkOverdueDebts() {
-    this.logger.log('Starting overdue debt check...');
+  async checkOverdueAccounts() {
+    this.logger.log('Starting overdue accounts check...');
 
     try {
-      // Get today's date at midnight for comparison
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Find all active debts where due_date < today
-      // This query is optimized with a composite index on (status, due_date)
-      // The 'lt' (less than) operator ensures efficient query execution
-      // Index: debts_status_dueDate_idx on (status, due_date)
-      const overdueDebts = await this.prisma.debt.findMany({
+      // Find all overdue payables (debts we owe to suppliers)
+      const overduePayables = await this.prisma.accountPayable.findMany({
         where: {
-          status: DebtStatus.ACTIVE,
-          dueDate: {
-            lt: today, // Uses Prisma's lt operator for efficient comparison
-          },
+          status: { in: ['ACTIVE', 'PARTIAL'] },
+          dueDate: { lt: today },
+          deletedAt: null,
         },
         include: {
-          branch: {
-            select: {
-              id: true,
-              name: true,
-              location: true,
-            },
-          },
-          creator: {
-            select: {
-              id: true,
-              username: true,
-            },
-          },
+          branch: { select: { id: true, name: true, location: true } },
+          creator: { select: { id: true, username: true } },
+          contact: { select: { id: true, name: true } },
         },
       });
 
-      this.logger.log(`Found ${overdueDebts.length} overdue debt(s)`);
+      // Find all overdue receivables (debts owed to us by customers)
+      const overdueReceivables = await this.prisma.accountReceivable.findMany({
+        where: {
+          status: { in: ['ACTIVE', 'PARTIAL'] },
+          dueDate: { lt: today },
+          deletedAt: null,
+        },
+        include: {
+          branch: { select: { id: true, name: true, location: true } },
+          creator: { select: { id: true, username: true } },
+          contact: { select: { id: true, name: true } },
+        },
+      });
 
-      if (overdueDebts.length === 0) {
-        this.logger.log('No overdue debts found. Task completed.');
+      this.logger.log(
+        `Found ${overduePayables.length} overdue payable(s) and ${overdueReceivables.length} overdue receivable(s)`,
+      );
+
+      if (overduePayables.length === 0 && overdueReceivables.length === 0) {
+        this.logger.log('No overdue accounts found. Task completed.');
         return;
       }
 
-      // Get admin users to send notifications to
       const adminUsers = await this.notificationsService.getAdminUsers();
-
       if (adminUsers.length === 0) {
-        this.logger.warn('No admin users found to receive overdue debt notifications');
+        this.logger.warn('No admin users found to receive overdue notifications');
         return;
       }
 
-      this.logger.log(`Creating notifications for ${adminUsers.length} admin user(s)...`);
-
-      // Create notifications for each overdue debt
       let notificationCount = 0;
-      for (const debt of overdueDebts) {
+
+      // Create notifications for overdue payables
+      for (const payable of overduePayables) {
         try {
-          // Check if a notification for this debt was already created today
           const existingNotification = await this.prisma.notification.findFirst({
             where: {
-              type: 'overdue_debt',
-              relatedId: debt.id,
-              createdAt: {
-                gte: today,
-              },
+              type: 'overdue_payable',
+              relatedId: payable.id,
+              createdAt: { gte: today },
             },
           });
 
-          if (existingNotification) {
-            this.logger.debug(`Notification for debt ${debt.id} already exists today. Skipping.`);
-            continue;
-          }
+          if (existingNotification) continue;
 
-          // Create notification for this overdue debt
-          await this.notificationsService.createOverdueDebtNotification(
-            debt.id,
-            debt.creditorName,
-            Number(debt.remainingAmount),
-            debt.dueDate,
-            debt.branchId,
-            this.systemUserId,
-          );
+          await this.prisma.notification.create({
+            data: {
+              type: 'overdue_payable',
+              title: 'دين متأخر - حسابات دائنة',
+              message: `الدين المستحق للمورد "${payable.contact.name}" متأخر. المبلغ المتبقي: ${payable.remainingAmount}. تاريخ الاستحقاق: ${payable.dueDate.toISOString().split('T')[0]}`,
+              severity: 'WARNING',
+              relatedId: payable.id,
+              relatedType: 'account_payable',
+              branchId: payable.branchId,
+              createdBy: this.systemUserId,
+            },
+          });
 
           notificationCount++;
-
-          this.logger.debug(
-            `Notification created for overdue debt: ${debt.creditorName}, amount: ${debt.remainingAmount}, due: ${debt.dueDate}`,
-          );
         } catch (error) {
-          this.logger.error(
-            `Failed to create notification for debt ${debt.id}: ${error.message}`,
-            error.stack,
-          );
-          // Continue with other debts even if one fails
+          this.logger.error(`Failed to create notification for payable ${payable.id}: ${error.message}`);
         }
       }
 
-      this.logger.log(
-        `Overdue debt check completed. Created ${notificationCount} notification(s) for ${overdueDebts.length} overdue debt(s).`,
-      );
+      // Create notifications for overdue receivables
+      for (const receivable of overdueReceivables) {
+        try {
+          const existingNotification = await this.prisma.notification.findFirst({
+            where: {
+              type: 'overdue_receivable',
+              relatedId: receivable.id,
+              createdAt: { gte: today },
+            },
+          });
+
+          if (existingNotification) continue;
+
+          await this.prisma.notification.create({
+            data: {
+              type: 'overdue_receivable',
+              title: 'ذمة متأخرة - حسابات مدينة',
+              message: `الذمة المستحقة من العميل "${receivable.contact.name}" متأخرة. المبلغ المتبقي: ${receivable.remainingAmount}. تاريخ الاستحقاق: ${receivable.dueDate.toISOString().split('T')[0]}`,
+              severity: 'INFO',
+              relatedId: receivable.id,
+              relatedType: 'account_receivable',
+              branchId: receivable.branchId,
+              createdBy: this.systemUserId,
+            },
+          });
+
+          notificationCount++;
+        } catch (error) {
+          this.logger.error(`Failed to create notification for receivable ${receivable.id}: ${error.message}`);
+        }
+      }
+
+      this.logger.log(`Overdue accounts check completed. Created ${notificationCount} notification(s).`);
     } catch (error) {
-      this.logger.error(`Error during overdue debt check: ${error.message}`, error.stack);
+      this.logger.error(`Error during overdue accounts check: ${error.message}`, error.stack);
     }
   }
 
   /**
    * Manual trigger for testing purposes
-   * Can be called via API endpoint if needed
    */
-  async manualCheckOverdueDebts() {
-    this.logger.log('Manual overdue debt check triggered');
-    return this.checkOverdueDebts();
+  async manualCheckOverdueAccounts() {
+    this.logger.log('Manual overdue accounts check triggered');
+    return this.checkOverdueAccounts();
   }
 
   /**

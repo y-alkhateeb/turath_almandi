@@ -12,7 +12,7 @@ import { Prisma, ReportType } from '@prisma/client';
 /**
  * Supported data sources for reports
  */
-export const DATA_SOURCES = ['transactions', 'debts', 'inventory', 'salaries', 'branches'] as const;
+export const DATA_SOURCES = ['transactions', 'payables', 'receivables', 'inventory', 'salaries', 'branches'] as const;
 export type DataSourceType = typeof DATA_SOURCES[number];
 
 /**

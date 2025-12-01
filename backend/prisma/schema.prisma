@@ -145,55 +145,60 @@ enum DiscountType {
 
 // 1. Users Table
 model User {
-  id                   String    @id @default(uuid()) @db.Uuid
-  username             String    @unique @db.VarChar(100)
-  passwordHash         String    @map("password_hash") @db.VarChar(255)
-  role                 UserRole  @default(ACCOUNTANT)
-  branchId             String?   @map("branch_id") @db.Uuid
-  failedLoginAttempts  Int       @default(0) @map("failed_login_attempts")
-  lockedUntil          DateTime? @map("locked_until") @db.Timestamptz
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz
-  deletedBy            String?   @map("deleted_by") @db.Uuid
-  isDeleted            Boolean   @default(false) @map("is_deleted")
+  id                  String    @id @default(uuid()) @db.Uuid
+  username            String    @unique @db.VarChar(100)
+  passwordHash        String    @map("password_hash") @db.VarChar(255)
+  role                UserRole  @default(ACCOUNTANT)
+  branchId            String?   @map("branch_id") @db.Uuid
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until") @db.Timestamptz
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz
+  deletedBy           String?   @map("deleted_by") @db.Uuid
+  isDeleted           Boolean   @default(false) @map("is_deleted")
 
   // Relations
-  branch                           Branch?                      @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  deleter                          User?                        @relation("UserDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
-  deletedUsers                     User[]                       @relation("UserDeleter")
+  branch                           Branch?                    @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  deleter                          User?                      @relation("UserDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  deletedUsers                     User[]                     @relation("UserDeleter")
   refreshTokens                    RefreshToken[]
-  recordedPayments                 DebtPayment[]                @relation("PaymentRecorder")
   recordedConsumptions             InventoryConsumption[]
   auditLogs                        AuditLog[]
-  createdEmployees                 Employee[]                   @relation("EmployeeCreator")
-  recordedSalaryPayments           SalaryPayment[]              @relation("SalaryPaymentRecorder")
-  createdReportTemplates           ReportTemplate[]             @relation("ReportTemplateCreator")
-  reportExecutions                 ReportExecution[]            @relation("ReportExecutor")
-  contactsCreated                  Contact[]                    @relation("ContactCreator")
-  contactsDeleted                  Contact[]                    @relation("ContactDeleter")
-  branchesDeleted                  Branch[]                     @relation("BranchDeleter")
-  payablesCreated                  AccountPayable[]             @relation("PayableCreator")
-  payablesDeleted                  AccountPayable[]             @relation("PayableDeleter")
-  receivablesCreated               AccountReceivable[]          @relation("ReceivableCreator")
-  receivablesDeleted               AccountReceivable[]          @relation("ReceivableDeleter")
-  payablePaymentsRecorded          PayablePayment[]             @relation("PayablePaymentRecorder")
-  payablePaymentsDeleted           PayablePayment[]             @relation("PayablePaymentDeleter")
-  receivablePaymentsRecorded       ReceivablePayment[]          @relation("ReceivablePaymentRecorder")
-  receivablePaymentsDeleted        ReceivablePayment[]          @relation("ReceivablePaymentDeleter")
-  subUnitsCreated                  InventorySubUnit[]           @relation("SubUnitCreator")
-  debtPaymentsDeleted              DebtPayment[]                @relation("DebtPaymentDeleter")
-  refreshTokensDeleted             RefreshToken[]               @relation("RefreshTokenDeleter")
-  salaryPaymentsDeleted            SalaryPayment[]              @relation("SalaryPaymentDeleter")
-  employeesDeleted                 Employee[]                   @relation("EmployeeDeleter")
-  appSettingsDeleted               AppSettings[]                @relation("AppSettingsDeleter")
-  currencySettingsDeleted          CurrencySettings[]           @relation("CurrencySettingsDeleter")
-  reportTemplatesDeleted           ReportTemplate[]             @relation("ReportTemplateDeleter")
-  reportFieldMetadataDeleted       ReportFieldMetadata[]        @relation("ReportFieldMetadataDeleter")
-  transactionInventoryItemsDeleted TransactionInventoryItem[]   @relation("TransactionInventoryItemDeleter")
-  createdEmployeeAdjustments     EmployeeAdjustment[]         @relation("EmployeeAdjustmentCreator")
-  deletedEmployeeAdjustments     EmployeeAdjustment[]         @relation("EmployeeAdjustmentDeleter")
-  discountReasonsDeleted           DiscountReason[]             @relation("DiscountReasonDeleter")
+  createdEmployees                 Employee[]                 @relation("EmployeeCreator")
+  recordedSalaryPayments           SalaryPayment[]            @relation("SalaryPaymentRecorder")
+  createdReportTemplates           ReportTemplate[]           @relation("ReportTemplateCreator")
+  reportExecutions                 ReportExecution[]          @relation("ReportExecutor")
+  contactsCreated                  Contact[]                  @relation("ContactCreator")
+  contactsDeleted                  Contact[]                  @relation("ContactDeleter")
+  branchesDeleted                  Branch[]                   @relation("BranchDeleter")
+  payablesCreated                  AccountPayable[]           @relation("PayableCreator")
+  payablesDeleted                  AccountPayable[]           @relation("PayableDeleter")
+  receivablesCreated               AccountReceivable[]        @relation("ReceivableCreator")
+  receivablesDeleted               AccountReceivable[]        @relation("ReceivableDeleter")
+  payablePaymentsRecorded          PayablePayment[]           @relation("PayablePaymentRecorder")
+  payablePaymentsDeleted           PayablePayment[]           @relation("PayablePaymentDeleter")
+  receivablePaymentsRecorded       ReceivablePayment[]        @relation("ReceivablePaymentRecorder")
+  receivablePaymentsDeleted        ReceivablePayment[]        @relation("ReceivablePaymentDeleter")
+  subUnitsCreated                  InventorySubUnit[]         @relation("SubUnitCreator")
+  subUnitsDeleted                  InventorySubUnit[]         @relation("SubUnitDeleter")
+  consumptionsDeleted              InventoryConsumption[]     @relation("ConsumptionDeleter")
+  notificationsCreated             Notification[]             @relation("NotificationCreator")
+  notificationsDeleted             Notification[]             @relation("NotificationDeleter")
+  transactionsCreated              Transaction[]              @relation("TransactionCreator")
+  notificationSettings             NotificationSetting[]
+  notificationSettingsDeleted      NotificationSetting[]      @relation("NotificationSettingDeleter")
+  refreshTokensDeleted             RefreshToken[]             @relation("RefreshTokenDeleter")
+  salaryPaymentsDeleted            SalaryPayment[]            @relation("SalaryPaymentDeleter")
+  employeesDeleted                 Employee[]                 @relation("EmployeeDeleter")
+  appSettingsDeleted               AppSettings[]              @relation("AppSettingsDeleter")
+  currencySettingsDeleted          CurrencySettings[]         @relation("CurrencySettingsDeleter")
+  reportTemplatesDeleted           ReportTemplate[]           @relation("ReportTemplateDeleter")
+  reportFieldMetadataDeleted       ReportFieldMetadata[]      @relation("ReportFieldMetadataDeleter")
+  transactionInventoryItemsDeleted TransactionInventoryItem[] @relation("TransactionInventoryItemDeleter")
+  createdEmployeeAdjustments       EmployeeAdjustment[]       @relation("EmployeeAdjustmentCreator")
+  deletedEmployeeAdjustments       EmployeeAdjustment[]       @relation("EmployeeAdjustmentDeleter")
+  discountReasonsDeleted           DiscountReason[]           @relation("DiscountReasonDeleter")
 
   @@index([branchId])
   @@index([role])
@@ -250,7 +255,8 @@ model Branch {
   contacts              Contact[]
   accountsPayable       AccountPayable[]
   accountsReceivable    AccountReceivable[]
-  deleter               User?                      @relation("BranchDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  notifications         Notification[]
+  deleter               User?                  @relation("BranchDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
 
   @@index([deletedBy])
   @@index([isDeleted])
@@ -261,49 +267,47 @@ model Branch {
 
 // 4. Transactions Table
 model Transaction {
-  id                 String           @id @default(uuid()) @db.Uuid
-  branchId           String?          @map("branch_id") @db.Uuid
+  id                 String          @id @default(uuid()) @db.Uuid
+  branchId           String?         @map("branch_id") @db.Uuid
   type               TransactionType
-  amount             Decimal          @db.Decimal(15, 2)
-  paymentMethod      PaymentMethod?   @map("payment_method")
-  category           String           @db.VarChar(100)
-  date               DateTime         @db.Date
-  employeeVendorName String           @map("employee_vendor_name") @db.VarChar(200)
-  notes              String?          @db.Text
-  inventoryItemId    String?          @map("inventory_item_id") @db.Uuid
-  paidAmount         Decimal?         @map("paid_amount") @db.Decimal(15, 2)
-  totalAmount        Decimal?         @map("total_amount") @db.Decimal(15, 2)
+  amount             Decimal         @db.Decimal(15, 2)
+  paymentMethod      PaymentMethod?  @map("payment_method")
+  category           String          @db.VarChar(100)
+  date               DateTime        @db.Date
+  employeeVendorName String          @map("employee_vendor_name") @db.VarChar(200)
+  notes              String?         @db.Text
+  inventoryItemId    String?         @map("inventory_item_id") @db.Uuid
+  paidAmount         Decimal?        @map("paid_amount") @db.Decimal(15, 2)
+  totalAmount        Decimal?        @map("total_amount") @db.Decimal(15, 2)
   // Discount fields
-  discountType       DiscountType?    @map("discount_type")
-  discountValue      Decimal?         @map("discount_value") @db.Decimal(15, 4)
-  discountReason     String?          @map("discount_reason") @db.VarChar(200)
-  subtotal           Decimal?         @map("subtotal") @db.Decimal(15, 2)
-  linkedDebtId       String?          @map("linked_debt_id") @db.Uuid
-  contactId          String?          @map("contact_id") @db.Uuid
-  linkedPayableId    String?          @map("linked_payable_id") @db.Uuid
+  discountType       DiscountType?   @map("discount_type")
+  discountValue      Decimal?        @map("discount_value") @db.Decimal(15, 4)
+  discountReason     String?         @map("discount_reason") @db.VarChar(200)
+  subtotal           Decimal?        @map("subtotal") @db.Decimal(15, 2)
+  contactId          String?         @map("contact_id") @db.Uuid
+  linkedPayableId    String?         @map("linked_payable_id") @db.Uuid
   // NEW: Link to employee for salary, bonus, advance transactions
-  employeeId         String?          @map("employee_id") @db.Uuid
-  linkedReceivableId String?          @map("linked_receivable_id") @db.Uuid
-  createdBy          String           @map("created_by") @db.Uuid
-  createdAt          DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt          DateTime         @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt          DateTime?        @map("deleted_at") @db.Timestamptz
-  deletedBy          String?          @map("deleted_by") @db.Uuid
-  isDeleted          Boolean          @default(false) @map("is_deleted")
+  employeeId         String?         @map("employee_id") @db.Uuid
+  linkedReceivableId String?         @map("linked_receivable_id") @db.Uuid
+  createdBy          String          @map("created_by") @db.Uuid
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt          DateTime?       @map("deleted_at") @db.Timestamptz
+  deletedBy          String?         @map("deleted_by") @db.Uuid
+  isDeleted          Boolean         @default(false) @map("is_deleted")
 
   // Relations
-  branch                    Branch?                     @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  creator                   User                        @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  inventoryItem             InventoryItem?              @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
-  linkedDebt                Debt?                       @relation("TransactionDebt", fields: [linkedDebtId], references: [id], onDelete: SetNull)
-  contact                   Contact?                    @relation("ContactTransactions", fields: [contactId], references: [id], onDelete: SetNull)
-  employee                  Employee?                   @relation("EmployeeTransactions", fields: [employeeId], references: [id], onDelete: SetNull)
-  linkedPayable             AccountPayable?             @relation("PurchasePayable")
-  linkedReceivable          AccountReceivable?          @relation("SaleReceivable")
+  branch                    Branch?                    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator                   User                       @relation("TransactionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  inventoryItem             InventoryItem?             @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+  contact                   Contact?                   @relation("ContactTransactions", fields: [contactId], references: [id], onDelete: SetNull)
+  employee                  Employee?                  @relation("EmployeeTransactions", fields: [employeeId], references: [id], onDelete: SetNull)
+  linkedPayable             AccountPayable?            @relation("PurchasePayable")
+  linkedReceivable          AccountReceivable?         @relation("SaleReceivable")
   salaryPayment             SalaryPayment?
   transactionInventoryItems TransactionInventoryItem[]
-  payablePayment            PayablePayment?             @relation("PayablePaymentTransaction")
-  receivablePayment         ReceivablePayment?          @relation("ReceivablePaymentTransaction")
+  payablePayment            PayablePayment?            @relation("PayablePaymentTransaction")
+  receivablePayment         ReceivablePayment?         @relation("ReceivablePaymentTransaction")
 
   @@index([branchId])
   @@index([type])
@@ -312,7 +316,6 @@ model Transaction {
   @@index([createdBy])
   @@index([paymentMethod])
   @@index([inventoryItemId])
-  @@index([linkedDebtId])
   @@index([contactId])
   @@index([linkedPayableId])
   @@index([employeeId])
@@ -345,12 +348,12 @@ model Contact {
   isDeleted   Boolean     @default(false) @map("is_deleted")
 
   // Relations
-  branch             Branch?               @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  creator            User                  @relation("ContactCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  deleter            User?                 @relation("ContactDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  branch             Branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  creator            User                @relation("ContactCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  deleter            User?               @relation("ContactDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
   accountsPayable    AccountPayable[]
   accountsReceivable AccountReceivable[]
-  transactions       Transaction[]         @relation("ContactTransactions")
+  transactions       Transaction[]       @relation("ContactTransactions")
 
   @@index([name])
   @@index([type])
@@ -363,24 +366,24 @@ model Contact {
 
 // NEW: Account Payable Model (Debts We Owe)
 model AccountPayable {
-  id                          String        @id @default(uuid()) @db.Uuid
-  contactId                   String        @map("contact_id") @db.Uuid
-  originalAmount              Decimal       @map("original_amount") @db.Decimal(15, 2)
-  remainingAmount             Decimal       @map("remaining_amount") @db.Decimal(15, 2)
-  date                        DateTime      @db.Date
-  dueDate                     DateTime?     @map("due_date") @db.Date
-  status                      DebtStatus    @default(ACTIVE)
-  description                 String?       @db.Text
-  invoiceNumber               String?       @map("invoice_number") @db.VarChar(50)
-  notes                       String?       @db.Text
-  linkedPurchaseTransactionId String?       @unique @map("linked_purchase_transaction_id") @db.Uuid
-  branchId                    String?       @map("branch_id") @db.Uuid
-  createdBy                   String        @map("created_by") @db.Uuid
-  createdAt                   DateTime      @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt                   DateTime      @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt                   DateTime?     @map("deleted_at") @db.Timestamptz
-  deletedBy                   String?       @map("deleted_by") @db.Uuid
-  isDeleted                   Boolean       @default(false) @map("is_deleted")
+  id                          String     @id @default(uuid()) @db.Uuid
+  contactId                   String     @map("contact_id") @db.Uuid
+  originalAmount              Decimal    @map("original_amount") @db.Decimal(15, 2)
+  remainingAmount             Decimal    @map("remaining_amount") @db.Decimal(15, 2)
+  date                        DateTime   @db.Date
+  dueDate                     DateTime?  @map("due_date") @db.Date
+  status                      DebtStatus @default(ACTIVE)
+  description                 String?    @db.Text
+  invoiceNumber               String?    @map("invoice_number") @db.VarChar(50)
+  notes                       String?    @db.Text
+  linkedPurchaseTransactionId String?    @unique @map("linked_purchase_transaction_id") @db.Uuid
+  branchId                    String?    @map("branch_id") @db.Uuid
+  createdBy                   String     @map("created_by") @db.Uuid
+  createdAt                   DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                   DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt                   DateTime?  @map("deleted_at") @db.Timestamptz
+  deletedBy                   String?    @map("deleted_by") @db.Uuid
+  isDeleted                   Boolean    @default(false) @map("is_deleted")
 
   // Relations
   contact             Contact          @relation(fields: [contactId], references: [id], onDelete: Restrict)
@@ -403,31 +406,31 @@ model AccountPayable {
 
 // NEW: Account Receivable Model (Debts Owed to Us)
 model AccountReceivable {
-  id                      String               @id @default(uuid()) @db.Uuid
-  contactId               String               @map("contact_id") @db.Uuid
-  originalAmount          Decimal              @map("original_amount") @db.Decimal(15, 2)
-  remainingAmount         Decimal              @map("remaining_amount") @db.Decimal(15, 2)
-  date                    DateTime             @db.Date
-  dueDate                 DateTime?            @map("due_date") @db.Date
-  status                  DebtStatus           @default(ACTIVE)
-  description             String?              @db.Text
-  invoiceNumber           String?              @map("invoice_number") @db.VarChar(50)
-  notes                   String?              @db.Text
-  linkedSaleTransactionId String?              @unique @map("linked_sale_transaction_id") @db.Uuid
-  branchId                String?              @map("branch_id") @db.Uuid
-  createdBy               String               @map("created_by") @db.Uuid
-  createdAt               DateTime             @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt               DateTime             @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt               DateTime?            @map("deleted_at") @db.Timestamptz
-  deletedBy               String?              @map("deleted_by") @db.Uuid
-  isDeleted               Boolean              @default(false) @map("is_deleted")
+  id                      String     @id @default(uuid()) @db.Uuid
+  contactId               String     @map("contact_id") @db.Uuid
+  originalAmount          Decimal    @map("original_amount") @db.Decimal(15, 2)
+  remainingAmount         Decimal    @map("remaining_amount") @db.Decimal(15, 2)
+  date                    DateTime   @db.Date
+  dueDate                 DateTime?  @map("due_date") @db.Date
+  status                  DebtStatus @default(ACTIVE)
+  description             String?    @db.Text
+  invoiceNumber           String?    @map("invoice_number") @db.VarChar(50)
+  notes                   String?    @db.Text
+  linkedSaleTransactionId String?    @unique @map("linked_sale_transaction_id") @db.Uuid
+  branchId                String?    @map("branch_id") @db.Uuid
+  createdBy               String     @map("created_by") @db.Uuid
+  createdAt               DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt               DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt               DateTime?  @map("deleted_at") @db.Timestamptz
+  deletedBy               String?    @map("deleted_by") @db.Uuid
+  isDeleted               Boolean    @default(false) @map("is_deleted")
 
   // Relations
-  contact         Contact              @relation(fields: [contactId], references: [id], onDelete: Restrict)
-  branch          Branch?              @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  creator         User                 @relation("ReceivableCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  deleter         User?                @relation("ReceivableDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
-  saleTransaction Transaction?         @relation("SaleReceivable", fields: [linkedSaleTransactionId], references: [id], onDelete: SetNull)
+  contact         Contact             @relation(fields: [contactId], references: [id], onDelete: Restrict)
+  branch          Branch?             @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator         User                @relation("ReceivableCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  deleter         User?               @relation("ReceivableDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  saleTransaction Transaction?        @relation("SaleReceivable", fields: [linkedSaleTransactionId], references: [id], onDelete: SetNull)
   payments        ReceivablePayment[]
 
   @@index([contactId])
@@ -473,19 +476,19 @@ model PayablePayment {
 
 // NEW: Receivable Payment Model
 model ReceivablePayment {
-  id            String             @id @default(uuid()) @db.Uuid
-  receivableId  String             @map("receivable_id") @db.Uuid
-  amountPaid    Decimal            @map("amount_paid") @db.Decimal(15, 2)
-  paymentDate   DateTime           @map("payment_date") @db.Date
-  paymentMethod PaymentMethod?     @map("payment_method")
-  notes         String?            @db.Text
-  transactionId String?            @unique @map("transaction_id") @db.Uuid
-  recordedBy    String             @map("recorded_by") @db.Uuid
-  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime           @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt     DateTime?          @map("deleted_at") @db.Timestamptz
-  deletedBy     String?            @map("deleted_by") @db.Uuid
-  isDeleted     Boolean            @default(false) @map("is_deleted")
+  id            String         @id @default(uuid()) @db.Uuid
+  receivableId  String         @map("receivable_id") @db.Uuid
+  amountPaid    Decimal        @map("amount_paid") @db.Decimal(15, 2)
+  paymentDate   DateTime       @map("payment_date") @db.Date
+  paymentMethod PaymentMethod? @map("payment_method")
+  notes         String?        @db.Text
+  transactionId String?        @unique @map("transaction_id") @db.Uuid
+  recordedBy    String         @map("recorded_by") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz
+  deletedBy     String?        @map("deleted_by") @db.Uuid
+  isDeleted     Boolean        @default(false) @map("is_deleted")
 
   // Relations
   receivable  AccountReceivable @relation(fields: [receivableId], references: [id], onDelete: Cascade)
@@ -544,7 +547,7 @@ model InventoryItem {
   isDeleted        Boolean       @default(false) @map("is_deleted")
 
   // Relations
-  branch                    Branch                      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch                    Branch                     @relation(fields: [branchId], references: [id], onDelete: Cascade)
   transactions              Transaction[]
   consumptions              InventoryConsumption[]
   transactionInventoryItems TransactionInventoryItem[]
@@ -561,17 +564,17 @@ model InventoryItem {
 
 // NEW: Inventory SubUnit Model
 model InventorySubUnit {
-  id              String        @id @default(uuid()) @db.Uuid
-  inventoryItemId String        @map("inventory_item_id") @db.Uuid
-  unitName        String        @map("unit_name") @db.VarChar(50)
-  ratio           Decimal       @db.Decimal(10, 4)
-  sellingPrice    Decimal       @map("selling_price") @db.Decimal(15, 2)
-  createdBy       String        @map("created_by") @db.Uuid
-  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt       DateTime?     @map("deleted_at") @db.Timestamptz
-  deletedBy       String?       @map("deleted_by") @db.Uuid
-  isDeleted       Boolean       @default(false) @map("is_deleted")
+  id              String    @id @default(uuid()) @db.Uuid
+  inventoryItemId String    @map("inventory_item_id") @db.Uuid
+  unitName        String    @map("unit_name") @db.VarChar(50)
+  ratio           Decimal   @db.Decimal(10, 4)
+  sellingPrice    Decimal   @map("selling_price") @db.Decimal(15, 2)
+  createdBy       String    @map("created_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
+  deletedBy       String?   @map("deleted_by") @db.Uuid
+  isDeleted       Boolean   @default(false) @map("is_deleted")
 
   // Relations
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
@@ -659,7 +662,7 @@ model NotificationSetting {
   isEnabled        Boolean       @default(true) @map("is_enabled")
   minAmount        Decimal?      @map("min_amount") @db.Decimal(15, 2)
   selectedBranches Json?         @map("selected_branches") @db.JsonB
-  displayMethod    DisplayMethod @map("display_method") @default(POPUP)
+  displayMethod    DisplayMethod @default(POPUP) @map("display_method")
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt        DateTime?     @map("deleted_at") @db.Timestamptz
@@ -747,28 +750,29 @@ model AppSettings {
 
 // 13. Employees Table
 model Employee {
-  id             String         @id @default(uuid()) @db.Uuid
-  branchId       String         @map("branch_id") @db.Uuid
-  name           String         @db.VarChar(200)
-  status         EmployeeStatus @default(ACTIVE)
-  position       String         @db.VarChar(100)
-  baseSalary     Decimal        @map("base_salary") @db.Decimal(15, 2)
-  allowance      Decimal        @default(0) @db.Decimal(15, 2)
-  hireDate       DateTime       @map("hire_date") @db.Date
-  resignDate     DateTime?      @map("resign_date") @db.Date
-  createdBy      String         @map("created_by") @db.Uuid
-  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt      DateTime?      @map("deleted_at") @db.Timestamptz
-  deletedBy      String?        @map("deleted_by") @db.Uuid
-  isDeleted      Boolean        @default(false) @map("is_deleted")
+  id         String         @id @default(uuid()) @db.Uuid
+  branchId   String         @map("branch_id") @db.Uuid
+  name       String         @db.VarChar(200)
+  status     EmployeeStatus @default(ACTIVE)
+  position   String         @db.VarChar(100)
+  baseSalary Decimal        @map("base_salary") @db.Decimal(15, 2)
+  allowance  Decimal        @default(0) @db.Decimal(15, 2)
+  hireDate   DateTime       @map("hire_date") @db.Date
+  resignDate DateTime?      @map("resign_date") @db.Date
+  createdBy  String         @map("created_by") @db.Uuid
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt  DateTime?      @map("deleted_at") @db.Timestamptz
+  deletedBy  String?        @map("deleted_by") @db.Uuid
+  isDeleted  Boolean        @default(false) @map("is_deleted")
 
   // Relations
-  branch          Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  creator         User             @relation("EmployeeCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  deleter         User?            @relation("EmployeeDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
-  salaryPayments  SalaryPayment[]
-  transactions    Transaction[]    @relation("EmployeeTransactions")
+  branch         Branch               @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  creator        User                 @relation("EmployeeCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  deleter        User?                @relation("EmployeeDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  salaryPayments SalaryPayment[]
+  transactions   Transaction[]        @relation("EmployeeTransactions")
+  adjustments    EmployeeAdjustment[]
 
   @@index([branchId])
   @@index([status])
@@ -815,8 +819,6 @@ model EmployeeAdjustment {
   @@map("employee_adjustments")
 }
 
-
-
 // 14. Salary Payments Table
 model SalaryPayment {
   id            String    @id @default(uuid()) @db.Uuid
@@ -833,11 +835,11 @@ model SalaryPayment {
   isDeleted     Boolean   @default(false) @map("is_deleted")
 
   // Relations
-  employee          Employee           @relation(fields: [employeeId], references: [id], onDelete: Restrict)
-  transaction       Transaction?       @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  recorder          User               @relation("SalaryPaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
-  deleter           User?              @relation("SalaryPaymentDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
-  adjustments       EmployeeAdjustment[]
+  employee    Employee             @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  transaction Transaction?         @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  recorder    User                 @relation("SalaryPaymentRecorder", fields: [recordedBy], references: [id], onDelete: Restrict)
+  deleter     User?                @relation("SalaryPaymentDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  adjustments EmployeeAdjustment[]
 
   @@index([employeeId])
   @@index([paymentDate])
@@ -848,6 +850,11 @@ model SalaryPayment {
   @@index([employeeId, paymentDate])
   @@map("salary_payments")
 }
+
+// 17. Transaction Inventory Items Table
+model TransactionInventoryItem {
+  id              String                 @id @default(uuid()) @db.Uuid
+  transactionId   String                 @map("transaction_id") @db.Uuid
   inventoryItemId String                 @map("inventory_item_id") @db.Uuid
   quantity        Decimal                @db.Decimal(12, 3)
   operationType   InventoryOperationType @map("operation_type")
@@ -882,19 +889,19 @@ model SalaryPayment {
 
 // 18. Report Templates Table
 model ReportTemplate {
-  id          String      @id @default(uuid()) @db.Uuid
-  name        String      @db.VarChar(200)
-  description String?     @db.Text
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @db.VarChar(200)
+  description String?    @db.Text
   reportType  ReportType
-  config      Json        @db.JsonB
-  isPublic    Boolean     @default(false) @map("is_public")
-  isDefault   Boolean     @default(false) @map("is_default")
-  createdById String      @map("created_by_id") @db.Uuid
-  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt   DateTime?   @map("deleted_at") @db.Timestamptz
-  deletedBy   String?     @map("deleted_by") @db.Uuid
-  isDeleted   Boolean     @default(false) @map("is_deleted")
+  config      Json       @db.JsonB
+  isPublic    Boolean    @default(false) @map("is_public")
+  isDefault   Boolean    @default(false) @map("is_default")
+  createdById String     @map("created_by_id") @db.Uuid
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt   DateTime?  @map("deleted_at") @db.Timestamptz
+  deletedBy   String?    @map("deleted_by") @db.Uuid
+  isDeleted   Boolean    @default(false) @map("is_deleted")
 
   // Relations
   createdBy  User              @relation("ReportTemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)

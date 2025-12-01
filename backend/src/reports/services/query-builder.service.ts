@@ -151,7 +151,7 @@ export class QueryBuilderService {
     const conditions: WhereCondition[] = [];
 
     // Data sources that have deletedAt field (branches doesn't have it)
-    const softDeleteSources: DataSourceType[] = ['transactions', 'debts', 'inventory', 'salaries'];
+    const softDeleteSources: DataSourceType[] = ['transactions', 'payables', 'receivables', 'inventory', 'salaries'];
 
     // Exclude soft-deleted records only for models that support it
     if (softDeleteSources.includes(dataSource)) {

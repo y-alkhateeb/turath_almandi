@@ -14,7 +14,8 @@ import { DataSourceType } from './report.types';
  */
 export type PrismaWhereInputMap = {
   transactions: Prisma.TransactionWhereInput;
-  debts: Prisma.DebtWhereInput;
+  payables: Prisma.AccountPayableWhereInput;
+  receivables: Prisma.AccountReceivableWhereInput;
   inventory: Prisma.InventoryItemWhereInput;
   salaries: Prisma.EmployeeWhereInput;
   branches: Prisma.BranchWhereInput;
@@ -31,7 +32,8 @@ export type WhereInputForDataSource<T extends DataSourceType> = PrismaWhereInput
 
 export type PrismaSelectInputMap = {
   transactions: Prisma.TransactionSelect;
-  debts: Prisma.DebtSelect;
+  payables: Prisma.AccountPayableSelect;
+  receivables: Prisma.AccountReceivableSelect;
   inventory: Prisma.InventoryItemSelect;
   salaries: Prisma.EmployeeSelect;
   branches: Prisma.BranchSelect;
@@ -45,7 +47,8 @@ export type SelectInputForDataSource<T extends DataSourceType> = PrismaSelectInp
 
 export type PrismaOrderByInputMap = {
   transactions: Prisma.TransactionOrderByWithRelationInput;
-  debts: Prisma.DebtOrderByWithRelationInput;
+  payables: Prisma.AccountPayableOrderByWithRelationInput;
+  receivables: Prisma.AccountReceivableOrderByWithRelationInput;
   inventory: Prisma.InventoryItemOrderByWithRelationInput;
   salaries: Prisma.EmployeeOrderByWithRelationInput;
   branches: Prisma.BranchOrderByWithRelationInput;
@@ -59,7 +62,8 @@ export type OrderByInputForDataSource<T extends DataSourceType> = PrismaOrderByI
 
 export type PrismaPayloadMap = {
   transactions: Prisma.TransactionGetPayload<object>;
-  debts: Prisma.DebtGetPayload<object>;
+  payables: Prisma.AccountPayableGetPayload<object>;
+  receivables: Prisma.AccountReceivableGetPayload<object>;
   inventory: Prisma.InventoryItemGetPayload<object>;
   salaries: Prisma.EmployeeGetPayload<object>;
   branches: Prisma.BranchGetPayload<object>;
@@ -75,14 +79,16 @@ export type PayloadForDataSource<T extends DataSourceType> = PrismaPayloadMap[T]
  * Valid field names for each data source
  */
 export type TransactionFields = keyof Prisma.TransactionScalarFieldEnum;
-export type DebtFields = keyof Prisma.DebtScalarFieldEnum;
+export type PayableFields = keyof Prisma.AccountPayableScalarFieldEnum;
+export type ReceivableFields = keyof Prisma.AccountReceivableScalarFieldEnum;
 export type InventoryFields = keyof Prisma.InventoryItemScalarFieldEnum;
 export type EmployeeFields = keyof Prisma.EmployeeScalarFieldEnum;
 export type BranchFields = keyof Prisma.BranchScalarFieldEnum;
 
 export type FieldsForDataSource<T extends DataSourceType> =
   T extends 'transactions' ? TransactionFields :
-  T extends 'debts' ? DebtFields :
+  T extends 'payables' ? PayableFields :
+  T extends 'receivables' ? ReceivableFields :
   T extends 'inventory' ? InventoryFields :
   T extends 'salaries' ? EmployeeFields :
   T extends 'branches' ? BranchFields :
@@ -100,7 +106,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 export function getPrismaDelegate(prisma: PrismaService, dataSource: DataSourceType) {
   const delegateMap = {
     transactions: prisma.transaction,
-    debts: prisma.debt,
+    payables: prisma.accountPayable,
+    receivables: prisma.accountReceivable,
     inventory: prisma.inventoryItem,
     salaries: prisma.employee,
     branches: prisma.branch,

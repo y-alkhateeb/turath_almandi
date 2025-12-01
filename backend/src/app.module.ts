@@ -22,6 +22,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmployeesModule } from './employees/employees.module';
+import { PayrollModule } from './payroll/payroll.module';
 import { SmartReportsModule } from './reports/smart-reports.module';
 import { DiscountReasonsModule } from './discount-reasons/discount-reasons.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
@@ -76,8 +77,10 @@ import { envValidationSchema } from './common/config/env.validation';
     WebSocketModule,
     SettingsModule,
     EmployeesModule,
+    PayrollModule,
     SmartReportsModule,
-    DiscountReasonsModule,],
+    DiscountReasonsModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

@@ -58,32 +58,6 @@ export class WebSocketGatewayService
     this.server.emit('transaction:updated', transaction);
   }
 
-  /**
-   * Emit a new debt event to all connected clients
-   * @param debt - The debt data to emit
-   */
-  emitNewDebt(debt: unknown): void {
-    this.logger.log('Emitting new debt event');
-    this.server.emit('debt:created', debt);
-  }
-
-  /**
-   * Emit a debt update event to all connected clients
-   * @param debt - The updated debt data
-   */
-  emitDebtUpdate(debt: unknown): void {
-    this.logger.log('Emitting debt update event');
-    this.server.emit('debt:updated', debt);
-  }
-
-  /**
-   * Emit a debt payment event to all connected clients
-   * @param payment - The payment data
-   */
-  emitDebtPayment(payment: unknown): void {
-    this.logger.log('Emitting debt payment event');
-    this.server.emit('debt:payment', payment);
-  }
 
   /**
    * Emit a new notification event to all connected clients

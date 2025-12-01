@@ -65,7 +65,8 @@ export class BranchesService {
           select: {
             users: true,
             transactions: true,
-            debts: true,
+            accountsPayable: true,
+            accountsReceivable: true,
           },
         },
       },
@@ -87,7 +88,8 @@ export class BranchesService {
         _count: {
           select: {
             transactions: true,
-            debts: true,
+            accountsPayable: true,
+            accountsReceivable: true,
           },
         },
       },

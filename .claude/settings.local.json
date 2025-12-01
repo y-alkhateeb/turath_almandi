@@ -34,7 +34,9 @@
       "Bash(done)",
       "Bash(git restore:*)",
       "Bash(git checkout:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(npx prisma validate:*)",
+      "Bash(npx prisma:*)"
     ],
     "deny": [],
     "ask": []

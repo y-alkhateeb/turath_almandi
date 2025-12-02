@@ -116,6 +116,19 @@ export const navData: NavItem[] = [
     ],
   },
   {
+    title: 'الفروع',
+    path: '/branches',
+    icon: <Icon icon="lucide:building-2" size={24} />,
+    caption: 'إدارة فروع الشركة',
+    roles: [UserRole.ADMIN], // Admin only
+    children: [
+      {
+        title: 'قائمة الفروع',
+        path: '/branches',
+      },
+    ],
+  },
+  {
     title: 'التقارير',
     path: '/reports',
     icon: <Icon icon="lucide:file-bar-chart" size={24} />,

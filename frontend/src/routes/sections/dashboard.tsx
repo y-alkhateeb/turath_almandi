@@ -7,6 +7,7 @@ import { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
 import { DashboardLayout } from '@/layouts/dashboard';
 import { LoginAuthGuard } from '@/routes/components/login-auth-guard';
+import { AdminRouteGuard } from '@/routes/components/admin-route-guard';
 import type { RouteObject } from 'react-router-dom';
 
 // Lazy load pages
@@ -20,6 +21,8 @@ const CreateInventoryItemPage = lazy(() => import('@/pages/inventory/CreateInven
 const EditInventoryItemPage = lazy(() => import('@/pages/inventory/EditInventoryItemPage'));
 const EmployeesPage = lazy(() => import('@/pages/employees/EmployeesPage'));
 const EmployeeDetailPage = lazy(() => import('@/pages/employees/EmployeeDetailPage'));
+const BranchesPage = lazy(() => import('@/pages/branches/BranchesPage'));
+const UsersPage = lazy(() => import('@/pages/settings/users/UsersPage'));
 const PayablesPage = lazy(() => import('@/pages/payables/PayablesPage'));
 const ReceivablesPage = lazy(() => import('@/pages/receivables/ReceivablesPage'));
 
@@ -85,6 +88,30 @@ export const dashboardRoutes: RouteObject[] = [
           {
             path: 'employees/:id',
             element: <EmployeeDetailPage />,
+          },
+
+          // Branches (Admin only)
+          {
+            path: 'branches',
+            element: <AdminRouteGuard />,
+            children: [
+              {
+                index: true,
+                element: <BranchesPage />,
+              },
+            ],
+          },
+
+          // Settings (Admin only)
+          {
+            path: 'settings',
+            element: <AdminRouteGuard />,
+            children: [
+              {
+                path: 'users',
+                element: <UsersPage />,
+              },
+            ],
           },
 
           // Payables & Receivables

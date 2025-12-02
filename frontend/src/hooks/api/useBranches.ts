@@ -171,7 +171,9 @@ export const useCreateBranch = () => {
           name: newBranch.name,
           location: newBranch.location,
           managerName: newBranch.managerName,
-          isActive: true,
+          isDeleted: false,
+          deletedAt: null,
+          deletedBy: null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -330,12 +332,12 @@ export const useDeleteBranch = () => {
         queryKey: queryKeys.branches.all,
       });
 
-      // Optimistically update isActive to false (soft delete)
+      // Optimistically update isDeleted to true (soft delete)
       queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
         if (!old) return old;
         return old.map((branch) =>
           branch.id === deletedId
-            ? { ...branch, isActive: false, updatedAt: new Date().toISOString() }
+            ? { ...branch, isDeleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
             : branch
         );
       });
@@ -343,7 +345,7 @@ export const useDeleteBranch = () => {
       // Update branch detail cache
       queryClient.setQueryData<Branch>(queryKeys.branches.detail(deletedId), (old) => {
         if (!old) return old;
-        return { ...old, isActive: false, updatedAt: new Date().toISOString() };
+        return { ...old, isDeleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
       });
 
       return { previousBranch, previousBranches };

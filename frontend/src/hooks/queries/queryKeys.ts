@@ -59,4 +59,9 @@ export const queryKeys = {
     list: (filters: any) => ['branches', 'list', filters],
     detail: (id: string) => ['branches', 'detail', id],
   },
+  users: {
+    all: ['users', 'all'],
+    list: (filters: any) => ['users', 'list', filters],
+    detail: (id: string) => ['users', 'detail', id],
+  },
 };

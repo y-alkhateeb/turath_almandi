@@ -115,7 +115,9 @@ export const useCreateUser = () => {
             username: newUser.username,
             role: newUser.role,
             branchId: newUser.branchId || null,
-            isActive: true,
+            isDeleted: false,
+            deletedAt: null,
+            deletedBy: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             branch: null,
@@ -255,12 +257,12 @@ export const useDeleteUser = () => {
       // Snapshot current data
       const previousUsers = queryClient.getQueryData<UserWithBranch[]>(queryKeys.users.all);
 
-      // Optimistically mark user as inactive (soft delete)
+      // Optimistically mark user as deleted (soft delete)
       if (previousUsers) {
         queryClient.setQueryData<UserWithBranch[]>(queryKeys.users.all, (old = []) =>
           old.map((user) =>
             user.id === deletedId
-              ? { ...user, isActive: false, updatedAt: new Date().toISOString() }
+              ? { ...user, isDeleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
               : user
           )
         );

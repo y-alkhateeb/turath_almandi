@@ -50,18 +50,20 @@ export interface UserRelation {
 
 /**
  * User entity
- * Matches backend User model and service responses
+ * Matches backend User model from Prisma schema
  */
 export interface User {
   id: string;
   username: string;
   role: UserRole;
   branchId: string | null;
-  isActive: boolean;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  deletedBy: string | null;
   createdAt: string;
   updatedAt: string;
   // Optional relation - included when fetched with branch
-  branch?: BranchRelation;
+  branch?: BranchRelation | null;
 }
 
 export interface UserToken {
@@ -96,14 +98,16 @@ export interface AuthResponse {
 
 /**
  * Branch entity
- * Matches backend Branch model
+ * Matches backend Branch model from Prisma schema
  */
 export interface Branch {
   id: string;
   name: string;
   location: string;
   managerName: string;
-  isActive: boolean;
+  isDeleted: boolean;
+  deletedAt: string | null;
+  deletedBy: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -118,7 +122,7 @@ export interface UpdateBranchInput {
   name?: string;
   location?: string;
   managerName?: string;
-  isActive?: boolean;
+  isDeleted?: boolean;
 }
 
 // ============================================
@@ -571,7 +575,7 @@ export interface QueryAuditLogsInput {
 // ============================================
 
 export interface UserWithBranch extends User {
-  branch: BranchRelation;
+  branch: BranchRelation | null;
 }
 
 export interface CreateUserInput {
@@ -584,7 +588,7 @@ export interface CreateUserInput {
 export interface UpdateUserInput {
   role?: UserRole;
   branchId?: string | null;
-  isActive?: boolean;
+  isDeleted?: boolean;
   password?: string;
 }
 

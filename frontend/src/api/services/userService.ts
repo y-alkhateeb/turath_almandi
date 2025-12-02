@@ -116,17 +116,21 @@ export const create = (data: CreateUserInput): Promise<UserWithBranch> => {
  * - password: Optional, same validation as create
  * - role: Optional, ADMIN | ACCOUNTANT
  * - branchId: Optional, UUID or null
- * - isActive: Optional, boolean
+ * Note: Backend UpdateUserDto doesn't support isDeleted directly.
+ * Use delete() endpoint for soft delete or reactivate() to restore.
  *
  * @param id - User UUID
- * @param data - UpdateUserInput (password?, role?, branchId?, isActive?)
+ * @param data - UpdateUserInput (password?, role?, branchId?)
  * @returns Updated UserWithBranch
  * @throws ApiError on 400 (validation error), 401, 403, 404 (user not found)
  */
 export const update = (id: string, data: UpdateUserInput): Promise<UserWithBranch> => {
+  // Remove isDeleted from data if present (backend doesn't support it in update)
+  const { isDeleted, ...updateData } = data;
+  
   return apiClient.patch<UserWithBranch>({
     url: `/users/${id}`,
-    data,
+    data: updateData,
   });
 };
 
@@ -181,15 +185,20 @@ export const reactivate = (userId: string): Promise<UserWithBranch> => {
  * Activate/deactivate user
  * PATCH /users/:id
  *
- * Helper method to update only isActive status
+ * Helper method to update only isDeleted status
+ * Note: Backend UpdateUserDto doesn't support isDeleted directly.
+ * Use delete/reactivate endpoints instead.
  *
  * @param userId - User UUID
- * @param isActive - Active status
+ * @param isDeleted - Deleted status
  * @returns Updated UserWithBranch
  * @throws ApiError on 400, 401, 403, 404
+ * @deprecated Use delete() or reactivate() instead
  */
-export const setActiveStatus = (userId: string, isActive: boolean): Promise<UserWithBranch> => {
-  return update(userId, { isActive });
+export const setActiveStatus = (userId: string, isDeleted: boolean): Promise<UserWithBranch> => {
+  // Note: Backend UpdateUserDto doesn't support isDeleted
+  // This is kept for backward compatibility but should use delete/reactivate instead
+  return update(userId, { isDeleted });
 };
 
 // ============================================

@@ -1,11 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { seedCurrencies } from './seeds/currencies.seed';
+import { seedDiscountReasons } from './seeds/discount-reasons.seed';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding database for تراث المندي Restaurant...');
+
+  // Seed discount reasons
+  await seedDiscountReasons(prisma);
 
   // Seed currencies
   await seedCurrencies(prisma);

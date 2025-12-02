@@ -50,35 +50,28 @@ npx prisma generate
 # Run database migrations
 echo "🔄 Running database migrations..."
 
-# Try to resolve any failed migrations before deploying
-# This handles the case where a migration failed previously and needs to be re-applied
-MIGRATION_NAME="20251130141243_make_branch_id_nullable_in_payables_receivables"
-echo "Checking for failed migrations..."
-
-# Check if there are failed migrations (suppress errors to avoid script exit)
-set +e
+# Check for and resolve failed migrations before deploying.
+# This handles cases where a previous deployment left a migration in a failed state.
+echo "🔍 Checking for failed migrations..."
+set +e # Don't exit if grep fails to find a match
 MIGRATE_STATUS=$(npx prisma migrate status 2>&1)
-HAS_FAILED=$(echo "$MIGRATE_STATUS" | grep -i "failed" || true)
+HAS_FAILED_MIGRATIONS=$(echo "$MIGRATE_STATUS" | grep -i "failed" || true)
 set -e
 
-if [ -n "$HAS_FAILED" ]; then
-  echo "⚠️  Found failed migrations. Attempting to resolve..."
-  echo "Resolving failed migration: $MIGRATION_NAME"
-  # Mark the migration as rolled back so it can be re-applied with the fixed SQL
-  set +e
-  npx prisma migrate resolve --rolled-back "$MIGRATION_NAME" 2>&1
-  RESOLVE_EXIT=$?
-  set -e
-  if [ $RESOLVE_EXIT -ne 0 ]; then
-    echo "⚠️  Note: Migration resolution returned non-zero exit code."
-    echo "This may be normal if the migration is not in a failed state."
-    echo "Continuing with migration deploy..."
-  else
-    echo "✓ Migration marked as rolled back. It will be re-applied with fixed SQL."
-  fi
+if [ -n "$HAS_FAILED_MIGRATIONS" ]; then
+  echo "⚠️  Found failed migrations. Attempting to resolve them..."
+  # Extract failed migration names and resolve them one by one
+  echo "$MIGRATE_STATUS" | grep "failed" | awk '{print $1}' | while read -r MIGRATION_NAME; do
+    if [ -n "$MIGRATION_NAME" ]; then
+      echo "   - Resolving migration: $MIGRATION_NAME"
+      npx prisma migrate resolve --rolled-back "$MIGRATION_NAME"
+    fi
+  done
+  echo "✅ Finished resolving failed migrations. They will be re-applied."
 fi
 
-# Deploy migrations (this will re-apply the fixed migration if it was rolled back)
+# Deploy all pending migrations. This will also re-apply any migrations that were just resolved.
+echo "🚀 Deploying database migrations..."
 npx prisma migrate deploy
 
 # Seed database if enabled

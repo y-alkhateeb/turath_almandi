@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useUserToken } from '@/store/userStore';
 import { useHydration } from '@/hooks/useHydration';
-import { PageLoading } from '@/components/loading';
+import { PageLoading } from '@/components/common';
 import GLOBAL_CONFIG from '@/global-config';
 
 export function GuestGuard() {

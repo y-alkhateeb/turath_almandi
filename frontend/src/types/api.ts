@@ -16,7 +16,6 @@ import type {
   PaymentMethod,
   DebtStatus,
   InventoryUnit,
-  Currency,
 } from './enum';
 
 // ============================================
@@ -82,7 +81,7 @@ export interface ValidationError {
 
 /**
  * Login response
- * Matches backend LoginResponseDto
+ * Matches backend LoginResponseDto exactly
  */
 export interface LoginResponse {
   user: {
@@ -90,7 +89,6 @@ export interface LoginResponse {
     username: string;
     role: string;
     branchId: string | null;
-    isActive: boolean;
   };
   access_token: string;
   refresh_token: string;
@@ -106,20 +104,13 @@ export interface RefreshTokenResponse {
 
 /**
  * User profile response
+ * Matches backend auth.controller.getProfile exactly
  */
 export interface UserProfileResponse {
   id: string;
   username: string;
   role: UserRole;
   branchId: string | null;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  branch?: {
-    id: string;
-    name: string;
-    location: string;
-  };
 }
 
 // ============================================
@@ -157,19 +148,18 @@ export interface HealthCheckResponse {
 
 /**
  * Transaction query filters
- * Matches backend TransactionFilters interface
+ * Matches backend QueryTransactionsDto
  */
 export interface TransactionQueryFilters {
   type?: TransactionType;
   category?: string;
   paymentMethod?: PaymentMethod;
-  currency?: Currency;
   branchId?: string;
   startDate?: string; // ISO date string
   endDate?: string; // ISO date string
   search?: string;
-  page?: number;
-  limit?: number;
+  page?: string;
+  limit?: string;
 }
 
 /**
@@ -187,15 +177,14 @@ export interface DebtQueryFilters {
 
 /**
  * Inventory query filters
- * Matches backend InventoryFilters interface
+ * Matches backend QueryInventoryDto
  */
 export interface InventoryQueryFilters {
   unit?: InventoryUnit;
   branchId?: string;
-  search?: string; // Search by item name
-  autoAdded?: boolean; // Filter by manually vs auto-added items
-  page?: number;
-  limit?: number;
+  search?: string;
+  page?: string;
+  limit?: string;
 }
 
 /**
@@ -208,15 +197,16 @@ export interface BranchQueryFilters {
 
 /**
  * Notification query filters
+ * Matches backend notification controller query params
  */
 export interface NotificationQueryFilters {
   branchId?: string;
-  isRead?: boolean;
+  isRead?: 'true' | 'false';
   type?: string;
   startDate?: string;
   endDate?: string;
-  page?: number;
-  limit?: number;
+  page?: string;
+  limit?: string;
 }
 
 /**
@@ -240,6 +230,19 @@ export interface UserQueryFilters {
   role?: UserRole;
   branchId?: string;
   isActive?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+import type { ContactType } from './enum';
+
+/**
+ * Contact query filters
+ */
+export interface ContactQueryFilters {
+  type?: ContactType;
+  branchId?: string;
+  search?: string;
   page?: number;
   limit?: number;
 }
@@ -312,7 +315,7 @@ export interface InventorySummaryResponse {
 
 /**
  * Dashboard statistics response
- * Aggregated metrics for dashboard overview
+ * Matches backend DashboardStatsDto
  */
 export interface DashboardStats {
   totalRevenue: number;
@@ -324,43 +327,6 @@ export interface DashboardStats {
   totalDebts?: number;
   activeDebts?: number;
   inventoryValue?: number;
-}
-
-/**
- * Revenue data point for charts
- * Time series data for revenue tracking
- */
-export interface RevenueDataPoint {
-  date: string; // ISO date or month label
-  revenue: number;
-  expenses: number;
-  net?: number;
-}
-
-/**
- * Category data point for charts
- * Category-based spending/revenue breakdown
- */
-export interface CategoryDataPoint {
-  category: string;
-  value: number;
-  count?: number;
-  color?: string;
-}
-
-/**
- * Branch performance comparison
- * Comparative metrics across branches
- */
-export interface BranchPerformance {
-  branchId: string;
-  branchName: string;
-  totalRevenue: number;
-  totalExpenses: number;
-  netProfit: number;
-  transactionCount: number;
-  averageTransactionValue: number;
-  topCategory?: string;
 }
 
 /**

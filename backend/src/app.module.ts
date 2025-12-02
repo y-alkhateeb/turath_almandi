@@ -14,7 +14,6 @@ import { UsersModule } from './users/users.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { PayablesModule } from './payables/payables.module';
 import { ReceivablesModule } from './receivables/receivables.module';
-import { InventorySubUnitsModule } from './inventory-sub-units/inventory-sub-units.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { TasksModule } from './tasks/tasks.module';
 import { InventoryModule } from './inventory/inventory.module';
@@ -69,7 +68,6 @@ import { envValidationSchema } from './common/config/env.validation';
     ContactsModule,
     PayablesModule,
     ReceivablesModule,
-    InventorySubUnitsModule,
     NotificationsModule,
     TasksModule,
     InventoryModule,

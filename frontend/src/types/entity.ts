@@ -16,7 +16,13 @@ import type {
   NotificationSeverity,
   DisplayMethod,
   EmployeeStatus,
+  InventoryOperationType,
+  DiscountType,
+  EmployeeAdjustmentType,
+  EmployeeAdjustmentStatus,
 } from './enum';
+import type { AccountPayable } from './payables.types';
+import type { AccountReceivable } from './receivables.types';
 
 // ============================================
 // USER & AUTH ENTITIES
@@ -79,7 +85,6 @@ export interface AuthResponse {
     username: string;
     role: string;
     branchId: string | null;
-    isActive: boolean;
   };
   access_token: string;
   refresh_token: string;
@@ -132,29 +137,100 @@ export interface InventoryItemRelation {
 }
 
 /**
+ * Contact relation (minimal select)
+ * Used in Transaction responses
+ */
+export interface ContactRelation {
+  id: string;
+  name: string;
+  type: string;
+}
+
+/**
+ * Employee relation (minimal select)
+ * Used in Transaction responses
+ */
+export interface EmployeeRelation {
+  id: string;
+  name: string;
+  position: string;
+}
+
+/**
+ * Transaction inventory item
+ * Links transaction to multiple inventory items
+ */
+export interface TransactionInventoryItem {
+  id: string;
+  transactionId: string;
+  inventoryItemId: string;
+  quantity: number;
+  operationType: InventoryOperationType;
+  unitPrice: number;
+  subtotal: number;
+  discountType: DiscountType | null;
+  discountValue: number | null;
+  total: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  isDeleted: boolean;
+  inventoryItem?: InventoryItemRelation;
+}
+
+/**
+ * Transaction item DTO for creating multi-item transactions
+ */
+export interface TransactionItemDto {
+  inventoryItemId: string;
+  quantity: number;
+  unitPrice: number;
+  operationType: InventoryOperationType;
+  discountType?: DiscountType;
+  discountValue?: number;
+}
+
+/**
  * Transaction entity
  * Matches backend Transaction model and service responses
  */
 export interface Transaction {
   id: string;
-  branchId: string;
+  branchId: string | null;
   type: TransactionType;
-  amount: number; // Decimal in DB, returned as number
-  currency: Currency;
+  amount: number;
   paymentMethod: PaymentMethod | null;
   category: string;
-  date: string; // ISO date string
+  date: string;
   employeeVendorName: string;
   notes: string | null;
   inventoryItemId: string | null;
+  paidAmount: number | null;
+  totalAmount: number | null;
+  discountType: string | null;
+  discountValue: number | null;
+  discountReason: string | null;
+  subtotal: number | null;
+  contactId: string | null;
+  linkedPayableId: string | null;
+  employeeId: string | null;
+  linkedReceivableId: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-  // Relations - included when fetched with relations
+  deletedBy: string | null;
+  isDeleted: boolean;
+  // Relations
   branch?: BranchRelation;
   creator?: UserRelation;
   inventoryItem?: InventoryItemRelation | null;
+  contact?: ContactRelation;
+  employee?: EmployeeRelation;
+  linkedPayable?: AccountPayable;
+  linkedReceivable?: AccountReceivable;
+  transactionInventoryItems?: TransactionInventoryItem[];
 }
 
 export interface TransactionFilters {
@@ -171,24 +247,34 @@ export interface TransactionFilters {
 
 export interface CreateTransactionInput {
   type: TransactionType;
-  amount: number;
-  currency?: Currency;
+  amount?: number;
   paymentMethod?: PaymentMethod;
+  items?: any[];
+  discountType?: string;
+  discountValue?: number;
+  discountReason?: string;
   category?: string;
   date: string;
   employeeVendorName?: string;
   notes?: string;
   branchId?: string;
+  employeeId?: string;
+  paidAmount?: number;
+  contactId?: string;
+  payableDueDate?: string;
 }
 
 export interface UpdateTransactionInput {
+  type?: TransactionType;
   amount?: number;
-  currency?: Currency;
   paymentMethod?: PaymentMethod;
   category?: string;
   date?: string;
   employeeVendorName?: string;
   notes?: string;
+  discountType?: string;
+  discountValue?: number;
+  discountReason?: string;
 }
 
 // ============================================
@@ -291,6 +377,10 @@ export interface InventoryConsumption {
 }
 
 /**
+ * InventorySubUnit relation (minimal select)
+ * Used in InventoryItem responses
+ */
+/**
  * InventoryItem entity
  * Matches backend InventoryItem model and service responses
  */
@@ -340,10 +430,45 @@ export interface UpdateInventoryInput {
   notes?: string;
 }
 
+/**
+ * Input for recording consumption/damage of inventory
+ * Matches backend RecordConsumptionDto (without inventoryItemId - passed as route param)
+ */
 export interface RecordConsumptionInput {
   quantity: number;
+  unit: InventoryUnit;
   reason?: string;
-  consumedAt?: string;
+  consumedAt: string; // ISO date string, required by backend
+}
+
+/**
+ * Item in daily consumption summary
+ */
+export interface ConsumptionSummaryItem {
+  inventoryItemId: string;
+  itemName: string;
+  quantity: number;
+  unit: string;
+  reason?: string;
+}
+
+/**
+ * Daily consumption summary response
+ * Matches backend DailyConsumptionSummary interface
+ */
+export interface DailyConsumptionSummary {
+  date: string;
+  totalConsumptions: number;
+  itemsConsumed: ConsumptionSummaryItem[];
+}
+
+/**
+ * Consumption history item (with relations)
+ * Response from GET /inventory/:id/consumption-history
+ */
+export interface ConsumptionHistoryItem extends InventoryConsumption {
+  recorder?: UserRelation;
+  branch?: BranchRelation;
 }
 
 // ============================================
@@ -435,40 +560,11 @@ export interface QueryAuditLogsInput {
 // DASHBOARD ENTITY
 // ============================================
 
-export interface DashboardStats {
-  totalRevenue: number;
-  totalExpenses: number;
-  netProfit: number;
-  todayTransactions: number;
-  revenueData: RevenueDataPoint[];
-  categoryData: CategoryDataPoint[];
-  recentTransactions: Transaction[];
-  // Additional stats
-  cashRevenue?: number;
-  masterRevenue?: number;
-  totalDebts?: number;
-  activeDebts?: number;
-  inventoryValue?: number;
-}
+// ============================================
+// DASHBOARD ENTITY
+// ============================================
 
-export interface RevenueDataPoint {
-  month: string;
-  revenue: number;
-  expenses: number;
-}
-
-export interface CategoryDataPoint {
-  name: string; // Category name/value (e.g., 'SALES', 'SALARIES')
-  value: number;
-  color?: string;
-}
-
-export interface DashboardFilters {
-  date?: string;
-  branchId?: string;
-  startDate?: string;
-  endDate?: string;
-}
+// Dashboard types moved to api.ts as they are API responses, not database entities
 
 // ============================================
 // USER MANAGEMENT (for admin)
@@ -497,28 +593,28 @@ export interface UpdateUserInput {
 // ============================================
 
 /**
- * Employee entity
- * Matches backend Employee model and service responses
+ * Employee Adjustment entity
+ * Matches backend EmployeeAdjustment model (bonuses, deductions, advances)
  */
-export interface Employee {
+export interface EmployeeAdjustment {
   id: string;
-  branchId: string;
-  name: string;
-  status: EmployeeStatus;
-  position: string;
-  baseSalary: number; // Prisma Decimal is number in frontend
-  allowance: number;
-  hireDate: string; // ISO date string
-  resignDate: string | null;
+  employeeId: string;
+  type: EmployeeAdjustmentType;
+  amount: number;
+  date: string; // ISO date string
+  description: string | null;
+  status: EmployeeAdjustmentStatus;
+  salaryPaymentId: string | null;
   createdBy: string;
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
+  createdAt: string;
+  updatedAt: string;
   deletedAt: string | null;
+  deletedBy: string | null;
+  isDeleted: boolean;
   // Optional relations
-  branch?: BranchRelation;
+  employee?: Employee;
+  salaryPayment?: SalaryPayment;
   creator?: UserRelation;
-  salaryPayments?: SalaryPayment[];
-  salaryIncreases?: SalaryIncrease[];
 }
 
 /**
@@ -536,47 +632,40 @@ export interface SalaryPayment {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  deletedBy: string | null;
+  isDeleted: boolean;
   // Optional relations
   employee?: Employee;
   transaction?: Transaction;
   recorder?: UserRelation;
+  adjustments?: EmployeeAdjustment[];
 }
 
 /**
- * Salary Increase entity
- * Matches backend SalaryIncrease model
+ * Employee entity
+ * Matches backend Employee model and service responses
  */
-export interface SalaryIncrease {
+export interface Employee {
   id: string;
-  employeeId: string;
-  oldSalary: number;
-  newSalary: number;
-  increaseAmount: number;
-  effectiveDate: string; // ISO date string
-  reason: string | null;
-  recordedBy: string;
-  createdAt: string;
-  updatedAt: string;
-  // Optional relations
-  employee?: Employee;
-  recorder?: UserRelation;
-}
-
-export interface Bonus {
-  id: string;
-  employeeId: string;
-  amount: number;
-  bonusDate: string; // ISO date string
-  reason: string | null;
-  transactionId: string | null;
-  recordedBy: string;
-  createdAt: string;
-  updatedAt: string;
+  branchId: string;
+  name: string;
+  status: EmployeeStatus;
+  position: string;
+  baseSalary: number; // Prisma Decimal is number in frontend
+  allowance: number;
+  hireDate: string; // ISO date string
+  resignDate: string | null;
+  createdBy: string;
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
   deletedAt: string | null;
+  deletedBy: string | null;
+  isDeleted: boolean;
   // Optional relations
-  employee?: Employee;
-  transaction?: Transaction;
-  recorder?: UserRelation;
+  branch?: BranchRelation;
+  creator?: UserRelation;
+  salaryPayments?: SalaryPayment[];
+  adjustments?: EmployeeAdjustment[];
 }
 
 // ============================================
@@ -602,30 +691,12 @@ export interface UpdateEmployeeInput {
   status?: EmployeeStatus;
 }
 
-export interface CreateSalaryPaymentInput {
-  amount: number;
-  paymentDate: string;
-  notes?: string;
-}
-
-export interface RecordSalaryIncreaseInput {
-  newSalary: number;
-  effectiveDate: string;
-  reason?: string;
-}
-
-export interface CreateBonusInput {
-  amount: number;
-  bonusDate: string;
-  reason?: string;
-}
-
 export interface ResignEmployeeInput {
   resignDate: string;
 }
 
 // ============================================
-// EMPLOYEE FILTERS & RESPONSES
+// EMPLOYEE FILTERS
 // ============================================
 
 export interface EmployeeFilters {
@@ -634,141 +705,4 @@ export interface EmployeeFilters {
   search?: string;
   page?: number;
   limit?: number;
-}
-
-export interface PayrollSummary {
-  totalPaid: number;
-  count: number;
-  breakdown: Array<{
-    employeeId: string;
-    employeeName: string;
-    totalAmount: number;
-    paymentCount: number;
-  }>;
-}
-
-// ============================================
-// EMPLOYEE ADVANCE (سلفة) ENTITIES
-// ============================================
-
-import type { AdvanceStatus } from './enum';
-
-/**
- * Advance Deduction entity (خصم السلفة)
- * Matches backend AdvanceDeduction model
- */
-export interface AdvanceDeduction {
-  id: string;
-  advanceId: string;
-  amount: number;
-  deductionDate: string; // ISO date string
-  salaryPaymentId: string | null;
-  notes: string | null;
-  recordedBy: string;
-  createdAt: string;
-  updatedAt: string;
-  // Optional relations
-  recorder?: UserRelation;
-  salaryPayment?: SalaryPayment;
-}
-
-/**
- * Employee Advance entity (السلفة)
- * Matches backend EmployeeAdvance model
- */
-export interface EmployeeAdvance {
-  id: string;
-  employeeId: string;
-  amount: number; // المبلغ الأصلي
-  remainingAmount: number; // المبلغ المتبقي
-  monthlyDeduction: number; // القسط الشهري
-  advanceDate: string; // ISO date string
-  reason: string | null;
-  status: AdvanceStatus;
-  recordedBy: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  // Optional relations
-  employee?: Employee;
-  recorder?: UserRelation;
-  deductions?: AdvanceDeduction[];
-  // Computed fields from API
-  warning?: string | null;
-  totalActiveAdvances?: number;
-  twoMonthsSalary?: number;
-  salaryMonthsEquivalent?: string;
-}
-
-/**
- * Input for creating an advance
- */
-export interface CreateAdvanceInput {
-  employeeId: string;
-  amount: number;
-  monthlyDeduction: number;
-  advanceDate: string;
-  reason?: string;
-}
-
-/**
- * Input for recording a deduction
- */
-export interface RecordDeductionInput {
-  advanceId: string;
-  amount: number;
-  deductionDate: string;
-  salaryPaymentId?: string;
-  notes?: string;
-}
-
-/**
- * Summary of advances for an employee
- */
-export interface EmployeeAdvancesSummary {
-  totalActiveAdvances: number;
-  totalRemaining: number;
-  totalMonthlyDeduction: number;
-  netSalaryAfterDeduction: number;
-  salaryMonthsEquivalent: string;
-  exceedsTwoMonths: boolean;
-  twoMonthsSalary: number;
-}
-
-/**
- * Response from getEmployeeAdvances
- */
-export interface EmployeeAdvancesResponse {
-  advances: EmployeeAdvance[];
-  summary: EmployeeAdvancesSummary;
-}
-
-/**
- * Branch advances summary item
- */
-export interface BranchAdvanceSummaryItem {
-  employeeId: string;
-  employeeName: string;
-  position: string;
-  baseSalary: number;
-  allowance: number;
-  totalSalary: number;
-  activeAdvancesCount: number;
-  totalRemaining: number;
-  totalMonthlyDeduction: number;
-  netSalary: number;
-  salaryMonthsEquivalent: string;
-  exceedsTwoMonths: boolean;
-}
-
-/**
- * Branch advances summary response
- */
-export interface BranchAdvancesSummaryResponse {
-  employees: BranchAdvanceSummaryItem[];
-  totals: {
-    employeesWithAdvances: number;
-    totalRemainingAdvances: number;
-    totalMonthlyDeductions: number;
-  };
 }

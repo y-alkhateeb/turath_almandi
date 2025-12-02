@@ -141,12 +141,22 @@ export enum EmployeeStatus {
 }
 
 /**
- * Advance status (حالة السلفة)
- * Matches backend Prisma enum: AdvanceStatus
+ * Employee adjustment types
+ * Matches backend Prisma enum: EmployeeAdjustmentType
  */
-export enum AdvanceStatus {
-  ACTIVE = 'ACTIVE',
-  PAID = 'PAID',
+export enum EmployeeAdjustmentType {
+  BONUS = 'BONUS',
+  DEDUCTION = 'DEDUCTION',
+  ADVANCE = 'ADVANCE',
+}
+
+/**
+ * Employee adjustment status
+ * Matches backend Prisma enum: EmployeeAdjustmentStatus
+ */
+export enum EmployeeAdjustmentStatus {
+  PENDING = 'PENDING',
+  PROCESSED = 'PROCESSED',
   CANCELLED = 'CANCELLED',
 }
 
@@ -170,6 +180,19 @@ export enum DisplayMethod {
   TOAST = 'TOAST',
   EMAIL = 'EMAIL',
   SMS = 'SMS',
+}
+
+/**
+ * Report types
+ * Matches backend Prisma enum: ReportType
+ */
+export enum ReportType {
+  FINANCIAL = 'FINANCIAL',
+  DEBTS = 'DEBTS',
+  INVENTORY = 'INVENTORY',
+  SALARY = 'SALARY',
+  BRANCHES = 'BRANCHES',
+  CUSTOM = 'CUSTOM',
 }
 
 // ============================================
@@ -234,3 +257,11 @@ export enum AuditEntityType {
 // Theme enums (re-exported from theme/type.ts)
 export { ThemeMode, ThemeColorPresets, ThemeLayout } from '../theme/type';
 export type { Direction } from '../theme/type';
+
+/**
+ * Currency codes
+ */
+export enum Currency {
+  IQD = 'IQD',
+  USD = 'USD',
+}

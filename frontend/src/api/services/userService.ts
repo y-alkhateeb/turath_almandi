@@ -148,10 +148,8 @@ export const deleteUser = (id: string): Promise<void> => {
 };
 
 /**
- * Assign user to branch (dedicated endpoint)
+ * Assign user to branch
  * PATCH /users/:id/assign-branch
- *
- * Uses dedicated endpoint for branch assignment
  *
  * @param userId - User UUID
  * @param branchId - Branch UUID or null to unassign
@@ -162,6 +160,20 @@ export const assignBranch = (userId: string, branchId: string | null): Promise<U
   return apiClient.patch<UserWithBranch>({
     url: `/users/${userId}/assign-branch`,
     data: { branchId },
+  });
+};
+
+/**
+ * Reactivate a deactivated user
+ * PATCH /users/:id/reactivate
+ *
+ * @param userId - User UUID
+ * @returns Updated UserWithBranch with isActive=true
+ * @throws ApiError on 400, 401, 403, 404
+ */
+export const reactivate = (userId: string): Promise<UserWithBranch> => {
+  return apiClient.patch<UserWithBranch>({
+    url: `/users/${userId}/reactivate`,
   });
 };
 
@@ -184,10 +196,6 @@ export const setActiveStatus = (userId: string, isActive: boolean): Promise<User
 // EXPORTS
 // ============================================
 
-/**
- * User service object with all methods
- * Use named exports or default object
- */
 const userService = {
   getAll,
   getAllUnpaginated,
@@ -196,6 +204,7 @@ const userService = {
   update,
   delete: deleteUser,
   assignBranch,
+  reactivate,
   setActiveStatus,
 };
 

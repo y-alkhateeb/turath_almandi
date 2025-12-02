@@ -1,101 +1,27 @@
 /**
  * Dashboard Routes
  * Protected routes for authenticated users with lazy-loaded components
- *
- * Route Structure:
- * - /dashboard - Main dashboard
- * - /transactions/* - Transaction management (list, create, view, edit)
- * - /inventory/* - Inventory management (list, create, edit)
- * - /employees/* - Employee management (list, create, edit, view)
- * - /reports - Reports page
- * - /notifications - Notifications (main and settings)
- * - /management/contacts/* - Contacts management (suppliers and customers)
- * - /management/payables/* - Payables management (accounts payable)
- * - /management/receivables/* - Receivables management (accounts receivable)
- * - /management/system/* - System management (admin-only: users, branches, audit, currency)
- * - /profile - User profile
  */
 
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
 import { DashboardLayout } from '@/layouts/dashboard';
 import { LoginAuthGuard } from '@/routes/components/login-auth-guard';
-import { PageLoading } from '@/components/loading';
 import type { RouteObject } from 'react-router-dom';
 
-// ============================================
-// LAZY-LOADED PAGES
-// ============================================
-
-// Dashboard
-const DashboardPage = lazy(() => import('@/pages/dashboard/workbench'));
-
-// Transactions - New unified design
-const TransactionsListPage = lazy(() => import('@/pages/transactions/TransactionListPage'));
-const TransactionsCreateIncomePage = lazy(() => import('@/pages/transactions/CreateIncomePage'));
-const TransactionsCreateExpensePage = lazy(() => import('@/pages/transactions/CreateExpensePage'));
-const TransactionsViewPage = lazy(() => import('@/pages/transactions/ViewTransactionDetailPage'));
-const TransactionsEditPage = lazy(() => import('@/pages/transactions/EditTransactionPage'));
-
-// Contacts (management section)
-const ContactsListPage = lazy(() => import('@/pages/management/contacts/list'));
-
-// Payables (management section)
-const PayablesListPage = lazy(() => import('@/pages/management/payables/list'));
-
-// Receivables (management section)
-const ReceivablesListPage = lazy(() => import('@/pages/management/receivables/list'));
-
-// Inventory
-const InventoryListPage = lazy(() => import('@/pages/inventory/Inventory'));
-const InventoryCreatePage = lazy(() => import('@/pages/inventory/CreateInventoryPage'));
-const InventoryEditPage = lazy(() => import('@/pages/inventory/EditInventoryPage'));
-
-// Employees
-const EmployeesListPage = lazy(() => import('@/pages/employees/EmployeesPage'));
-const EmployeeCreatePage = lazy(() => import('@/pages/employees/CreateEmployeePage'));
-const EmployeeEditPage = lazy(() => import('@/pages/employees/EditEmployeePage'));
-const EmployeeDetailsPage = lazy(() => import('@/pages/employees/EmployeeDetailsPage'));
-
-// Notifications
-const NotificationsPage = lazy(() => import('@/pages/notifications'));
-const NotificationsSettingsPage = lazy(() => import('@/pages/notifications/settings'));
-
-// Management / System (Admin-only)
-const UsersListPage = lazy(() => import('@/pages/management/system/users/list'));
-const UsersCreatePage = lazy(() => import('@/pages/management/system/users/create'));
-const UsersEditPage = lazy(() => import('@/pages/management/system/users/edit/[id]'));
-
-const BranchesListPage = lazy(() => import('@/pages/management/system/branches/list'));
-const BranchesCreatePage = lazy(() => import('@/pages/management/system/branches/create'));
-const BranchesEditPage = lazy(() => import('@/pages/management/system/branches/edit/[id]'));
-
-const AuditLogPage = lazy(() => import('@/pages/management/system/audit'));
-
-// Settings
-const AppSettingsPage = lazy(() => import('@/pages/settings/app'));
-
-// Profile
-const ProfilePage = lazy(() => import('@/pages/profile'));
-
-// Reports
-const SmartReportBuilderPage = lazy(() => import('@/pages/reports/smart-builder'));
-
-// ============================================
-// LAZY PAGE WRAPPER
-// ============================================
-
-/**
- * Suspense wrapper for lazy-loaded pages
- * Shows loading spinner while page loads
- */
-function LazyPage({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoading />}>{children}</Suspense>;
-}
-
-// ============================================
-// ROUTE CONFIGURATION
-// ============================================
+// Lazy load pages
+const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
+const TransactionsPage = lazy(() => import('@/pages/transactions/TransactionsPage'));
+const CreateExpensePage = lazy(() => import('@/pages/transactions/CreateExpensePage'));
+const CreateIncomePage = lazy(() => import('@/pages/transactions/CreateIncomePage'));
+const ContactsPage = lazy(() => import('@/pages/contacts/ContactsPage'));
+const InventoryPage = lazy(() => import('@/pages/inventory/InventoryPage'));
+const CreateInventoryItemPage = lazy(() => import('@/pages/inventory/CreateInventoryItemPage'));
+const EditInventoryItemPage = lazy(() => import('@/pages/inventory/EditInventoryItemPage'));
+const EmployeesPage = lazy(() => import('@/pages/employees/EmployeesPage'));
+const EmployeeDetailPage = lazy(() => import('@/pages/employees/EmployeeDetailPage'));
+const PayablesPage = lazy(() => import('@/pages/payables/PayablesPage'));
+const ReceivablesPage = lazy(() => import('@/pages/receivables/ReceivablesPage'));
 
 export const dashboardRoutes: RouteObject[] = [
   {
@@ -111,374 +37,64 @@ export const dashboardRoutes: RouteObject[] = [
             element: <Navigate to="/dashboard" replace />,
           },
 
-          // ============================================
-          // DASHBOARD
-          // ============================================
+          // Dashboard
           {
             path: 'dashboard',
-            element: (
-              <LazyPage>
-                <DashboardPage />
-              </LazyPage>
-            ),
+            element: <DashboardPage />,
           },
 
-          // ============================================
-          // TRANSACTIONS
-          // ============================================
+          // Transactions
           {
             path: 'transactions',
-            children: [
-              // Main list page
-              {
-                index: true,
-                element: (
-                  <LazyPage>
-                    <TransactionsListPage />
-                  </LazyPage>
-                ),
-              },
-              // Create routes - separate pages for income and expense
-              {
-                path: 'create',
-                children: [
-                  // Redirect /transactions/create to /transactions/create/expense (default)
-                  {
-                    index: true,
-                    element: <Navigate to="/transactions/create/expense" replace />,
-                  },
-                  {
-                    path: 'income',
-                    element: (
-                      <LazyPage>
-                        <TransactionsCreateIncomePage />
-                      </LazyPage>
-                    ),
-                  },
-                  {
-                    path: 'expense',
-                    element: (
-                      <LazyPage>
-                        <TransactionsCreateExpensePage />
-                      </LazyPage>
-                    ),
-                  },
-                ],
-              },
-              {
-                path: 'view/:id',
-                element: (
-                  <LazyPage>
-                    <TransactionsViewPage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'edit/:id',
-                element: (
-                  <LazyPage>
-                    <TransactionsEditPage />
-                  </LazyPage>
-                ),
-              },
-            ],
+            element: <TransactionsPage />,
+          },
+          {
+            path: 'transactions/create/expense',
+            element: <CreateExpensePage />,
+          },
+          {
+            path: 'transactions/create/income',
+            element: <CreateIncomePage />,
           },
 
-          // ============================================
-          // INVENTORY
-          // ============================================
+          // Contacts
+          {
+            path: 'contacts',
+            element: <ContactsPage />,
+          },
+
+          // Inventory
           {
             path: 'inventory',
-            children: [
-              // Redirect /inventory to /inventory/list
-              {
-                index: true,
-                element: <Navigate to="/inventory/list" replace />,
-              },
-              {
-                path: 'list',
-                element: (
-                  <LazyPage>
-                    <InventoryListPage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'create',
-                element: (
-                  <LazyPage>
-                    <InventoryCreatePage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'edit/:id',
-                element: (
-                  <LazyPage>
-                    <InventoryEditPage />
-                  </LazyPage>
-                ),
-              },
-            ],
+            element: <InventoryPage />,
+          },
+          {
+            path: 'inventory/create',
+            element: <CreateInventoryItemPage />,
+          },
+          {
+            path: 'inventory/:id/edit',
+            element: <EditInventoryItemPage />,
           },
 
-          // ============================================
-          // EMPLOYEES
-          // ============================================
+          // Employees
           {
             path: 'employees',
-            children: [
-              {
-                index: true,
-                element: (
-                  <LazyPage>
-                    <EmployeesListPage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'create',
-                element: (
-                  <LazyPage>
-                    <EmployeeCreatePage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'edit/:id',
-                element: (
-                  <LazyPage>
-                    <EmployeeEditPage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'view/:id',
-                element: (
-                  <LazyPage>
-                    <EmployeeDetailsPage />
-                  </LazyPage>
-                ),
-              },
-            ],
+            element: <EmployeesPage />,
+          },
+          {
+            path: 'employees/:id',
+            element: <EmployeeDetailPage />,
           },
 
-          // ============================================
-          // REPORTS
-          // ============================================
+          // Payables & Receivables
           {
-            path: 'reports',
-            children: [
-              {
-                path: 'smart-builder',
-                element: (
-                  <LazyPage>
-                    <SmartReportBuilderPage />
-                  </LazyPage>
-                ),
-              },
-            ],
+            path: 'payables',
+            element: <PayablesPage />,
           },
-
-          // ============================================
-          // NOTIFICATIONS
-          // ============================================
           {
-            path: 'notifications',
-            children: [
-              {
-                index: true,
-                element: (
-                  <LazyPage>
-                    <NotificationsPage />
-                  </LazyPage>
-                ),
-              },
-              {
-                path: 'settings',
-                element: (
-                  <LazyPage>
-                    <NotificationsSettingsPage />
-                  </LazyPage>
-                ),
-              },
-            ],
-          },
-
-          // ============================================
-          // MANAGEMENT / SYSTEM (Admin-only)
-          // Admin guards are implemented inside each page component
-          // ============================================
-          {
-            path: 'management',
-            children: [
-              // Contacts Management
-              {
-                path: 'contacts',
-                children: [
-                  {
-                    index: true,
-                    element: <Navigate to="/management/contacts/list" replace />,
-                  },
-                  {
-                    path: 'list',
-                    element: (
-                      <LazyPage>
-                        <ContactsListPage />
-                      </LazyPage>
-                    ),
-                  },
-                ],
-              },
-
-              // Payables Management (Accounts Payable)
-              {
-                path: 'payables',
-                children: [
-                  {
-                    index: true,
-                    element: <Navigate to="/management/payables/list" replace />,
-                  },
-                  {
-                    path: 'list',
-                    element: (
-                      <LazyPage>
-                        <PayablesListPage />
-                      </LazyPage>
-                    ),
-                  },
-                ],
-              },
-
-              // Receivables Management (Accounts Receivable)
-              {
-                path: 'receivables',
-                children: [
-                  {
-                    index: true,
-                    element: <Navigate to="/management/receivables/list" replace />,
-                  },
-                  {
-                    path: 'list',
-                    element: (
-                      <LazyPage>
-                        <ReceivablesListPage />
-                      </LazyPage>
-                    ),
-                  },
-                ],
-              },
-
-              // System Management
-              {
-                path: 'system',
-                children: [
-                  // Users Management
-                  {
-                    path: 'users',
-                    children: [
-                      // Redirect /management/system/users to list
-                      {
-                        index: true,
-                        element: <Navigate to="/management/system/users/list" replace />,
-                      },
-                      {
-                        path: 'list',
-                        element: (
-                          <LazyPage>
-                            <UsersListPage />
-                          </LazyPage>
-                        ),
-                      },
-                      {
-                        path: 'create',
-                        element: (
-                          <LazyPage>
-                            <UsersCreatePage />
-                          </LazyPage>
-                        ),
-                      },
-                      {
-                        path: 'edit/:id',
-                        element: (
-                          <LazyPage>
-                            <UsersEditPage />
-                          </LazyPage>
-                        ),
-                      },
-                    ],
-                  },
-
-                  // Branches Management
-                  {
-                    path: 'branches',
-                    children: [
-                      // Redirect /management/system/branches to list
-                      {
-                        index: true,
-                        element: <Navigate to="/management/system/branches/list" replace />,
-                      },
-                      {
-                        path: 'list',
-                        element: (
-                          <LazyPage>
-                            <BranchesListPage />
-                          </LazyPage>
-                        ),
-                      },
-                      {
-                        path: 'create',
-                        element: (
-                          <LazyPage>
-                            <BranchesCreatePage />
-                          </LazyPage>
-                        ),
-                      },
-                      {
-                        path: 'edit/:id',
-                        element: (
-                          <LazyPage>
-                            <BranchesEditPage />
-                          </LazyPage>
-                        ),
-                      },
-                    ],
-                  },
-
-                  // Audit Log
-                  {
-                    path: 'audit',
-                    element: (
-                      <LazyPage>
-                        <AuditLogPage />
-                      </LazyPage>
-                    ),
-                  },
-
-                  // App Settings (includes currency settings)
-                  {
-                    path: 'app',
-                    element: (
-                      <LazyPage>
-                        <AppSettingsPage />
-                      </LazyPage>
-                    ),
-                  },
-                ],
-              },
-            ],
-          },
-
-          // ============================================
-          // PROFILE
-          // ============================================
-          {
-            path: 'profile',
-            element: (
-              <LazyPage>
-                <ProfilePage />
-              </LazyPage>
-            ),
+            path: 'receivables',
+            element: <ReceivablesPage />,
           },
         ],
       },

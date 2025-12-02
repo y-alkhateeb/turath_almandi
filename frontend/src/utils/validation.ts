@@ -21,35 +21,6 @@ export function isValidDate(date: string | null | undefined): boolean {
 
   return true;
 }
-
-/**
- * Validate Iraqi phone number
- * Supports formats:
- * - 07XX XXX XXXX (local)
- * - +964 7XX XXX XXXX (international)
- * - 07XXXXXXXXX (no spaces)
- *
- * @param phone - Phone number to validate
- * @returns true if valid Iraqi phone number, false otherwise
- */
-export function isValidPhone(phone: string | null | undefined): boolean {
-  if (!phone) return false;
-
-  // Remove all spaces, dashes, and parentheses
-  const cleaned = phone.replace(/[\s\-()]/g, '');
-
-  // Pattern 1: Local format 07XXXXXXXXX (11 digits starting with 07)
-  const localPattern = /^07\d{9}$/;
-
-  // Pattern 2: International format +9647XXXXXXXXX (13 chars)
-  const intlPattern = /^\+9647\d{9}$/;
-
-  // Pattern 3: International without + (12 digits starting with 9647)
-  const intlNoPlus = /^9647\d{9}$/;
-
-  return localPattern.test(cleaned) || intlPattern.test(cleaned) || intlNoPlus.test(cleaned);
-}
-
 /**
  * Validate password strength
  * Requirements:
@@ -178,41 +149,4 @@ export function isValidQuantity(quantity: number | null | undefined): boolean {
 
   // Must be positive integer
   return Number.isInteger(quantity) && quantity > 0;
-}
-
-/**
- * Validate IBAN (International Bank Account Number)
- * Basic format check for Iraqi IBAN
- * @param iban - IBAN to validate
- * @returns true if valid IBAN format, false otherwise
- */
-export function isValidIBAN(iban: string | null | undefined): boolean {
-  if (!iban) return false;
-
-  // Remove spaces
-  const cleaned = iban.replace(/\s/g, '').toUpperCase();
-
-  // Iraqi IBAN: IQ followed by 2 check digits and 19 alphanumeric characters (23 total)
-  const ibanPattern = /^IQ\d{2}[A-Z0-9]{19}$/;
-
-  if (!ibanPattern.test(cleaned)) return false;
-
-  // TODO: Implement MOD-97 checksum validation if needed
-  return true;
-}
-
-/**
- * Validate URL format
- * @param url - URL to validate
- * @returns true if valid URL, false otherwise
- */
-export function isValidUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
 }

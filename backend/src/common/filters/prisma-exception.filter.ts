@@ -10,23 +10,43 @@ import { Request, Response } from 'express';
 import { translateError, extractLocale } from '../constants/arabic-errors';
 import { ERROR_MESSAGES } from '../constants/error-messages';
 
-@Catch(Prisma.PrismaClientKnownRequestError)
+@Catch(Prisma.PrismaClientKnownRequestError, Prisma.PrismaClientValidationError)
 export class PrismaExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(PrismaExceptionFilter.name);
 
-  catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
+  catch(exception: Prisma.PrismaClientKnownRequestError | Prisma.PrismaClientValidationError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-
-    // Log detailed error information
-    this.logDetailedError(exception, request);
 
     // Extract locale from Accept-Language header
     const locale = extractLocale(request.headers['accept-language']);
 
     let status: HttpStatus;
     let messageKey: string;
+
+    // Handle PrismaClientValidationError (invalid query structure, wrong types, etc.)
+    if (exception instanceof Prisma.PrismaClientValidationError) {
+      this.logValidationError(exception, request);
+      status = HttpStatus.BAD_REQUEST;
+      messageKey = ERROR_MESSAGES.DATABASE.VALIDATION_ERROR || 'validationError';
+      
+      // Translate the message and error name based on locale
+      const translatedMessage = translateError(messageKey, locale);
+      const translatedError = translateError(this.getErrorKey(status), locale);
+
+      response.status(status).json({
+        statusCode: status,
+        message: translatedMessage,
+        error: translatedError,
+        requestId: request.requestId,
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Log detailed error information for known request errors
+    this.logDetailedError(exception, request);
 
     switch (exception.code) {
       case 'P2002':
@@ -178,5 +198,21 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     }
 
     return sanitized;
+  }
+
+  private logValidationError(
+    exception: Prisma.PrismaClientValidationError,
+    request: Request,
+  ): void {
+    const requestId = request.requestId || 'unknown';
+
+    this.logger.error(
+      `[${requestId}] Prisma Validation Error: ${exception.message}`,
+      exception.stack,
+    );
+
+    this.logger.debug(
+      `[${requestId}] Request details: ${request.method} ${request.url}`,
+    );
   }
 }

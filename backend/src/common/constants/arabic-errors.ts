@@ -58,6 +58,7 @@ export const ARABIC_ERRORS: Record<string, string> = {
   // Prisma/Database Errors
   recordNotFound: 'السجل غير موجود',
   unexpectedDatabaseError: 'حدث خطأ غير متوقع في قاعدة البيانات',
+  databaseValidationError: 'خطأ في التحقق من صحة البيانات',
 
   // Unique Constraint Violations
   recordWithThisUsernameAlreadyExists: 'يوجد بالفعل مستخدم بنفس اسم المستخدم',

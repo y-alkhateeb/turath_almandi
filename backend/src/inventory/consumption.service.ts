@@ -13,7 +13,7 @@ import { formatDateForDB, getStartOfDay, getEndOfDay } from '../common/utils/dat
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 import { RequestUser } from '../common/interfaces';
 
-interface DailyConsumptionSummary {
+export interface DailyConsumptionSummary {
   date: string;
   totalConsumptions: number;
   itemsConsumed: Array<{
@@ -40,11 +40,6 @@ export class ConsumptionService {
     recordConsumptionDto: RecordConsumptionDto,
     user: RequestUser,
   ) {
-    // Validate user has branch assignment (required for inventory operations)
-    if (!user.branchId) {
-      throw new ForbiddenException(ERROR_MESSAGES.INVENTORY.BRANCH_REQUIRED);
-    }
-
     // Fetch the inventory item to verify it exists and check quantity
     const inventoryItem = await this.prisma.inventoryItem.findUnique({
       where: { id: recordConsumptionDto.inventoryItemId },

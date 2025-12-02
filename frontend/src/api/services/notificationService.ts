@@ -43,12 +43,12 @@ export enum NotificationApiEndpoints {
  *
  * Supports filtering by:
  * - branchId: UUID
- * - isRead: boolean (true = read, false = unread)
+ * - isRead: 'true' | 'false' (string boolean)
  * - type: string (notification type)
  * - startDate: ISO date string
  * - endDate: ISO date string
- * - page: number (default: 1)
- * - limit: number (default: 50)
+ * - page: string (default: 1)
+ * - limit: string (default: 10, max: 100)
  *
  * Backend behavior:
  * - Returns notifications for current user
@@ -80,7 +80,7 @@ export const getAll = (
  */
 export const getUnreadCount = (): Promise<{ count: number }> => {
   return apiClient.get<{ count: number }>({
-    url: NotificationApiEndpoints.GetUnreadCount,
+    url: NotificationApiEndpoints.UnreadCount,
   });
 };
 
@@ -118,11 +118,10 @@ export const markAllAsRead = (): Promise<void> => {
 };
 
 /**
- * Get notification settings
+ * Get notification settings for all types
  * GET /notifications/settings
  *
  * Returns all notification settings for current user
- * Includes settings for all notification types
  *
  * @returns NotificationSettings[]
  * @throws ApiError on 401 (not authenticated)
@@ -134,71 +133,80 @@ export const getSettings = (): Promise<NotificationSettings[]> => {
 };
 
 /**
- * Update notification settings
- * PATCH /notifications/settings
+ * Get notification setting for specific type
+ * GET /notifications/settings/:notificationType
  *
- * Updates notification settings for current user
- * Can update multiple settings at once
+ * @param notificationType - Notification type
+ * @returns NotificationSettings
+ * @throws ApiError on 401, 404 (not found)
+ */
+export const getSettingByType = (notificationType: string): Promise<NotificationSettings> => {
+  return apiClient.get<NotificationSettings>({
+    url: `/notifications/settings/${notificationType}`,
+  });
+};
+
+/**
+ * Create or update notification setting
+ * POST /notifications/settings
  *
  * Backend validation:
  * - notificationType: Required, string
  * - isEnabled: Optional, boolean
- * - minAmount: Optional, number >= 0
- * - selectedBranches: Optional, array of UUIDs
- * - displayMethod: Optional, TOAST | EMAIL | BOTH
+ * - minAmount: Optional, number
+ * - selectedBranches: Optional, string[] (array of branch IDs)
+ * - displayMethod: Optional, DisplayMethod enum (POPUP | TOAST | EMAIL | SMS)
  *
  * @param data - UpdateNotificationSettingsInput
- * @returns Updated NotificationSettings
- * @throws ApiError on 400 (validation), 401 (not authenticated)
+ * @returns Updated/created NotificationSettings
+ * @throws ApiError on 400 (validation), 401
  */
 export const updateSettings = (
   data: UpdateNotificationSettingsInput
 ): Promise<NotificationSettings> => {
-  return apiClient.patch<NotificationSettings>({
+  return apiClient.post<NotificationSettings>({
     url: NotificationApiEndpoints.Settings,
     data,
   });
 };
 
-// ============================================
-// HELPER METHODS
-// ============================================
-
 /**
- * Get unread notifications only
- * GET /notifications?isRead=false
+ * Delete notification setting
+ * DELETE /notifications/settings/:notificationType
  *
- * Convenience method for fetching unread notifications
- *
- * @param filters - Optional additional filters
- * @returns PaginatedResponse<Notification>
- * @throws ApiError on 401
+ * @param notificationType - Notification type to delete
+ * @returns void
+ * @throws ApiError on 401, 404
  */
-export const getUnreadNotifications = (
-  filters?: Omit<NotificationQueryFilters, 'isRead'>
-): Promise<PaginatedResponse<Notification>> => {
-  return getAll({
-    ...filters,
-    isRead: false,
+export const deleteSetting = (notificationType: string): Promise<void> => {
+  return apiClient.delete<void>({
+    url: `/notifications/settings/${notificationType}`,
   });
 };
 
 /**
- * Get read notifications only
- * GET /notifications?isRead=true
+ * Get enabled notification types
+ * GET /notifications/settings/enabled/types
  *
- * Convenience method for fetching read notifications
- *
- * @param filters - Optional additional filters
- * @returns PaginatedResponse<Notification>
+ * @returns Object with enabledTypes array
  * @throws ApiError on 401
  */
-export const getReadNotifications = (
-  filters?: Omit<NotificationQueryFilters, 'isRead'>
-): Promise<PaginatedResponse<Notification>> => {
-  return getAll({
-    ...filters,
-    isRead: true,
+export const getEnabledTypes = (): Promise<{ enabledTypes: string[] }> => {
+  return apiClient.get<{ enabledTypes: string[] }>({
+    url: '/notifications/settings/enabled/types',
+  });
+};
+
+/**
+ * Get unread notifications only
+ * GET /notifications/unread
+ *
+ * @returns Notification[] - Array of unread notifications
+ * @throws ApiError on 401
+ */
+export const getUnread = (): Promise<Notification[]> => {
+  return apiClient.get<Notification[]>({
+    url: '/notifications/unread',
   });
 };
 
@@ -206,19 +214,17 @@ export const getReadNotifications = (
 // EXPORTS
 // ============================================
 
-/**
- * Notification service object with all methods
- * Use named exports or default object
- */
 const notificationService = {
   getAll,
   getUnreadCount,
-  getUnreadNotifications,
-  getReadNotifications,
+  getUnread,
   markAsRead,
   markAllAsRead,
   getSettings,
+  getSettingByType,
   updateSettings,
+  deleteSetting,
+  getEnabledTypes,
 };
 
 export default notificationService;

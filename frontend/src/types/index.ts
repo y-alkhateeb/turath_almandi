@@ -16,13 +16,14 @@ export * from './api';
 export * from './router';
 
 // Domain-specific types
+// Domain-specific types
 export * from './auth.types';
-export * from './branches.types';
-export * from './users.types';
-export * from './transactions.types';
+// export * from './branches.types';
+// export * from './users.types';
+// export * from './transactions.types';
 export * from './settings.types';
 export * from './contacts.types';
 export * from './payables.types';
 export * from './receivables.types';
 export * from './inventory-sub-units.types';
-export * from './debts.types'; // Legacy - to be deprecated
+// export * from './debts.types'; // Legacy - to be deprecated

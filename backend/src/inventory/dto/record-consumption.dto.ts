@@ -3,6 +3,7 @@ import { InventoryUnit } from '../../common/types/prisma-enums';
 
 export class RecordConsumptionDto {
   @IsNotEmpty()
+  @IsOptional()
   @IsUUID('4', { message: 'معرف العنصر يجب أن يكون UUID صالح' })
   inventoryItemId: string;
 

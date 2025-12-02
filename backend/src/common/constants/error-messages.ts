@@ -154,6 +154,7 @@ export const ERROR_MESSAGES = {
   DATABASE: {
     RECORD_NOT_FOUND: 'recordNotFound',
     UNEXPECTED_ERROR: 'unexpectedDatabaseError',
+    VALIDATION_ERROR: 'databaseValidationError',
     USERNAME_EXISTS: 'recordWithThisUsernameAlreadyExists',
     EMAIL_EXISTS: 'recordWithThisEmailAlreadyExists',
     FOREIGN_KEY_CONSTRAINT: 'foreignKeyConstraintViolation',

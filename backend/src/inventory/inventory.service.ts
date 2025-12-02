@@ -62,7 +62,7 @@ type TransactionForInventory = Prisma.TransactionGetPayload<{
 }>;
 
 // Type for inventory item with metadata
-interface InventoryItemWithMetadata extends InventoryItemWithTransactions {
+export interface InventoryItemWithMetadata extends InventoryItemWithTransactions {
   isAutoAdded: boolean;
   relatedPurchases: TransactionForInventory[];
 }
@@ -192,6 +192,7 @@ export class InventoryService {
           select: BRANCH_SELECT,
         },
         transactions: {
+          where: { isDeleted: false }, // Only include non-deleted transactions
           select: TRANSACTION_SELECT_FOR_INVENTORY,
           orderBy: {
             date: 'desc',

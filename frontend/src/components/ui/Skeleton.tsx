@@ -1,20 +1,15 @@
-/**
- * Skeleton - Base Component
- * Animated loading skeleton for placeholder content
- *
- * Based on shadcn/ui Skeleton component
- */
+import { cn } from "@/lib/utils"
 
-import { HTMLAttributes } from 'react';
-
-export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
-  className?: string;
-}
-
-export function Skeleton({ className = '', ...props }: SkeletonProps) {
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`animate-pulse rounded-md bg-[var(--bg-tertiary)] ${className}`} {...props} />
-  );
+    <div
+      className={cn("animate-pulse rounded-md bg-muted", className)}
+      {...props}
+    />
+  )
 }
 
-export default Skeleton;
+export { Skeleton }

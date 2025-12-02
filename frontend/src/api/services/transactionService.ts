@@ -16,8 +16,8 @@
 import apiClient from '../apiClient';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
 import type { PaginatedResponse, TransactionQueryFilters, TransactionStatsResponse } from '#/api';
-import type { TransactionWithInventoryRequest } from '@/types/inventoryOperation.types';
-import { DiscountType, InventoryOperationType } from '@/types/enum';
+import type { TransactionWithInventoryRequest } from '../../types/inventoryOperation.types';
+import { DiscountType, InventoryOperationType, TransactionType } from '@/types/enum';
 
 // ============================================
 // TYPES
@@ -62,13 +62,12 @@ export enum TransactionApiEndpoints {
  * - type: TransactionType (INCOME | EXPENSE)
  * - category: string
  * - paymentMethod: PaymentMethod (CASH | MASTER)
- * - currency: Currency (USD | IQD)
  * - branchId: UUID (accountants auto-filtered to their branch)
  * - startDate: ISO date string (inclusive)
  * - endDate: ISO date string (inclusive)
  * - search: string (searches employeeVendorName, category, notes)
- * - page: number (default: 1)
- * - limit: number (default: 50)
+ * - page: string (default: 1)
+ * - limit: string (default: 10)
  *
  * Backend behavior:
  * - Accountants: Auto-filtered to their assigned branch
@@ -114,25 +113,26 @@ export const getOne = (id: string): Promise<Transaction> => {
  *
  * Backend validation (from CreateTransactionDto):
  * - type: Required, INCOME | EXPENSE
- * - amount: Required, >= 0.01
- * - currency: Optional, USD | IQD (defaults to USD)
- * - paymentMethod: Optional for EXPENSE, required for INCOME (CASH | MASTER)
- * - category: Optional, validated against allowed categories
- * - date: Required, ISO date string, cannot be future date
- * - employeeVendorName: Optional, string for employee/vendor name
- * - notes: Optional, text
- * - branchId: Auto-set from user for accountants, required for admins
- * - inventoryItemId: Optional, links transaction to inventory item
+ * - amount: Required if no items, positive
+ * - paymentMethod: Required for INCOME (CASH | MASTER)
+ * - items: Optional TransactionItemDto[] (alternative to amount)
+ * - discountType: Optional, DiscountType enum (PERCENTAGE | AMOUNT)
+ * - discountValue: Optional, >= 0
+ * - discountReason: Optional, max 200 chars
+ * - category: Optional if not EMPLOYEE_SALARIES
+ * - date: Required, ISO date string, not future
+ * - employeeVendorName: Optional
+ * - notes: Optional
+ * - branchId: Optional for admins, auto-assigned for accountants
+ * - employeeId: Required if category === 'EMPLOYEE_SALARIES'
  *
  * Backend behavior:
  * - Accountants: branchId auto-set from their assignment
  * - Admins: Must provide branchId
- * - Auto-creates notification for large transactions
- * - Emits WebSocket event for real-time updates
  *
  * @param data - CreateTransactionInput
  * @returns Created Transaction with relations
- * @throws ApiError on 400 (validation), 401, 403, 404 (invalid inventoryItemId)
+ * @throws ApiError on 400 (validation), 401, 403, 404
  */
 export const create = (data: CreateTransactionInput): Promise<Transaction> => {
   return apiClient.post<Transaction>({
@@ -142,16 +142,40 @@ export const create = (data: CreateTransactionInput): Promise<Transaction> => {
 };
 
 /**
- * Create transaction with inventory operations and partial payment
+ * Create purchase expense with optional inventory
+ * POST /transactions/purchase
+ *
+ * Creates an expense transaction for a purchase with optional inventory item creation
+ *
+ * Backend validation:
+ * - date: Required, ISO date, not future
+ * - amount: Required, > 0.01
+ * - vendorName: Required, 2+ chars
+ * - addToInventory: Required boolean
+ * - itemName: Required if addToInventory=true
+ * - quantity: Required if addToInventory=true, > 0.01
+ * - unit: Required if addToInventory=true, InventoryUnit enum
+ * - notes: Optional
+ *
+ * @param data - Purchase expense DTO
+ * @returns Created Transaction with linked inventory
+ * @throws ApiError on 400 (validation), 401, 403
+ */
+export const createPurchase = (data: any): Promise<Transaction> => {
+  return apiClient.post<Transaction>({
+    url: '/transactions/purchase',
+    data,
+  });
+};
+
+/**
+ * Create transaction with inventory operations
  * POST /transactions/with-inventory
  *
- * Supports:
- * - Purchase (add to inventory) or Consumption (deduct from inventory)
- * - Multiple inventory items per transaction
- * - Partial payment with automatic debt creation
+ * Creates transaction with linked inventory operations
  *
  * @param data - TransactionWithInventoryRequest
- * @returns Created Transaction with relations
+ * @returns Created Transaction with inventory operations
  * @throws ApiError on 400 (validation), 401, 403, 404
  */
 export const createWithInventory = (data: TransactionWithInventoryRequest): Promise<Transaction> => {
@@ -163,23 +187,23 @@ export const createWithInventory = (data: TransactionWithInventoryRequest): Prom
 
 /**
  * Update transaction
- * PATCH /transactions/:id
+ * PUT /transactions/:id
  *
  * Backend allows partial updates of:
+ * - type: Optional, TransactionType
  * - amount: Optional, >= 0.01
- * - currency: Optional, USD | IQD
- * - paymentMethod: Optional, CASH | MASTER
- * - category: Optional, validated against allowed categories
- * - date: Optional, ISO date string, cannot be future date
- * - employeeVendorName: Optional, string
- * - notes: Optional, text
+ * - paymentMethod: Optional, PaymentMethod
+ * - category: Optional
+ * - date: Optional, ISO date string, not future
+ * - employeeVendorName: Optional
+ * - notes: Optional
+ * - discountType: Optional, DiscountType
+ * - discountValue: Optional, >= 0
+ * - discountReason: Optional
  *
  * Backend restrictions:
- * - Cannot change type (INCOME/EXPENSE)
- * - Cannot change branchId
- * - Cannot change createdBy
  * - Accountants can only update their branch's transactions
- * - Cannot update soft-deleted transactions
+ * - Cannot update if linked to payables/receivables
  *
  * @param id - Transaction UUID
  * @param data - UpdateTransactionInput (partial fields)
@@ -187,7 +211,7 @@ export const createWithInventory = (data: TransactionWithInventoryRequest): Prom
  * @throws ApiError on 400 (validation), 401, 403 (wrong branch), 404 (not found)
  */
 export const update = (id: string, data: UpdateTransactionInput): Promise<Transaction> => {
-  return apiClient.patch<Transaction>({
+  return apiClient.put<Transaction>({
     url: `/transactions/${id}`,
     data,
   });
@@ -198,14 +222,13 @@ export const update = (id: string, data: UpdateTransactionInput): Promise<Transa
  * DELETE /transactions/:id
  *
  * Backend behavior:
- * - Soft delete: Sets deletedAt timestamp, keeps in database
- * - Excluded from future queries automatically
+ * - Soft delete: Sets deletedAt, isDeleted
  * - Accountants can only delete their branch's transactions
- * - Audit log entry created
+ * - Cannot delete if linked to payables/receivables
  *
  * @param id - Transaction UUID
  * @returns void
- * @throws ApiError on 401, 403 (wrong branch), 404 (not found or already deleted)
+ * @throws ApiError on 401, 403 (wrong branch), 404 (not found), 400 (has linked records)
  */
 export const deleteTransaction = (id: string): Promise<void> => {
   return apiClient.delete<void>({
@@ -214,31 +237,18 @@ export const deleteTransaction = (id: string): Promise<void> => {
 };
 
 /**
- * Get transaction statistics and summary
+ * Get transaction summary statistics
  * GET /transactions/summary
  *
- * Calculates financial statistics based on filters:
- * - Total income (sum of all INCOME transactions)
- * - Total expenses (sum of all EXPENSE transactions)
- * - Net profit (income - expenses)
- * - Transaction count
- * - Breakdown by currency (if multiple currencies)
- * - Breakdown by payment method
- * - Breakdown by category
+ * Returns daily/branch summary with income, expense, net totals
  *
- * Supports same filters as getAll:
- * - branchId: Filter by specific branch
- * - startDate: ISO date string (inclusive)
- * - endDate: ISO date string (inclusive)
- * - type: Filter by transaction type
- * - category: Filter by category
- * - paymentMethod: Filter by payment method
- * - currency: Filter by currency
+ * Supports filtering by:
+ * - date: Optional ISO date
+ * - branchId: Optional UUID
  *
  * Backend behavior:
  * - Accountants: Auto-filtered to their branch
- * - Admins: Can see summary for any branch or all branches
- * - Excludes soft-deleted transactions
+ * - Admins: Can filter by branch or see all
  *
  * @param filters - Optional query filters (same as getAll)
  * @returns TransactionStatsResponse with financial statistics
@@ -254,134 +264,18 @@ export const getSummary = (
 };
 
 // ============================================
-// HELPER METHODS
-// ============================================
-
-/**
- * Get all transactions without pagination (for exports, reports)
- * GET /transactions?limit=10000
- *
- * Warning: Use with caution on large datasets
- * Consider using pagination for better performance
- *
- * @param filters - Optional query filters (without page/limit)
- * @returns Transaction[] array
- * @throws ApiError on 401
- */
-export const getAllUnpaginated = (
-  filters?: Omit<TransactionQueryFilters, 'page' | 'limit'>
-): Promise<Transaction[]> => {
-  return apiClient
-    .get<PaginatedResponse<Transaction>>({
-      url: TransactionApiEndpoints.Base,
-      params: { ...filters, limit: 10000 },
-    })
-    .then((response) => {
-      // Extract data from paginated response
-      return response.data;
-    });
-};
-
-/**
- * Get today's transactions for current user's branch
- * GET /transactions?date=today
- *
- * Convenience method for dashboard/overview
- *
- * @returns PaginatedResponse<Transaction> for today
- * @throws ApiError on 401
- */
-export const getTodayTransactions = (): Promise<PaginatedResponse<Transaction>> => {
-  const today = new Date().toISOString().split('T')[0];
-  return getAll({
-    startDate: today,
-    endDate: today,
-  });
-};
-
-/**
- * Get transactions for a specific date range
- * GET /transactions?startDate=X&endDate=Y
- *
- * Convenience method for date range queries
- *
- * @param startDate - ISO date string (inclusive)
- * @param endDate - ISO date string (inclusive)
- * @param additionalFilters - Additional optional filters
- * @returns PaginatedResponse<Transaction>
- * @throws ApiError on 401
- */
-export const getByDateRange = (
-  startDate: string,
-  endDate: string,
-  additionalFilters?: Omit<TransactionQueryFilters, 'startDate' | 'endDate'>
-): Promise<PaginatedResponse<Transaction>> => {
-  return getAll({
-    ...additionalFilters,
-    startDate,
-    endDate,
-  });
-};
-
-/**
- * Get income transactions only
- * GET /transactions?type=INCOME
- *
- * Convenience method for filtering by type
- *
- * @param filters - Optional additional filters
- * @returns PaginatedResponse<Transaction>
- * @throws ApiError on 401
- */
-export const getIncome = (
-  filters?: Omit<TransactionQueryFilters, 'type'>
-): Promise<PaginatedResponse<Transaction>> => {
-  return getAll({
-    ...filters,
-    type: 'INCOME',
-  });
-};
-
-/**
- * Get expense transactions only
- * GET /transactions?type=EXPENSE
- *
- * Convenience method for filtering by type
- *
- * @param filters - Optional additional filters
- * @returns PaginatedResponse<Transaction>
- * @throws ApiError on 401
- */
-export const getExpenses = (
-  filters?: Omit<TransactionQueryFilters, 'type'>
-): Promise<PaginatedResponse<Transaction>> => {
-  return getAll({
-    ...filters,
-    type: 'EXPENSE',
-  });
-};
-
-// ============================================
 // EXPORTS
 // ============================================
 
-/**
- * Transaction service object with all methods
- * Use named exports or default object
- */
 const transactionService = {
   getAll,
-  getAllUnpaginated,
   getOne,
   create,
+  createPurchase,
   createWithInventory,
   update,
   delete: deleteTransaction,
   getSummary,
-  getTodayTransactions,
-  getByDateRange,
-  getIncome,
-  getExpenses,
 };
 
 export default transactionService;

@@ -95,4 +95,32 @@ export class CreateTransactionDto {
   @IsUUID()
   @IsOptional() // IsOptional is needed to allow the field to be absent for other categories
   employeeId?: string;
+
+  /**
+   * معرف جهة الاتصال (للمعاملات المرتبطة بجهة اتصال أو للديون)
+   * مطلوب عند الدفع الجزئي للمشتريات
+   * @example '550e8400-e29b-41d4-a716-446655440000'
+   */
+  @IsUUID('4', { message: 'معرف جهة الاتصال يجب أن يكون UUID صحيح' })
+  @IsOptional()
+  contactId?: string;
+
+  /**
+   * المبلغ المدفوع فعلياً (للدفع الجزئي)
+   * إذا كان أقل من المبلغ الإجمالي، سيتم إنشاء دين تلقائياً
+   * @example 100
+   * @minimum 0
+   */
+  @IsOptional()
+  @IsNumber()
+  @Min(0, { message: 'المبلغ المدفوع يجب أن يكون صفر أو أكبر' })
+  paidAmount?: number;
+
+  /**
+   * تاريخ استحقاق الدين (اختياري - للدفع الجزئي)
+   * @example '2024-02-15'
+   */
+  @IsOptional()
+  @IsDateString()
+  payableDueDate?: string;
 }

@@ -11,14 +11,14 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useRouter } from '@/routes/hooks';
-import { useUser } from '@/store/userStore';
-import { PageLoading } from '@/components/loading';
+import { useUserInfo } from '@/store/userStore';
+import { PageLoading } from '@/components/common';
 import { isAdmin } from '@/utils/permissions';
 import { toast } from 'sonner';
 
 export function AdminRouteGuard() {
   const router = useRouter();
-  const user = useUser();
+  const user = useUserInfo();
 
   useEffect(() => {
     // User is loaded but not admin

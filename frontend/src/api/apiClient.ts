@@ -303,7 +303,7 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error: AxiosError): Promise<never> => {
-    return Promise.reject(ApiError.fromAxiosError(error));
+    return Promise.reject(ApiError.fromAxiosError(error as AxiosError<ErrorResponse>));
   }
 );
 
@@ -347,7 +347,7 @@ axiosInstance.interceptors.response.use(
     // Return response data directly (unwrap axios response)
     return response.data;
   },
-  async (error: AxiosError<ErrorResponse>): Promise<never> => {
+  async (error: AxiosError<ErrorResponse>): Promise<any> => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };

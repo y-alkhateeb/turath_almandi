@@ -115,13 +115,13 @@ export const create = (data: CreateBranchInput): Promise<Branch> => {
 
 /**
  * Update branch
- * PATCH /branches/:id
+ * PUT /branches/:id
  *
  * Backend allows partial updates of:
- * - name: Optional, max 200 chars, trimmed, escaped
- * - location: Optional, max 500 chars, trimmed, escaped
- * - managerName: Optional, max 200 chars, trimmed, escaped
- * - isActive: Optional, boolean (can deactivate branch)
+ * - name: Optional, max 200 chars
+ * - location: Optional, max 500 chars
+ * - managerName: Optional, max 200 chars
+ * - isActive: Optional, boolean
  *
  * @param id - Branch UUID
  * @param data - UpdateBranchInput (name?, location?, managerName?, isActive?)
@@ -129,7 +129,7 @@ export const create = (data: CreateBranchInput): Promise<Branch> => {
  * @throws ApiError on 400 (validation error), 401, 403 (not admin), 404 (not found)
  */
 export const update = (id: string, data: UpdateBranchInput): Promise<Branch> => {
-  return apiClient.patch<Branch>({
+  return apiClient.put<Branch>({
     url: `/branches/${id}`,
     data,
   });

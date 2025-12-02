@@ -180,8 +180,6 @@ model User {
   payablePaymentsDeleted           PayablePayment[]           @relation("PayablePaymentDeleter")
   receivablePaymentsRecorded       ReceivablePayment[]        @relation("ReceivablePaymentRecorder")
   receivablePaymentsDeleted        ReceivablePayment[]        @relation("ReceivablePaymentDeleter")
-  subUnitsCreated                  InventorySubUnit[]         @relation("SubUnitCreator")
-  subUnitsDeleted                  InventorySubUnit[]         @relation("SubUnitDeleter")
   consumptionsDeleted              InventoryConsumption[]     @relation("ConsumptionDeleter")
   notificationsCreated             Notification[]             @relation("NotificationCreator")
   notificationsDeleted             Notification[]             @relation("NotificationDeleter")
@@ -537,7 +535,6 @@ model InventoryItem {
   unit             InventoryUnit
   costPerUnit      Decimal       @map("cost_per_unit") @db.Decimal(15, 2)
   sellingPrice     Decimal?      @map("selling_price") @db.Decimal(15, 2)
-  allowSubUnits    Boolean       @default(false) @map("allow_sub_units")
   includeInRevenue Boolean       @default(true) @map("include_in_revenue")
   lastUpdated      DateTime      @map("last_updated") @db.Timestamptz
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz
@@ -551,7 +548,6 @@ model InventoryItem {
   transactions              Transaction[]
   consumptions              InventoryConsumption[]
   transactionInventoryItems TransactionInventoryItem[]
-  subUnits                  InventorySubUnit[]
 
   @@index([branchId])
   @@index([name])
@@ -560,32 +556,6 @@ model InventoryItem {
   @@index([deletedAt])
   @@index([isDeleted])
   @@map("inventory_items")
-}
-
-// NEW: Inventory SubUnit Model
-model InventorySubUnit {
-  id              String    @id @default(uuid()) @db.Uuid
-  inventoryItemId String    @map("inventory_item_id") @db.Uuid
-  unitName        String    @map("unit_name") @db.VarChar(50)
-  ratio           Decimal   @db.Decimal(10, 4)
-  sellingPrice    Decimal   @map("selling_price") @db.Decimal(15, 2)
-  createdBy       String    @map("created_by") @db.Uuid
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
-  deletedBy       String?   @map("deleted_by") @db.Uuid
-  isDeleted       Boolean   @default(false) @map("is_deleted")
-
-  // Relations
-  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  creator       User          @relation("SubUnitCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  deleter       User?         @relation("SubUnitDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
-
-  @@unique([inventoryItemId, unitName])
-  @@index([inventoryItemId])
-  @@index([isDeleted])
-  @@index([deletedAt])
-  @@map("inventory_sub_units")
 }
 
 // 7b. Inventory Consumption Table
@@ -853,27 +823,28 @@ model SalaryPayment {
 
 // 17. Transaction Inventory Items Table
 model TransactionInventoryItem {
-  id              String                 @id @default(uuid()) @db.Uuid
-  transactionId   String                 @map("transaction_id") @db.Uuid
-  inventoryItemId String                 @map("inventory_item_id") @db.Uuid
-  quantity        Decimal                @db.Decimal(12, 3)
-  operationType   InventoryOperationType @map("operation_type")
-  unitPrice       Decimal                @map("unit_price") @db.Decimal(15, 2)
+  id            String                 @id @default(uuid()) @db.Uuid
+  transactionId String                 @map("transaction_id") @db.Uuid
+  inventoryItemId String               @map("inventory_item_id") @db.Uuid
+  quantity      Decimal                @db.Decimal(12, 3)
+  operationType InventoryOperationType @map("operation_type")
+  unitPrice     Decimal                @map("unit_price") @db.Decimal(15, 2)
   // Multi-item discount fields
-  subtotal        Decimal                @db.Decimal(15, 2)
-  discountType    DiscountType?          @map("discount_type")
-  discountValue   Decimal?               @map("discount_value") @db.Decimal(15, 4)
-  total           Decimal                @db.Decimal(15, 2)
-  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime               @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt       DateTime?              @map("deleted_at") @db.Timestamptz
-  deletedBy       String?                @map("deleted_by") @db.Uuid
-  isDeleted       Boolean                @default(false) @map("is_deleted")
+  subtotal      Decimal                @db.Decimal(15, 2)
+  discountType  DiscountType?          @map("discount_type")
+  discountValue Decimal?               @map("discount_value") @db.Decimal(15, 4)
+  total         Decimal                @db.Decimal(15, 2)
+  notes         String?                @db.VarChar(500)
+  createdAt     DateTime               @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime               @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?              @map("deleted_at") @db.Timestamptz
+  deletedBy     String?                @map("deleted_by") @db.Uuid
+  isDeleted     Boolean                @default(false) @map("is_deleted")
 
   // Relations
-  transaction   Transaction   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
-  deleter       User?         @relation("TransactionInventoryItemDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
+  deleter       User?       @relation("TransactionInventoryItemDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
 
   @@index([transactionId])
   @@index([inventoryItemId])

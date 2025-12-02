@@ -1,6 +1,6 @@
 /**
  * Inventory Service
- * Inventory item CRUD operations and value calculations
+ * Inventory item CRUD operations
  *
  * Endpoints:
  * - GET /inventory?filters → PaginatedResponse<InventoryItem>
@@ -8,13 +8,20 @@
  * - POST /inventory → InventoryItem (CreateInventoryDto)
  * - PATCH /inventory/:id → InventoryItem (UpdateInventoryDto)
  * - DELETE /inventory/:id → void
- * - GET /inventory/value?branchId → number
  *
  * All types match backend DTOs exactly. No any types.
  */
 
 import apiClient from '../apiClient';
-import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '#/entity';
+import type {
+  InventoryItem,
+  CreateInventoryInput,
+  UpdateInventoryInput,
+  RecordConsumptionInput,
+  InventoryConsumption,
+  DailyConsumptionSummary,
+  ConsumptionHistoryItem,
+} from '#/entity';
 import type { PaginatedResponse, InventoryQueryFilters } from '#/api';
 
 // ============================================
@@ -28,7 +35,6 @@ import type { PaginatedResponse, InventoryQueryFilters } from '#/api';
 export enum InventoryApiEndpoints {
   Base = '/inventory',
   ById = '/inventory/:id',
-  Value = '/inventory/value',
 }
 
 // ============================================
@@ -40,18 +46,16 @@ export enum InventoryApiEndpoints {
  * GET /inventory
  *
  * Supports filtering by:
- * - unit: Unit (e.g., 'kg', 'liter', 'piece')
+ * - unit: InventoryUnit enum (KG | PIECE | LITER | OTHER)
  * - branchId: UUID (accountants auto-filtered to their branch)
- * - autoAdded: boolean (filter manually vs auto-added items)
- * - search: string (searches name, notes)
- * - page: number (default: 1)
- * - limit: number (default: 50)
+ * - search: string (searches name)
+ * - page: string (default: 1)
+ * - limit: string (default: 10)
  *
  * Backend behavior:
  * - Accountants: Auto-filtered to their assigned branch
  * - Admins: Can filter by any branch or see all
- * - Results ordered by name ASC
- * - Includes consumption history if requested
+ * - Results ordered by createdAt DESC
  *
  * @param filters - Optional query filters
  * @returns PaginatedResponse<InventoryItem> with items and pagination meta
@@ -90,19 +94,17 @@ export const getOne = (id: string): Promise<InventoryItem> => {
  * POST /inventory
  *
  * Backend validation (from CreateInventoryDto):
- * - name: Required, string, trimmed, escaped
- * - quantity: Required, >= 0
- * - unit: Required, string (e.g., 'kg', 'liter', 'piece')
- * - costPerUnit: Required, >= 0
- * - notes: Optional, text
- * - branchId: Auto-set from user for accountants, required for admins
+ * - name: Required, 2+ chars
+ * - quantity: Optional (default: 0), min: 0
+ * - unit: Required, InventoryUnit enum (KG | PIECE | LITER | OTHER)
+ * - costPerUnit: Optional (default: 0), min: 0
+ * - sellingPrice: Optional, min: 0 or null
+ * - notes: Optional
+ * - branchId: Required for admins, accountants use their branch
  *
  * Backend behavior:
  * - Accountants: branchId auto-set from their assignment
  * - Admins: Must provide branchId
- * - Sets autoAdded to false (manual inventory item)
- * - Calculates totalValue = quantity * costPerUnit
- * - Emits WebSocket event for real-time updates
  *
  * @param data - CreateInventoryInput
  * @returns Created InventoryItem with relations
@@ -120,18 +122,15 @@ export const create = (data: CreateInventoryInput): Promise<InventoryItem> => {
  * PATCH /inventory/:id
  *
  * Backend allows partial updates of:
- * - name: Optional, string
+ * - name: Optional
  * - quantity: Optional, >= 0
- * - unit: Optional, string
+ * - unit: Optional, InventoryUnit enum
  * - costPerUnit: Optional, >= 0
- * - notes: Optional, text
+ * - sellingPrice: Optional, >= 0 or null
+ * - notes: Optional
  *
  * Backend restrictions:
- * - Cannot change branchId
- * - Cannot change autoAdded flag
- * - Cannot change createdBy
  * - Accountants can only update their branch's items
- * - Auto-updates totalValue on quantity or costPerUnit change
  *
  * @param id - InventoryItem UUID
  * @param data - UpdateInventoryInput (partial fields)
@@ -146,20 +145,16 @@ export const update = (id: string, data: UpdateInventoryInput): Promise<Inventor
 };
 
 /**
- * Delete inventory item
+ * Delete inventory item (soft delete)
  * DELETE /inventory/:id
- *
- * Permanently deletes inventory item
- * Cannot delete items with consumption history
  *
  * Backend behavior:
  * - Accountants can only delete their branch's items
- * - Cannot delete items referenced in consumption history
- * - Audit log entry created
+ * - Soft deletes (sets deletedAt, isDeleted)
  *
  * @param id - InventoryItem UUID
  * @returns void
- * @throws ApiError on 401, 403 (wrong branch), 404 (not found), 409 (has consumption history)
+ * @throws ApiError on 401, 403 (wrong branch), 404 (not found)
  */
 export const deleteInventory = (id: string): Promise<void> => {
   return apiClient.delete<void>({
@@ -167,192 +162,97 @@ export const deleteInventory = (id: string): Promise<void> => {
   });
 };
 
+// ============================================
+// CONSUMPTION METHODS (ADMIN ONLY)
+// ============================================
+
 /**
- * Get total inventory value for a branch
- * GET /inventory/value?branchId
+ * Record consumption/damage of an inventory item
+ * POST /inventory/:id/consume
  *
- * Calculates total value of all inventory items:
- * Sum of (quantity * costPerUnit) for all items
+ * Admin only - decreases inventory without creating transaction
+ *
+ * Backend validation (from RecordConsumptionDto):
+ * - quantity: Required, min: 0.001
+ * - unit: Required, must match inventory item's unit
+ * - reason: Optional string (e.g., "انتهاء صلاحية", "تلف")
+ * - consumedAt: Required, ISO date string
  *
  * Backend behavior:
- * - Accountants: Auto-filtered to their branch
- * - Admins: Can get value for any branch or all branches
- * - Returns total value as number
- *
- * @param branchId - Optional branch UUID (admins only)
- * @returns number - Total inventory value
- * @throws ApiError on 401 (not authenticated)
- */
-export const getValue = (branchId?: string): Promise<number> => {
-  return apiClient.get<number>({
-    url: InventoryApiEndpoints.Value,
-    params: branchId ? { branchId } : undefined,
-  });
-};
-
-// ============================================
-// HELPER METHODS
-// ============================================
-
-/**
- * Get all inventory items without pagination (for exports, reports)
- * GET /inventory?limit=10000
- *
- * Warning: Use with caution on large datasets
- * Consider using pagination for better performance
- *
- * @param filters - Optional query filters (without page/limit)
- * @returns InventoryItem[] array
- * @throws ApiError on 401
- */
-export const getAllUnpaginated = (
-  filters?: Omit<InventoryQueryFilters, 'page' | 'limit'>
-): Promise<InventoryItem[]> => {
-  return apiClient
-    .get<PaginatedResponse<InventoryItem>>({
-      url: InventoryApiEndpoints.Base,
-      params: { ...filters, limit: 10000 },
-    })
-    .then((response) => {
-      // Extract data from paginated response
-      return response.data;
-    });
-};
-
-/**
- * Get only manually added inventory items
- * GET /inventory?autoAdded=false
- *
- * Convenience method for filtering by autoAdded flag
- *
- * @param filters - Optional additional filters
- * @returns PaginatedResponse<InventoryItem>
- * @throws ApiError on 401
- */
-export const getManualItems = (
-  filters?: Omit<InventoryQueryFilters, 'autoAdded'>
-): Promise<PaginatedResponse<InventoryItem>> => {
-  return getAll({
-    ...filters,
-    autoAdded: false,
-  });
-};
-
-/**
- * Get only auto-added inventory items
- * GET /inventory?autoAdded=true
- *
- * Convenience method for filtering by autoAdded flag
- *
- * @param filters - Optional additional filters
- * @returns PaginatedResponse<InventoryItem>
- * @throws ApiError on 401
- */
-export const getAutoItems = (
-  filters?: Omit<InventoryQueryFilters, 'autoAdded'>
-): Promise<PaginatedResponse<InventoryItem>> => {
-  return getAll({
-    ...filters,
-    autoAdded: true,
-  });
-};
-
-/**
- * Get inventory items by unit type
- * GET /inventory?unit=X
- *
- * Convenience method for filtering by unit
- *
- * @param unit - Unit string (e.g., 'kg', 'liter', 'piece')
- * @param filters - Optional additional filters
- * @returns PaginatedResponse<InventoryItem>
- * @throws ApiError on 401
- */
-export const getByUnit = (
-  unit: string,
-  filters?: Omit<InventoryQueryFilters, 'unit'>
-): Promise<PaginatedResponse<InventoryItem>> => {
-  return getAll({
-    ...filters,
-    unit,
-  });
-};
-
-/**
- * Get low stock items (quantity < threshold)
- * GET /inventory?page=1&limit=10000
- *
- * Note: Backend doesn't have a lowStock filter, so we fetch all and filter client-side
- * For large datasets, consider adding backend support
- *
- * @param threshold - Quantity threshold (default: 10)
- * @param filters - Optional additional filters
- * @returns InventoryItem[] - Items with quantity below threshold
- * @throws ApiError on 401
- */
-export const getLowStock = (
-  threshold: number = 10,
-  filters?: Omit<InventoryQueryFilters, 'page' | 'limit'>
-): Promise<InventoryItem[]> => {
-  return getAllUnpaginated(filters).then((items) => {
-    return items.filter((item) => item.quantity < threshold);
-  });
-};
-
-/**
- * Update inventory item quantity
- * PATCH /inventory/:id
- *
- * Helper method to update only quantity
+ * - Validates quantity doesn't exceed current inventory
+ * - Creates InventoryConsumption record
+ * - Decreases inventory quantity
+ * - Logs audit trail
  *
  * @param id - InventoryItem UUID
- * @param quantity - New quantity value
- * @returns Updated InventoryItem
- * @throws ApiError on 400, 401, 403, 404
+ * @param data - RecordConsumptionInput
+ * @returns Created InventoryConsumption with relations
+ * @throws ApiError on 400 (validation/insufficient quantity), 401, 403 (not admin), 404 (not found)
  */
-export const updateQuantity = (id: string, quantity: number): Promise<InventoryItem> => {
-  return update(id, { quantity });
+export const recordConsumption = (
+  id: string,
+  data: RecordConsumptionInput
+): Promise<InventoryConsumption> => {
+  return apiClient.post<InventoryConsumption>({
+    url: `/inventory/${id}/consume`,
+    data,
+  });
 };
 
 /**
- * Adjust inventory item quantity (increment/decrement)
- * PATCH /inventory/:id
- *
- * Helper method to adjust quantity by delta
+ * Get consumption history for a specific inventory item
+ * GET /inventory/:id/consumption-history
  *
  * @param id - InventoryItem UUID
- * @param delta - Quantity change (positive to add, negative to subtract)
- * @returns Updated InventoryItem
- * @throws ApiError on 400, 401, 403, 404
+ * @param startDate - Optional start date filter (ISO string)
+ * @param endDate - Optional end date filter (ISO string)
+ * @returns Array of ConsumptionHistoryItem with recorder and branch relations
+ * @throws ApiError on 401, 403 (wrong branch for accountant), 404 (not found)
  */
-export const adjustQuantity = async (id: string, delta: number): Promise<InventoryItem> => {
-  const item = await getOne(id);
-  const newQuantity = Math.max(0, item.quantity + delta);
-  return update(id, { quantity: newQuantity });
+export const getConsumptionHistory = (
+  id: string,
+  startDate?: string,
+  endDate?: string
+): Promise<ConsumptionHistoryItem[]> => {
+  return apiClient.get<ConsumptionHistoryItem[]>({
+    url: `/inventory/${id}/consumption-history`,
+    params: { startDate, endDate },
+  });
+};
+
+/**
+ * Get daily consumption summary
+ * GET /inventory/consumption/daily
+ *
+ * @param date - Date to get summary for (ISO string, e.g., "2024-01-15")
+ * @param branchId - Optional branch filter (Admin only, accountants auto-filtered)
+ * @returns DailyConsumptionSummary with total count and items consumed
+ * @throws ApiError on 401, 403 (accountant without branch)
+ */
+export const getDailyConsumption = (
+  date: string,
+  branchId?: string
+): Promise<DailyConsumptionSummary> => {
+  return apiClient.get<DailyConsumptionSummary>({
+    url: '/inventory/consumption/daily',
+    params: { date, branchId },
+  });
 };
 
 // ============================================
 // EXPORTS
 // ============================================
 
-/**
- * Inventory service object with all methods
- * Use named exports or default object
- */
 const inventoryService = {
   getAll,
-  getAllUnpaginated,
   getOne,
   create,
   update,
   delete: deleteInventory,
-  getValue,
-  getManualItems,
-  getAutoItems,
-  getByUnit,
-  getLowStock,
-  updateQuantity,
-  adjustQuantity,
+  // Consumption methods (Admin only)
+  recordConsumption,
+  getConsumptionHistory,
+  getDailyConsumption,
 };
 
 export default inventoryService;

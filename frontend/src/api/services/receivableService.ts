@@ -17,13 +17,13 @@
 import apiClient from '../apiClient';
 import type {
   AccountReceivable,
-  AccountReceivableWithPayments,
+  AccountReceivableWithCollections,
   CreateReceivableDto,
   UpdateReceivableDto,
   CollectReceivableDto,
   QueryReceivablesDto,
   ReceivablesSummary,
-} from '#/entity';
+} from '#/receivables.types';
 import type { PaginatedResponse } from '#/api';
 
 // ============================================
@@ -88,11 +88,11 @@ export const getAll = (
  * - Returns receivable with full payments array
  *
  * @param id - Receivable UUID
- * @returns AccountReceivableWithPayments (includes payments array)
+ * @returns AccountReceivableWithCollections (includes payments array)
  * @throws ApiError on 404 (not found) or 403 (no access)
  */
-export const getById = (id: string): Promise<AccountReceivableWithPayments> => {
-  return apiClient.get<AccountReceivableWithPayments>({
+export const getOne = (id: string): Promise<AccountReceivableWithCollections> => {
+  return apiClient.get<AccountReceivableWithCollections>({
     url: ReceivableApiEndpoints.ById.replace(':id', id),
   });
 };
@@ -248,7 +248,7 @@ export const getSummary = (branchId?: string): Promise<ReceivablesSummary> => {
 
 const receivableService = {
   getAll,
-  getById,
+  getOne,
   create,
   update,
   remove,

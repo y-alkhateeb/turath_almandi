@@ -9,9 +9,9 @@ import { authRoutes } from './auth';
 import { dashboardRoutes } from './dashboard';
 
 // Lazy load error pages
-const Page403 = lazy(() => import('@/pages/error/403'));
-const Page404 = lazy(() => import('@/pages/error/404'));
-const Page500 = lazy(() => import('@/pages/error/500'));
+const Error403Page = lazy(() => import('@/pages/error/403'));
+const Error404Page = lazy(() => import('@/pages/error/404'));
+const Error500Page = lazy(() => import('@/pages/error/500'));
 
 export const routes: RouteObject[] = [
   // Auth routes
@@ -22,15 +22,21 @@ export const routes: RouteObject[] = [
 
   // Error pages
   {
-    path: '403',
-    element: <Page403 />,
+    path: '/403',
+    element: <Error403Page />,
   },
   {
-    path: '500',
-    element: <Page500 />,
+    path: '/404',
+    element: <Error404Page />,
   },
+  {
+    path: '/500',
+    element: <Error500Page />,
+  },
+
+  // Catch-all 404 route - must be last
   {
     path: '*',
-    element: <Page404 />,
+    element: <Error404Page />,
   },
 ];

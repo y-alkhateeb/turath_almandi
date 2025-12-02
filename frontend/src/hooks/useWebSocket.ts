@@ -13,7 +13,7 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from './useAuth';
+import { useAuth } from './api/useAuth';
 import { queryKeys } from './queries/queryKeys';
 import GLOBAL_CONFIG from '@/global-config';
 
@@ -468,39 +468,3 @@ export const useWebSocketEvent = <T extends WebSocketEventType>(
   }, [event, queryClient]);
 };
 
-/**
- * useWebSocketEvents Hook
- * Subscribe to multiple WebSocket events at once
- *
- * Note: This hook cannot be implemented using forEach with hooks
- * as it violates the rules of hooks (hooks cannot be called in loops).
- * Instead, call useWebSocketEvent multiple times explicitly for each event.
- *
- * @deprecated Use multiple useWebSocketEvent calls instead
- *
- * @param events - Array of event types to subscribe to
- * @param handler - Optional custom handler for all events
- *
- * @example
- * ```tsx
- * function Dashboard() {
- *   // Instead of useWebSocketEvents, use multiple calls:
- *   useWebSocketEvent('transaction:created', handleTransaction);
- *   useWebSocketEvent('debt:created', handleDebt);
- *   useWebSocketEvent('notification:created', handleNotification);
- *
- *   return <DashboardContent />;
- * }
- * ```
- */
-export const useWebSocketEvents = (
-  events: WebSocketEventType[],
-  handler?: (event: WebSocketEventType, payload: unknown) => void
-) => {
-  // This implementation violates rules of hooks
-  // Kept for backwards compatibility but should not be used
-  events.forEach((event) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useWebSocketEvent(event, handler ? (payload) => handler(event, payload) : undefined);
-  });
-};

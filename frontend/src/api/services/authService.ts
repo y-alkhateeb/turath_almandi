@@ -3,17 +3,34 @@
  * Handles all authentication-related API calls
  *
  * Endpoints:
- * - POST /auth/login ’ LoginResponse
- * - POST /auth/refresh ’ RefreshTokenResponse
- * - POST /auth/logout ’ void
- * - GET /auth/profile ’ User
+ * - POST /auth/login â†’ LoginResponse
+ * - POST /auth/register â†’ User (Admin only)
+ * - POST /auth/refresh â†’ RefreshTokenResponse
+ * - POST /auth/logout â†’ void
+ * - GET /auth/profile â†’ User
  *
  * All types match backend DTOs exactly. No any types.
  */
 
 import apiClient from '../apiClient';
-import type { LoginCredentials } from '#/entity';
+import type { LoginCredentials, User } from '#/entity';
 import type { LoginResponse, RefreshTokenResponse, UserProfileResponse } from '#/api';
+import type { UserRole } from '@/types/enum';
+
+// ============================================
+// INPUT TYPES
+// ============================================
+
+/**
+ * Register user input
+ * Matches backend RegisterDto exactly
+ */
+export interface RegisterInput {
+  username: string;
+  password: string;
+  role?: UserRole;
+  branchId?: string;
+}
 
 // ============================================
 // API ENDPOINTS
@@ -25,6 +42,7 @@ import type { LoginResponse, RefreshTokenResponse, UserProfileResponse } from '#
  */
 export enum AuthApiEndpoints {
   Login = '/auth/login',
+  Register = '/auth/register',
   Refresh = '/auth/refresh',
   Logout = '/auth/logout',
   Profile = '/auth/profile',
@@ -46,6 +64,21 @@ export const login = (credentials: LoginCredentials): Promise<LoginResponse> => 
   return apiClient.post<LoginResponse>({
     url: AuthApiEndpoints.Login,
     data: credentials,
+  });
+};
+
+/**
+ * Register new user (Admin only)
+ * POST /auth/register
+ *
+ * @param data - RegisterInput with username, password, role, branchId
+ * @returns Created User
+ * @throws ApiError on 400 (validation), 401 (not authenticated), 403 (not admin), 409 (username exists)
+ */
+export const register = (data: RegisterInput): Promise<User> => {
+  return apiClient.post<User>({
+    url: AuthApiEndpoints.Register,
+    data,
   });
 };
 
@@ -102,6 +135,7 @@ export const getProfile = (): Promise<UserProfileResponse> => {
  */
 const authService = {
   login,
+  register,
   refreshToken,
   logout,
   getProfile,

@@ -227,37 +227,6 @@ export const useRememberMe = (): boolean => {
 };
 
 // ============================================
-// HELPER SELECTORS (DEPRECATED - Use useAuth instead)
-// ============================================
-
-/**
- * @deprecated Use `useAuth().isAuthenticated` instead
- * Check if user is authenticated
- */
-export const useIsAuthenticated = (): boolean => {
-  const tokens = useUserToken();
-  return !!tokens.accessToken;
-};
-
-/**
- * @deprecated Use `useAuth().isAdmin` instead
- * Check if user is admin
- */
-export const useIsAdmin = (): boolean => {
-  const user = useUserInfo();
-  return user?.role === 'ADMIN';
-};
-
-/**
- * @deprecated Use `useAuth().isAccountant` instead
- * Check if user is accountant
- */
-export const useIsAccountant = (): boolean => {
-  const user = useUserInfo();
-  return user?.role === 'ACCOUNTANT';
-};
-
-// ============================================
 // EXPORTS
 // ============================================
 

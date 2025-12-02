@@ -1,27 +1,7 @@
-export interface User {
-  id: string;
-  username: string;
-  role: 'ADMIN' | 'ACCOUNTANT';
-  branchId: string | null;
-  isActive: boolean;
-  branch?: {
-    id: string;
-    name: string;
-    location?: string;
-  } | null;
-}
+import type { User, LoginCredentials, AuthResponse } from './entity';
 
-export interface LoginCredentials {
-  username: string;
-  password: string;
-  rememberMe?: boolean;
-}
+export type { User, LoginCredentials, AuthResponse };
 
-export interface AuthResponse {
-  user: User;
-  access_token: string;
-  refresh_token: string;
-}
 
 export interface AuthState {
   user: User | null;

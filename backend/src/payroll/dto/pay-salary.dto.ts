@@ -1,5 +1,5 @@
-import { IsString, IsNotEmpty, IsUUID, IsDateString, IsEnum, IsOptional, IsNumber, Min } from 'class-validator';
-import { PaymentMethod } from '@prisma/client';
+import { IsString, IsNotEmpty, IsUUID, IsDateString, Equals, IsOptional, MaxLength } from 'class-validator';
+import { Trim, Escape } from 'class-sanitizer';
 
 export class PaySalaryDto {
   @IsUUID()
@@ -14,7 +14,14 @@ export class PaySalaryDto {
   @IsNotEmpty({ message: 'يجب تحديد شهر الراتب (YYYY-MM)' })
   salaryMonth: string; // Format: YYYY-MM
 
-  @IsEnum(PaymentMethod, { message: 'طريقة الدفع غير صالحة' })
+  @Equals('CASH', { message: 'طريقة الدفع يجب أن تكون نقدية فقط' })
   @IsNotEmpty({ message: 'طريقة الدفع مطلوبة' })
-  paymentMethod: PaymentMethod;
+  paymentMethod: 'CASH';
+
+  @Trim()
+  @Escape()
+  @IsString()
+  @IsOptional()
+  @MaxLength(500, { message: 'الملاحظات يجب أن لا تتجاوز 500 حرف' })
+  notes?: string;
 }

@@ -5,9 +5,10 @@ import {
   IsEnum,
   IsEmail,
   IsUUID,
-  IsDecimal,
+  IsNumber,
   MaxLength,
   Matches,
+  Min,
 } from 'class-validator';
 import { Trim, Escape } from 'class-sanitizer';
 import { ContactType } from '../../common/types/prisma-enums';
@@ -43,7 +44,8 @@ export class CreateContactDto {
   @IsOptional()
   address?: string;
 
-  @IsDecimal({ decimal_digits: '0,2' }, { message: 'حد الائتمان يجب أن يكون رقماً صالحاً' })
+  @IsNumber({}, { message: 'حد الائتمان يجب أن يكون رقماً صالحاً' })
+  @Min(0, { message: 'حد الائتمان يجب أن يكون صفراً أو أكثر' })
   @IsOptional()
   creditLimit?: number;
 

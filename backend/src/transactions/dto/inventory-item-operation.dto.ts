@@ -24,6 +24,15 @@ export class InventoryItemOperationDto {
   itemId: string;
 
   /**
+   * معرف الوحدة الفرعية (اختياري)
+   * يستخدم عند البيع بوحدة فرعية مثل نصف فروج أو ربع فروج
+   * @example '550e8400-e29b-41d4-a716-446655440001'
+   */
+  @IsOptional()
+  @IsUUID()
+  subUnitId?: string;
+
+  /**
    * الكمية (شراء أو صرف)
    * @example 10.5
    * @minimum 0.001

@@ -23,7 +23,7 @@ import type {
   PayPayableDto,
   QueryPayablesDto,
   PayablesSummary,
-} from '#/entity';
+} from '#/payables.types';
 import type { PaginatedResponse } from '#/api';
 
 // ============================================

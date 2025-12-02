@@ -16,7 +16,7 @@ import { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUserToken } from '@/store/userStore';
 import { useHydration } from '@/hooks/useHydration';
-import { PageLoading } from '@/components/loading';
+import { PageLoading } from '@/components/common';
 
 export function LoginAuthGuard() {
   const navigate = useNavigate();

@@ -14,7 +14,7 @@ export function SimpleLayout() {
     >
       {/* Logo Header */}
       <div className="absolute top-6 right-6">
-        <Logo size="lg" linkTo="/" />
+        <Logo size="lg" />
       </div>
 
       {/* Content */}

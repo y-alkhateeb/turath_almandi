@@ -1,88 +1,120 @@
-/**
- * Logo Component
- * Application logo with RTL support and variants
- */
+import { cn } from '@/lib/utils';
 
-import { Link } from 'react-router-dom';
-import { cn } from '@/utils';
-import GLOBAL_CONFIG from '@/global-config';
-
-export interface LogoProps {
+interface LogoProps {
   className?: string;
-  variant?: 'default' | 'minimal' | 'image';
-  size?: 'sm' | 'md' | 'lg';
-  linkTo?: string;
-  onClick?: () => void;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  showText?: boolean;
 }
 
 const sizeClasses = {
-  sm: 'text-xl',
-  md: 'text-2xl',
-  lg: 'text-3xl',
+  sm: 'h-8 w-8',
+  md: 'h-12 w-12',
+  lg: 'h-16 w-16',
+  xl: 'h-24 w-24',
 };
 
-const imageSizeClasses = {
-  sm: 'h-8',
-  md: 'h-10',
-  lg: 'h-12',
+const textSizeClasses = {
+  sm: 'text-lg',
+  md: 'text-xl',
+  lg: 'text-2xl',
+  xl: 'text-3xl',
 };
 
-/**
- * Logo component
- *
- * @example
- * <Logo />
- * <Logo variant="minimal" size="sm" />
- * <Logo variant="image" size="lg" />
- * <Logo linkTo="/dashboard" />
- */
-export function Logo({
-  className,
-  variant = 'default',
-  size = 'md',
-  linkTo = '/',
-  onClick,
-}: LogoProps) {
-  const content = (
-    <div
-      className={cn('flex items-center gap-2 font-bold', variant !== 'image' && sizeClasses[size], className)}
-      onClick={onClick}
-    >
-      {/* Image variant - uses static logo */}
-      {variant === 'image' && GLOBAL_CONFIG.logoUrl && (
-        <img
-          src={GLOBAL_CONFIG.logoUrl}
-          alt={GLOBAL_CONFIG.appName}
-          className={cn('object-contain', imageSizeClasses[size])}
+// API base URL for logo image
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const LOGO_URL = `${API_URL}/uploads/app-assets/logo.jpg`;
+
+export function Logo({ className, size = 'md', showText = true }: LogoProps) {
+  return (
+    <div className={cn('flex items-center gap-3', className)}>
+      {/* Logo Image */}
+      <img
+        src={LOGO_URL}
+        alt="تراث المندي"
+        className={cn(sizeClasses[size], 'object-contain rounded-lg')}
+        onError={(e) => {
+          // Fallback to SVG if image fails to load
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+        }}
+      />
+
+      {/* Fallback SVG Logo (hidden by default) */}
+      <svg
+        viewBox="0 0 100 100"
+        className={cn(sizeClasses[size], 'hidden')}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="50"
+          cy="50"
+          r="48"
+          className="fill-primary/10 stroke-primary"
+          strokeWidth="2"
         />
-      )}
+        <path
+          d="M25 45 C25 45 20 75 30 82 C35 85 65 85 70 82 C80 75 75 45 75 45"
+          className="fill-primary/20 stroke-primary"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <ellipse
+          cx="50"
+          cy="45"
+          rx="27"
+          ry="8"
+          className="fill-primary stroke-primary"
+          strokeWidth="2"
+        />
+        <path
+          d="M45 38 Q50 32 55 38"
+          className="stroke-primary"
+          strokeWidth="3"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M35 28 Q33 22 35 18"
+          className="stroke-secondary"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M50 25 Q48 18 50 12"
+          className="stroke-secondary"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <path
+          d="M65 28 Q67 22 65 18"
+          className="stroke-secondary"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
 
-      {/* Text variants */}
-      {variant !== 'image' && (
-        <>
-          {/* Logo Icon */}
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-brand">
-            <span className="text-white text-lg">ت</span>
-          </div>
-
-          {/* Logo Text */}
-          {variant === 'default' && (
-            <span className="bg-gradient-to-l from-brand-600 to-brand-500 bg-clip-text text-transparent">
-              {GLOBAL_CONFIG.appName}
-            </span>
-          )}
-        </>
+      {showText && (
+        <div className="flex flex-col">
+          <span
+            className={cn(
+              'font-bold text-foreground leading-tight',
+              textSizeClasses[size]
+            )}
+          >
+            تراث المندي
+          </span>
+          <span className="text-xs text-muted-foreground">
+            Turath Al-Mandi
+          </span>
+        </div>
       )}
     </div>
   );
-
-  if (linkTo) {
-    return (
-      <Link to={linkTo} className="block">
-        {content}
-      </Link>
-    );
-  }
-
-  return content;
 }
+
+export default Logo;

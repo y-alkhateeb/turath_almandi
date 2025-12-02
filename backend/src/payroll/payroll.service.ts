@@ -140,8 +140,85 @@ export class PayrollService {
   }
 
   async paySalary(dto: PaySalaryDto, user: RequestUser) {
-    // This will be the final step of Phase 2
-    // It will calculate net salary, create a transaction, and update adjustments status to PROCESSED
-    throw new Error('Method not implemented yet. This is the next step.');
+    // 1. Get salary details (reuse existing method)
+    const salaryDetails = await this.getEmployeeSalaryDetails(
+      dto.employeeId,
+      dto.salaryMonth,
+      user,
+    );
+
+    // 2. Validate net salary is positive
+    if (salaryDetails.summary.netSalary <= 0) {
+      throw new BadRequestException('صافي الراتب يجب أن يكون أكبر من صفر');
+    }
+
+    // 3. Use Prisma transaction for atomicity
+    return this.prisma.$transaction(async (prisma) => {
+      // 4. Create SalaryPayment record
+      const defaultNotes = `صرف راتب شهر ${dto.salaryMonth}`;
+      const salaryPayment = await prisma.salaryPayment.create({
+        data: {
+          employeeId: dto.employeeId,
+          amount: salaryDetails.summary.netSalary,
+          paymentDate: new Date(dto.paymentDate),
+          notes: dto.notes || defaultNotes,
+          recordedBy: user.id,
+        },
+      });
+
+      // 5. Create expense transaction
+      const transaction = await this.transactionsService.create(
+        {
+          type: TransactionType.EXPENSE,
+          amount: salaryDetails.summary.netSalary,
+          category: 'EMPLOYEE_SALARIES',
+          date: dto.paymentDate,
+          employeeId: dto.employeeId,
+          employeeVendorName: `راتب: ${salaryDetails.employee.name} - ${dto.salaryMonth}`,
+          notes: dto.notes || defaultNotes,
+          branchId: salaryDetails.employee.branchId,
+          paymentMethod: 'CASH',
+        },
+        user,
+      );
+
+      // 6. Update SalaryPayment with transaction ID
+      await prisma.salaryPayment.update({
+        where: { id: salaryPayment.id },
+        data: { transactionId: transaction.id },
+      });
+
+      // 7. Update all PENDING adjustments to PROCESSED
+      const adjustmentIds = salaryDetails.pendingAdjustments.map((adj) => adj.id);
+
+      if (adjustmentIds.length > 0) {
+        await prisma.employeeAdjustment.updateMany({
+          where: { id: { in: adjustmentIds } },
+          data: {
+            status: EmployeeAdjustmentStatus.PROCESSED,
+            salaryPaymentId: salaryPayment.id,
+          },
+        });
+      }
+
+      // 8. Audit log
+      await this.auditLogService.logCreate(
+        user.id,
+        AuditEntityType.SALARY_PAYMENT,
+        salaryPayment.id,
+        { salaryPayment, transaction, adjustmentsProcessed: adjustmentIds.length },
+      );
+
+      // 9. Return complete salary payment details
+      return {
+        salaryPayment: {
+          ...salaryPayment,
+          transactionId: transaction.id,
+        },
+        transaction,
+        adjustmentsProcessed: adjustmentIds.length,
+        summary: salaryDetails.summary,
+      };
+    });
   }
 }

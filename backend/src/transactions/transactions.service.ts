@@ -224,6 +224,7 @@ export class TransactionsService {
       let subtotal = 0;
       let finalAmount = 0;
 
+
       // Calculate amounts based on whether it's multi-item or single-amount
       if (hasItems) {
         // Multi-item: calculate subtotal from items
@@ -261,10 +262,66 @@ export class TransactionsService {
         }
       }
 
+      // Handle partial payment for EXPENSE transactions
+      const totalAmount = finalAmount;
+      const paidAmount = createTransactionDto.paidAmount !== undefined 
+        ? createTransactionDto.paidAmount 
+        : totalAmount;
+      const remainingAmount = totalAmount - paidAmount;
+
+      // Validate partial payment
+      if (paidAmount < 0) {
+        throw new BadRequestException('المبلغ المدفوع لا يمكن أن يكون سالباً');
+      }
+
+      if (paidAmount > totalAmount) {
+        throw new BadRequestException('المبلغ المدفوع لا يمكن أن يتجاوز المبلغ الإجمالي');
+      }
+
+      // If partial payment for EXPENSE, require contactId
+      if (createTransactionDto.type === TransactionType.EXPENSE && remainingAmount > 0) {
+        if (!createTransactionDto.contactId) {
+          throw new BadRequestException('معرف جهة الاتصال مطلوب عند الدفع الجزئي للمصروفات');
+        }
+      }
+
+      // Create AccountPayable for remaining amount if partial payment on EXPENSE
+      let linkedPayableId: string | null = null;
+      if (createTransactionDto.type === TransactionType.EXPENSE && remainingAmount > 0 && createTransactionDto.contactId) {
+        const payable = await prisma.accountPayable.create({
+          data: {
+            branchId,
+            contactId: createTransactionDto.contactId,
+            originalAmount: remainingAmount,
+            remainingAmount: remainingAmount,
+            date: formatDateForDB(createTransactionDto.date),
+            dueDate: createTransactionDto.payableDueDate 
+              ? formatDateForDB(createTransactionDto.payableDueDate) 
+              : null,
+            status: 'ACTIVE',
+            description: `دين تلقائي من معاملة ${category}`,
+            notes: createTransactionDto.notes || `المبلغ المتبقي من المعاملة`,
+            createdBy: user.id,
+          },
+        });
+
+        linkedPayableId = payable.id;
+
+        // Log payable creation
+        await this.auditLogService.logCreate(
+          user.id,
+          AuditEntityType.ACCOUNT_PAYABLE,
+          payable.id,
+          payable,
+        );
+      }
+
       // Build transaction data
       const transactionData = {
         type: createTransactionDto.type,
-        amount: finalAmount, // Final amount after discount
+        amount: paidAmount, // Amount actually paid
+        totalAmount: totalAmount !== paidAmount ? totalAmount : null, // Store total if different
+        paidAmount: totalAmount !== paidAmount ? paidAmount : null, // Store paid amount if partial
         subtotal: hasItems || createTransactionDto.discountType ? subtotal : null,
         date: formatDateForDB(createTransactionDto.date),
         paymentMethod: createTransactionDto.paymentMethod || null,
@@ -277,6 +334,8 @@ export class TransactionsService {
         branchId: branchId,
         createdBy: user.id,
         employeeId: createTransactionDto.employeeId || null,
+        contactId: createTransactionDto.contactId || null,
+        linkedPayableId: linkedPayableId,
       };
 
       const transaction = await prisma.transaction.create({

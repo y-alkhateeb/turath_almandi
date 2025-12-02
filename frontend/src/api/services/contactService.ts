@@ -21,7 +21,7 @@ import type {
   UpdateContactDto,
   QueryContactsDto,
   ContactsSummary,
-} from '#/entity';
+} from '#/contacts.types';
 import type { PaginatedResponse } from '#/api';
 
 // ============================================

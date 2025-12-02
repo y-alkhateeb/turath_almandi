@@ -49,37 +49,37 @@ export const navData: NavItem[] = [
   },
   {
     title: 'جهات الاتصال',
-    path: '/management/contacts',
+    path: '/contacts',
     icon: <Icon icon="lucide:contact" size={24} />,
     caption: 'إدارة الموردين والعملاء',
     children: [
       {
         title: 'قائمة جهات الاتصال',
-        path: '/management/contacts/list',
+        path: '/contacts',
       },
     ],
   },
   {
     title: 'الحسابات الدائنة',
-    path: '/management/payables',
+    path: '/payables',
     icon: <Icon icon="lucide:arrow-up-circle" size={24} />,
     caption: 'المبالغ المستحقة للموردين',
     children: [
       {
         title: 'قائمة الحسابات الدائنة',
-        path: '/management/payables/list',
+        path: '/payables',
       },
     ],
   },
   {
     title: 'الحسابات المدينة',
-    path: '/management/receivables',
+    path: '/receivables',
     icon: <Icon icon="lucide:arrow-down-circle" size={24} />,
     caption: 'المبالغ المستحقة من العملاء',
     children: [
       {
         title: 'قائمة الحسابات المدينة',
-        path: '/management/receivables/list',
+        path: '/receivables',
       },
     ],
   },
@@ -91,11 +91,11 @@ export const navData: NavItem[] = [
     children: [
       {
         title: 'قائمة المخزون',
-        path: '/inventory/list',
+        path: '/inventory',
       },
       {
         title: 'إضافة صنف',
-        path: '/inventory/create',
+        path: '/inventory/create', // This path should now work if a route is defined for it
       },
     ],
   },
@@ -136,29 +136,29 @@ export const navData: NavItem[] = [
   },
   {
     title: 'الإعدادات',
-    path: '/management/system',
+    path: '/settings',
     icon: <Icon icon="lucide:settings" size={24} />,
     caption: 'إعدادات النظام',
     roles: [UserRole.ADMIN], // Admin only
     children: [
       {
         title: 'المستخدمين',
-        path: '/management/system/users/list',
+        path: '/settings/users',
         icon: <Icon icon="lucide:users" size={20} />,
       },
       {
         title: 'الفروع',
-        path: '/management/system/branches/list',
+        path: '/settings/branches',
         icon: <Icon icon="lucide:building" size={20} />,
       },
       {
         title: 'سجل النشاطات',
-        path: '/management/system/audit',
+        path: '/settings/audit',
         icon: <Icon icon="lucide:file-text" size={20} />,
       },
       {
         title: 'إعدادات التطبيق',
-        path: '/management/system/app',
+        path: '/settings/app',
         icon: <Icon icon="lucide:app-window" size={20} />,
       },
     ],

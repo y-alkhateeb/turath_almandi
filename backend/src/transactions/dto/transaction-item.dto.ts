@@ -1,4 +1,4 @@
-import { IsUUID, IsNotEmpty, IsNumber, IsPositive, IsEnum, IsOptional, Min } from 'class-validator';
+import { IsUUID, IsNotEmpty, IsNumber, IsPositive, IsEnum, IsOptional, Min, IsString, MaxLength } from 'class-validator';
 import { InventoryOperationType, DiscountType } from '@prisma/client';
 
 /**
@@ -29,4 +29,10 @@ export class TransactionItemDto {
   @IsNumber()
   @Min(0, { message: 'قيمة الخصم يجب أن تكون صفر أو أكبر' })
   discountValue?: number;
+
+  // Optional item-level notes
+  @IsOptional()
+  @IsString()
+  @MaxLength(500, { message: 'الملاحظة يجب أن لا تتجاوز 500 حرف' })
+  notes?: string;
 }

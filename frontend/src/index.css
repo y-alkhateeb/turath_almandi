@@ -1,96 +1,59 @@
 @import 'tailwindcss';
 
 /* ============================================
-   TURATH AL-MANDI THEME
-   Modern Design System with Light/Dark Mode
+   TURATH AL-MANDI - DESIGN SYSTEM
+   Professional Theme with shadcn/ui Support
    ============================================ */
 
 @theme {
-  /* === BRAND COLORS - GOLD === */
-  --color-brand-gold-50: #faf7f0;
-  --color-brand-gold-100: #f0e9d8;
-  --color-brand-gold-200: #e5d9bf;
-  --color-brand-gold-300: #d4af77;
-  --color-brand-gold-400: #caa87a;
-  --color-brand-gold-500: #c5a572;
-  --color-brand-gold-600: #b39461;
-  --color-brand-gold-700: #9d7f4f;
-  --color-brand-gold-800: #876a42;
-  --color-brand-gold-900: #6f5635;
+  /* ========================================
+     BRAND COLORS
+     ======================================== */
 
-  /* === BRAND COLORS - GREEN === */
-  --color-brand-green-50: #f0f5f2;
-  --color-brand-green-100: #dce8e2;
-  --color-brand-green-200: #b8d4c5;
-  --color-brand-green-300: #7fa78e;
-  --color-brand-green-400: #648c76;
-  --color-brand-green-500: #4a6f5c;
-  --color-brand-green-600: #3a5f4c;
-  --color-brand-green-700: #2f4e3d;
-  --color-brand-green-800: #253e31;
-  --color-brand-green-900: #1c2f26;
+  /* Gold - Primary Brand Color */
+  --color-gold-50: #fdfaf3;
+  --color-gold-100: #f9f0dc;
+  --color-gold-200: #f2e0b8;
+  --color-gold-300: #e9ca8a;
+  --color-gold-400: #deb05c;
+  --color-gold-500: #d4a03f;
+  --color-gold-600: #c08832;
+  --color-gold-700: #9f6a2b;
+  --color-gold-800: #82562a;
+  --color-gold-900: #6b4726;
+  --color-gold-950: #3d2513;
 
-  /* === BRAND COLORS - CREAM === */
-  --color-brand-cream-50: #fdfcfa;
-  --color-brand-cream-100: #f5f2eb;
-  --color-brand-cream-200: #ede8dc;
-  --color-brand-cream-300: #e5dfd0;
-  --color-brand-cream-400: #ddd5c4;
-  --color-brand-cream-500: #d1c7b3;
-  --color-brand-cream-600: #b8aa92;
-  --color-brand-cream-700: #9a8b72;
-  --color-brand-cream-800: #7a6d5a;
-  --color-brand-cream-900: #5c5242;
+  /* Green - Secondary Brand Color */
+  --color-green-50: #f3faf6;
+  --color-green-100: #e0f3ea;
+  --color-green-200: #c3e6d6;
+  --color-green-300: #97d2b8;
+  --color-green-400: #64b694;
+  --color-green-500: #419a77;
+  --color-green-600: #307c60;
+  --color-green-700: #28634e;
+  --color-green-800: #234f40;
+  --color-green-900: #1f4236;
+  --color-green-950: #0d251e;
 
-  /* === PRIMARY COLORS (Gold) === */
-  --color-primary-50: #faf7f0;
-  --color-primary-100: #f0e9d8;
-  --color-primary-200: #e5d9bf;
-  --color-primary-300: #d4af77;
-  --color-primary-400: #caa87a;
-  --color-primary-500: #c5a572;
-  --color-primary-600: #b39461;
-  --color-primary-700: #9d7f4f;
-  --color-primary-800: #876a42;
-  --color-primary-900: #6f5635;
+  /* Cream - Background Tones */
+  --color-cream-50: #fefdfb;
+  --color-cream-100: #fcf9f3;
+  --color-cream-200: #f8f2e6;
+  --color-cream-300: #f2e8d5;
+  --color-cream-400: #e9d9be;
+  --color-cream-500: #dcc7a3;
+  --color-cream-600: #c9ad82;
+  --color-cream-700: #b2926a;
+  --color-cream-800: #92785a;
+  --color-cream-900: #78634c;
+  --color-cream-950: #403327;
 
-  /* === SECONDARY COLORS (Green) === */
-  --color-secondary-50: #f0f5f2;
-  --color-secondary-100: #dce8e2;
-  --color-secondary-200: #b8d4c5;
-  --color-secondary-300: #7fa78e;
-  --color-secondary-400: #648c76;
-  --color-secondary-500: #4a6f5c;
-  --color-secondary-600: #3a5f4c;
-  --color-secondary-700: #2f4e3d;
-  --color-secondary-800: #253e31;
-  --color-secondary-900: #1c2f26;
+  /* ========================================
+     SEMANTIC COLORS
+     ======================================== */
 
-  /* === ACCENT COLORS (Light Gold) === */
-  --color-accent-50: #faf7f0;
-  --color-accent-100: #f0e9d8;
-  --color-accent-200: #e5d9bf;
-  --color-accent-300: #d4af77;
-  --color-accent-400: #caa87a;
-  --color-accent-500: #d4af77;
-  --color-accent-600: #c19f65;
-  --color-accent-700: #a88953;
-  --color-accent-800: #8c7145;
-  --color-accent-900: #6f5a38;
-
-  /* === LEGACY BRAND (Orange) === */
-  --color-brand-50: #fef7f0;
-  --color-brand-100: #fde6cf;
-  --color-brand-200: #fbd4a8;
-  --color-brand-300: #f8a35d;
-  --color-brand-400: #f58b3a;
-  --color-brand-500: #e47020;
-  --color-brand-600: #c45515;
-  --color-brand-700: #a34412;
-  --color-brand-800: #833610;
-  --color-brand-900: #662e0e;
-
-  /* === SUCCESS COLORS === */
+  /* Success */
   --color-success-50: #f0fdf4;
   --color-success-100: #dcfce7;
   --color-success-200: #bbf7d0;
@@ -101,8 +64,9 @@
   --color-success-700: #15803d;
   --color-success-800: #166534;
   --color-success-900: #14532d;
+  --color-success-950: #052e16;
 
-  /* === DANGER COLORS === */
+  /* Danger/Destructive */
   --color-danger-50: #fef2f2;
   --color-danger-100: #fee2e2;
   --color-danger-200: #fecaca;
@@ -113,8 +77,9 @@
   --color-danger-700: #b91c1c;
   --color-danger-800: #991b1b;
   --color-danger-900: #7f1d1d;
+  --color-danger-950: #450a0a;
 
-  /* === WARNING COLORS === */
+  /* Warning */
   --color-warning-50: #fffbeb;
   --color-warning-100: #fef3c7;
   --color-warning-200: #fde68a;
@@ -125,60 +90,181 @@
   --color-warning-700: #b45309;
   --color-warning-800: #92400e;
   --color-warning-900: #78350f;
+  --color-warning-950: #451a03;
 
-  /* === NEUTRAL COLORS === */
-  --color-gray-50: #fafaf9;
-  --color-gray-100: #f5f5f4;
-  --color-gray-200: #e7e5e4;
-  --color-gray-300: #d6d3d1;
-  --color-gray-400: #a8a29e;
-  --color-gray-500: #78716c;
-  --color-gray-600: #57534e;
-  --color-gray-700: #44403c;
-  --color-gray-800: #292524;
-  --color-gray-900: #1c1917;
+  /* Info */
+  --color-info-50: #eff6ff;
+  --color-info-100: #dbeafe;
+  --color-info-200: #bfdbfe;
+  --color-info-300: #93c5fd;
+  --color-info-400: #60a5fa;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+  --color-info-700: #1d4ed8;
+  --color-info-800: #1e40af;
+  --color-info-900: #1e3a8a;
+  --color-info-950: #172554;
+
+  /* ========================================
+     NEUTRAL COLORS
+     ======================================== */
+
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-neutral-950: #0a0a0a;
+
+  /* ========================================
+     SHADCN/UI SEMANTIC COLORS
+     ======================================== */
+
+  --color-background: var(--color-cream-50);
+  --color-foreground: var(--color-green-900);
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-green-900);
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-green-900);
+  --color-primary: var(--color-gold-500);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-green-600);
+  --color-secondary-foreground: #ffffff;
+  --color-muted: var(--color-cream-100);
+  --color-muted-foreground: var(--color-neutral-500);
+  --color-accent: var(--color-gold-100);
+  --color-accent-foreground: var(--color-gold-900);
+  --color-destructive: var(--color-danger-600);
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--color-cream-300);
+  --color-input: var(--color-cream-300);
+  --color-ring: var(--color-gold-400);
+
+  /* Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 /* ============================================
-   GLOBAL STYLES
+   CSS VARIABLES - LIGHT/DARK MODE
    ============================================ */
 
 @layer base {
-  * {
-    @apply transition-colors duration-300;
-  }
-
   :root {
-    /* Light mode default */
-    --bg-primary: theme('colors.brand-cream.100');
+    /* shadcn/ui variables */
+    --background: 40 43% 99%;
+    --foreground: 152 25% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 152 25% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 152 25% 17%;
+    --primary: 39 62% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 152 44% 34%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 40 33% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 39 75% 92%;
+    --accent-foreground: 39 62% 30%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 30% 88%;
+    --input: 40 30% 88%;
+    --ring: 39 68% 58%;
+    --radius: 0.5rem;
+
+    /* Custom variables */
+    --bg-primary: var(--color-cream-50);
     --bg-secondary: #ffffff;
-    --bg-tertiary: theme('colors.brand-cream.200');
-    --text-primary: theme('colors.brand-green.600');
-    --text-secondary: theme('colors.brand-green.400');
-    --border-color: theme('colors.brand-gold.500');
+    --bg-tertiary: var(--color-cream-100);
+    --bg-muted: var(--color-neutral-100);
+    --text-primary: var(--color-green-900);
+    --text-secondary: var(--color-green-700);
+    --text-muted: var(--color-neutral-500);
+    --text-inverse: #ffffff;
+    --border-default: var(--color-cream-300);
+    --border-muted: var(--color-cream-200);
+    --border-accent: var(--color-gold-400);
+    --interactive-primary: var(--color-gold-500);
+    --interactive-primary-hover: var(--color-gold-600);
+    --interactive-secondary: var(--color-green-600);
+    --interactive-secondary-hover: var(--color-green-700);
+    --ring-color: var(--color-gold-400);
+
+    /* Chart colors */
+    --chart-1: 39 62% 54%;
+    --chart-2: 152 44% 34%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 199 89% 48%;
   }
 
   .dark {
-    /* Dark mode */
-    --bg-primary: #0a0e0d;
-    --bg-secondary: #141a18;
-    --bg-tertiary: #1f2825;
-    --text-primary: #f5f2eb;
-    --text-secondary: #d4af77;
-    --border-color: rgba(197, 165, 114, 0.3);
+    /* shadcn/ui variables - Dark Mode */
+    --background: 152 40% 6%;
+    --foreground: 40 33% 96%;
+    --card: 152 35% 10%;
+    --card-foreground: 40 33% 96%;
+    --popover: 152 35% 10%;
+    --popover-foreground: 40 33% 96%;
+    --primary: 39 68% 58%;
+    --primary-foreground: 152 40% 6%;
+    --secondary: 152 30% 40%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 152 30% 15%;
+    --muted-foreground: 40 20% 65%;
+    --accent: 39 50% 20%;
+    --accent-foreground: 39 68% 70%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 152 25% 20%;
+    --input: 152 25% 20%;
+    --ring: 39 68% 58%;
+
+    /* Custom variables - Dark Mode */
+    --bg-primary: var(--color-green-950);
+    --bg-secondary: var(--color-green-900);
+    --bg-tertiary: var(--color-green-800);
+    --bg-muted: var(--color-neutral-800);
+    --text-primary: var(--color-cream-100);
+    --text-secondary: var(--color-cream-300);
+    --text-muted: var(--color-neutral-400);
+    --text-inverse: var(--color-green-950);
+    --border-default: var(--color-green-700);
+    --border-muted: var(--color-green-800);
+    --border-accent: var(--color-gold-500);
+    --interactive-primary: var(--color-gold-400);
+    --interactive-primary-hover: var(--color-gold-500);
+    --interactive-secondary: var(--color-green-400);
+    --interactive-secondary-hover: var(--color-green-500);
+    --ring-color: var(--color-gold-500);
+
+    /* Chart colors - Dark Mode */
+    --chart-1: 39 68% 58%;
+    --chart-2: 152 44% 50%;
+    --chart-3: 142 71% 55%;
+    --chart-4: 43 96% 66%;
+    --chart-5: 199 89% 58%;
+  }
+
+  /* ========================================
+     BASE STYLES
+     ======================================== */
+
+  * {
+    @apply border-border;
   }
 
   body {
-    @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
-    font-family:
-      'Cairo',
-      'Tajawal',
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      'Helvetica Neue',
-      Arial,
-      sans-serif;
+    @apply bg-background text-foreground;
+    font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
     direction: rtl;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -188,18 +274,23 @@
     @apply min-h-screen flex flex-col;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
     font-family: 'Cairo', sans-serif;
     font-weight: 700;
     line-height: 1.3;
   }
 
-  /* Custom scrollbar */
+  /* Selection */
+  ::selection {
+    @apply bg-gold-200 text-gold-900;
+  }
+
+  .dark ::selection {
+    @apply bg-gold-700 text-gold-100;
+  }
+
+  /* Scrollbar */
   ::-webkit-scrollbar {
     @apply w-2 h-2;
   }
@@ -209,35 +300,32 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-brand-gold-500 rounded-full;
-  }
-
-  .dark ::-webkit-scrollbar-thumb {
-    background: linear-gradient(
-      to bottom,
-      theme('colors.brand-gold.300'),
-      theme('colors.brand-gold.500')
-    );
+    @apply bg-gold-400 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-brand-gold-600;
+    @apply bg-gold-500;
   }
 
-  /* Selection */
-  ::selection {
-    @apply bg-primary-200 text-primary-900;
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-gold-600;
   }
 
-  /* Accessibility */
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gold-500;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
     }
   }
 }
@@ -246,91 +334,17 @@
    COMPONENT UTILITIES
    ============================================ */
 
-@layer components {
-  /* Card */
-  .card {
-    @apply bg-[var(--bg-secondary)] rounded-xl shadow-sm border-2 border-brand-gold-500/30;
-  }
-
-  .dark .card {
-    @apply border-[var(--border-color)] shadow-md;
-  }
-
-  /* Glass Effect */
-  .glass {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    @apply border border-white/40;
-  }
-
-  .dark .glass {
-    background: rgba(20, 26, 24, 0.85);
-    @apply border-[var(--border-color)];
-  }
-}
-
-/* ============================================
-   CUSTOM UTILITIES
-   ============================================ */
-
 @layer utilities {
-  /* Backdrop blur */
-  .backdrop-blur-glass {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  /* Animation utilities */
+  .animate-in {
+    animation: animate-in 0.2s ease-out;
   }
 
-  /* Rotation */
-  .rotate-15 {
-    transform: rotate(15deg);
+  .animate-out {
+    animation: animate-out 0.2s ease-in;
   }
 
-  .-rotate-15 {
-    transform: rotate(-15deg);
-  }
-
-  /* Shadow utilities */
-  .shadow-gold-sm {
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-  }
-
-  .shadow-gold-md {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-  }
-
-  .shadow-gold-lg {
-    box-shadow: 0 8px 30px rgba(197, 165, 114, 0.15);
-  }
-
-  .shadow-gold-glow {
-    box-shadow: 0 0 30px rgba(197, 165, 114, 0.3);
-  }
-
-  /* Animation */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes scaleIn {
+  @keyframes animate-in {
     from {
       opacity: 0;
       transform: scale(0.95);
@@ -341,30 +355,55 @@
     }
   }
 
-  @keyframes slideDown {
+  @keyframes animate-out {
     from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
       opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  /* Slide animations */
+  .slide-in-from-top {
+    animation: slide-in-from-top 0.2s ease-out;
+  }
+
+  .slide-in-from-bottom {
+    animation: slide-in-from-bottom 0.2s ease-out;
+  }
+
+  @keyframes slide-in-from-top {
+    from {
       transform: translateY(-100%);
     }
     to {
-      opacity: 1;
       transform: translateY(0);
     }
   }
 
-  .animate-fade-in {
-    animation: fadeIn 0.4s ease-out;
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 
-  .animate-slide-in-right {
-    animation: slideInRight 0.4s ease-out;
+  /* Spin animation for loading */
+  .animate-spin {
+    animation: spin 1s linear infinite;
   }
 
-  .animate-scale-in {
-    animation: scaleIn 0.3s ease-out;
-  }
-
-  .animate-slide-down {
-    animation: slideDown 0.3s ease-out;
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 }

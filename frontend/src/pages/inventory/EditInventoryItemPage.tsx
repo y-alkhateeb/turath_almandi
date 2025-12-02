@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui';
 import inventoryService from '@/api/services/inventoryService';
 import { useAuth } from '@/hooks/api/useAuth';
 import type { UpdateInventoryInput } from '@/types/entity';

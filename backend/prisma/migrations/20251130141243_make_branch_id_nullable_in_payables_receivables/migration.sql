@@ -65,13 +65,45 @@ ADD COLUMN     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
 ALTER COLUMN "id" DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE "inventory_consumption" ADD COLUMN     "deleted_at" TIMESTAMPTZ,
+-- First, update existing rows to have a valid unit from the related inventory_item
+UPDATE "inventory_consumption" ic
+SET "unit" = ii."unit"::text
+FROM "inventory_items" ii
+WHERE ic."inventory_item_id" = ii."id" AND ic."unit" IS NULL;
+
+-- Set a default for any remaining NULL values (shouldn't happen, but safety first)
+UPDATE "inventory_consumption"
+SET "unit" = 'PIECE'
+WHERE "unit" IS NULL;
+
+-- Now alter the table: add new columns and change unit type
+ALTER TABLE "inventory_consumption" 
+ADD COLUMN     "deleted_at" TIMESTAMPTZ,
 ADD COLUMN     "deleted_by" UUID,
 ADD COLUMN     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
-ALTER COLUMN "id" DROP DEFAULT,
-DROP COLUMN "unit",
-ADD COLUMN     "unit" "inventory_unit" NOT NULL,
-ALTER COLUMN "updated_at" DROP DEFAULT;
+ALTER COLUMN "id" DROP DEFAULT;
+
+-- Change unit column type from TEXT to enum
+-- First, add a temporary column with the new type
+ALTER TABLE "inventory_consumption" 
+ADD COLUMN "unit_new" "inventory_unit";
+
+-- Copy data from old column to new column
+UPDATE "inventory_consumption"
+SET "unit_new" = "unit"::"inventory_unit"
+WHERE "unit" IS NOT NULL;
+
+-- Drop the old column
+ALTER TABLE "inventory_consumption" DROP COLUMN "unit";
+
+-- Rename the new column
+ALTER TABLE "inventory_consumption" RENAME COLUMN "unit_new" TO "unit";
+
+-- Make it NOT NULL
+ALTER TABLE "inventory_consumption" ALTER COLUMN "unit" SET NOT NULL;
+
+-- Drop default from updated_at
+ALTER TABLE "inventory_consumption" ALTER COLUMN "updated_at" DROP DEFAULT;
 
 -- AlterTable
 ALTER TABLE "inventory_items" ADD COLUMN     "allow_sub_units" BOOLEAN NOT NULL DEFAULT false,

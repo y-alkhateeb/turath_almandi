@@ -62,3 +62,4 @@ export {
   DialogDescription,
 } from './dialog';
 export { Badge, badgeVariants, type BadgeProps } from './badge';
+export { Skeleton } from './skeleton';

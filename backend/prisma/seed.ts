@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { seedCurrencies } from './seeds/currencies.seed';
-import { seedDiscountReasons } from './seeds/discount-reasons.seed';
+import { seedDiscountReasons } from './seed-discount-reasons';
 
 const prisma = new PrismaClient();
 

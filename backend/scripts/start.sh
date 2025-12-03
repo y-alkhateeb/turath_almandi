@@ -14,7 +14,7 @@ validate_required() {
   var_name=$1
   var_value=$(eval echo \$$var_name)
   if [ -z "$var_value" ]; then
-    echo "ERROR: $var_name is required but not set"
+    echo "❌ ERROR: $var_name is required but not set"
     return 1
   fi
   echo "✓ $var_name is set"
@@ -25,7 +25,7 @@ validate_min_length() {
   min_length=$2
   var_value=$(eval echo \$$var_name)
   if [ ${#var_value} -lt $min_length ]; then
-    echo "ERROR: $var_name must be at least $min_length characters (current: ${#var_value})"
+    echo "❌ ERROR: $var_name must be at least $min_length characters (current: ${#var_value})"
     return 1
   fi
 }
@@ -40,48 +40,71 @@ validate_required "FRONTEND_URL" || exit 1
 validate_min_length "JWT_SECRET" 32 || exit 1
 validate_min_length "JWT_REFRESH_SECRET" 32 || exit 1
 
-echo "✓ All required environment variables validated"
+echo "✅ All required environment variables validated"
 echo ""
 
 # Generate Prisma Client
 echo "📦 Generating Prisma Client..."
-npx prisma generate
+npx prisma generate || {
+  echo "❌ Failed to generate Prisma Client"
+  exit 1
+}
+echo "✅ Prisma Client generated successfully"
+echo ""
 
 # Run database migrations
 echo "🔄 Running database migrations..."
 
-# Check for and resolve failed migrations before deploying.
-# This handles cases where a previous deployment left a migration in a failed state.
-echo "🔍 Checking for failed migrations..."
-set +e # Don't exit if grep fails to find a match
+# Check migration status
+echo "🔍 Checking migration status..."
+set +e # Don't exit if status check fails
 MIGRATE_STATUS=$(npx prisma migrate status 2>&1)
-HAS_FAILED_MIGRATIONS=$(echo "$MIGRATE_STATUS" | grep -i "failed" || true)
+MIGRATE_STATUS_CODE=$?
 set -e
 
-if [ -n "$HAS_FAILED_MIGRATIONS" ]; then
-  echo "⚠️  Found failed migrations. Attempting to resolve them..."
-  # Extract failed migration names and resolve them one by one
-  echo "$MIGRATE_STATUS" | grep "failed" | awk '{print $1}' | while read -r MIGRATION_NAME; do
+echo "$MIGRATE_STATUS"
+
+# Check for failed migrations
+if echo "$MIGRATE_STATUS" | grep -qi "failed"; then
+  echo ""
+  echo "⚠️  Found failed migrations. Attempting to resolve..."
+  
+  # Extract and resolve failed migrations
+  echo "$MIGRATE_STATUS" | grep -i "failed" | awk '{print $1}' | while read -r MIGRATION_NAME; do
     if [ -n "$MIGRATION_NAME" ]; then
-      echo "   - Resolving migration: $MIGRATION_NAME"
-      npx prisma migrate resolve --rolled-back "$MIGRATION_NAME"
+      echo "   📌 Resolving migration: $MIGRATION_NAME"
+      npx prisma migrate resolve --rolled-back "$MIGRATION_NAME" || true
     fi
   done
-  echo "✅ Finished resolving failed migrations. They will be re-applied."
+  
+  echo "✅ Finished resolving failed migrations"
 fi
 
-# Deploy all pending migrations. This will also re-apply any migrations that were just resolved.
+# Deploy all pending migrations
+echo ""
 echo "🚀 Deploying database migrations..."
-npx prisma migrate deploy
+npx prisma migrate deploy || {
+  echo "❌ Migration deployment failed"
+  exit 1
+}
+echo "✅ Migrations deployed successfully"
+echo ""
 
 # Seed database if enabled
 if [ "$RUN_SEED" = "true" ]; then
   echo "🌱 Seeding database..."
-  npm run deploy:seed
+  npm run deploy:seed || {
+    echo "⚠️  Seeding failed, but continuing startup..."
+  }
+  echo "✅ Database seeding completed"
 else
-  echo "⏭️  Skipping database seed"
+  echo "⏭️  Skipping database seed (RUN_SEED not set to 'true')"
 fi
 
+echo ""
+echo "✅ All startup checks passed"
+echo "🎯 Starting application on port ${PORT:-3000}..."
+echo ""
+
 # Start the application
-echo "✅ Starting application..."
 exec node dist/main

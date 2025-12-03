@@ -70,7 +70,7 @@ export default function EditInventoryItemPage() {
   // Fetch inventory item
   const { data: item, isLoading, error: fetchError } = useQuery({
     queryKey: ['inventory', id],
-    queryFn: () => inventoryService.getById(id!),
+    queryFn: () => inventoryService.getOne(id!),
     enabled: !!id,
   });
 

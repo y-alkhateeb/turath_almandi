@@ -25,5 +25,4 @@ export * from './settings.types';
 export * from './contacts.types';
 export * from './payables.types';
 export * from './receivables.types';
-export * from './inventory-sub-units.types';
 // export * from './debts.types'; // Legacy - to be deprecated

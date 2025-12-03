@@ -74,16 +74,16 @@ function StatCard({
 }: StatCardProps) {
   const variantStyles = {
     default: 'bg-card',
-    success: 'bg-green-500/10 border-green-500/20',
-    warning: 'bg-yellow-500/10 border-yellow-500/20',
-    danger: 'bg-red-500/10 border-red-500/20',
+    success: 'bg-secondary/10 border-secondary/20',
+    warning: 'bg-amber-500/10 border-amber-500/20',
+    danger: 'bg-destructive/10 border-destructive/20',
   };
 
   const iconStyles = {
     default: 'bg-primary/10 text-primary',
-    success: 'bg-green-500/20 text-green-600',
-    warning: 'bg-yellow-500/20 text-yellow-600',
-    danger: 'bg-red-500/20 text-red-600',
+    success: 'bg-secondary/20 text-secondary',
+    warning: 'bg-amber-500/20 text-amber-600 dark:text-amber-400',
+    danger: 'bg-destructive/20 text-destructive',
   };
 
   return (

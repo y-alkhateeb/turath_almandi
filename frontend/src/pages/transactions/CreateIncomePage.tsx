@@ -615,7 +615,7 @@ export default function CreateIncomePage() {
                                   {/* Item Total */}
                                   <div className="flex justify-between items-center text-sm">
                                     <span className="text-muted-foreground">الإجمالي:</span>
-                                    <span className="font-semibold text-green-600">
+                                    <span className="font-semibold text-secondary">
                                       {formatCurrency(itemTotal)}
                                     </span>
                                   </div>
@@ -672,20 +672,20 @@ export default function CreateIncomePage() {
                       )}
 
                       {/* Totals Summary */}
-                      <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 space-y-2">
+                      <div className="p-4 rounded-lg bg-secondary/10 border border-secondary/20 space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">الإجمالي الفرعي:</span>
                           <span>{formatCurrency(calculations.subtotal)}</span>
                         </div>
                         {calculations.discount > 0 && (
-                          <div className="flex justify-between text-sm text-red-600">
+                          <div className="flex justify-between text-sm text-destructive">
                             <span>الخصم:</span>
                             <span>-{formatCurrency(calculations.discount)}</span>
                           </div>
                         )}
-                        <div className="flex justify-between font-bold text-lg border-t border-green-500/20 pt-2">
+                        <div className="flex justify-between font-bold text-lg border-t border-secondary/20 pt-2">
                           <span>الإجمالي النهائي:</span>
-                          <span className="text-green-600">
+                          <span className="text-secondary">
                             {formatCurrency(calculations.total)}
                           </span>
                         </div>
@@ -860,7 +860,7 @@ export default function CreateIncomePage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">النوع:</span>
-                  <span className="font-medium text-green-600">إيراد</span>
+                  <span className="font-medium text-secondary">إيراد</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">الفئة:</span>
@@ -889,7 +889,7 @@ export default function CreateIncomePage() {
                 <div className="border-t border-border pt-3 mt-3">
                   <div className="flex justify-between">
                     <span className="font-medium">المبلغ:</span>
-                    <span className="text-lg font-bold text-green-600">
+                    <span className="text-lg font-bold text-secondary">
                       {displayAmount > 0
                         ? `+${formatCurrency(displayAmount)}`
                         : '0 د.ع'}

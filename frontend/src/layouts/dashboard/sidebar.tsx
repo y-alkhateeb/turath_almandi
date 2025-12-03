@@ -12,6 +12,7 @@ import type { NavItem } from '#/router';
 import { ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import GLOBAL_CONFIG from '@/global-config';
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div className="h-16 flex items-center justify-between px-6 border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <span className="text-xl font-bold text-primary">ت</span>
+            <img src={GLOBAL_CONFIG.logoUrl} alt="Logo" className="w-full h-full object-cover rounded-xl" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">تراث المندي</h1>

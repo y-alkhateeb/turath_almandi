@@ -1,4 +1,6 @@
+import GLOBAL_CONFIG from '@/global-config';
 import { cn } from '@/lib/utils';
+
 
 interface LogoProps {
   className?: string;
@@ -20,15 +22,12 @@ const textSizeClasses = {
   xl: 'text-3xl',
 };
 
-// Local logo from public directory
-const LOGO_URL = '/logo.jpg';
-
 export function Logo({ className, size = 'md', showText = true }: LogoProps) {
   return (
     <div className={cn('flex items-center gap-3', className)}>
       {/* Logo Image */}
       <img
-        src={LOGO_URL}
+        src={GLOBAL_CONFIG.logoUrl}
         alt="تراث المندي"
         className={cn(sizeClasses[size], 'object-contain rounded-lg')}
         onError={(e) => {

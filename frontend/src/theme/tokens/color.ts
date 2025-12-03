@@ -11,25 +11,33 @@ export const commonColors = {
   black: '#09090B',
 };
 
-// Brand color palette (تراث المندي orange)
+// Brand color palette (Gold - from Logo)
 const brandColors: ColorChannel = {
-  lighter: '#fde6cf',
-  light: '#f8a35d',
-  default: '#e47020',
-  dark: '#c45515',
-  darker: '#662e0e',
+  lighter: '#efe7db', // 100
+  light: '#c1a270',   // 400
+  default: '#b28b4c', // 500
+  dark: '#6a532e',    // 700
+  darker: '#231b0f',  // 900
 };
 
-// Primary color palette (Sky blue)
+// Primary color palette (Gold - Matching Brand)
 const primaryColors: ColorChannel = {
-  lighter: '#bae6fd',
-  light: '#38bdf8',
-  default: '#0ea5e9',
-  dark: '#0284c7',
-  darker: '#0c4a6e',
+  lighter: '#efe7db',
+  light: '#c1a270',
+  default: '#b28b4c',
+  dark: '#6a532e',
+  darker: '#231b0f',
 };
+
+// Secondary color palette (Green - from Logo)
+// Adding this to be available even if not originally in the file, 
+// though we might need to export it or map it to an existing category.
+// For now, let's update the "brand" concept to be Gold.
 
 // Success color palette (Green)
+// We can keep the standard green or align it with brand green.
+// Let's keep standard green for semantic meaning, but maybe slightly warmer?
+// For now, keeping as is to avoid confusion with "Brand Green".
 const successColors: ColorChannel = {
   lighter: '#bbf7d0',
   light: '#4ade80',

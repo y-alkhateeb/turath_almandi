@@ -145,7 +145,7 @@ export function UserForm({ open, onOpenChange, userToEdit, branches }: UserFormP
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      اسم المستخدم <span className="text-red-500">*</span>
+                      اسم المستخدم <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="اسم المستخدم" {...field} disabled={isEditing} />
@@ -163,7 +163,7 @@ export function UserForm({ open, onOpenChange, userToEdit, branches }: UserFormP
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      الدور <span className="text-red-500">*</span>
+                      الدور <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Select value={field.value} onValueChange={field.onChange}>
@@ -199,7 +199,7 @@ export function UserForm({ open, onOpenChange, userToEdit, branches }: UserFormP
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      كلمة المرور <span className="text-red-500">*</span>
+                      كلمة المرور <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
@@ -254,7 +254,7 @@ export function UserForm({ open, onOpenChange, userToEdit, branches }: UserFormP
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    الفرع {selectedRole === UserRole.ACCOUNTANT && <span className="text-red-500">*</span>}
+                    الفرع {selectedRole === UserRole.ACCOUNTANT && <span className="text-destructive">*</span>}
                   </FormLabel>
                   <FormControl>
                     <Select

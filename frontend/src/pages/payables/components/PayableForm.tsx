@@ -124,7 +124,7 @@ export function PayableForm({ open, onOpenChange, payableToEdit }: PayableFormPr
                 rules={{ required: 'يرجى اختيار المورد' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>المورد <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>المورد <span className="text-destructive">*</span></FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -160,7 +160,7 @@ export function PayableForm({ open, onOpenChange, payableToEdit }: PayableFormPr
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>المبلغ <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>المبلغ <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -181,7 +181,7 @@ export function PayableForm({ open, onOpenChange, payableToEdit }: PayableFormPr
                 rules={{ required: 'يرجى اختيار التاريخ' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>تاريخ الاستحقاق <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>تاريخ الاستحقاق <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>

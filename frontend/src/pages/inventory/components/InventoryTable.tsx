@@ -157,10 +157,10 @@ export default function InventoryTable({
                         <span
                           className={cn(
                             'font-medium',
-                            item.quantity === 0 && 'text-red-600 dark:text-red-400',
+                            item.quantity === 0 && 'text-destructive',
                             item.quantity < LOW_STOCK_THRESHOLD &&
                               item.quantity > 0 &&
-                              'text-yellow-600 dark:text-yellow-400'
+                              'text-amber-600 dark:text-amber-400'
                           )}
                         >
                           {formatNumber(item.quantity)}

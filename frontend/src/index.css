@@ -10,31 +10,31 @@
      BRAND COLORS
      ======================================== */
 
-  /* Gold - Primary Brand Color */
-  --color-gold-50: #fdfaf3;
-  --color-gold-100: #f9f0dc;
-  --color-gold-200: #f2e0b8;
-  --color-gold-300: #e9ca8a;
-  --color-gold-400: #deb05c;
-  --color-gold-500: #d4a03f;
-  --color-gold-600: #c08832;
-  --color-gold-700: #9f6a2b;
-  --color-gold-800: #82562a;
-  --color-gold-900: #6b4726;
-  --color-gold-950: #3d2513;
+  /* Gold - Primary Brand Color (Updated to match logo) */
+  --color-gold-50: #f7f3ed;
+  --color-gold-100: #efe7db;
+  --color-gold-200: #e0d0b7;
+  --color-gold-300: #d0b994;
+  --color-gold-400: #c1a270;
+  --color-gold-500: #b28b4c;
+  --color-gold-600: #8e6f3d;
+  --color-gold-700: #6a532e;
+  --color-gold-800: #47371e;
+  --color-gold-900: #231b0f;
+  --color-gold-950: #110d07;
 
-  /* Green - Secondary Brand Color */
-  --color-green-50: #f3faf6;
-  --color-green-100: #e0f3ea;
-  --color-green-200: #c3e6d6;
-  --color-green-300: #97d2b8;
-  --color-green-400: #64b694;
-  --color-green-500: #419a77;
-  --color-green-600: #307c60;
-  --color-green-700: #28634e;
-  --color-green-800: #234f40;
-  --color-green-900: #1f4236;
-  --color-green-950: #0d251e;
+  /* Green - Secondary Brand Color (Updated to match logo) */
+  --color-green-50: #eff4f0;
+  --color-green-100: #e0eae1;
+  --color-green-200: #c2d5c3;
+  --color-green-300: #a3c1a6;
+  --color-green-400: #85ac88;
+  --color-green-500: #67976b;
+  --color-green-600: #527955;
+  --color-green-700: #3d5b40;
+  --color-green-800: #293c2a;
+  --color-green-900: #141e15;
+  --color-green-950: #0a0f0a;
 
   /* Cream - Background Tones */
   --color-cream-50: #fefdfb;
@@ -158,26 +158,26 @@
 
 @layer base {
   :root {
-    /* shadcn/ui variables */
-    --background: 40 43% 99%;
-    --foreground: 152 25% 17%;
+    /* shadcn/ui variables - Light Mode */
+    --background: 40 60% 99%; /* Cream 50 */
+    --foreground: 126 20% 10%; /* Green 900 */
     --card: 0 0% 100%;
-    --card-foreground: 152 25% 17%;
+    --card-foreground: 126 20% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 152 25% 17%;
-    --primary: 39 62% 54%;
+    --popover-foreground: 126 20% 10%;
+    --primary: 37 40% 50%; /* Gold 500 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 152 44% 34%;
+    --secondary: 125 19% 40%; /* Green 600 */
     --secondary-foreground: 0 0% 100%;
-    --muted: 40 33% 96%;
+    --muted: 40 60% 97%; /* Cream 100 */
     --muted-foreground: 0 0% 45%;
-    --accent: 39 75% 92%;
-    --accent-foreground: 39 62% 30%;
+    --accent: 36 38% 90%; /* Gold 100 */
+    --accent-foreground: 36 40% 10%; /* Gold 900 */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
     --border: 40 30% 88%;
     --input: 40 30% 88%;
-    --ring: 39 68% 58%;
+    --ring: 37 40% 60%; /* Gold 400 */
     --radius: 0.5rem;
 
     /* Custom variables */
@@ -198,60 +198,60 @@
     --interactive-secondary-hover: var(--color-green-700);
     --ring-color: var(--color-gold-400);
 
-    /* Chart colors */
-    --chart-1: 39 62% 54%;
-    --chart-2: 152 44% 34%;
-    --chart-3: 142 71% 45%;
-    --chart-4: 43 96% 56%;
-    --chart-5: 199 89% 48%;
+    /* Chart colors - Light Mode */
+    --chart-1: 37 40% 50%; /* Gold */
+    --chart-2: 125 19% 40%; /* Green */
+    --chart-3: 142 71% 45%; /* Success */
+    --chart-4: 37 40% 70%; /* Light gold */
+    --chart-5: 199 89% 48%; /* Info */
   }
 
   .dark {
     /* shadcn/ui variables - Dark Mode */
-    --background: 152 40% 6%;
-    --foreground: 40 33% 96%;
-    --card: 152 35% 10%;
-    --card-foreground: 40 33% 96%;
-    --popover: 152 35% 10%;
-    --popover-foreground: 40 33% 96%;
-    --primary: 39 68% 58%;
-    --primary-foreground: 152 40% 6%;
-    --secondary: 152 30% 40%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 152 30% 15%;
-    --muted-foreground: 40 20% 65%;
-    --accent: 39 50% 20%;
-    --accent-foreground: 39 68% 70%;
-    --destructive: 0 62% 50%;
+    --background: 0 0% 7%; /* Very dark gray */
+    --foreground: 36 38% 90%; /* Gold 100 */
+    --card: 0 0% 10%;
+    --card-foreground: 36 38% 90%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 36 38% 90%;
+    --primary: 37 40% 60%; /* Gold 400 */
+    --primary-foreground: 0 0% 10%;
+    --secondary: 125 19% 50%; /* Green 500 */
+    --secondary-foreground: 36 38% 90%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 36 20% 70%;
+    --accent: 36 40% 10%; /* Gold 900 */
+    --accent-foreground: 36 38% 90%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 152 25% 20%;
-    --input: 152 25% 20%;
-    --ring: 39 68% 58%;
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 37 40% 60%; /* Gold 400 */
 
     /* Custom variables - Dark Mode */
-    --bg-primary: var(--color-green-950);
-    --bg-secondary: var(--color-green-900);
-    --bg-tertiary: var(--color-green-800);
-    --bg-muted: var(--color-neutral-800);
-    --text-primary: var(--color-cream-100);
-    --text-secondary: var(--color-cream-300);
-    --text-muted: var(--color-neutral-400);
-    --text-inverse: var(--color-green-950);
-    --border-default: var(--color-green-700);
-    --border-muted: var(--color-green-800);
+    --bg-primary: hsl(0, 0%, 7%);
+    --bg-secondary: hsl(0, 0%, 10%);
+    --bg-tertiary: hsl(0, 0%, 13%);
+    --bg-muted: hsl(0, 0%, 15%);
+    --text-primary: hsl(36, 38%, 95%);
+    --text-secondary: hsl(36, 25%, 80%);
+    --text-muted: hsl(36, 15%, 60%);
+    --text-inverse: hsl(0, 0%, 10%);
+    --border-default: hsl(0, 0%, 20%);
+    --border-muted: hsl(0, 0%, 15%);
     --border-accent: var(--color-gold-500);
-    --interactive-primary: var(--color-gold-400);
-    --interactive-primary-hover: var(--color-gold-500);
-    --interactive-secondary: var(--color-green-400);
-    --interactive-secondary-hover: var(--color-green-500);
+    --interactive-primary: var(--color-gold-500);
+    --interactive-primary-hover: var(--color-gold-400);
+    --interactive-secondary: var(--color-green-500);
+    --interactive-secondary-hover: var(--color-green-400);
     --ring-color: var(--color-gold-500);
 
     /* Chart colors - Dark Mode */
-    --chart-1: 39 68% 58%;
-    --chart-2: 152 44% 50%;
-    --chart-3: 142 71% 55%;
-    --chart-4: 43 96% 66%;
-    --chart-5: 199 89% 58%;
+    --chart-1: 37 40% 60%; /* Bright gold */
+    --chart-2: 125 19% 50%; /* Green */
+    --chart-3: 142 71% 55%; /* Success */
+    --chart-4: 37 40% 80%; /* Lighter gold */
+    --chart-5: 199 89% 58%; /* Info */
   }
 
   /* ========================================

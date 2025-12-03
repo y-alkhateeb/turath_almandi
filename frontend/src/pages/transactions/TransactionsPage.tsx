@@ -350,8 +350,8 @@ export default function TransactionsPage() {
                           className={cn(
                             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                             transaction.type === TransactionType.INCOME
-                              ? 'bg-green-500/10 text-green-600'
-                              : 'bg-red-500/10 text-red-600'
+                              ? 'bg-secondary/10 text-secondary'
+                              : 'bg-destructive/10 text-destructive'
                           )}
                         >
                           {getTransactionTypeLabel(transaction.type)}
@@ -367,8 +367,8 @@ export default function TransactionsPage() {
                           className={cn(
                             'font-semibold',
                             transaction.type === TransactionType.INCOME
-                              ? 'text-green-600'
-                              : 'text-red-600'
+                              ? 'text-secondary'
+                              : 'text-destructive'
                           )}
                         >
                           {transaction.type === TransactionType.INCOME ? '+' : '-'}

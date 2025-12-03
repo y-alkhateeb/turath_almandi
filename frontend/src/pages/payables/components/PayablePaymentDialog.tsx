@@ -103,7 +103,7 @@ export function PayablePaymentDialog({ open, onOpenChange, payable }: PayablePay
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>المبلغ المدفوع <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel>المبلغ المدفوع <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
@@ -125,7 +125,7 @@ export function PayablePaymentDialog({ open, onOpenChange, payable }: PayablePay
                 rules={{ required: 'يرجى اختيار التاريخ' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>تاريخ الدفع <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>تاريخ الدفع <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -140,7 +140,7 @@ export function PayablePaymentDialog({ open, onOpenChange, payable }: PayablePay
                 rules={{ required: 'يرجى اختيار طريقة الدفع' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>طريقة الدفع <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>طريقة الدفع <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <PaymentMethodSelect
                         value={field.value}

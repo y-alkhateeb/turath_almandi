@@ -110,7 +110,7 @@ export function BranchForm({ open, onOpenChange, branchToEdit }: BranchFormProps
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      اسم الفرع <span className="text-red-500">*</span>
+                      اسم الفرع <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="اسم الفرع" {...field} />
@@ -131,7 +131,7 @@ export function BranchForm({ open, onOpenChange, branchToEdit }: BranchFormProps
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      اسم المدير <span className="text-red-500">*</span>
+                      اسم المدير <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="اسم مدير الفرع" {...field} />
@@ -153,7 +153,7 @@ export function BranchForm({ open, onOpenChange, branchToEdit }: BranchFormProps
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    الموقع <span className="text-red-500">*</span>
+                    الموقع <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="موقع الفرع الكامل" {...field} />

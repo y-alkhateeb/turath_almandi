@@ -122,7 +122,7 @@ export default function BranchesPage() {
   // Helper for status badge
   const getStatusBadge = (isDeleted: boolean) => {
     return !isDeleted ? (
-      <Badge variant="secondary" className="bg-green-500/10 text-green-600 hover:bg-green-500/20">
+      <Badge variant="secondary" className="bg-secondary/10 text-secondary hover:bg-secondary/20">
         نشط
       </Badge>
     ) : (
@@ -165,7 +165,7 @@ export default function BranchesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">الفروع النشطة</CardTitle>
-            <Building2 className="h-4 w-4 text-green-500" />
+            <Building2 className="h-4 w-4 text-secondary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.active}</div>

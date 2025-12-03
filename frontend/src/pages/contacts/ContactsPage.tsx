@@ -98,9 +98,9 @@ export default function ContactsPage() {
   const getTypeBadge = (type: ContactType) => {
     switch (type) {
       case ContactType.SUPPLIER:
-        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20">{getContactTypeLabel(type)}</Badge>;
+        return <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">{getContactTypeLabel(type)}</Badge>;
       case ContactType.CUSTOMER:
-        return <Badge variant="secondary" className="bg-green-500/10 text-green-600 hover:bg-green-500/20">{getContactTypeLabel(type)}</Badge>;
+        return <Badge variant="secondary" className="bg-secondary/10 text-secondary hover:bg-secondary/20">{getContactTypeLabel(type)}</Badge>;
       case ContactType.BOTH:
         return <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 hover:bg-purple-500/20">{getContactTypeLabel(type)}</Badge>;
       default:
@@ -140,7 +140,7 @@ export default function ContactsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">الموردين</CardTitle>
-              <Truck className="h-4 w-4 text-blue-500" />
+              <Truck className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.byType.suppliers}</div>
@@ -150,7 +150,7 @@ export default function ContactsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">العملاء</CardTitle>
-              <User className="h-4 w-4 text-green-500" />
+              <User className="h-4 w-4 text-secondary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.byType.customers}</div>

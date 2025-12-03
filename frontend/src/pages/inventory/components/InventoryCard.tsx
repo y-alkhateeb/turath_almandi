@@ -42,12 +42,12 @@ interface InventoryCardProps {
 
 function getStockStatus(quantity: number) {
   if (quantity === 0) {
-    return { label: 'نفذ', variant: 'destructive' as const, color: 'text-red-600 dark:text-red-400' };
+    return { label: 'نفذ', variant: 'destructive' as const, color: 'text-destructive' };
   }
   if (quantity < LOW_STOCK_THRESHOLD) {
-    return { label: 'منخفض', variant: 'warning' as const, color: 'text-yellow-600 dark:text-yellow-400' };
+    return { label: 'منخفض', variant: 'warning' as const, color: 'text-amber-600 dark:text-amber-400' };
   }
-  return { label: 'متوفر', variant: 'success' as const, color: 'text-green-600 dark:text-green-400' };
+  return { label: 'متوفر', variant: 'success' as const, color: 'text-secondary' };
 }
 
 function formatPrice(price: number | null): string {

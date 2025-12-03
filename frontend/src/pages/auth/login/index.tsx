@@ -1,3 +1,4 @@
+import GLOBAL_CONFIG from '@/global-config';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +26,7 @@ import {
   AlertDescription,
 } from '@/components/ui';
 import authService from '@/api/services/authService';
-import { cn } from '@/lib/utils';
+
 import { useUserActions } from '@/store/userStore';
 import type { UserRole } from '@/types/enum';
 
@@ -241,7 +242,7 @@ export default function LoginPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src="/logo.jpg" 
+            src={GLOBAL_CONFIG.logoUrl} 
             alt="Background" 
             className="w-full h-full object-cover"
           />

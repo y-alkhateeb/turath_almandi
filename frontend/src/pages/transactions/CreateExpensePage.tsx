@@ -829,7 +829,7 @@ export default function CreateExpensePage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">النوع:</span>
-                  <span className="font-medium text-red-600">مصروف</span>
+                  <span className="font-medium text-destructive">مصروف</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">الفئة:</span>
@@ -862,7 +862,7 @@ export default function CreateExpensePage() {
                 <div className="border-t border-border pt-3 mt-3">
                   <div className="flex justify-between">
                     <span className="font-medium">المبلغ:</span>
-                    <span className="text-lg font-bold text-red-600">
+                    <span className="text-lg font-bold text-destructive">
                       {isInventoryCategory
                         ? `-${formatCurrency(inventoryTotal)}`
                         : formData.amount
@@ -874,7 +874,7 @@ export default function CreateExpensePage() {
                     <>
                       <div className="flex justify-between text-sm mt-2">
                         <span className="text-muted-foreground">المدفوع:</span>
-                        <span className="font-medium text-green-600">
+                        <span className="font-medium text-secondary">
                           {formatCurrency(totalPaidAmount)}
                         </span>
                       </div>

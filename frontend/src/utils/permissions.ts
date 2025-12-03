@@ -236,7 +236,7 @@ export function canManageNotificationSettings(user: User | null | undefined): bo
  * @returns true if user can access dashboard
  */
 export function canAccessDashboard(user: User | null | undefined): boolean {
-  return user !== null && user !== undefined && user.isActive;
+  return user !== null && user !== undefined && !user.isDeleted;
 }
 
 /**
@@ -245,7 +245,7 @@ export function canAccessDashboard(user: User | null | undefined): boolean {
  * @returns true if user is active
  */
 export function isUserActive(user: User | null | undefined): boolean {
-  return user?.isActive === true;
+  return user?.isDeleted === false;
 }
 
 /**

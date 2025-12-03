@@ -104,11 +104,11 @@ export default function PayablesPage() {
   const getStatusBadge = (status: DebtStatus) => {
     switch (status) {
       case DebtStatus.PAID:
-        return <Badge variant="default" className="bg-green-500 hover:bg-green-600">مدفوع</Badge>;
+        return <Badge variant="default" className="bg-secondary/10 text-secondary hover:bg-secondary/20">مدفوع</Badge>;
       case DebtStatus.PARTIAL:
-        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20">جزئي</Badge>;
+        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400">جزئي</Badge>;
       default:
-        return <Badge variant="secondary" className="bg-red-500/10 text-red-600 hover:bg-red-500/20">غير مدفوع</Badge>;
+        return <Badge variant="secondary" className="bg-destructive/10 text-destructive hover:bg-destructive/20">غير مدفوع</Badge>;
     }
   };
 
@@ -146,7 +146,7 @@ export default function PayablesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">الديون النشطة</CardTitle>
-              <AlertCircle className="h-4 w-4 text-red-500" />
+              <AlertCircle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.byStatus.active}</div>
@@ -156,7 +156,7 @@ export default function PayablesPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">الديون المدفوعة</CardTitle>
-              <Receipt className="h-4 w-4 text-green-500" />
+              <Receipt className="h-4 w-4 text-secondary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{summary.byStatus.paid}</div>
@@ -263,10 +263,10 @@ export default function PayablesPage() {
                       <TableCell>{payable.contact?.name}</TableCell>
                       <TableCell>{payable.invoiceNumber || '-'}</TableCell>
                       <TableCell>{formatCurrency(payable.originalAmount)}</TableCell>
-                      <TableCell className="text-green-600">
+                      <TableCell className="text-secondary">
                         {formatCurrency(payable.originalAmount - payable.remainingAmount)}
                       </TableCell>
-                      <TableCell className="text-red-600 font-bold">
+                      <TableCell className="text-destructive font-bold">
                         {formatCurrency(payable.remainingAmount)}
                       </TableCell>
                       <TableCell>{getStatusBadge(payable.status)}</TableCell>
@@ -279,7 +279,7 @@ export default function PayablesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              className="h-8 w-8 text-secondary hover:text-secondary/80 hover:bg-secondary/10"
                               onClick={() => handlePay(payable)}
                               title="تسجيل دفعة"
                             >

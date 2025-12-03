@@ -1,6 +1,6 @@
 /**
  * Unified variant styles for consistent theming
- * Using brand colors from logo.jpg (gold/brown tones + green)
+ * Using semantic theme variables that adapt to light/dark mode
  */
 
 export type VariantType = 'default' | 'success' | 'warning' | 'danger' | 'info';
@@ -8,13 +8,14 @@ export type VariantType = 'default' | 'success' | 'warning' | 'danger' | 'info';
 /**
  * Card/Container variant styles
  * For stat cards, info panels, alerts, etc.
+ * Uses semantic theme variables that adapt to light/dark mode
  */
 export const CARD_VARIANT_STYLES: Record<VariantType, string> = {
   default: 'bg-card border-border',
-  success: 'bg-gold-500/5 border-gold-500/20',        // Brand gold from logo
-  warning: 'bg-orange-500/5 border-orange-500/20',    // Orange for visibility
-  danger: 'bg-destructive/5 border-destructive/20',   // Red for errors
-  info: 'bg-green-600/5 border-green-600/20',         // Brand green from logo
+  success: 'bg-primary/5 border-primary/20',        // Gold (brand primary)
+  warning: 'bg-amber-500/10 border-amber-500/30 dark:bg-amber-500/20 dark:border-amber-500/40',
+  danger: 'bg-destructive/10 border-destructive/30',
+  info: 'bg-secondary/10 border-secondary/30',      // Green (brand secondary)
 };
 
 /**
@@ -23,10 +24,10 @@ export const CARD_VARIANT_STYLES: Record<VariantType, string> = {
  */
 export const ICON_VARIANT_STYLES: Record<VariantType, string> = {
   default: 'text-muted-foreground',
-  success: 'text-gold-600 dark:text-gold-400',
-  warning: 'text-orange-600 dark:text-orange-400',
+  success: 'text-primary',                           // Gold
+  warning: 'text-amber-600 dark:text-amber-400',
   danger: 'text-destructive',
-  info: 'text-green-600 dark:text-green-400',
+  info: 'text-secondary',                            // Green
 };
 
 /**
@@ -35,10 +36,10 @@ export const ICON_VARIANT_STYLES: Record<VariantType, string> = {
  */
 export const TEXT_VARIANT_STYLES: Record<VariantType, string> = {
   default: 'text-foreground',
-  success: 'text-gold-700 dark:text-gold-300',
-  warning: 'text-orange-700 dark:text-orange-300',
+  success: 'text-primary',                           // Gold
+  warning: 'text-amber-700 dark:text-amber-300',
   danger: 'text-destructive',
-  info: 'text-green-700 dark:text-green-300',
+  info: 'text-secondary',                            // Green
 };
 
 /**
@@ -46,11 +47,11 @@ export const TEXT_VARIANT_STYLES: Record<VariantType, string> = {
  * For status badges, pills, tags
  */
 export const BADGE_VARIANT_STYLES: Record<VariantType, string> = {
-  default: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-  success: 'bg-gold-500/10 text-gold-700 hover:bg-gold-500/20 dark:text-gold-400',
-  warning: 'bg-orange-500/10 text-orange-600 hover:bg-orange-500/20',
+  default: 'bg-secondary/10 text-secondary hover:bg-secondary/20',
+  success: 'bg-primary/10 text-primary hover:bg-primary/20',
+  warning: 'bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400',
   danger: 'bg-destructive/10 text-destructive hover:bg-destructive/20',
-  info: 'bg-green-500/10 text-green-700 hover:bg-green-500/20 dark:text-green-400',
+  info: 'bg-secondary/10 text-secondary hover:bg-secondary/20',
 };
 
 /**

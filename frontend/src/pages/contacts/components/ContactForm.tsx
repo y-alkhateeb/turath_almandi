@@ -128,7 +128,7 @@ export function ContactForm({ open, onOpenChange, contactToEdit }: ContactFormPr
                 rules={{ required: 'الاسم مطلوب' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>الاسم <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="اسم جهة الاتصال" {...field} />
                     </FormControl>
@@ -144,7 +144,7 @@ export function ContactForm({ open, onOpenChange, contactToEdit }: ContactFormPr
                 rules={{ required: 'نوع جهة الاتصال مطلوب' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>النوع <span className="text-red-500">*</span></FormLabel>
+                    <FormLabel>النوع <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <ContactTypeSelect
                         value={field.value}

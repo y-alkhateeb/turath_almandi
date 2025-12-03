@@ -3,67 +3,19 @@ import { twMerge } from 'tailwind-merge';
 
 /**
  * Merge Tailwind CSS classes using clsx and tailwind-merge
+ * This is shadcn/ui's utility for combining class names
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 /**
- * Format number as Iraqi Dinar currency
+ * NOTE: All currency and date formatting functions have been moved to @/utils/format.ts
+ * This file now only contains the cn() utility for class name merging.
+ * 
+ * Please import formatting functions from @/utils/format instead:
+ * - formatCurrency
+ * - formatDate
+ * - formatNumber
+ * - etc.
  */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('ar-IQ', {
-    style: 'currency',
-    currency: 'IQD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-/**
- * Format date in English (DD/MM/YYYY format)
- */
-export function formatDate(date: string | Date): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('en-GB', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(dateObj);
-}
-
-/**
- * Format date as short format (DD/MM/YYYY)
- */
-export function formatDateShort(date: string | Date): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('en-GB', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(dateObj);
-}
-
-/**
- * Format number with Arabic numerals
- */
-export function formatNumber(num: number): string {
-  return new Intl.NumberFormat('ar-IQ').format(num);
-}
-
-/**
- * Format large numbers with abbreviations (K, M, B)
- */
-export function formatCompactNumber(num: number): string {
-  return new Intl.NumberFormat('ar-IQ', {
-    notation: 'compact',
-    compactDisplay: 'short',
-  }).format(num);
-}
-
-/**
- * Format number as percentage
- */
-export function formatPercentage(value: number, decimals: number = 1): string {
-  return `${value.toFixed(decimals)}%`;
-}

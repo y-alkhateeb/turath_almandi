@@ -1,134 +1,146 @@
-/**
- * Employees React Query Hooks
- * Hooks for fetching and managing employees
- */
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import employeeService from '@/api/services/employeeService';
+import type {
+  CreateEmployeeInput,
+  UpdateEmployeeInput,
+  ResignEmployeeInput,
+  EmployeeFilters,
+} from '@/types';
 import { toast } from 'sonner';
-import apiClient from '@/api/apiClient';
-import type { Employee, EmployeeFilters, CreateEmployeeInput, UpdateEmployeeInput } from '#/entity';
 
-interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+// Query Keys
+export const employeeKeys = {
+  all: ['employees'] as const,
+  lists: () => [...employeeKeys.all, 'list'] as const,
+  list: (filters: EmployeeFilters) => [...employeeKeys.lists(), { ...filters }] as const,
+  details: () => [...employeeKeys.all, 'detail'] as const,
+  detail: (id: string) => [...employeeKeys.details(), id] as const,
+  active: (branchId: string) => [...employeeKeys.all, 'active', branchId] as const,
+};
+
+// Hooks
 
 /**
- * Fetch paginated employees list with filters
+ * Hook to fetch employees with pagination and filters
  */
-export function useEmployees(filters?: EmployeeFilters) {
+export function useEmployees(filters: EmployeeFilters = {}) {
   return useQuery({
-    queryKey: ['employees', 'list', filters],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      
-      if (filters?.status) params.append('status', filters.status);
-      if (filters?.branchId) params.append('branchId', filters.branchId);
-      if (filters?.search) params.append('search', filters.search);
-      if (filters?.page) params.append('page', filters.page.toString());
-      if (filters?.limit) params.append('limit', filters.limit.toString());
-
-      const queryString = params.toString();
-      const url = queryString ? `/employees?${queryString}` : '/employees';
-
-      return apiClient.get<PaginatedResponse<Employee>>({ url });
-    },
+    queryKey: employeeKeys.list(filters),
+    queryFn: () => employeeService.getAll(filters),
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching new page
   });
 }
 
 /**
- * Fetch active employees only (for dropdowns)
- */
-export function useActiveEmployees() {
-  return useQuery({
-    queryKey: ['employees', 'active'],
-    queryFn: async () => {
-      return apiClient.get<PaginatedResponse<Employee>>({ 
-        url: '/employees?status=ACTIVE&limit=1000'
-      });
-    },
-    select: (data) => data.data, // Return just the array
-  });
-}
-
-/**
- * Fetch single employee by ID
+ * Hook to fetch a single employee by ID
  */
 export function useEmployee(id: string) {
   return useQuery({
-    queryKey: ['employees', 'detail', id],
-    queryFn: async () => {
-      return apiClient.get<Employee>({ url: `/employees/${id}` });
-    },
+    queryKey: employeeKeys.detail(id),
+    queryFn: () => employeeService.getOne(id),
     enabled: !!id,
   });
 }
 
 /**
- * Create new employee
+ * Hook to fetch active employees for a branch
+ */
+export function useActiveEmployees(branchId: string) {
+  return useQuery({
+    queryKey: employeeKeys.active(branchId),
+    queryFn: () => employeeService.getActive(branchId),
+    enabled: !!branchId,
+  });
+}
+
+/**
+ * Hook to create a new employee
  */
 export function useCreateEmployee() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: CreateEmployeeInput) => {
-      return apiClient.post<Employee>({ 
-        url: '/employees',
-        data,
-      });
-    },
+    mutationFn: (data: CreateEmployeeInput) => employeeService.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      toast.success('تم إضافة الموظف بنجاح');
+      toast.success('تمت الإضافة بنجاح', {
+        description: 'تم إضافة الموظف الجديد بنجاح',
+      });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
     },
-    onError: () => {
-      toast.error('فشل إضافة الموظف');
+    onError: (error: any) => {
+      toast.error('خطأ في الإضافة', {
+        description: error.response?.data?.message || 'حدث خطأ أثناء إضافة الموظف',
+      });
     },
   });
 }
 
 /**
- * Update employee
+ * Hook to update an existing employee
  */
-export function useUpdateEmployee(id: string) {
+export function useUpdateEmployee() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: UpdateEmployeeInput) => {
-      return apiClient.put<Employee>({ 
-        url: `/employees/${id}`,
-        data,
+    mutationFn: ({ id, data }: { id: string; data: UpdateEmployeeInput }) =>
+      employeeService.update(id, data),
+    onSuccess: (data) => {
+      toast.success('تم التحديث بنجاح', {
+        description: 'تم تحديث بيانات الموظف بنجاح',
       });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      toast.success('تم تحديث بيانات الموظف بنجاح');
-    },
-    onError: () => {
-      toast.error('فشل تحديث بيانات الموظف');
+    onError: (error: any) => {
+      toast.error('خطأ في التحديث', {
+        description: error.response?.data?.message || 'حدث خطأ أثناء تحديث الموظف',
+      });
     },
   });
 }
 
 /**
- * Delete employee
+ * Hook to resign an employee
+ */
+export function useResignEmployee() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ResignEmployeeInput }) =>
+      employeeService.resign(id, data),
+    onSuccess: (data) => {
+      toast.success('تم تسجيل الاستقالة', {
+        description: 'تم تسجيل استقالة الموظف بنجاح',
+      });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.detail(data.id) });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
+    },
+    onError: (error: any) => {
+      toast.error('خطأ', {
+        description: error.response?.data?.message || 'حدث خطأ أثناء تسجيل الاستقالة',
+      });
+    },
+  });
+}
+
+/**
+ * Hook to delete an employee
  */
 export function useDeleteEmployee() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return apiClient.delete({ url: `/employees/${id}` });
-    },
+    mutationFn: (id: string) => employeeService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      toast.success('تم حذف الموظف بنجاح');
+      toast.success('تم الحذف بنجاح', {
+        description: 'تم حذف الموظف بنجاح',
+      });
+      queryClient.invalidateQueries({ queryKey: employeeKeys.lists() });
     },
-    onError: () => {
-      toast.error('فشل حذف الموظف');
+    onError: (error: any) => {
+      toast.error('خطأ في الحذف', {
+        description: error.response?.data?.message || 'حدث خطأ أثناء حذف الموظف',
+      });
     },
   });
 }

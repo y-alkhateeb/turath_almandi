@@ -20,9 +20,8 @@ const textSizeClasses = {
   xl: 'text-3xl',
 };
 
-// API base URL for logo image
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const LOGO_URL = `${API_URL}/uploads/app-assets/logo.jpg`;
+// Local logo from public directory
+const LOGO_URL = '/logo.jpg';
 
 export function Logo({ className, size = 'md', showText = true }: LogoProps) {
   return (

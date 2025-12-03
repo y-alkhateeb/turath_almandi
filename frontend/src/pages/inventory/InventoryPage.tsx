@@ -324,7 +324,7 @@ export default function InventoryPage() {
       </div>
 
       {/* Pagination */}
-      {inventoryData && inventoryData.meta.totalPages > 1 && (
+      {inventoryData && inventoryData.meta && inventoryData.meta.totalPages > 1 && (
         <Pagination
           page={page}
           totalPages={inventoryData.meta.totalPages}

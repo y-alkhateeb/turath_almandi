@@ -44,6 +44,7 @@ import {
   isCashOnlyCategory,
   type TransactionCategory,
 } from '@/constants/transaction-categories';
+import { TRANSACTION_CATEGORY_ICONS } from '@/constants/transaction-category-icons';
 import { PaymentMethodButtons, getPaymentMethodLabel, PAYMENT_METHOD_CONFIG } from '@/components/shared/PaymentMethodSelect';
 import {
   isMultiItemCategory,
@@ -77,33 +78,6 @@ interface FormErrors {
   date?: string;
   branchId?: string;
 }
-
-// ============================================
-// CATEGORY ICONS
-// ============================================
-
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  INVENTORY_SALES: (
-    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-    </svg>
-  ),
-  CAPITAL_ADDITION: (
-    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  APP_PURCHASES: (
-    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-    </svg>
-  ),
-  DEBT_PAYMENT: (
-    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-    </svg>
-  ),
-};
 
 // ============================================
 // MAIN COMPONENT
@@ -415,7 +389,7 @@ export default function CreateIncomePage() {
                           formData.category === category ? 'bg-primary/20' : 'bg-muted'
                         )}
                       >
-                        {CATEGORY_ICONS[category]}
+                        {TRANSACTION_CATEGORY_ICONS[category]}
                       </div>
                       <span className="text-sm font-medium text-center">
                         {CATEGORY_LABELS_AR[category as TransactionCategory]}

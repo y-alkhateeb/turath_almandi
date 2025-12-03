@@ -21,6 +21,8 @@ const CreateInventoryItemPage = lazy(() => import('@/pages/inventory/CreateInven
 const EditInventoryItemPage = lazy(() => import('@/pages/inventory/EditInventoryItemPage'));
 const EmployeesPage = lazy(() => import('@/pages/employees/EmployeesPage'));
 const EmployeeDetailPage = lazy(() => import('@/pages/employees/EmployeeDetailPage'));
+const AddEmployeePage = lazy(() => import('@/pages/employees/AddEmployeePage'));
+const EditEmployeePage = lazy(() => import('@/pages/employees/EditEmployeePage'));
 const BranchesPage = lazy(() => import('@/pages/branches/BranchesPage'));
 const UsersPage = lazy(() => import('@/pages/settings/users/UsersPage'));
 const PayablesPage = lazy(() => import('@/pages/payables/PayablesPage'));
@@ -86,8 +88,16 @@ export const dashboardRoutes: RouteObject[] = [
             element: <EmployeesPage />,
           },
           {
+            path: 'employees/new',
+            element: <AddEmployeePage />,
+          },
+          {
             path: 'employees/:id',
             element: <EmployeeDetailPage />,
+          },
+          {
+            path: 'employees/:id/edit',
+            element: <EditEmployeePage />,
           },
 
           // Branches (Admin only)

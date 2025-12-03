@@ -8,7 +8,6 @@ export const INCOME_CATEGORIES = [
   'INVENTORY_SALES',   // مبيعات المخزون - Multi-item ✓ Discount ✓
   'CAPITAL_ADDITION',  // إضافة رأس مال
   'APP_PURCHASES',     // مبيعات التطبيق - Multi-item ✓ Discount ✓
-  'DEBT_PAYMENT',      // دفع دين
 ] as const;
 
 export const EXPENSE_CATEGORIES = [
@@ -17,7 +16,6 @@ export const EXPENSE_CATEGORIES = [
   'SUPPLIES',          // مستلزمات
   'MAINTENANCE',       // صيانة
   'INVENTORY',         // مشتريات مخزون - Multi-item ✓
-  'DEBT',              // دين
   'CASHIER_SHORTAGE',  // نقص كاشير
   'RETURNS',           // مرتجعات
   'OTHER_EXPENSE',     // مصروفات أخرى
@@ -64,14 +62,12 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   INVENTORY_SALES: 'مبيعات المخزون',
   CAPITAL_ADDITION: 'إضافة رأس مال',
   APP_PURCHASES: 'مبيعات التطبيق',
-  DEBT_PAYMENT: 'دفع دين',
   // EXPENSE
   EMPLOYEE_SALARIES: 'رواتب الموظفين',
   WORKER_DAILY: 'يوميات العمال',
   SUPPLIES: 'مستلزمات',
   MAINTENANCE: 'صيانة',
   INVENTORY: 'مشتريات مخزون',
-  DEBT: 'دين',
   CASHIER_SHORTAGE: 'نقص كاشير',
   RETURNS: 'مرتجعات',
   OTHER_EXPENSE: 'مصروفات أخرى',
@@ -158,3 +154,15 @@ export function normalizeCategory(category: string | undefined): string | undefi
   // Return original value
   return category;
 }
+
+/**
+ * System-generated transaction categories
+ * These are created automatically by backend services (e.g., Payables, Receivables)
+ * and should not be user-selectable
+ */
+export const SYSTEM_TRANSACTION_CATEGORIES = {
+  PAYABLE_PAYMENT: 'دفع حسابات دائنة',
+  RECEIVABLE_COLLECTION: 'تحصيل حسابات مدينة',
+} as const;
+
+export type SystemTransactionCategory = typeof SYSTEM_TRANSACTION_CATEGORIES[keyof typeof SYSTEM_TRANSACTION_CATEGORIES];

@@ -14,7 +14,7 @@
 
 import apiClient from '../apiClient';
 import type { Branch, CreateBranchInput, UpdateBranchInput } from '#/entity';
-import type { BranchQueryFilters } from '#/api';
+import type { BranchQueryFilters, PaginatedResponse } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -46,11 +46,19 @@ export enum BranchApiEndpoints {
  * @returns Branch[] array
  * @throws ApiError on 401 (not authenticated)
  */
-export const getAll = (filters?: BranchQueryFilters): Promise<Branch[]> => {
-  return apiClient.get<Branch[]>({
+export const getAll = async (filters?: BranchQueryFilters): Promise<Branch[]> => {
+  const response = await apiClient.get<Branch[] | PaginatedResponse<Branch>>({
     url: BranchApiEndpoints.Base,
     params: filters,
   });
+
+  // Handle paginated response (extract data array)
+  if (response && 'data' in response && Array.isArray((response as any).data)) {
+    return (response as any).data;
+  }
+
+  // Handle direct array response
+  return response as Branch[];
 };
 
 /**
@@ -171,21 +179,21 @@ export const deleteBranch = (id: string): Promise<void> => {
  * Activate branch
  * PATCH /branches/:id
  *
- * Helper method to activate a branch (set isActive = true)
+ * Helper method to activate a branch (set isDeleted = false)
  *
  * @param id - Branch UUID
  * @returns Updated Branch
  * @throws ApiError on 400, 401, 403, 404
  */
 export const activate = (id: string): Promise<Branch> => {
-  return update(id, { isActive: true });
+  return update(id, { isDeleted: false });
 };
 
 /**
  * Deactivate branch
  * PATCH /branches/:id
  *
- * Helper method to deactivate a branch (set isActive = false)
+ * Helper method to deactivate a branch (set isDeleted = true)
  * Deactivated branches won't appear in default listings
  *
  * @param id - Branch UUID
@@ -193,7 +201,7 @@ export const activate = (id: string): Promise<Branch> => {
  * @throws ApiError on 400, 401, 403, 404
  */
 export const deactivate = (id: string): Promise<Branch> => {
-  return update(id, { isActive: false });
+  return update(id, { isDeleted: true });
 };
 
 // ============================================

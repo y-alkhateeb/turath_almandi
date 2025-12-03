@@ -710,3 +710,36 @@ export interface EmployeeFilters {
   page?: number;
   limit?: number;
 }
+
+// ============================================
+// PAYROLL INPUT TYPES
+// ============================================
+
+export interface CreateAdjustmentInput {
+  employeeId: string;
+  type: EmployeeAdjustmentType;
+  amount: number;
+  date: string; // ISO date string
+  description?: string;
+}
+
+export interface PaySalaryInput {
+  employeeId: string;
+  paymentDate: string; // ISO date string
+  salaryMonth: string; // YYYY-MM
+  paymentMethod: 'CASH';
+  notes?: string;
+}
+
+export interface SalaryDetails {
+  employeeId: string;
+  month: string; // YYYY-MM
+  baseSalary: number;
+  allowance: number;
+  bonuses: number;
+  deductions: number;
+  advances: number;
+  netSalary: number;
+  isPaid: boolean;
+  adjustments: EmployeeAdjustment[];
+}

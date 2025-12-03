@@ -69,9 +69,14 @@ export default function LoginPage() {
       // Note: Login response has minimal user data, full profile is fetched separately
       setAuth(
         {
-          ...response.user,
+          id: response.user.id,
+          username: response.user.username,
           role: response.user.role as UserRole,
-          isActive: true,
+          branchId: response.user.branchId,
+          // Required fields not provided by AuthResponse - using defaults
+          isDeleted: false,
+          deletedAt: null,
+          deletedBy: null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
@@ -231,24 +236,16 @@ export default function LoginPage() {
       </div>
       
       {/* Right side - Decorative (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/20 via-secondary/10 to-primary/5 relative overflow-hidden">
-        {/* Decorative elements */}
+      {/* Right side - Decorative (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black">
+        {/* Background Image */}
         <div className="absolute inset-0">
-          {/* Large circle */}
-          <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-primary/10" />
-          <div className="absolute bottom-20 -left-20 w-80 h-80 rounded-full bg-secondary/10" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-primary/5" />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center w-full p-12">
-          <Logo size="xl" className="mb-8" />
-          <h1 className="text-3xl font-bold text-foreground text-center mb-4">
-            مرحباً بك في نظام تراث المندي
-          </h1>
-          <p className="text-muted-foreground text-center max-w-md">
-            نظام إدارة متكامل لإدارة المطاعم والفروع والمخزون والمعاملات المالية
-          </p>
+          <img 
+            src="/logo.jpg" 
+            alt="Background" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent" />
         </div>
       </div>
 

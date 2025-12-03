@@ -160,11 +160,6 @@ export const navData: NavItem[] = [
         icon: <Icon icon="lucide:users" size={20} />,
       },
       {
-        title: 'الفروع',
-        path: '/settings/branches',
-        icon: <Icon icon="lucide:building" size={20} />,
-      },
-      {
         title: 'سجل النشاطات',
         path: '/settings/audit',
         icon: <Icon icon="lucide:file-text" size={20} />,
@@ -209,11 +204,13 @@ export function getFilteredNavItems(
 ): NavItem[] {
   if (!userRole) return [];
 
+  const normalizedUserRole = String(userRole).toUpperCase();
+
   return items
     .filter((item) => {
       // If item has roles requirement, check if user has required role
       if (item.roles && item.roles.length > 0) {
-        return item.roles.includes(userRole);
+        return item.roles.some((role) => String(role).toUpperCase() === normalizedUserRole);
       }
       // No role requirement, show to all authenticated users
       return true;

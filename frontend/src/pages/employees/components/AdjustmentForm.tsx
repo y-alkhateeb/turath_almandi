@@ -25,7 +25,7 @@ import { Loader2 } from 'lucide-react';
 
 const adjustmentSchema = z.object({
   type: z.nativeEnum(EmployeeAdjustmentType),
-  amount: z.number().min(1, 'المبلغ يجب أن يكون أكبر من 0'),
+  amount: z.coerce.number().min(1, 'المبلغ يجب أن يكون أكبر من 0'),
   date: z.string().min(1, 'التاريخ مطلوب'),
   description: z.string().optional(),
 });
@@ -98,7 +98,19 @@ export function AdjustmentForm({ employeeId, onSuccess }: AdjustmentFormProps) {
             <FormItem>
               <FormLabel>المبلغ</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" min="0" {...field} />
+                <Input 
+                  type="number" 
+                  step="0.01" 
+                  min="0" 
+                  value={field.value ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
+                    field.onChange(value);
+                  }}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -8,6 +8,7 @@ import 'dayjs/locale/ar';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import updateLocale from 'dayjs/plugin/updateLocale';
+import { useCurrencyStore } from '@/stores/currencyStore';
 
 // Configure dayjs
 dayjs.extend(relativeTime);
@@ -23,28 +24,29 @@ dayjs.updateLocale('en', {
 });
 
 /**
- * Format number as Iraqi Dinar currency
- * @param amount - Number to format (returns '0 د.ع' if null/undefined)
- * @param locale - Locale string (default: 'ar-IQ')
+ * Format number as currency
+ * @param amount - Number to format (returns '0' with currency symbol if null/undefined)
+ * @param locale - Locale string (default: 'en-US' for English numbers)
+ * @returns Formatted currency string with English numbers and Arabic currency symbol from settings
  */
 export function formatCurrency(
   amount: number | null | undefined,
-  locale: string = 'ar-IQ'
+  locale: string = 'en-US'
 ): string {
-  if (amount === null || amount === undefined || isNaN(amount)) {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: 'IQD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(0);
-  }
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: 'IQD',
+  // Get currency from store (cached in localStorage)
+  const currency = useCurrencyStore.getState().currency;
+  const currencySymbol = currency?.symbol || 'د.ع';
+  
+  const value = amount === null || amount === undefined || isNaN(amount) ? 0 : amount;
+  
+  // Format number in English (en-US locale) without currency style
+  const formattedNumber = new Intl.NumberFormat(locale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(value);
+  
+  // Add currency symbol from settings (Arabic symbol)
+  return `${formattedNumber} ${currencySymbol}`;
 }
 
 /**

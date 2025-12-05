@@ -11,12 +11,32 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import apiClient from '@/api/apiClient';
+import type { Employee, EmployeeAdjustment } from '@/types/entity';
 
 /**
- * Salary details response
- * Matches backend PayrollService.getEmployeeSalaryDetails response
+ * Backend salary details response
+ * Matches backend PayrollService.getEmployeeSalaryDetails response exactly
  */
 interface SalaryDetailsResponse {
+  employee: Employee;
+  salaryMonth: string;
+  baseSalary: number;
+  allowance: number;
+  grossSalary: number;
+  pendingAdjustments: EmployeeAdjustment[];
+  summary: {
+    totalBonuses: number;
+    totalDeductions: number;
+    totalAdvances: number;
+    netSalary: number;
+  };
+}
+
+/**
+ * Transformed salary details response for frontend use
+ * This is the transformed version that components consume
+ */
+interface TransformedSalaryDetailsResponse {
   employeeId: string;
   employeeName: string;
   baseSalary: number;
@@ -29,14 +49,7 @@ interface SalaryDetailsResponse {
     total: number;
   };
   netSalary: number;
-  pendingAdjustments: Array<{
-    id: string;
-    type: 'BONUS' | 'DEDUCTION' | 'ADVANCE';
-    amount: number;
-    date: string;
-    description: string | null;
-    status: string;
-  }>;
+  pendingAdjustments: EmployeeAdjustment[];
 }
 
 /**
@@ -64,15 +77,44 @@ interface PaySalaryInput {
 }
 
 /**
+ * Transform backend salary details response to frontend format
+ * Type-safe transformation without using any
+ */
+function transformSalaryDetailsResponse(
+  backendResponse: SalaryDetailsResponse,
+  employeeId: string
+): TransformedSalaryDetailsResponse {
+  const { employee, baseSalary, allowance, grossSalary, pendingAdjustments, summary } = backendResponse;
+
+  return {
+    employeeId: employee.id ?? employeeId,
+    employeeName: employee.name ?? '',
+    baseSalary: baseSalary ?? 0,
+    allowance: allowance ?? 0,
+    totalSalary: grossSalary ?? 0,
+    adjustments: {
+      bonuses: summary.totalBonuses ?? 0,
+      deductions: summary.totalDeductions ?? 0,
+      advances: summary.totalAdvances ?? 0,
+      total: (summary.totalBonuses ?? 0) - (summary.totalDeductions ?? 0) - (summary.totalAdvances ?? 0),
+    },
+    netSalary: summary.netSalary ?? grossSalary ?? 0,
+    pendingAdjustments: pendingAdjustments ?? [],
+  };
+}
+
+/**
  * Fetch employee salary details for a specific month
  */
 export function useEmployeeSalaryDetails(employeeId: string, month: string) {
   return useQuery({
     queryKey: ['payroll', 'salary-details', employeeId, month],
     queryFn: async () => {
-      return apiClient.get<SalaryDetailsResponse>({ 
+      const backendResponse = await apiClient.get<SalaryDetailsResponse>({ 
         url: `/payroll/employee/${employeeId}/salary-details?month=${month}`
       });
+      
+      return transformSalaryDetailsResponse(backendResponse, employeeId);
     },
     enabled: !!employeeId && !!month,
   });

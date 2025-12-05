@@ -10,7 +10,7 @@ import { UpdateReceivableDto } from './dto/update-receivable.dto';
 import { QueryReceivablesDto } from './dto/query-receivables.dto';
 import { CollectReceivableDto } from './dto/collect-receivable.dto';
 import { Prisma } from '@prisma/client';
-import { UserRole, DebtStatus, TransactionType } from '../common/types/prisma-enums';
+import { UserRole, DebtStatus, TransactionType, PaymentMethod } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { applyBranchFilter } from '../common/utils/query-builder';
 import {
@@ -110,34 +110,58 @@ export class ReceivablesService {
       }
     }
 
-    // Create the receivable
-    const receivable = await this.prisma.accountReceivable.create({
-      data: {
-        contactId: createReceivableDto.contactId,
-        originalAmount: createReceivableDto.amount,
-        remainingAmount: createReceivableDto.amount,
-        date: new Date(createReceivableDto.date),
-        dueDate: createReceivableDto.dueDate ? new Date(createReceivableDto.dueDate) : null,
-        description: createReceivableDto.description,
-        invoiceNumber: createReceivableDto.invoiceNumber,
-        notes: createReceivableDto.notes,
-        status: DebtStatus.ACTIVE,
-        branchId,
-        linkedSaleTransactionId: createReceivableDto.linkedSaleTransactionId,
-        createdBy: user.id,
-        isDeleted: false,
-      },
-      include: {
-        contact: {
-          select: CONTACT_SELECT,
+    // Use transaction to ensure consistency
+    const receivable = await this.prisma.$transaction(async (prisma) => {
+      // Create the receivable
+      const newReceivable = await prisma.accountReceivable.create({
+        data: {
+          contactId: createReceivableDto.contactId,
+          originalAmount: createReceivableDto.amount,
+          remainingAmount: createReceivableDto.amount,
+          date: new Date(createReceivableDto.date),
+          dueDate: createReceivableDto.dueDate ? new Date(createReceivableDto.dueDate) : null,
+          description: createReceivableDto.description,
+          invoiceNumber: createReceivableDto.invoiceNumber,
+          notes: createReceivableDto.notes,
+          status: DebtStatus.ACTIVE,
+          branchId,
+          linkedSaleTransactionId: createReceivableDto.linkedSaleTransactionId,
+          createdBy: user.id,
+          isDeleted: false,
         },
-        branch: {
-          select: BRANCH_SELECT,
+        include: {
+          contact: {
+            select: CONTACT_SELECT,
+          },
+          branch: {
+            select: BRANCH_SELECT,
+          },
+          creator: {
+            select: USER_SELECT,
+          },
         },
-        creator: {
-          select: USER_SELECT,
-        },
-      },
+      });
+
+      // Create expense transaction for standalone receivables (not linked to a sale)
+      if (!createReceivableDto.linkedSaleTransactionId) {
+        await prisma.transaction.create({
+          data: {
+            type: TransactionType.EXPENSE,
+            amount: createReceivableDto.amount,
+            date: new Date(createReceivableDto.date),
+            category: 'صرف حساب مدين',
+            paymentMethod: PaymentMethod.CASH,
+            notes: createReceivableDto.notes || `صرف حساب مدين - ${contact.name}`,
+            branchId,
+            contactId: createReceivableDto.contactId,
+            linkedReceivableId: newReceivable.id,
+            createdBy: user.id,
+            isDeleted: false,
+          },
+        });
+      }
+
+      return newReceivable;
     });
 
     // Audit log

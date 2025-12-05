@@ -162,6 +162,7 @@ export function normalizeCategory(category: string | undefined): string | undefi
 export const SYSTEM_TRANSACTION_CATEGORIES = {
   PAYABLE_PAYMENT: 'دفع حسابات دائنة',
   RECEIVABLE_COLLECTION: 'تحصيل حسابات مدينة',
+  RECEIVABLE_DISBURSEMENT: 'صرف حساب مدين',
 } as const;
 
 export type SystemTransactionCategory = typeof SYSTEM_TRANSACTION_CATEGORIES[keyof typeof SYSTEM_TRANSACTION_CATEGORIES];

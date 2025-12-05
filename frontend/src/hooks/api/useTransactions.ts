@@ -32,6 +32,7 @@ export function useTransactions(filters?: TransactionFilters) {
       if (filters?.startDate) params.append('startDate', filters.startDate);
       if (filters?.endDate) params.append('endDate', filters.endDate);
       if (filters?.search) params.append('search', filters.search);
+      if (filters?.employeeId) params.append('employeeId', filters.employeeId);
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.limit) params.append('limit', filters.limit.toString());
 

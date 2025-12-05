@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Loader2, UserX, Trash2 } from 'lucide-react';
+import { ArrowRight, Edit, Loader2, UserX, Trash2, User, Wallet, History, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FormDialog } from '@/components/shared/FormDialog';
 import { useEmployee, useDeleteEmployee, useResignEmployee } from '@/hooks/api/useEmployees';
-import { EmployeeStatus } from '@/types/enum';
+import { EmployeeStatus, EmployeeAdjustmentStatus } from '@/types/enum';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { AdjustmentForm } from './components/AdjustmentForm';
 import { SalaryDetailsComponent } from './components/SalaryDetailsComponent';
+import { PaymentHistoryTable } from './components/PaymentHistoryTable';
 
 export default function EmployeeDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +32,7 @@ export default function EmployeeDetailPage() {
     if (window.confirm('هل أنت متأكد من تسجيل استقالة هذا الموظف؟')) {
       resignEmployee({
         id: id!,
-        data: { resignDate: new Date().toISOString() }, // Default to today
+        data: { resignDate: new Date().toISOString() },
       });
     }
   };
@@ -42,6 +44,11 @@ export default function EmployeeDetailPage() {
       });
     }
   };
+
+  // Count pending adjustments
+  const pendingAdjustmentsCount =
+    employee?.adjustments?.filter((adj) => adj.status === EmployeeAdjustmentStatus.PENDING)
+      .length ?? 0;
 
   if (isLoading) {
     return (
@@ -66,13 +73,18 @@ export default function EmployeeDetailPage() {
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/employees')}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
           </Button>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               {employee.name}
               <Badge
                 variant={employee.status === EmployeeStatus.ACTIVE ? 'default' : 'secondary'}
+                className={
+                  employee.status === EmployeeStatus.ACTIVE
+                    ? 'bg-success/10 text-success hover:bg-success/20'
+                    : ''
+                }
               >
                 {employee.status === EmployeeStatus.ACTIVE ? 'نشط' : 'مستقيل'}
               </Badge>
@@ -82,17 +94,17 @@ export default function EmployeeDetailPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleEdit}>
-            <Edit className="h-4 w-4 ml-2" />
+            <Edit className="h-4 w-4 me-2" />
             تعديل
           </Button>
           {employee.status === EmployeeStatus.ACTIVE && (
             <Button variant="secondary" onClick={handleResign} disabled={isResigning}>
-              <UserX className="h-4 w-4 ml-2" />
+              <UserX className="h-4 w-4 me-2" />
               تسجيل استقالة
             </Button>
           )}
           <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-            <Trash2 className="h-4 w-4 ml-2" />
+            <Trash2 className="h-4 w-4 me-2" />
             حذف
           </Button>
         </div>
@@ -100,17 +112,39 @@ export default function EmployeeDetailPage() {
 
       {/* Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="history">سجل الرواتب</TabsTrigger>
-          <TabsTrigger value="adjustments">المكافآت والخصومات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview" className="gap-2">
+            <User className="h-4 w-4" />
+            نظرة عامة
+          </TabsTrigger>
+          <TabsTrigger value="salary" className="gap-2">
+            <Wallet className="h-4 w-4" />
+            الراتب الحالي
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2">
+            <History className="h-4 w-4" />
+            سجل الدفعات
+          </TabsTrigger>
+          <TabsTrigger value="adjustments" className="gap-2">
+            <FileText className="h-4 w-4" />
+            التسويات
+            {pendingAdjustmentsCount > 0 && (
+              <Badge variant="destructive" className="ms-1 h-5 w-5 p-0 text-xs">
+                {pendingAdjustmentsCount}
+              </Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
 
+        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>المعلومات الشخصية</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  المعلومات الشخصية
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between border-b pb-2">
@@ -119,9 +153,7 @@ export default function EmployeeDetailPage() {
                 </div>
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-muted-foreground">تاريخ التعيين</span>
-                  <span className="font-medium">
-                    {formatDate(new Date(employee.hireDate))}
-                  </span>
+                  <span className="font-medium">{formatDate(new Date(employee.hireDate))}</span>
                 </div>
                 {employee.resignDate && (
                   <div className="flex justify-between border-b pb-2">
@@ -136,7 +168,10 @@ export default function EmployeeDetailPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>المعلومات المالية</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5" />
+                  المعلومات المالية
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between border-b pb-2">
@@ -147,9 +182,9 @@ export default function EmployeeDetailPage() {
                   <span className="text-muted-foreground">البدلات</span>
                   <span className="font-medium">{formatCurrency(employee.allowance)}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2 pt-2 bg-muted/50 px-2 rounded">
+                <div className="flex justify-between border-b pb-2 pt-2 bg-primary/10 dark:bg-primary/20 px-2 rounded">
                   <span className="font-bold">إجمالي الراتب</span>
-                  <span className="font-bold">
+                  <span className="font-bold text-primary">
                     {formatCurrency(Number(employee.baseSalary) + Number(employee.allowance))}
                   </span>
                 </div>
@@ -158,10 +193,14 @@ export default function EmployeeDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="history">
+        {/* Salary Tab */}
+        <TabsContent value="salary">
           <Card>
             <CardHeader>
-              <CardTitle>إدارة الرواتب</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                إدارة الراتب
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <SalaryDetailsComponent employeeId={id!} employeeName={employee.name} />
@@ -169,10 +208,19 @@ export default function EmployeeDetailPage() {
           </Card>
         </TabsContent>
 
+        {/* Payment History Tab */}
+        <TabsContent value="history">
+          <PaymentHistoryTable employeeId={id!} />
+        </TabsContent>
+
+        {/* Adjustments Tab */}
         <TabsContent value="adjustments">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>المكافآت والخصومات</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                المكافآت والخصومات والسلف
+              </CardTitle>
               <Button
                 onClick={() => setShowAdjustmentDialog(true)}
                 disabled={employee.status !== EmployeeStatus.ACTIVE}
@@ -183,82 +231,128 @@ export default function EmployeeDetailPage() {
             <CardContent>
               {employee.adjustments && employee.adjustments.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="rounded-md border">
+                  <div className="rounded-md border overflow-hidden">
                     <table className="w-full">
                       <thead>
                         <tr className="border-b bg-muted/50">
                           <th className="p-3 text-right font-medium">التاريخ</th>
                           <th className="p-3 text-right font-medium">النوع</th>
                           <th className="p-3 text-right font-medium">المبلغ</th>
+                          <th className="p-3 text-right font-medium">المتبقي</th>
                           <th className="p-3 text-right font-medium">الحالة</th>
                           <th className="p-3 text-right font-medium">الوصف</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {employee.adjustments.map((adjustment) => (
-                          <tr key={adjustment.id} className="border-b">
-                            <td className="p-3">{formatDate(new Date(adjustment.date))}</td>
-                            <td className="p-3">
-                              <Badge variant={
-                                adjustment.type === 'BONUS' ? 'default' : 
-                                adjustment.type === 'DEDUCTION' ? 'destructive' : 
-                                'secondary'
-                              }>
-                                {adjustment.type === 'BONUS' ? 'مكافأة' :
-                                 adjustment.type === 'DEDUCTION' ? 'خصم' : 'سلفة'}
-                              </Badge>
-                            </td>
-                            <td className="p-3 font-medium">{formatCurrency(adjustment.amount)}</td>
-                            <td className="p-3">
-                              <Badge variant={
-                                adjustment.status === 'PENDING' ? 'outline' :
-                                adjustment.status === 'PROCESSED' ? 'default' :
-                                'secondary'
-                              }>
-                                {adjustment.status === 'PENDING' ? 'معلق' :
-                                 adjustment.status === 'PROCESSED' ? 'تم المعالجة' : 'ملغي'}
-                              </Badge>
-                            </td>
-                            <td className="p-3 text-muted-foreground">{adjustment.description || '-'}</td>
-                          </tr>
-                        ))}
+                        {employee.adjustments.map((adjustment) => {
+                          const isAdvance = adjustment.type === 'ADVANCE';
+                          const remaining = adjustment.remainingAmount ?? adjustment.amount;
+
+                          return (
+                            <tr key={adjustment.id} className="border-b last:border-0">
+                              <td className="p-3">{formatDate(new Date(adjustment.date))}</td>
+                              <td className="p-3">
+                                <Badge
+                                  variant={
+                                    adjustment.type === 'BONUS'
+                                      ? 'default'
+                                      : adjustment.type === 'DEDUCTION'
+                                        ? 'destructive'
+                                        : 'secondary'
+                                  }
+                                  className={
+                                    adjustment.type === 'BONUS'
+                                      ? 'bg-success/10 text-success hover:bg-success/20'
+                                      : adjustment.type === 'ADVANCE'
+                                        ? 'bg-warning-500/10 text-warning-700 dark:text-warning-400 hover:bg-warning-500/20'
+                                        : ''
+                                  }
+                                >
+                                  {adjustment.type === 'BONUS'
+                                    ? 'مكافأة'
+                                    : adjustment.type === 'DEDUCTION'
+                                      ? 'خصم'
+                                      : 'سلفة'}
+                                </Badge>
+                              </td>
+                              <td className="p-3 font-medium">
+                                {formatCurrency(adjustment.amount)}
+                              </td>
+                              <td className="p-3">
+                                {isAdvance ? (
+                                  <span
+                                    className={
+                                      remaining > 0 ? 'text-warning-600 dark:text-warning-400 font-medium' : 'text-success'
+                                    }
+                                  >
+                                    {formatCurrency(remaining)}
+                                  </span>
+                                ) : (
+                                  '-'
+                                )}
+                              </td>
+                              <td className="p-3">
+                                <Badge
+                                  variant={
+                                    adjustment.status === EmployeeAdjustmentStatus.PENDING
+                                      ? 'outline'
+                                      : adjustment.status === EmployeeAdjustmentStatus.PROCESSED
+                                        ? 'default'
+                                        : 'secondary'
+                                  }
+                                  className={
+                                    adjustment.status === EmployeeAdjustmentStatus.PROCESSED
+                                      ? 'bg-success/10 text-success hover:bg-success/20'
+                                      : ''
+                                  }
+                                >
+                                  {adjustment.status === EmployeeAdjustmentStatus.PENDING
+                                    ? 'معلق'
+                                    : adjustment.status === EmployeeAdjustmentStatus.PROCESSED
+                                      ? 'تم المعالجة'
+                                      : 'ملغي'}
+                                </Badge>
+                              </td>
+                              <td className="p-3 text-muted-foreground max-w-[200px] truncate">
+                                {adjustment.description || '-'}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
                 </div>
               ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  لا توجد تسويات لهذا الموظف
-                </p>
+                <div className="text-center py-12">
+                  <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                  <p className="text-muted-foreground">لا توجد تسويات لهذا الموظف</p>
+                  {employee.status === EmployeeStatus.ACTIVE && (
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => setShowAdjustmentDialog(true)}
+                    >
+                      إضافة أول تسوية
+                    </Button>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
 
           {/* Add Adjustment Dialog */}
-          {showAdjustmentDialog && (
-            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-              <Card className="w-full max-w-md mx-4">
-                <CardHeader>
-                  <CardTitle>إضافة تسوية جديدة</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <AdjustmentForm
-                    employeeId={id!}
-                    onSuccess={() => setShowAdjustmentDialog(false)}
-                  />
-                  <div className="mt-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowAdjustmentDialog(false)}
-                      className="w-full"
-                    >
-                      إلغاء
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          <FormDialog
+            open={showAdjustmentDialog}
+            onOpenChange={setShowAdjustmentDialog}
+            title="إضافة تسوية جديدة"
+            maxWidth="sm:max-w-md"
+          >
+            <AdjustmentForm
+              employeeId={id!}
+              onSuccess={() => setShowAdjustmentDialog(false)}
+            />
+          </FormDialog>
         </TabsContent>
       </Tabs>
     </div>

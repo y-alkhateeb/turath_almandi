@@ -11,7 +11,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import apiClient from '@/api/apiClient';
-import type { Employee, EmployeeAdjustment } from '@/types/entity';
+import type { Employee, EmployeeAdjustment, CreateAdjustmentInput, PaySalaryInput } from '@/types/entity';
 
 /**
  * Backend salary details response
@@ -23,7 +23,15 @@ interface SalaryDetailsResponse {
   baseSalary: number;
   allowance: number;
   grossSalary: number;
+  isPaid: boolean;
+  existingPayment: {
+    id: string;
+    amount: number;
+    paymentDate: string;
+    salaryMonth: string;
+  } | null;
   pendingAdjustments: EmployeeAdjustment[];
+  pendingAdvances: EmployeeAdjustment[]; // Separate list for advances with remainingAmount
   summary: {
     totalBonuses: number;
     totalDeductions: number;
@@ -49,32 +57,13 @@ interface TransformedSalaryDetailsResponse {
     total: number;
   };
   netSalary: number;
+  isPaid: boolean;
+  existingPayment: SalaryDetailsResponse['existingPayment'];
   pendingAdjustments: EmployeeAdjustment[];
+  pendingAdvances: EmployeeAdjustment[]; // For partial advance deduction UI
 }
 
-/**
- * Create adjustment input
- * Matches backend CreateAdjustmentDto exactly
- */
-interface CreateAdjustmentInput {
-  employeeId: string;
-  type: 'BONUS' | 'DEDUCTION' | 'ADVANCE';
-  amount: number;
-  date: string;
-  description?: string;
-}
-
-/**
- * Pay salary input
- * Matches backend PaySalaryDto exactly
- */
-interface PaySalaryInput {
-  employeeId: string;
-  salaryMonth: string; // YYYY-MM format
-  paymentDate: string;
-  paymentMethod: 'CASH';
-  notes?: string;
-}
+// CreateAdjustmentInput and PaySalaryInput are imported from @/types/entity
 
 /**
  * Transform backend salary details response to frontend format
@@ -84,7 +73,7 @@ function transformSalaryDetailsResponse(
   backendResponse: SalaryDetailsResponse,
   employeeId: string
 ): TransformedSalaryDetailsResponse {
-  const { employee, baseSalary, allowance, grossSalary, pendingAdjustments, summary } = backendResponse;
+  const { employee, baseSalary, allowance, grossSalary, isPaid, existingPayment, pendingAdjustments, pendingAdvances, summary } = backendResponse;
 
   return {
     employeeId: employee.id ?? employeeId,
@@ -99,7 +88,10 @@ function transformSalaryDetailsResponse(
       total: (summary.totalBonuses ?? 0) - (summary.totalDeductions ?? 0) - (summary.totalAdvances ?? 0),
     },
     netSalary: summary.netSalary ?? grossSalary ?? 0,
+    isPaid: isPaid ?? false,
+    existingPayment: existingPayment ?? null,
     pendingAdjustments: pendingAdjustments ?? [],
+    pendingAdvances: pendingAdvances ?? [],
   };
 }
 
@@ -134,8 +126,16 @@ export function useCreateAdjustment() {
       });
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['payroll', 'salary-details', variables.employeeId] 
+      queryClient.invalidateQueries({
+        queryKey: ['payroll', 'salary-details', variables.employeeId]
+      });
+      // Invalidate employee detail to refresh adjustments list
+      queryClient.invalidateQueries({
+        queryKey: ['employees', 'detail', variables.employeeId]
+      });
+      // Also invalidate employees list
+      queryClient.invalidateQueries({
+        queryKey: ['employees', 'list']
       });
       toast.success('تم إضافة التسوية بنجاح');
     },

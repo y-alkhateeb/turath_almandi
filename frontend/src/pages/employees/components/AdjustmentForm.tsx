@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -25,7 +26,7 @@ import { Loader2 } from 'lucide-react';
 
 const adjustmentSchema = z.object({
   type: z.nativeEnum(EmployeeAdjustmentType),
-  amount: z.coerce.number().min(1, 'المبلغ يجب أن يكون أكبر من 0'),
+  amount: z.number().min(1, 'المبلغ يجب أن يكون أكبر من 0'),
   date: z.string().min(1, 'التاريخ مطلوب'),
   description: z.string().optional(),
 });
@@ -38,7 +39,8 @@ interface AdjustmentFormProps {
 }
 
 export function AdjustmentForm({ employeeId, onSuccess }: AdjustmentFormProps) {
-  const { mutate: createAdjustment, isPending } = useCreateAdjustment();
+  const { mutateAsync: createAdjustmentAsync, isPending } = useCreateAdjustment();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AdjustmentFormValues>({
     resolver: zodResolver(adjustmentSchema),
@@ -50,19 +52,29 @@ export function AdjustmentForm({ employeeId, onSuccess }: AdjustmentFormProps) {
     },
   });
 
-  const handleSubmit = (values: AdjustmentFormValues) => {
-    createAdjustment(
-      {
+  const handleSubmit = async (values: AdjustmentFormValues) => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Convert date to ISO string for backend
+      const data = {
         employeeId,
-        ...values,
-      },
-      {
-        onSuccess: () => {
-          form.reset();
-          onSuccess?.();
-        },
-      }
-    );
+        type: values.type,
+        amount: values.amount,
+        date: new Date(values.date).toISOString(),
+        description: values.description,
+      };
+
+      await createAdjustmentAsync(data);
+      form.reset();
+      onSuccess?.();
+    } catch {
+      // Error is already handled by the mutation hook (toast.error)
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -145,9 +157,12 @@ export function AdjustmentForm({ employeeId, onSuccess }: AdjustmentFormProps) {
           )}
         />
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" type="button" onClick={() => form.reset()}>
+            إعادة تعيين
+          </Button>
+          <Button type="submit" disabled={isPending || isSubmitting}>
+            {(isPending || isSubmitting) && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
             حفظ
           </Button>
         </div>

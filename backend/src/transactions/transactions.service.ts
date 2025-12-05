@@ -83,6 +83,7 @@ interface TransactionFilters {
   startDate?: string;
   endDate?: string;
   search?: string;
+  employeeId?: string; // Filter salary transactions by employee
 }
 
 interface SalaryExpensesSummary {
@@ -643,6 +644,11 @@ export class TransactionsService {
         { category: { contains: filters.search, mode: 'insensitive' } },
         { notes: { contains: filters.search, mode: 'insensitive' } },
       ];
+    }
+
+    // Employee filter (for salary transactions)
+    if (filters.employeeId) {
+      where.employeeId = filters.employeeId;
     }
 
     // Get total count for pagination

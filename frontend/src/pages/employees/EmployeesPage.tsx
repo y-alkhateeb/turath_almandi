@@ -87,7 +87,7 @@ export default function EmployeesPage() {
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <h1 className="text-2xl font-bold">الموظفين</h1>
         <Button onClick={handleAddEmployee}>
-          <Plus className="h-4 w-4 ml-2" />
+          <Plus className="h-4 w-4 me-2" />
           إضافة موظف جديد
         </Button>
       </div>

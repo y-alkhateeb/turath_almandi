@@ -45,16 +45,16 @@ export class PayrollService {
           user,
         );
 
-        // Create the adjustment record, linked to the transaction, and mark as PENDING
-        // It will be deducted from the next salary payment
+        // Create the adjustment record with remainingAmount for partial deductions
         const adjustment = await prisma.employeeAdjustment.create({
           data: {
             employeeId: dto.employeeId,
             type: dto.type,
             amount: new Decimal(dto.amount),
+            remainingAmount: new Decimal(dto.amount), // Initialize remaining = full amount
             date: new Date(dto.date),
             description: dto.description,
-            status: EmployeeAdjustmentStatus.PENDING, // Pending deduction from salary
+            status: EmployeeAdjustmentStatus.PENDING,
             createdBy: user.id,
           },
         });
@@ -97,11 +97,32 @@ export class PayrollService {
     const startDate = getStartOfMonth(monthDate);
     const endDate = getEndOfMonth(monthDate);
 
+    // Check if salary is already paid for this month
+    const existingPayment = await this.prisma.salaryPayment.findFirst({
+      where: {
+        employeeId,
+        salaryMonth: month,
+        isDeleted: false,
+      },
+    });
+
+    // Get pending adjustments for this month (bonuses/deductions dated in this month)
     const pendingAdjustments = await this.prisma.employeeAdjustment.findMany({
       where: {
         employeeId,
         status: EmployeeAdjustmentStatus.PENDING,
         date: { gte: startDate, lte: endDate },
+        isDeleted: false,
+      },
+    });
+
+    // Get ALL pending advances (not limited to this month - they carry over)
+    const pendingAdvances = await this.prisma.employeeAdjustment.findMany({
+      where: {
+        employeeId,
+        type: EmployeeAdjustmentType.ADVANCE,
+        status: EmployeeAdjustmentStatus.PENDING,
+        isDeleted: false,
       },
     });
 
@@ -113,10 +134,16 @@ export class PayrollService {
     let totalDeductions = new Decimal(0);
     let totalAdvances = new Decimal(0);
 
+    // Calculate bonuses and deductions for this month
     for (const adj of pendingAdjustments) {
       if (adj.type === EmployeeAdjustmentType.BONUS) totalBonuses = totalBonuses.plus(adj.amount);
       if (adj.type === EmployeeAdjustmentType.DEDUCTION) totalDeductions = totalDeductions.plus(adj.amount);
-      if (adj.type === EmployeeAdjustmentType.ADVANCE) totalAdvances = totalAdvances.plus(adj.amount);
+    }
+
+    // Calculate total advances using remainingAmount (for partial deduction support)
+    for (const adv of pendingAdvances) {
+      const remaining = adv.remainingAmount ?? adv.amount;
+      totalAdvances = totalAdvances.plus(remaining);
     }
 
     const netSalary = grossSalary.plus(totalBonuses).minus(totalDeductions).minus(totalAdvances);
@@ -127,7 +154,10 @@ export class PayrollService {
       baseSalary: baseSalary.toNumber(),
       allowance: allowance.toNumber(),
       grossSalary: grossSalary.toNumber(),
+      isPaid: !!existingPayment,
+      existingPayment,
       pendingAdjustments,
+      pendingAdvances, // Separate list for advances with remainingAmount
       summary: {
         totalBonuses: totalBonuses.toNumber(),
         totalDeductions: totalDeductions.toNumber(),
@@ -145,29 +175,78 @@ export class PayrollService {
       user,
     );
 
-    // 2. Validate net salary is positive
-    if (salaryDetails.summary.netSalary <= 0) {
+    // 2. Check if salary is already paid for this month
+    if (salaryDetails.isPaid) {
+      throw new BadRequestException(`راتب شهر ${dto.salaryMonth} مدفوع مسبقاً`);
+    }
+
+    // 3. Calculate actual net salary based on advance deductions
+    let actualAdvanceDeductions = new Decimal(0);
+    const advanceDeductionsMap = new Map<string, number>();
+
+    if (dto.advanceDeductions && dto.advanceDeductions.length > 0) {
+      // User specified partial deductions
+      for (const deduction of dto.advanceDeductions) {
+        const advance = salaryDetails.pendingAdvances.find(
+          (adv) => adv.id === deduction.adjustmentId,
+        );
+
+        if (!advance) {
+          throw new BadRequestException(`السلفة ${deduction.adjustmentId} غير موجودة أو ليست معلقة`);
+        }
+
+        const remaining = Number(advance.remainingAmount ?? advance.amount);
+        if (deduction.deductionAmount > remaining) {
+          throw new BadRequestException(
+            `مبلغ الخصم (${deduction.deductionAmount}) أكبر من المتبقي من السلفة (${remaining})`,
+          );
+        }
+
+        advanceDeductionsMap.set(deduction.adjustmentId, deduction.deductionAmount);
+        actualAdvanceDeductions = actualAdvanceDeductions.plus(deduction.deductionAmount);
+      }
+    } else {
+      // Default: deduct all pending advances in full
+      for (const advance of salaryDetails.pendingAdvances) {
+        const remaining = Number(advance.remainingAmount ?? advance.amount);
+        advanceDeductionsMap.set(advance.id, remaining);
+        actualAdvanceDeductions = actualAdvanceDeductions.plus(remaining);
+      }
+    }
+
+    // Calculate actual net salary
+    const grossSalary = new Decimal(salaryDetails.grossSalary);
+    const totalBonuses = new Decimal(salaryDetails.summary.totalBonuses);
+    const totalDeductions = new Decimal(salaryDetails.summary.totalDeductions);
+    const actualNetSalary = grossSalary
+      .plus(totalBonuses)
+      .minus(totalDeductions)
+      .minus(actualAdvanceDeductions);
+
+    // 4. Validate net salary is positive
+    if (actualNetSalary.lessThanOrEqualTo(0)) {
       throw new BadRequestException('صافي الراتب يجب أن يكون أكبر من صفر');
     }
 
-    // 3. Use Prisma transaction for atomicity
+    // 5. Use Prisma transaction for atomicity
     return this.prisma.$transaction(async (prisma) => {
-      // 4. Create SalaryPayment record
+      // 6. Create SalaryPayment record
       const defaultNotes = `صرف راتب شهر ${dto.salaryMonth}`;
       const salaryPayment = await prisma.salaryPayment.create({
         data: {
           employeeId: dto.employeeId,
-          amount: salaryDetails.summary.netSalary,
+          salaryMonth: dto.salaryMonth,
+          amount: actualNetSalary.toNumber(),
           paymentDate: new Date(dto.paymentDate),
           notes: dto.notes || defaultNotes,
           recordedBy: user.id,
         },
       });
 
-      // 5. Create expense transaction
+      // 7. Create expense transaction
       const transaction = await this.transactionsService.createExpense(
         {
-          amount: salaryDetails.summary.netSalary,
+          amount: actualNetSalary.toNumber(),
           category: 'EMPLOYEE_SALARIES',
           date: dto.paymentDate,
           employeeId: dto.employeeId,
@@ -178,18 +257,20 @@ export class PayrollService {
         user,
       );
 
-      // 6. Update SalaryPayment with transaction ID
+      // 8. Update SalaryPayment with transaction ID
       await prisma.salaryPayment.update({
         where: { id: salaryPayment.id },
         data: { transactionId: transaction.id },
       });
 
-      // 7. Update all PENDING adjustments to PROCESSED
-      const adjustmentIds = salaryDetails.pendingAdjustments.map((adj) => adj.id);
+      // 9. Process bonuses and deductions (non-advances) - mark as PROCESSED
+      const nonAdvanceAdjustmentIds = salaryDetails.pendingAdjustments
+        .filter((adj) => adj.type !== EmployeeAdjustmentType.ADVANCE)
+        .map((adj) => adj.id);
 
-      if (adjustmentIds.length > 0) {
+      if (nonAdvanceAdjustmentIds.length > 0) {
         await prisma.employeeAdjustment.updateMany({
-          where: { id: { in: adjustmentIds } },
+          where: { id: { in: nonAdvanceAdjustmentIds } },
           data: {
             status: EmployeeAdjustmentStatus.PROCESSED,
             salaryPaymentId: salaryPayment.id,
@@ -197,23 +278,66 @@ export class PayrollService {
         });
       }
 
-      // 8. Audit log
+      // 10. Process advances with partial deduction support
+      let advancesProcessed = 0;
+      for (const [advanceId, deductionAmount] of advanceDeductionsMap) {
+        const advance = salaryDetails.pendingAdvances.find((a) => a.id === advanceId);
+        if (!advance) continue;
+
+        const currentRemaining = Number(advance.remainingAmount ?? advance.amount);
+        const newRemaining = currentRemaining - deductionAmount;
+
+        if (newRemaining <= 0) {
+          // Fully paid off
+          await prisma.employeeAdjustment.update({
+            where: { id: advanceId },
+            data: {
+              remainingAmount: new Decimal(0),
+              status: EmployeeAdjustmentStatus.PROCESSED,
+              salaryPaymentId: salaryPayment.id,
+            },
+          });
+        } else {
+          // Partially paid - remains PENDING
+          await prisma.employeeAdjustment.update({
+            where: { id: advanceId },
+            data: {
+              remainingAmount: new Decimal(newRemaining),
+              // Status remains PENDING, no salaryPaymentId
+            },
+          });
+        }
+        advancesProcessed++;
+      }
+
+      // 11. Audit log
       await this.auditLogService.logCreate(
         user.id,
         AuditEntityType.SALARY_PAYMENT,
         salaryPayment.id,
-        { salaryPayment, transaction, adjustmentsProcessed: adjustmentIds.length },
+        {
+          salaryPayment,
+          transaction,
+          adjustmentsProcessed: nonAdvanceAdjustmentIds.length,
+          advancesProcessed,
+          advanceDeductions: Object.fromEntries(advanceDeductionsMap),
+        },
       );
 
-      // 9. Return complete salary payment details
+      // 12. Return complete salary payment details
       return {
         salaryPayment: {
           ...salaryPayment,
           transactionId: transaction.id,
         },
         transaction,
-        adjustmentsProcessed: adjustmentIds.length,
-        summary: salaryDetails.summary,
+        adjustmentsProcessed: nonAdvanceAdjustmentIds.length,
+        advancesProcessed,
+        summary: {
+          ...salaryDetails.summary,
+          actualNetSalary: actualNetSalary.toNumber(),
+          actualAdvanceDeductions: actualAdvanceDeductions.toNumber(),
+        },
       };
     });
   }

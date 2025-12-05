@@ -53,6 +53,7 @@ export class TransactionsController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('search') search?: string,
+    @Query('employeeId') employeeId?: string,
   ) {
     const pagination = parsePagination(page, limit);
 
@@ -64,6 +65,7 @@ export class TransactionsController {
       startDate,
       endDate,
       search,
+      employeeId,
     };
 
     return this.transactionsService.findAll(user, pagination, filters);

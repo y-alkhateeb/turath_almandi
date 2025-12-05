@@ -247,6 +247,7 @@ export interface TransactionFilters {
   startDate?: string;
   endDate?: string;
   search?: string;
+  employeeId?: string; // Filter salary transactions by employee
   page?: number;
   limit?: number;
 }
@@ -610,6 +611,7 @@ export interface EmployeeAdjustment {
   employeeId: string;
   type: EmployeeAdjustmentType;
   amount: number;
+  remainingAmount?: number | null; // For partial advance deduction tracking
   date: string; // ISO date string
   description: string | null;
   status: EmployeeAdjustmentStatus;
@@ -633,6 +635,7 @@ export interface EmployeeAdjustment {
 export interface SalaryPayment {
   id: string;
   employeeId: string;
+  salaryMonth: string; // YYYY-MM format
   amount: number;
   paymentDate: string; // ISO date string
   notes: string | null;
@@ -726,12 +729,21 @@ export interface CreateAdjustmentInput {
   description?: string;
 }
 
+/**
+ * Partial advance deduction for salary payment
+ */
+export interface AdvanceDeductionInput {
+  adjustmentId: string;
+  deductionAmount: number;
+}
+
 export interface PaySalaryInput {
   employeeId: string;
   paymentDate: string; // ISO date string
   salaryMonth: string; // YYYY-MM
   paymentMethod: 'CASH';
   notes?: string;
+  advanceDeductions?: AdvanceDeductionInput[]; // Optional partial advance deductions
 }
 
 export interface SalaryDetails {

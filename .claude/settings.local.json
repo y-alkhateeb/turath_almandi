@@ -45,7 +45,9 @@
       "Bash(wc:*)",
       "Bash(npx tsx:*)",
       "Bash(while read file)",
-      "Bash(npm --prefix /Volumes/SSD/project/turath_almandi/frontend run build)"
+      "Bash(npm --prefix /Volumes/SSD/project/turath_almandi/frontend run build)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Create unified Dialog components system for better code reusability\n\n## Summary\n\nIntroduced a comprehensive Dialog components system to eliminate repetition and improve consistency across the application:\n\n### Components Created\n- **FormDialog** - Unified form dialog with configurable width, description, and RTL/dark mode support\n- **ConfirmDialog** - Unified confirmation dialog for delete/confirm actions with loading states\n- **useDialog** - Custom hook for managing dialog state and data with support for multiple dialogs\n\n### Key Features\n- Props-based control for consistency\n- Full RTL support for Arabic UI\n- Dark mode support with semantic colors\n- Accessibility (ARIA attributes, keyboard navigation)\n- Smooth animations and transitions\n- Simple API that reduces boilerplate by ~40%\n\n### Files Created\n- frontend/src/components/shared/FormDialog.tsx\n- frontend/src/components/shared/ConfirmDialog.tsx\n- frontend/src/hooks/useDialog.ts\n- frontend/DIALOG_COMPONENTS.md (comprehensive guide)\n- frontend/DIALOG_REFACTORING_PLAN.md (implementation roadmap)\n- frontend/DIALOG_EXAMPLES.md (practical examples)\n\n### Fixed Issues\n- Fixed AdjustmentForm submission using mutateAsync + async/await pattern\n- Updated EmployeeDetailPage to use FormDialog\n- Fixed React Query v5 callback handling in form submissions\n\n### Testing\n- Build passes without errors\n- All components properly exported\n- Type safety maintained\n\n### Next Steps\n- Refactor Receivables module dialogs\n- Refactor Payables module dialogs\n- Refactor Inventory module dialogs\n- Refactor Contacts, Branches, and Users dialogs\n- See DIALOG_REFACTORING_PLAN.md for detailed steps\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

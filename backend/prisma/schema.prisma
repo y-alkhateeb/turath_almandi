@@ -761,6 +761,7 @@ model EmployeeAdjustment {
   employeeId      String                   @map("employee_id") @db.Uuid
   type            EmployeeAdjustmentType
   amount          Decimal                  @db.Decimal(15, 2)
+  remainingAmount Decimal?                 @map("remaining_amount") @db.Decimal(15, 2) // للسلف الجزئية - المبلغ المتبقي
   date            DateTime                 @db.Date
   description     String?                  @db.Text
   status          EmployeeAdjustmentStatus @default(PENDING)
@@ -793,6 +794,7 @@ model EmployeeAdjustment {
 model SalaryPayment {
   id            String    @id @default(uuid()) @db.Uuid
   employeeId    String    @map("employee_id") @db.Uuid
+  salaryMonth   String    @map("salary_month") @db.VarChar(7) // YYYY-MM format - شهر الراتب
   amount        Decimal   @db.Decimal(15, 2)
   paymentDate   DateTime  @map("payment_date") @db.Date
   notes         String?   @db.Text
@@ -811,7 +813,9 @@ model SalaryPayment {
   deleter     User?                @relation("SalaryPaymentDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
   adjustments EmployeeAdjustment[]
 
+  // Note: unique_employee_salary_month constraint is a partial unique index in SQL (only for non-deleted records)
   @@index([employeeId])
+  @@index([salaryMonth])
   @@index([paymentDate])
   @@index([recordedBy])
   @@index([transactionId])

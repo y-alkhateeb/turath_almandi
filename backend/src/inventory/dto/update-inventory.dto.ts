@@ -42,4 +42,9 @@ export class UpdateInventoryDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  isInternalConsumption?: boolean;
 }

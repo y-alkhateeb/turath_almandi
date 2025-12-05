@@ -6,11 +6,9 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { RecordConsumptionDto } from './dto/record-consumption.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequestUser } from '../common/interfaces';
-import { InventoryUnit, UserRole } from '../common/types/prisma-enums';
+import { InventoryUnit } from '../common/types/prisma-enums';
 
 @Controller('inventory')
 @UseGuards(JwtAuthGuard, BranchAccessGuard)
@@ -33,6 +31,7 @@ export class InventoryController {
    * - branchId: Filter by branch UUID
    * - unit: Filter by inventory unit (KG | PIECE | LITER | OTHER)
    * - search: Search by item name
+   * - excludeInternalConsumption: Exclude items marked for internal consumption only
    */
   @Get()
   findAll(
@@ -40,11 +39,13 @@ export class InventoryController {
     @Query('branchId') branchId?: string,
     @Query('unit') unit?: InventoryUnit,
     @Query('search') search?: string,
+    @Query('excludeInternalConsumption') excludeInternalConsumption?: string,
   ): Promise<InventoryItemWithMetadata[]> {
     const filters = {
       branchId,
       unit,
       search,
+      excludeInternalConsumption: excludeInternalConsumption === 'true' || excludeInternalConsumption === '1',
     };
 
     return this.inventoryService.findAll(user, filters);
@@ -70,17 +71,15 @@ export class InventoryController {
   }
 
   // ============================================
-  // CONSUMPTION ENDPOINTS (ADMIN ONLY)
+  // CONSUMPTION ENDPOINTS
   // ============================================
 
   /**
    * Record consumption/damage of an inventory item
    * POST /inventory/:id/consume
-   * Admin only - decreases inventory without creating transaction
+   * Decreases inventory without creating transaction
    */
   @Post(':id/consume')
-  @UseGuards(RolesGuard)
-  @Roles([UserRole.ADMIN])
   recordConsumption(
     @Param('id') id: string,
     @Body() recordConsumptionDto: RecordConsumptionDto,

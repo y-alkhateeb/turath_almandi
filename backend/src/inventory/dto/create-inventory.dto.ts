@@ -52,4 +52,9 @@ export class CreateInventoryDto {
   @IsUUID('4', { message: 'معرف الفرع يجب أن يكون UUID صالح' })
   @IsOptional()
   branchId?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  isInternalConsumption?: boolean = false;
 }

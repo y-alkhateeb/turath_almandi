@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import inventoryService from '@/api/services/inventoryService';
 import { useAuth } from '@/hooks/api/useAuth';
 import { BranchSelect } from '@/components/shared/BranchSelect';
@@ -60,6 +61,7 @@ const initialFormData: FormData = {
   sellingPrice: '0',
   branchId: '',
   notes: '',
+  isInternalConsumption: false,
 };
 
 export default function CreateInventoryItemPage() {
@@ -140,6 +142,7 @@ export default function CreateInventoryItemPage() {
       costPerUnit: parseFloat(formData.costPerUnit),
       sellingPrice: formData.sellingPrice ? parseFloat(formData.sellingPrice) : null,
       branchId: isAdmin ? formData.branchId : userBranchId!,
+      isInternalConsumption: formData.isInternalConsumption,
     };
 
     createMutation.mutate(data);
@@ -317,6 +320,19 @@ export default function CreateInventoryItemPage() {
                 disabled={isSaving}
                 rows={3}
               />
+            </div>
+
+            {/* استهلاك داخلي */}
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <Checkbox
+                id="isInternalConsumption"
+                checked={formData.isInternalConsumption}
+                onCheckedChange={(checked) => handleChange('isInternalConsumption', checked as boolean)}
+                disabled={isSaving}
+              />
+              <Label htmlFor="isInternalConsumption" className="text-sm font-normal cursor-pointer">
+                استهلاك داخلي (لا يظهر في إضافة الإيراد)
+              </Label>
             </div>
           </CardContent>
         </Card>

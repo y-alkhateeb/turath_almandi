@@ -183,6 +183,7 @@ export interface InventoryQueryFilters {
   unit?: InventoryUnit;
   branchId?: string;
   search?: string;
+  excludeInternalConsumption?: boolean;
 }
 
 /**

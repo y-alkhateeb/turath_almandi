@@ -25,6 +25,7 @@ interface InventoryFilters {
   branchId?: string;
   search?: string;
   unit?: string;
+  excludeInternalConsumption?: boolean;
 }
 
 // Type for inventory item with branch and minimal transactions
@@ -125,6 +126,7 @@ export class InventoryService {
         unit: createInventoryDto.unit,
         costPerUnit: createInventoryDto.costPerUnit,
         sellingPrice: createInventoryDto.sellingPrice ?? null,
+        isInternalConsumption: createInventoryDto.isInternalConsumption ?? false,
         lastUpdated: getCurrentTimestamp(),
       },
       include: {
@@ -172,6 +174,11 @@ export class InventoryService {
     // Search filter (searches in name)
     if (filters.search) {
       where.name = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    // Exclude internal consumption items if requested
+    if (filters.excludeInternalConsumption) {
+      where.isInternalConsumption = false;
     }
 
     // Get inventory items without pagination
@@ -277,6 +284,8 @@ export class InventoryService {
       updateData.costPerUnit = updateInventoryDto.costPerUnit;
     if (updateInventoryDto.sellingPrice !== undefined)
       updateData.sellingPrice = updateInventoryDto.sellingPrice;
+    if (updateInventoryDto.isInternalConsumption !== undefined)
+      updateData.isInternalConsumption = updateInventoryDto.isInternalConsumption;
 
     // Update the item
     const updatedItem = await this.prisma.inventoryItem.update({

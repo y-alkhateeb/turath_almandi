@@ -536,6 +536,7 @@ model InventoryItem {
   costPerUnit      Decimal       @map("cost_per_unit") @db.Decimal(15, 2)
   sellingPrice     Decimal?      @map("selling_price") @db.Decimal(15, 2)
   includeInRevenue Boolean       @default(true) @map("include_in_revenue")
+  isInternalConsumption Boolean  @default(false) @map("is_internal_consumption")
   lastUpdated      DateTime      @map("last_updated") @db.Timestamptz
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz

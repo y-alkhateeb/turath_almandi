@@ -403,6 +403,7 @@ export interface InventoryItem {
   costPerUnit: number; // سعر الشراء - Decimal in DB, returned as number
   sellingPrice: number | null; // سعر البيع - Decimal in DB, returned as number
   autoAdded: boolean; // True if auto-added via transaction, false if manually added
+  isInternalConsumption: boolean; // True if item is for internal consumption only
   lastUpdated: string;
   createdAt: string;
   updatedAt: string;
@@ -429,6 +430,7 @@ export interface CreateInventoryInput {
   sellingPrice?: number | null; // سعر البيع
   notes?: string;
   branchId?: string;
+  isInternalConsumption?: boolean; // استهلاك داخلي
 }
 
 export interface UpdateInventoryInput {
@@ -438,6 +440,7 @@ export interface UpdateInventoryInput {
   costPerUnit?: number; // سعر الشراء
   sellingPrice?: number | null; // سعر البيع
   notes?: string;
+  isInternalConsumption?: boolean; // استهلاك داخلي
 }
 
 /**

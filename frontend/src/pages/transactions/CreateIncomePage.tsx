@@ -128,9 +128,10 @@ export default function CreateIncomePage() {
 
   // Fetch inventory items when multi-item category is selected
   // Filter by branch to ensure only items from the selected branch are shown
+  // Exclude internal consumption items (only show sellable items)
   const { data: inventoryItems = [], isLoading: loadingInventory } = useQuery({
-    queryKey: ['inventory', { branchId: formData.branchId }],
-    queryFn: () => inventoryService.getAll({ branchId: formData.branchId }),
+    queryKey: ['inventory', { branchId: formData.branchId, excludeInternalConsumption: true }],
+    queryFn: () => inventoryService.getAll({ branchId: formData.branchId, excludeInternalConsumption: true }),
     enabled: supportsMultiItem && !!formData.branchId,
   });
 

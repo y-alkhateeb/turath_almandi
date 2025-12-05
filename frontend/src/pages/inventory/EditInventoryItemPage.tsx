@@ -3,15 +3,16 @@
  * صفحة تعديل صنف في المخزون
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowRight, Loader2, Save } from 'lucide-react';
+import { ArrowRight, Loader2, Save, TrendingDown, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -24,8 +25,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui';
 import inventoryService from '@/api/services/inventoryService';
 import { useAuth } from '@/hooks/api/useAuth';
-import type { UpdateInventoryInput } from '@/types/entity';
+import type { UpdateInventoryInput, RecordConsumptionInput, ConsumptionHistoryItem } from '@/types/entity';
 import { InventoryUnit } from '@/types/enum';
+import RecordConsumptionDialog from './components/RecordConsumptionDialog';
+import ConsumptionHistoryDialog from './components/ConsumptionHistoryDialog';
 
 const UNIT_OPTIONS: { value: InventoryUnit; label: string }[] = [
   { value: InventoryUnit.KG, label: 'كيلوغرام (كغ)' },
@@ -41,6 +44,7 @@ interface FormData {
   costPerUnit: string;
   sellingPrice: string;
   notes: string;
+  isInternalConsumption: boolean;
 }
 
 interface FormErrors {
@@ -64,8 +68,16 @@ export default function EditInventoryItemPage() {
     costPerUnit: '0',
     sellingPrice: '0',
     notes: '',
+    isInternalConsumption: false,
   });
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Consumption states
+  const [consumptionItem, setConsumptionItem] = useState<typeof item | null>(null);
+  const [historyItem, setHistoryItem] = useState<typeof item | null>(null);
+  const [consumptionError, setConsumptionError] = useState<string | null>(null);
+  const [consumptionHistory, setConsumptionHistory] = useState<ConsumptionHistoryItem[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Fetch inventory item
   const { data: item, isLoading, error: fetchError } = useQuery({
@@ -84,6 +96,7 @@ export default function EditInventoryItemPage() {
         costPerUnit: item.costPerUnit.toString(),
         sellingPrice: item.sellingPrice?.toString() || '0',
         notes: '',
+        isInternalConsumption: item.isInternalConsumption || false,
       });
     }
   }, [item]);
@@ -101,6 +114,39 @@ export default function EditInventoryItemPage() {
       toast.error(error.message || 'حدث خطأ أثناء تحديث الصنف');
     },
   });
+
+  // Consumption mutation
+  const consumptionMutation = useMutation({
+    mutationFn: (data: RecordConsumptionInput) => inventoryService.recordConsumption(id!, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      await queryClient.invalidateQueries({ queryKey: ['inventory', id] });
+      toast.success('تم تسجيل الاستهلاك بنجاح');
+      setConsumptionItem(null);
+      setConsumptionError(null);
+    },
+    onError: (error: Error) => {
+      setConsumptionError(error.message || 'حدث خطأ أثناء تسجيل الاستهلاك');
+    },
+  });
+
+  // Fetch consumption history
+  const fetchConsumptionHistory = useCallback(
+    async (startDate?: string, endDate?: string) => {
+      if (!item) return;
+
+      setIsLoadingHistory(true);
+      try {
+        const data = await inventoryService.getConsumptionHistory(id!, startDate, endDate);
+        setConsumptionHistory(data);
+      } catch {
+        toast.error('حدث خطأ أثناء تحميل السجل');
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    },
+    [item, id]
+  );
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -148,6 +194,7 @@ export default function EditInventoryItemPage() {
       quantity: parseFloat(formData.quantity),
       costPerUnit: parseFloat(formData.costPerUnit),
       sellingPrice: formData.sellingPrice ? parseFloat(formData.sellingPrice) : null,
+      isInternalConsumption: formData.isInternalConsumption,
     };
 
     updateMutation.mutate(data);
@@ -163,6 +210,21 @@ export default function EditInventoryItemPage() {
 
   const handleCancel = () => {
     navigate('/inventory');
+  };
+
+  const handleRecordConsumption = () => {
+    setConsumptionItem(item);
+    setConsumptionError(null);
+  };
+
+  const handleViewHistory = () => {
+    setHistoryItem(item);
+    setConsumptionHistory([]);
+    fetchConsumptionHistory();
+  };
+
+  const handleSubmitConsumption = (data: RecordConsumptionInput) => {
+    consumptionMutation.mutate(data);
   };
 
   const isSaving = updateMutation.isPending;
@@ -338,8 +400,53 @@ export default function EditInventoryItemPage() {
                 rows={3}
               />
             </div>
+
+            {/* استهلاك داخلي */}
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <Checkbox
+                id="isInternalConsumption"
+                checked={formData.isInternalConsumption}
+                onCheckedChange={(checked) => handleChange('isInternalConsumption', checked as boolean)}
+                disabled={isSaving}
+              />
+              <Label htmlFor="isInternalConsumption" className="text-sm font-normal cursor-pointer">
+                استهلاك داخلي (لا يظهر في إضافة الإيراد)
+              </Label>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Consumption Section - Only for internal consumption items */}
+        {item && item.isInternalConsumption && (
+          <Card>
+            <CardHeader>
+              <CardTitle>الاستهلاك</CardTitle>
+              <CardDescription>تسجيل الاستهلاك وعرض السجل</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRecordConsumption}
+                  disabled={isSaving}
+                >
+                  <TrendingDown className="h-4 w-4 ml-2" />
+                  تسجيل استهلاك
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleViewHistory}
+                  disabled={isSaving}
+                >
+                  <History className="h-4 w-4 ml-2" />
+                  عرض سجل الاستهلاك
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Form Actions */}
         <div className="flex gap-3 justify-end">
@@ -366,6 +473,29 @@ export default function EditInventoryItemPage() {
           </Button>
         </div>
       </form>
+
+      {/* Consumption Dialogs */}
+      {item && (
+        <>
+          <RecordConsumptionDialog
+            open={!!consumptionItem}
+            onOpenChange={(open) => !open && setConsumptionItem(null)}
+            item={consumptionItem || item}
+            onSubmit={handleSubmitConsumption}
+            isSaving={consumptionMutation.isPending}
+            error={consumptionError}
+          />
+
+          <ConsumptionHistoryDialog
+            open={!!historyItem}
+            onOpenChange={(open) => !open && setHistoryItem(null)}
+            item={historyItem || item}
+            history={consumptionHistory}
+            isLoading={isLoadingHistory}
+            onFetchHistory={fetchConsumptionHistory}
+          />
+        </>
+      )}
     </div>
   );
 }

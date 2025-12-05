@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
 import { FormDialog } from '@/components/shared/FormDialog';
 import { BranchSelect } from '@/components/shared/BranchSelect';
 import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '@/types/entity';
@@ -32,6 +33,7 @@ interface FormData {
   sellingPrice: string;
   branchId: string;
   notes: string;
+  isInternalConsumption: boolean;
 }
 
 interface FormErrors {
@@ -62,6 +64,7 @@ const initialFormData: FormData = {
   sellingPrice: '0',
   branchId: '',
   notes: '',
+  isInternalConsumption: false,
 };
 
 export default function AddEditItemDialog({
@@ -89,6 +92,7 @@ export default function AddEditItemDialog({
         sellingPrice: item.sellingPrice?.toString() || '0',
         branchId: item.branchId,
         notes: '',
+        isInternalConsumption: item.isInternalConsumption || false,
       });
     } else {
       setFormData({
@@ -146,6 +150,7 @@ export default function AddEditItemDialog({
       quantity: parseFloat(formData.quantity),
       costPerUnit: parseFloat(formData.costPerUnit),
       sellingPrice: formData.sellingPrice ? parseFloat(formData.sellingPrice) : null,
+      isInternalConsumption: formData.isInternalConsumption,
     };
 
     // إضافة الفرع فقط عند الإنشاء وللأدمن
@@ -313,6 +318,19 @@ export default function AddEditItemDialog({
               disabled={isSaving}
               rows={2}
             />
+          </div>
+
+          {/* استهلاك داخلي */}
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Checkbox
+              id="isInternalConsumption"
+              checked={formData.isInternalConsumption}
+              onCheckedChange={(checked) => handleChange('isInternalConsumption', checked as boolean)}
+              disabled={isSaving}
+            />
+            <Label htmlFor="isInternalConsumption" className="text-sm font-normal cursor-pointer">
+              استهلاك داخلي (لا يظهر في إضافة الإيراد)
+            </Label>
           </div>
 
           <div className="flex justify-end gap-2">

@@ -83,10 +83,35 @@ fi
 # Deploy all pending migrations
 echo ""
 echo "🚀 Deploying database migrations..."
-npx prisma migrate deploy || {
-  echo "❌ Migration deployment failed"
-  exit 1
-}
+if ! npx prisma migrate deploy; then
+  echo "⚠️  Standard migration deployment failed, attempting manual migration..."
+  
+  # Try to apply is_internal_consumption migration manually if it exists
+  if [ -f "prisma/migrations/20251205200000_add_is_internal_consumption_to_inventory_item/migration.sql" ]; then
+    echo "📦 Applying is_internal_consumption migration manually..."
+    if command -v psql > /dev/null 2>&1; then
+      psql "$DATABASE_URL" -f "prisma/migrations/20251205200000_add_is_internal_consumption_to_inventory_item/migration.sql" || {
+        echo "❌ Manual migration via psql failed"
+        exit 1
+      }
+    elif command -v docker > /dev/null 2>&1 && docker ps | grep -q turath-almandi-db-prod; then
+      # Try via Docker
+      DB_NAME=$(echo "$DATABASE_URL" | sed -n 's/.*\/\([^?]*\).*/\1/p' || echo "turath_almandi")
+      docker exec -i turath-almandi-db-prod psql -U postgres -d "$DB_NAME" < "prisma/migrations/20251205200000_add_is_internal_consumption_to_inventory_item/migration.sql" || {
+        echo "❌ Manual migration via Docker failed"
+        exit 1
+      }
+    else
+      echo "❌ Cannot apply migration automatically. Please apply manually:"
+      echo "   Run: psql \$DATABASE_URL -f prisma/migrations/20251205200000_add_is_internal_consumption_to_inventory_item/migration.sql"
+      exit 1
+    fi
+    echo "✅ Manual migration applied successfully"
+  else
+    echo "❌ Migration deployment failed and migration file not found"
+    exit 1
+  fi
+fi
 echo "✅ Migrations deployed successfully"
 echo ""
 

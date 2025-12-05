@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowRight, Edit, Loader2, UserX, Trash2, User, Wallet, History, FileText } from 'lucide-react';
+import { ArrowRight, Edit, Loader2, UserX, Trash2, User, Wallet, History } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FormDialog } from '@/components/shared/FormDialog';
 import { useEmployee, useDeleteEmployee, useResignEmployee } from '@/hooks/api/useEmployees';
 import { EmployeeStatus, EmployeeAdjustmentStatus } from '@/types/enum';
 import { formatCurrency, formatDate } from '@/utils/format';
-import { AdjustmentForm } from './components/AdjustmentForm';
 import { SalaryDetailsComponent } from './components/SalaryDetailsComponent';
 import { PaymentHistoryTable } from './components/PaymentHistoryTable';
 
@@ -18,7 +16,6 @@ export default function EmployeeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [showAdjustmentDialog, setShowAdjustmentDialog] = useState(false);
 
   const { data: employee, isLoading, error } = useEmployee(id!);
   const { mutate: deleteEmployee, isPending: isDeleting } = useDeleteEmployee();
@@ -44,11 +41,6 @@ export default function EmployeeDetailPage() {
       });
     }
   };
-
-  // Count pending adjustments
-  const pendingAdjustmentsCount =
-    employee?.adjustments?.filter((adj) => adj.status === EmployeeAdjustmentStatus.PENDING)
-      .length ?? 0;
 
   if (isLoading) {
     return (
@@ -112,7 +104,7 @@ export default function EmployeeDetailPage() {
 
       {/* Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" className="gap-2">
             <User className="h-4 w-4" />
             نظرة عامة
@@ -123,16 +115,7 @@ export default function EmployeeDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="history" className="gap-2">
             <History className="h-4 w-4" />
-            سجل الدفعات
-          </TabsTrigger>
-          <TabsTrigger value="adjustments" className="gap-2">
-            <FileText className="h-4 w-4" />
-            التسويات
-            {pendingAdjustmentsCount > 0 && (
-              <Badge variant="destructive" className="ms-1 h-5 w-5 p-0 text-xs">
-                {pendingAdjustmentsCount}
-              </Badge>
-            )}
+            الدفعات
           </TabsTrigger>
         </TabsList>
 
@@ -210,10 +193,12 @@ export default function EmployeeDetailPage() {
 
         {/* Payment History Tab */}
         <TabsContent value="history">
-          <PaymentHistoryTable employeeId={id!} />
+          <PaymentHistoryTable employeeId={id!} employeeStatus={employee.status} />
         </TabsContent>
+      </Tabs>
 
-        {/* Adjustments Tab */}
+      {/* Keep adjustment dialog state but remove tab - kept for backward compatibility */}
+      {false && (
         <TabsContent value="adjustments">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -340,21 +325,8 @@ export default function EmployeeDetailPage() {
               )}
             </CardContent>
           </Card>
-
-          {/* Add Adjustment Dialog */}
-          <FormDialog
-            open={showAdjustmentDialog}
-            onOpenChange={setShowAdjustmentDialog}
-            title="إضافة تسوية جديدة"
-            maxWidth="sm:max-w-md"
-          >
-            <AdjustmentForm
-              employeeId={id!}
-              onSuccess={() => setShowAdjustmentDialog(false)}
-            />
-          </FormDialog>
         </TabsContent>
-      </Tabs>
+      )}
     </div>
   );
 }

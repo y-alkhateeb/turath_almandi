@@ -195,7 +195,6 @@ export function SalaryDetailsComponent({ employeeId, employeeName }: SalaryDetai
           {!salaryDetails.isPaid && salaryDetails.pendingAdvances.length > 0 && (
             <AdvanceDeductionSelector
               advances={salaryDetails.pendingAdvances}
-              monthlyNetSalary={salaryDetails.netSalary}
               onChange={handleAdvanceDeductionsChange}
             />
           )}

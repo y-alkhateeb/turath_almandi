@@ -1,12 +1,18 @@
+import { useState } from 'react';
 import { useTransactions } from '@/hooks/api/useTransactions';
 import { TransactionType } from '@/types/enum';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, History, Receipt, Calendar, DollarSign } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, History, Receipt, Calendar, DollarSign, Plus } from 'lucide-react';
+import { FormDialog } from '@/components/shared/FormDialog';
+import { AdjustmentForm } from './AdjustmentForm';
+import { EmployeeStatus } from '@/types/enum';
 
 interface PaymentHistoryTableProps {
   employeeId: string;
+  employeeStatus?: string;
 }
 
 /**
@@ -20,12 +26,15 @@ function formatMonth(dateString: string): string {
   });
 }
 
-export function PaymentHistoryTable({ employeeId }: PaymentHistoryTableProps) {
+export function PaymentHistoryTable({ employeeId, employeeStatus }: PaymentHistoryTableProps) {
+  const [showAdjustmentDialog, setShowAdjustmentDialog] = useState(false);
+
+  // Fetch all employee expense transactions (includes both salaries and adjustments)
+  // Adjustments are stored as EMPLOYEE_SALARIES category with bonus/deduction notes
   const { data: transactionsData, isLoading } = useTransactions({
     employeeId,
-    category: 'EMPLOYEE_SALARIES',
     type: TransactionType.EXPENSE,
-    limit: 24, // Show up to 2 years of payments
+    limit: 24,
   });
 
   if (isLoading) {
@@ -36,16 +45,19 @@ export function PaymentHistoryTable({ employeeId }: PaymentHistoryTableProps) {
     );
   }
 
-  const transactions = transactionsData?.data ?? [];
+  // Get all transactions and sort by date (newest first)
+  const allTransactions = (transactionsData?.data ?? []).sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
-  if (transactions.length === 0) {
+  if (allTransactions.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <History className="h-12 w-12 text-muted-foreground/50 mb-4" />
-          <p className="text-muted-foreground">لا يوجد سجل دفعات لهذا الموظف</p>
+          <p className="text-muted-foreground">لا يوجد سجل دفعات أو تسويات لهذا الموظف</p>
           <p className="text-sm text-muted-foreground/70 mt-1">
-            سيظهر سجل الدفعات هنا بعد صرف أول راتب
+            سيظهر السجل هنا بعد صرف أول راتب أو إضافة تسوية
           </p>
         </CardContent>
       </Card>
@@ -53,7 +65,7 @@ export function PaymentHistoryTable({ employeeId }: PaymentHistoryTableProps) {
   }
 
   // Calculate totals
-  const totalPaid = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
+  const totalPaid = allTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
 
   return (
     <div className="space-y-4">
@@ -69,7 +81,7 @@ export function PaymentHistoryTable({ employeeId }: PaymentHistoryTableProps) {
               </div>
             </div>
             <Badge variant="outline" className="text-sm">
-              {transactions.length} دفعة
+              {allTransactions.length} دفعة
             </Badge>
           </div>
         </CardContent>
@@ -77,11 +89,19 @@ export function PaymentHistoryTable({ employeeId }: PaymentHistoryTableProps) {
 
       {/* Payments Table */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            سجل الدفعات
+            الدفعات
           </CardTitle>
+          <Button
+            onClick={() => setShowAdjustmentDialog(true)}
+            size="sm"
+            disabled={employeeStatus !== EmployeeStatus.ACTIVE}
+          >
+            <Plus className="h-4 w-4 me-2" />
+            إضافة تسوية
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border overflow-hidden">
@@ -95,7 +115,7 @@ export function PaymentHistoryTable({ employeeId }: PaymentHistoryTableProps) {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((transaction) => (
+                {allTransactions.map((transaction) => (
                   <tr key={transaction.id} className="border-b last:border-0 hover:bg-muted/30">
                     <td className="p-3">
                       <div className="flex items-center gap-2">
@@ -124,6 +144,19 @@ export function PaymentHistoryTable({ employeeId }: PaymentHistoryTableProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Adjustment Dialog */}
+      <FormDialog
+        open={showAdjustmentDialog}
+        onOpenChange={setShowAdjustmentDialog}
+        title="إضافة تسوية جديدة"
+        maxWidth="sm:max-w-md"
+      >
+        <AdjustmentForm
+          employeeId={employeeId}
+          onSuccess={() => setShowAdjustmentDialog(false)}
+        />
+      </FormDialog>
     </div>
   );
 }

@@ -150,6 +150,7 @@ interface PaymentMethodButtonsProps {
   onChange: (value: PaymentMethod) => void;
   disabled?: boolean;
   className?: string;
+  cashOnly?: boolean;
 }
 
 export function PaymentMethodButtons({
@@ -157,8 +158,27 @@ export function PaymentMethodButtons({
   onChange,
   disabled = false,
   className,
+  cashOnly = false,
 }: PaymentMethodButtonsProps) {
   const options = getPaymentMethodOptions();
+
+  // If cash-only, show only cash option
+  if (cashOnly) {
+    const CashOption = options.find((opt) => opt.value === PaymentMethod.CASH)!;
+    const Icon = CashOption.icon;
+
+    return (
+      <div className="p-4 rounded-lg border-2 border-primary bg-primary/10">
+        <div className="flex items-center justify-center gap-3 text-primary">
+          <Icon className="h-5 w-5" />
+          <span className="font-medium">نقدي فقط</span>
+        </div>
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          هذه الفئة تدعم الدفع نقداً فقط
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={cn('grid grid-cols-2 gap-3', className)}>

@@ -15,6 +15,7 @@ import {
   Plus,
   Trash2,
   AlertCircle,
+  Package,
 } from 'lucide-react';
 
 import {
@@ -45,7 +46,7 @@ import {
   type TransactionCategory,
 } from '@/constants/transaction-categories';
 import { TRANSACTION_CATEGORY_ICONS } from '@/constants/transaction-category-icons';
-import { PaymentMethodButtons, getPaymentMethodLabel, PAYMENT_METHOD_CONFIG } from '@/components/shared/PaymentMethodSelect';
+import { PaymentMethodButtons, getPaymentMethodLabel } from '@/components/shared/PaymentMethodSelect';
 import { BranchSelect } from '@/components/shared/BranchSelect';
 import {
   isMultiItemCategory,
@@ -415,13 +416,12 @@ export default function CreateIncomePage() {
             {/* Inventory Items Section (for multi-item categories) */}
             {supportsMultiItem && (
               <Card>
-                <CardHeader className="pb-4">
+                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">أصناف المخزون</CardTitle>
-                    <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                      <Plus className="h-4 w-4 ml-1" />
-                      إضافة صنف
-                    </Button>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      أصناف المخزون
+                    </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -749,26 +749,11 @@ export default function CreateIncomePage() {
                 <CardTitle className="text-base">طريقة الدفع</CardTitle>
               </CardHeader>
               <CardContent>
-                {cashOnly ? (
-                  // Cash-only categories show only CASH option
-                  <div className="p-4 rounded-lg border-2 border-primary bg-primary/10">
-                    <div className="flex items-center justify-center gap-3 text-primary">
-                      {(() => {
-                        const CashIcon = PAYMENT_METHOD_CONFIG[PaymentMethod.CASH].icon;
-                        return <CashIcon className="h-5 w-5" />;
-                      })()}
-                      <span className="font-medium">نقدي فقط</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground text-center mt-2">
-                      هذه الفئة تدعم الدفع نقداً فقط
-                    </p>
-                  </div>
-                ) : (
-                  <PaymentMethodButtons
-                    value={formData.paymentMethod}
-                    onChange={(value) => updateField('paymentMethod', value)}
-                  />
-                )}
+                <PaymentMethodButtons
+                  value={formData.paymentMethod}
+                  onChange={(value) => updateField('paymentMethod', value)}
+                  cashOnly={cashOnly}
+                />
               </CardContent>
             </Card>
 

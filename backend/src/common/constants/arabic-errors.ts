@@ -102,7 +102,6 @@ export const ARABIC_ERRORS: Record<string, string> = {
   userMustBeAssignedToBranchToReceivePayments: 'يجب تعيين فرع للمستخدم لاستلام المدفوعات',
   canOnlyReceivePaymentsFromYourBranch: 'يمكنك فقط استلام المدفوعات من فرعك',
   noAccessToReceivable: 'ليس لديك صلاحية للوصول إلى هذا الحساب المدين',
-  contactIdRequiredForReceivable: 'معرف جهة الاتصال مطلوب للحساب المدين',
 
   // Employee & Payroll Errors
   employeeNotFound: 'الموظف غير موجود',

@@ -65,22 +65,41 @@ export class PayrollService {
       });
     }
 
-    // 3. Handle BONUS and DEDUCTION (Pending until salary payment)
-    const adjustment = await this.prisma.employeeAdjustment.create({
-      data: {
-        employeeId: dto.employeeId,
-        type: dto.type,
-        amount: new Decimal(dto.amount),
-        date: new Date(dto.date),
-        description: dto.description,
-        status: EmployeeAdjustmentStatus.PENDING,
-        createdBy: user.id,
-      },
+    // 3. Handle BONUS and DEDUCTION (Create transactions immediately to appear in history)
+    return this.prisma.$transaction(async (prisma) => {
+      // Create the adjustment record
+      const adjustment = await prisma.employeeAdjustment.create({
+        data: {
+          employeeId: dto.employeeId,
+          type: dto.type,
+          amount: new Decimal(dto.amount),
+          date: new Date(dto.date),
+          description: dto.description,
+          status: EmployeeAdjustmentStatus.PENDING,
+          createdBy: user.id,
+        },
+      });
+
+      // Create a corresponding transaction to track in history immediately
+      // Bonuses increase expenses (paid out to employee)
+      // Deductions decrease payroll expenses (reduction in what we owe)
+      const transaction = await this.transactionsService.createExpense(
+        {
+          amount: dto.amount,
+          category: 'EMPLOYEE_SALARIES',
+          date: dto.date,
+          employeeId: dto.employeeId,
+          notes: `${dto.type === EmployeeAdjustmentType.BONUS ? 'مكافأة' : 'تسوية'} ${dto.description ? '- ' + dto.description : ''}`.trim(),
+          branchId: employee.branchId,
+          paymentMethod: 'CASH', // Default for adjustments
+        },
+        user,
+      );
+
+      await this.auditLogService.logCreate(user.id, AuditEntityType.EMPLOYEE_ADJUSTMENT, adjustment.id, adjustment);
+
+      return { adjustment, transaction };
     });
-
-    await this.auditLogService.logCreate(user.id, AuditEntityType.EMPLOYEE_ADJUSTMENT, adjustment.id, adjustment);
-
-    return adjustment;
   }
 
   async getEmployeeSalaryDetails(employeeId: string, month: string, user: RequestUser) {

@@ -9,13 +9,11 @@ import { Banknote, Calendar, Info } from 'lucide-react';
 
 interface AdvanceDeductionSelectorProps {
   advances: EmployeeAdjustment[];
-  monthlyNetSalary: number; // Used to estimate months remaining
   onChange: (deductions: AdvanceDeductionInput[]) => void;
 }
 
 export function AdvanceDeductionSelector({
   advances,
-  monthlyNetSalary,
   onChange,
 }: AdvanceDeductionSelectorProps) {
   // Track deduction amounts for each advance

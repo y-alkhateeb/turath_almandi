@@ -25,8 +25,9 @@ import {
   Checkbox,
 } from '@/components/ui';
 import { useCreateUser, useUpdateUser } from '@/hooks/api/useUsers';
+import { BranchSelect } from '@/components/shared/BranchSelect';
 import { UserRole } from '#/enum';
-import type { UserWithBranch, Branch } from '#/entity';
+import type { UserWithBranch } from '#/entity';
 
 interface FormValues {
   username: string;
@@ -40,10 +41,9 @@ interface UserFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userToEdit?: UserWithBranch;
-  branches: Branch[];
 }
 
-export function UserForm({ open, onOpenChange, userToEdit, branches }: UserFormProps) {
+export function UserForm({ open, onOpenChange, userToEdit }: UserFormProps) {
   const isEditing = !!userToEdit;
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
@@ -256,26 +256,13 @@ export function UserForm({ open, onOpenChange, userToEdit, branches }: UserFormP
                   <FormLabel>
                     الفرع {selectedRole === UserRole.ACCOUNTANT && <span className="text-destructive">*</span>}
                   </FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value ?? undefined}
-                      onValueChange={(value) => field.onChange(value ?? null)}
-                      disabled={selectedRole === UserRole.ADMIN}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={selectedRole === UserRole.ADMIN ? 'غير متاح للمدير' : 'اختر الفرع'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {branches
-                          .filter((branch) => !branch.isDeleted)
-                          .map((branch) => (
-                            <SelectItem key={branch.id} value={branch.id}>
-                              {branch.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
+                  <BranchSelect
+                    value={field.value ?? undefined}
+                    onValueChange={(value) => field.onChange(value ?? null)}
+                    placeholder={selectedRole === UserRole.ADMIN ? 'غير متاح للمدير' : 'اختر الفرع'}
+                    disabled={selectedRole === UserRole.ADMIN}
+                    asFormControl
+                  />
                   <FormMessage />
                   {selectedRole === UserRole.ADMIN && (
                     <p className="text-sm text-muted-foreground">المديرون لا يحتاجون إلى فرع محدد</p>

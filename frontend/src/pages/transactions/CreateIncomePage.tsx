@@ -36,8 +36,7 @@ import {
 import { cn } from '@/lib/utils';
 import transactionService from '@/api/services/transactionService';
 import inventoryService from '@/api/services/inventoryService';
-import branchService from '@/api/services/branchService';
-import { TransactionType, PaymentMethod, DiscountType, InventoryOperationType, UserRole } from '@/types/enum';
+import { PaymentMethod, DiscountType, InventoryOperationType, UserRole } from '@/types/enum';
 import {
   INCOME_CATEGORIES,
   CATEGORY_LABELS_AR,
@@ -46,6 +45,7 @@ import {
 } from '@/constants/transaction-categories';
 import { TRANSACTION_CATEGORY_ICONS } from '@/constants/transaction-category-icons';
 import { PaymentMethodButtons, getPaymentMethodLabel, PAYMENT_METHOD_CONFIG } from '@/components/shared/PaymentMethodSelect';
+import { BranchSelect } from '@/components/shared/BranchSelect';
 import {
   isMultiItemCategory,
   isDiscountEnabledCategory,
@@ -60,7 +60,7 @@ interface FormData {
   amount: string;
   paymentMethod: PaymentMethod;
   date: Date;
-  employeeVendorName: string;
+
   notes: string;
   branchId: string;
   // Multi-item fields
@@ -98,7 +98,7 @@ export default function CreateIncomePage() {
     amount: '',
     paymentMethod: PaymentMethod.CASH,
     date: new Date(),
-    employeeVendorName: '',
+
     notes: '',
     branchId: userBranch?.id || '',
     items: [],
@@ -114,22 +114,14 @@ export default function CreateIncomePage() {
   const supportsDiscount = isDiscountEnabledCategory(formData.category);
   const cashOnly = isCashOnlyCategory(formData.category);
 
-  // Fetch branches for admin
-  const { data: branches = [] } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAllActive(),
-    enabled: isAdmin,
-  });
 
   // Fetch inventory items when multi-item category is selected
   // Filter by branch to ensure only items from the selected branch are shown
-  const { data: inventoryData, isLoading: loadingInventory } = useQuery({
-    queryKey: ['inventory', { limit: '100', branchId: formData.branchId }],
-    queryFn: () => inventoryService.getAll({ limit: '100', branchId: formData.branchId }),
+  const { data: inventoryItems = [], isLoading: loadingInventory } = useQuery({
+    queryKey: ['inventory', { branchId: formData.branchId }],
+    queryFn: () => inventoryService.getAll({ branchId: formData.branchId }),
     enabled: supportsMultiItem && !!formData.branchId,
   });
-
-  const inventoryItems = inventoryData?.data || [];
 
   // Calculate totals for multi-item transactions
   const calculations = useMemo(() => {
@@ -158,7 +150,7 @@ export default function CreateIncomePage() {
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: transactionService.create,
+    mutationFn: transactionService.createIncome,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -231,7 +223,6 @@ export default function CreateIncomePage() {
     if (supportsMultiItem) {
       // Multi-item transaction
       createMutation.mutate({
-        type: TransactionType.INCOME,
         category: formData.category,
         items: formData.items.map((item) => ({
           inventoryItemId: item.inventoryItemId,
@@ -249,19 +240,18 @@ export default function CreateIncomePage() {
         discountReason: formData.transactionDiscountReason || undefined,
         paymentMethod,
         date: toInputDate(formData.date),
-        employeeVendorName: formData.employeeVendorName || undefined,
+
         notes: formData.notes || undefined,
         branchId: isAdmin ? formData.branchId : undefined,
       });
     } else {
       // Simple transaction
       createMutation.mutate({
-        type: TransactionType.INCOME,
         category: formData.category,
         amount: parseFloat(formData.amount),
         paymentMethod,
         date: toInputDate(formData.date),
-        employeeVendorName: formData.employeeVendorName || undefined,
+
         notes: formData.notes || undefined,
         branchId: isAdmin ? formData.branchId : undefined,
       });
@@ -769,16 +759,7 @@ export default function CreateIncomePage() {
                 <CardTitle className="text-base">معلومات إضافية</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Vendor/Customer Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="employeeVendorName">اسم العميل / المورد</Label>
-                  <Input
-                    id="employeeVendorName"
-                    placeholder="اختياري"
-                    value={formData.employeeVendorName}
-                    onChange={(e) => updateField('employeeVendorName', e.target.value)}
-                  />
-                </div>
+
 
                 {/* Notes */}
                 <div className="space-y-2">
@@ -803,34 +784,16 @@ export default function CreateIncomePage() {
                 <CardTitle className="text-base">الفرع</CardTitle>
               </CardHeader>
               <CardContent>
-                {isAdmin ? (
-                  // Admin: Branch selection dropdown
-                  <div className="space-y-2">
-                    <Select
-                      value={formData.branchId}
-                      onValueChange={(value) => updateField('branchId', value)}
-                    >
-                      <SelectTrigger className={cn(errors.branchId && 'border-destructive')}>
-                        <SelectValue placeholder="اختر الفرع" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {branches.map((branch) => (
-                          <SelectItem key={branch.id} value={branch.id}>
-                            {branch.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.branchId && (
-                      <p className="text-destructive text-sm">{errors.branchId}</p>
-                    )}
-                  </div>
-                ) : (
-                  // Accountant: Display branch name (read-only)
-                  <div className="p-3 rounded-md bg-muted">
-                    <span className="font-medium">{userBranch?.name || 'غير محدد'}</span>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <BranchSelect
+                    value={formData.branchId}
+                    onValueChange={(value) => updateField('branchId', value)}
+                    placeholder="اختر الفرع"
+                  />
+                  {errors.branchId && (
+                    <p className="text-destructive text-sm">{errors.branchId}</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

@@ -10,7 +10,6 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequestUser } from '../common/interfaces';
-import { parsePagination } from '../common/utils/pagination.util';
 import { InventoryUnit, UserRole } from '../common/types/prisma-enums';
 
 @Controller('inventory')
@@ -26,24 +25,29 @@ export class InventoryController {
     return this.inventoryService.create(createInventoryDto, user);
   }
 
+  /**
+   * Get all inventory items
+   * Returns all items matching the filters (no pagination)
+   *
+   * Query Parameters:
+   * - branchId: Filter by branch UUID
+   * - unit: Filter by inventory unit (KG | PIECE | LITER | OTHER)
+   * - search: Search by item name
+   */
   @Get()
   findAll(
     @CurrentUser() user: RequestUser,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
     @Query('branchId') branchId?: string,
     @Query('unit') unit?: InventoryUnit,
     @Query('search') search?: string,
-  ): Promise<{ data: InventoryItemWithMetadata[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
-    const pagination = parsePagination(page, limit);
-
+  ): Promise<InventoryItemWithMetadata[]> {
     const filters = {
       branchId,
       unit,
       search,
     };
 
-    return this.inventoryService.findAll(user, pagination, filters);
+    return this.inventoryService.findAll(user, filters);
   }
 
   @Get(':id')

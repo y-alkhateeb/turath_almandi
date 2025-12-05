@@ -1,10 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCreateEmployee } from '@/hooks/api/useEmployees';
-import branchService from '@/api/services/branchService';
 import { useUserInfo } from '@/store/userStore';
 import { UserRole } from '@/types/enum';
 import EmployeeForm from './components/EmployeeForm';
@@ -16,13 +14,6 @@ export default function AddEmployeePage() {
   const isAdmin = user?.role === UserRole.ADMIN;
 
   const { mutate: createEmployee, isPending } = useCreateEmployee();
-
-  // Fetch branches for admin
-  const { data: branches } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAll(),
-    enabled: isAdmin,
-  });
 
   const handleSubmit = (data: any) => {
     createEmployee(data as CreateEmployeeInput, {
@@ -47,7 +38,6 @@ export default function AddEmployeePage() {
         </CardHeader>
         <CardContent>
           <EmployeeForm
-            branches={branches || []}
             isAdmin={isAdmin}
             userBranchId={user?.branchId || undefined}
             onSubmit={handleSubmit}

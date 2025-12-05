@@ -40,7 +40,12 @@
       "Bash(export LC_ALL=C)",
       "Bash(tree:*)",
       "Bash(xargs:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(npx tsx:*)",
+      "Bash(while read file)",
+      "Bash(npm --prefix /Volumes/SSD/project/turath_almandi/frontend run build)"
     ],
     "deny": [],
     "ask": []

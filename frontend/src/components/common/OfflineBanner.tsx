@@ -23,7 +23,7 @@ export function OfflineBanner() {
   return (
     <div
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 bg-warning-500 text-warning-950 px-4 py-2',
+        'fixed top-0 left-0 right-0 z-50 bg-warning-500 text-warning-foreground px-4 py-2',
         'flex items-center justify-center gap-2 text-sm font-medium',
         'slide-in-from-top'
       )}

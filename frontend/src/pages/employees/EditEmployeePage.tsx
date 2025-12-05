@@ -1,11 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEmployee, useUpdateEmployee } from '@/hooks/api/useEmployees';
-import branchService from '@/api/services/branchService';
 import { useUserInfo } from '@/store/userStore';
 import { UserRole } from '@/types/enum';
 import EmployeeForm from './components/EmployeeForm';
@@ -19,13 +17,6 @@ export default function EditEmployeePage() {
 
   const { data: employee, isLoading: isLoadingEmployee, error } = useEmployee(id!);
   const { mutate: updateEmployee, isPending: isUpdating } = useUpdateEmployee();
-
-  // Fetch branches for admin
-  const { data: branches } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAll(),
-    enabled: isAdmin,
-  });
 
   useEffect(() => {
     if (error) {
@@ -83,7 +74,6 @@ export default function EditEmployeePage() {
               hireDate: new Date(employee.hireDate),
               status: employee.status,
             }}
-            branches={branches || []}
             isAdmin={isAdmin}
             userBranchId={user?.branchId || undefined}
             onSubmit={handleSubmit}

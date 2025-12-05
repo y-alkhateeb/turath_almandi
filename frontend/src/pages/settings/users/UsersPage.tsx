@@ -40,11 +40,11 @@ import {
   Badge,
 } from '@/components/ui';
 import { useUsers, useDeleteUser } from '@/hooks/api/useUsers';
-import { useBranches } from '@/hooks/api/useBranches';
 import { useAuth } from '@/hooks/api/useAuth';
 import { formatDate } from '@/utils/format';
 import { UserRole } from '#/enum';
 import type { UserWithBranch } from '#/entity';
+import type { UserQueryFilters } from '#/api';
 import userService from '@/api/services/userService';
 import { toast } from 'sonner';
 
@@ -54,7 +54,7 @@ export default function UsersPage() {
   const queryClient = useQueryClient();
   const { isAdmin } = useAuth();
 
-  // State
+  // Filter state
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -63,37 +63,23 @@ export default function UsersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<UserWithBranch | undefined>(undefined);
 
+  // Build query filters
+  const filters: UserQueryFilters = useMemo(() => {
+    const f: UserQueryFilters = {};
+
+    if (search.trim()) f.search = search;
+    if (roleFilter !== 'all') f.role = roleFilter as UserRole;
+    if (statusFilter === 'active') f.isActive = true;
+    else if (statusFilter === 'inactive') f.isActive = false;
+
+    return f;
+  }, [search, roleFilter, statusFilter]);
+
   // Queries
-  const { data: users = [], isLoading, error } = useUsers();
-  const { data: branches = [] } = useBranches({ enabled: true });
+  const { data: users = [], isLoading, error } = useUsers(filters);
   const deleteMutation = useDeleteUser();
 
-  // Filter users client-side
-  const filteredUsers = useMemo(() => {
-    let filtered = users;
-
-    // Search filter
-    if (search.trim()) {
-      const searchLower = search.toLowerCase();
-      filtered = filtered.filter((user) => user.username.toLowerCase().includes(searchLower));
-    }
-
-    // Role filter
-    if (roleFilter !== 'all') {
-      filtered = filtered.filter((user) => user.role === roleFilter);
-    }
-
-    // Status filter
-    if (statusFilter === 'active') {
-      filtered = filtered.filter((user) => !user.isDeleted);
-    } else if (statusFilter === 'inactive') {
-      filtered = filtered.filter((user) => user.isDeleted);
-    }
-
-    return filtered;
-  }, [users, search, roleFilter, statusFilter]);
-
-  // Calculate summary stats
+  // Calculate summary stats from all users
   const summary = useMemo(() => {
     const total = users.length;
     const admins = users.filter((u) => u.role === UserRole.ADMIN).length;
@@ -136,16 +122,29 @@ export default function UsersPage() {
     setStatusFilter('all');
   };
 
+  // Handle filter changes
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
+  const handleRoleFilterChange = (value: string) => {
+    setRoleFilter(value);
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+  };
+
   const hasActiveFilters = search || roleFilter !== 'all' || statusFilter !== 'all';
 
   // Helper for role badge
   const getRoleBadge = (role: UserRole) => {
     return role === UserRole.ADMIN ? (
-      <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 hover:bg-purple-500/20">
+      <Badge variant="destructive">
         مدير
       </Badge>
     ) : (
-      <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20">
+      <Badge variant="secondary">
         محاسب
       </Badge>
     );
@@ -154,11 +153,11 @@ export default function UsersPage() {
   // Helper for status badge
   const getStatusBadge = (isDeleted: boolean) => {
     return !isDeleted ? (
-      <Badge variant="secondary" className="bg-green-500/10 text-green-600 hover:bg-green-500/20">
+      <Badge variant="success">
         نشط
       </Badge>
     ) : (
-      <Badge variant="secondary" className="bg-gray-500/10 text-gray-600 hover:bg-gray-500/20">
+      <Badge variant="secondary" className="bg-muted/50 text-muted-foreground hover:bg-muted">
         غير نشط
       </Badge>
     );
@@ -195,7 +194,7 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">المديرين</CardTitle>
-            <Shield className="h-4 w-4 text-purple-500" />
+            <Shield className="h-4 w-4 text-accent" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.admins}</div>
@@ -205,7 +204,7 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">المحاسبين</CardTitle>
-            <UserCog className="h-4 w-4 text-blue-500" />
+            <UserCog className="h-4 w-4 text-accent" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.accountants}</div>
@@ -215,7 +214,7 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">المستخدمين النشطين</CardTitle>
-            <UserCheck className="h-4 w-4 text-green-500" />
+            <UserCheck className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.active}</div>
@@ -225,7 +224,7 @@ export default function UsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">المستخدمين غير النشطين</CardTitle>
-            <UserX className="h-4 w-4 text-gray-500" />
+            <UserX className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.inactive}</div>
@@ -259,11 +258,11 @@ export default function UsersPage() {
               <Input
                 placeholder="بحث باسم المستخدم..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pr-10"
               />
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <Select value={roleFilter} onValueChange={handleRoleFilterChange}>
               <SelectTrigger>
                 <SelectValue placeholder="الدور" />
               </SelectTrigger>
@@ -273,7 +272,7 @@ export default function UsersPage() {
                 <SelectItem value={UserRole.ACCOUNTANT}>محاسب</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
               <SelectTrigger>
                 <SelectValue placeholder="الحالة" />
               </SelectTrigger>
@@ -301,12 +300,12 @@ export default function UsersPage() {
               <Button
                 variant="outline"
                 className="mt-4"
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['users'] })}
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['users', 'list'] })}
               >
                 إعادة المحاولة
               </Button>
             </div>
-          ) : filteredUsers.length > 0 ? (
+          ) : users.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -319,10 +318,10 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>{getRoleBadge(user.role)}</TableCell>
+                    <TableCell >{getRoleBadge(user.role)}</TableCell>
                     <TableCell>
                       {user.branch ? (
                         <span className="flex items-center gap-1 text-sm">
@@ -398,7 +397,7 @@ export default function UsersPage() {
       </Card>
 
       {/* Dialog */}
-      <UserForm open={isFormOpen} onOpenChange={setIsFormOpen} userToEdit={userToEdit} branches={branches} />
+      <UserForm open={isFormOpen} onOpenChange={setIsFormOpen} userToEdit={userToEdit} />
     </div>
   );
 }

@@ -1,6 +1,76 @@
-import { useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { useSettingActions, useSettings } from '@/store/settingStore';
 import { HtmlDataAttribute, ThemeMode } from './type';
+import {
+  getBrandColors,
+  getSemanticColors,
+  getTransactionColors,
+  type BrandColors,
+  type SemanticColors,
+  type TransactionColors,
+} from '@/theme/tokens/colors';
+
+/**
+ * Theme tokens available through React Context
+ */
+export interface ThemeTokenContext {
+  /**
+   * Current theme mode indicator
+   */
+  isDarkMode: boolean;
+
+  /**
+   * Brand color tokens (primary, secondary, accent)
+   * Each contains: lighter, light, main, dark, darker, contrast
+   */
+  brand: BrandColors;
+
+  /**
+   * Semantic color tokens for UI states and feedback
+   * Includes: success, warning, danger, info, text, background, border, action
+   */
+  semantic: SemanticColors;
+
+  /**
+   * Transaction-specific color tokens
+   * Includes: income, expense, transfer
+   */
+  transaction: TransactionColors;
+}
+
+/**
+ * React Context for theme tokens
+ * Provides access to theme colors throughout the application
+ */
+const ThemeTokensContext = createContext<ThemeTokenContext | undefined>(undefined);
+
+/**
+ * Hook to access theme tokens from React Context
+ *
+ * @throws {Error} If used outside of ThemeProvider
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { brand, semantic, isDarkMode } = useThemeContext();
+ *
+ *   return (
+ *     <div style={{ backgroundColor: brand.primary.main }}>
+ *       {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
+export function useThemeContext(): ThemeTokenContext {
+  const context = useContext(ThemeTokensContext);
+
+  if (context === undefined) {
+    throw new Error('useThemeContext must be used within a ThemeProvider');
+  }
+
+  return context;
+}
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -9,6 +79,22 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const settings = useSettings();
   const { setSettings } = useSettingActions();
+
+  // Compute theme tokens based on current theme mode
+  const isDarkMode = settings.themeMode === ThemeMode.Dark;
+
+  // Memoize theme tokens to prevent unnecessary recalculations
+  // Note: Color functions read directly from CSS variables,
+  // so they automatically return the correct colors for the current theme
+  const themeTokens = useMemo<ThemeTokenContext>(
+    () => ({
+      isDarkMode,
+      brand: getBrandColors(),
+      semantic: getSemanticColors(),
+      transaction: getTransactionColors(),
+    }),
+    [isDarkMode] // Re-compute when theme changes to read updated CSS values
+  );
 
   // Apply theme mode to HTML element with class-based dark mode
   useEffect(() => {
@@ -59,5 +145,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }
   }, [setSettings]);
 
-  return <>{children}</>;
+  return (
+    <ThemeTokensContext.Provider value={themeTokens}>
+      {children}
+    </ThemeTokensContext.Provider>
+  );
 }

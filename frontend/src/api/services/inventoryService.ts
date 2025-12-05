@@ -3,7 +3,7 @@
  * Inventory item CRUD operations
  *
  * Endpoints:
- * - GET /inventory?filters → PaginatedResponse<InventoryItem>
+ * - GET /inventory?filters → InventoryItem[] (array of items with filters)
  * - GET /inventory/:id → InventoryItem
  * - POST /inventory → InventoryItem (CreateInventoryDto)
  * - PATCH /inventory/:id → InventoryItem (UpdateInventoryDto)
@@ -22,7 +22,7 @@ import type {
   DailyConsumptionSummary,
   ConsumptionHistoryItem,
 } from '#/entity';
-import type { PaginatedResponse, InventoryQueryFilters } from '#/api';
+import type { InventoryQueryFilters } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -42,29 +42,27 @@ export enum InventoryApiEndpoints {
 // ============================================
 
 /**
- * Get all inventory items with pagination and filters
+ * Get all inventory items with filters
  * GET /inventory
  *
  * Supports filtering by:
  * - unit: InventoryUnit enum (KG | PIECE | LITER | OTHER)
  * - branchId: UUID (accountants auto-filtered to their branch)
  * - search: string (searches name)
- * - page: string (default: 1)
- * - limit: string (default: 10)
  *
  * Backend behavior:
  * - Accountants: Auto-filtered to their assigned branch
  * - Admins: Can filter by any branch or see all
- * - Results ordered by createdAt DESC
+ * - Results ordered by lastUpdated DESC
  *
  * @param filters - Optional query filters
- * @returns PaginatedResponse<InventoryItem> with items and pagination meta
+ * @returns Array of inventory items
  * @throws ApiError on 401 (not authenticated)
  */
 export const getAll = (
   filters?: InventoryQueryFilters
-): Promise<PaginatedResponse<InventoryItem>> => {
-  return apiClient.get<PaginatedResponse<InventoryItem>>({
+): Promise<InventoryItem[]> => {
+  return apiClient.get<InventoryItem[]>({
     url: InventoryApiEndpoints.Base,
     params: filters,
   });

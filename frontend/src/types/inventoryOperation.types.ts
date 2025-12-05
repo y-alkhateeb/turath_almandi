@@ -9,6 +9,8 @@ export interface TransactionItemDto {
   operationType: InventoryOperationType;
   discountType?: DiscountType;
   discountValue?: number;
+  /** ملاحظات إضافية للصنف */
+  notes?: string;
 }
 
 export interface TransactionWithInventoryRequest {
@@ -24,10 +26,7 @@ export interface TransactionWithInventoryRequest {
   // Payment details
   paymentAmount?: number;
   paymentMethod?: PaymentMethod | string; // 'CASH' | 'MASTER'
-  currency?: string; // 'USD' | 'IQD'
 
-  // Vendor/Employee info
-  employeeVendorName?: string;
   branchId?: string;
 
   // Partial payment (creates Payable for EXPENSE or Receivable for INCOME)

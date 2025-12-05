@@ -51,7 +51,6 @@ export const DISCOUNT_ENABLED_CATEGORIES = [
  */
 export const CASH_ONLY_CATEGORIES = [
   'CAPITAL_ADDITION',  // إضافة رأس المال - نقدي فقط
-  'DEBT_PAYMENT',      // دفع دين - نقدي فقط
 ] as const;
 
 /**
@@ -166,3 +165,34 @@ export const SYSTEM_TRANSACTION_CATEGORIES = {
 } as const;
 
 export type SystemTransactionCategory = typeof SYSTEM_TRANSACTION_CATEGORIES[keyof typeof SYSTEM_TRANSACTION_CATEGORIES];
+
+/**
+ * Transaction type labels in Arabic
+ */
+export const TRANSACTION_TYPE_LABELS_AR = {
+  INCOME: 'إيراد',
+  EXPENSE: 'مصروف',
+} as const;
+
+/**
+ * Discount type labels in Arabic
+ */
+export const DISCOUNT_TYPE_LABELS_AR = {
+  PERCENTAGE: 'نسبة مئوية',
+  AMOUNT: 'مبلغ ثابت',
+} as const;
+
+/**
+ * Helper function to get Arabic label for transaction type
+ */
+export function getTransactionTypeLabel(type: string): string {
+  return TRANSACTION_TYPE_LABELS_AR[type as keyof typeof TRANSACTION_TYPE_LABELS_AR] || type;
+}
+
+/**
+ * Helper function to get Arabic label for discount type
+ */
+export function getDiscountTypeLabel(type: string | null | undefined): string {
+  if (!type) return '-';
+  return DISCOUNT_TYPE_LABELS_AR[type as keyof typeof DISCOUNT_TYPE_LABELS_AR] || type;
+}

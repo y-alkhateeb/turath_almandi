@@ -3,10 +3,10 @@
  * Branch CRUD operations
  *
  * Endpoints:
- * - GET /branches → Branch[] (filter by isActive)
+ * - GET /branches → Branch[] (array of branches with filters)
  * - GET /branches/:id → Branch
  * - POST /branches → Branch (CreateBranchDto)
- * - PATCH /branches/:id → Branch (UpdateBranchDto)
+ * - PUT /branches/:id → Branch (UpdateBranchDto)
  * - DELETE /branches/:id → void
  *
  * All types match backend DTOs exactly. No any types.
@@ -14,7 +14,7 @@
 
 import apiClient from '../apiClient';
 import type { Branch, CreateBranchInput, UpdateBranchInput } from '#/entity';
-import type { BranchQueryFilters, PaginatedResponse } from '#/api';
+import type { BranchQueryFilters } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -34,57 +34,23 @@ export enum BranchApiEndpoints {
 // ============================================
 
 /**
- * Get all branches with optional filtering
+ * Get all branches with filters
  * GET /branches
  *
  * Backend behavior:
- * - By default, returns only active branches (isActive: true)
+ * - By default, returns only active branches (isDeleted: false)
  * - Admin can request all branches including inactive with includeInactive=true
  * - Accountants always get only active branches regardless of filter
  *
- * @param filters - Optional query filters (branchId?, includeInactive?)
- * @returns Branch[] array
+ * @param filters - Optional query filters (search, includeInactive)
+ * @returns Array of branches
  * @throws ApiError on 401 (not authenticated)
  */
-export const getAll = async (filters?: BranchQueryFilters): Promise<Branch[]> => {
-  const response = await apiClient.get<Branch[] | PaginatedResponse<Branch>>({
+export const getAll = (filters?: BranchQueryFilters): Promise<Branch[]> => {
+  return apiClient.get<Branch[]>({
     url: BranchApiEndpoints.Base,
     params: filters,
   });
-
-  // Handle paginated response (extract data array)
-  if (response && 'data' in response && Array.isArray((response as any).data)) {
-    return (response as any).data;
-  }
-
-  // Handle direct array response
-  return response as Branch[];
-};
-
-/**
- * Get only active branches
- * GET /branches
- *
- * Convenience method that explicitly filters for active branches only
- *
- * @returns Branch[] array of active branches
- * @throws ApiError on 401 (not authenticated)
- */
-export const getAllActive = (): Promise<Branch[]> => {
-  return getAll({ includeInactive: false });
-};
-
-/**
- * Get all branches including inactive ones (Admin only)
- * GET /branches?includeInactive=true
- *
- * Convenience method for admins to see all branches
- *
- * @returns Branch[] array of all branches (active and inactive)
- * @throws ApiError on 401 (not authenticated), 403 (not admin)
- */
-export const getAllIncludingInactive = (): Promise<Branch[]> => {
-  return getAll({ includeInactive: true });
 };
 
 /**
@@ -214,8 +180,6 @@ export const deactivate = (id: string): Promise<Branch> => {
  */
 const branchService = {
   getAll,
-  getAllActive,
-  getAllIncludingInactive,
   getOne,
   create,
   update,

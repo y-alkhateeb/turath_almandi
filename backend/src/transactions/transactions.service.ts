@@ -5,11 +5,12 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { CreateIncomeDto } from './dto/create-income.dto';
+import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
-import { Prisma, EmployeeStatus } from '@prisma/client';
-import { TransactionType, UserRole, PaymentMethod } from '../common/types/prisma-enums';
+import { TransactionItemDto } from './dto/transaction-item.dto';
+import { Prisma, EmployeeStatus, DiscountType } from '@prisma/client';
+import { TransactionType, UserRole, PaymentMethod, DebtStatus } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -22,8 +23,6 @@ import {
   INVENTORY_ITEM_SELECT,
   INVENTORY_ITEM_EXTENDED_SELECT,
 } from '../common/constants/prisma-includes';
-import { calculateDiscount, calculateItemTotal } from './helpers/discount-calculator';
-import { supportsMultiItem, supportsDiscount } from '../common/constants/transaction-categories';
 import {
   formatDateForDB,
   getCurrentTimestamp,
@@ -32,14 +31,48 @@ import {
   formatToISODate,
 } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
-import {ARABIC_ERRORS } from '../common/constants/arabic-errors';
-// Currency constants removed - currency is now frontend-only
-import { normalizeCategory } from '../common/constants/transaction-categories';
+import { ARABIC_ERRORS, TransactionErrors } from '../common/constants/arabic-errors';
+import { 
+  normalizeCategory, 
+  supportsMultiItem, 
+  supportsDiscount,
+  Category,
+  DEFAULT_CATEGORY,
+  type TransactionCategory,
+} from '../common/constants/transaction-categories';
 import { RequestUser } from '../common/interfaces';
+// Import helpers
+import {
+  resolveBranchId,
+  getEffectiveBranchFilter,
+  calculateDiscount,
+  calculateItemTotal,
+  processPartialPayment,
+  processInventoryOperation,
+} from './helpers';
 
 interface PaginationParams {
   page?: number;
   limit?: number;
+}
+
+/**
+ * Parameters for the core transaction creation method
+ */
+interface CreateTransactionCoreParams {
+  type: TransactionType;
+  category: string;
+  amount: number;
+  paymentMethod?: PaymentMethod;
+  date: string;
+  branchId: string;
+  creatorId: string;
+
+  notes?: string;
+  items?: TransactionItemDto[];
+  discount?: { type: DiscountType; value: number; reason?: string };
+  partialPayment?: { paidAmount: number; contactId: string; dueDate?: string };
+  employeeId?: string;
 }
 
 interface TransactionFilters {
@@ -148,66 +181,122 @@ export class TransactionsService {
     private readonly settingsService: SettingsService,
   ) {}
 
-  async create(createTransactionDto: CreateTransactionDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
-    // Determine branchId based on user role
-    let branchId: string;
+  // ============================================
+  // PUBLIC METHODS - Transaction Creation
+  // ============================================
 
-    if (user.role === UserRole.ADMIN) {
-      // Admin must provide branchId in request
-      if (!createTransactionDto.branchId) {
-        throw new BadRequestException('Admin must specify branchId for transaction');
-      }
-      branchId = createTransactionDto.branchId;
-    } else {
-      // Accountant uses their assigned branch
-      if (!user.branchId) {
-        throw new BadRequestException('Accountant must be assigned to branch');
-      }
-      branchId = user.branchId;
-    }
-
-    const category = normalizeCategory(createTransactionDto.category) || 'General';
-    const hasItems = createTransactionDto.items && createTransactionDto.items.length > 0;
+  /**
+   * Create a new INCOME transaction
+   * POST /transactions/income
+   */
+  async createIncome(dto: CreateIncomeDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
+    // Resolve branch ID based on user role
+    const branchId = resolveBranchId(user, dto.branchId);
+    const category = normalizeCategory(dto.category) || DEFAULT_CATEGORY;
+    const hasItems = dto.items && dto.items.length > 0;
 
     // Validate multi-item support
     if (hasItems && !supportsMultiItem(category)) {
-      throw new BadRequestException(
-        `الفئة ${category} لا تدعم إضافة عدة أصناف. الفئات المدعومة: INVENTORY_SALES, APP_PURCHASES, INVENTORY`,
-      );
+      throw new BadRequestException(TransactionErrors.categoryNotSupportMultiItem(category));
     }
 
     // Validate discount rules
-    if (createTransactionDto.discountType || createTransactionDto.discountValue) {
-      if (createTransactionDto.type !== TransactionType.INCOME) {
-        throw new BadRequestException('الخصم متاح فقط لمعاملات الإيرادات');
-      }
+    if (dto.discountType || dto.discountValue) {
       if (!supportsDiscount(category)) {
-        throw new BadRequestException(
-          `الفئة ${category} لا تدعم الخصم. الفئات المدعومة: INVENTORY_SALES, APP_PURCHASES`,
-        );
+        throw new BadRequestException(TransactionErrors.categoryNotSupportDiscount(category));
       }
     }
 
-    // Validate that either amount OR items is provided (not both)
-    if (!hasItems && (!createTransactionDto.amount || createTransactionDto.amount <= 0)) {
+    // Validate that either amount OR items is provided
+    if (!hasItems && (!dto.amount || dto.amount <= 0)) {
       throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
     }
 
     // Validate payment method for income transactions
-    if (createTransactionDto.type === TransactionType.INCOME) {
-      if (
-        createTransactionDto.paymentMethod &&
-        createTransactionDto.paymentMethod !== PaymentMethod.CASH &&
-        createTransactionDto.paymentMethod !== PaymentMethod.MASTER
-      ) {
-        throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
+    if (
+      dto.paymentMethod &&
+      dto.paymentMethod !== PaymentMethod.CASH &&
+      dto.paymentMethod !== PaymentMethod.MASTER
+    ) {
+      throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
+    }
+
+    // Calculate amounts
+    let subtotal = 0;
+    let finalAmount = 0;
+
+    if (hasItems) {
+      for (const item of dto.items!) {
+        const itemCalc = calculateItemTotal(
+          item.quantity,
+          item.unitPrice,
+          item.discountType,
+          item.discountValue,
+        );
+        subtotal += Number(itemCalc.subtotal);
+      }
+
+      const discountCalc = calculateDiscount(
+        subtotal,
+        dto.discountType,
+        dto.discountValue,
+      );
+      finalAmount = Number(discountCalc.total);
+    } else {
+      subtotal = dto.amount!;
+      if (dto.discountType && dto.discountValue) {
+        const discountCalc = calculateDiscount(
+          subtotal,
+          dto.discountType,
+          dto.discountValue,
+        );
+        finalAmount = Number(discountCalc.total);
+      } else {
+        finalAmount = subtotal;
       }
     }
 
+    return this._createTransactionCore({
+      type: TransactionType.INCOME,
+      category,
+      amount: finalAmount,
+      paymentMethod: dto.paymentMethod,
+      date: dto.date,
+      branchId,
+      creatorId: user.id,
+
+      notes: dto.notes,
+      items: dto.items,
+      discount: dto.discountType && dto.discountValue
+        ? { type: dto.discountType, value: dto.discountValue, reason: dto.discountReason }
+        : undefined,
+    });
+  }
+
+  /**
+   * Create a new EXPENSE transaction
+   * POST /transactions/expense
+   */
+  async createExpense(dto: CreateExpenseDto, user: RequestUser): Promise<TransactionWithBranchAndCreator> {
+    // Resolve branch ID based on user role
+    const branchId = resolveBranchId(user, dto.branchId);
+    const category = normalizeCategory(dto.category) || DEFAULT_CATEGORY;
+    const hasItems = dto.items && dto.items.length > 0;
+
+    // Validate multi-item support for expenses
+    if (hasItems && !supportsMultiItem(category)) {
+      throw new BadRequestException(TransactionErrors.categoryNotSupportMultiItem(category));
+    }
+
+    // Validate that either amount OR items is provided
+    if (!hasItems && (!dto.amount || dto.amount <= 0)) {
+      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
+    }
+
     // Validate employee for salary transactions
-    if (category === 'EMPLOYEE_SALARIES' && createTransactionDto.employeeId) {
+    if (category === Category.EMPLOYEE_SALARIES && dto.employeeId) {
       const employee = await this.prisma.employee.findUnique({
-        where: { id: createTransactionDto.employeeId },
+        where: { id: dto.employeeId },
       });
 
       if (!employee) {
@@ -219,16 +308,99 @@ export class TransactionsService {
       }
     }
 
+    // Calculate amounts
+    let subtotal = 0;
+    let finalAmount = 0;
+
+    if (hasItems) {
+      for (const item of dto.items!) {
+        const itemCalc = calculateItemTotal(
+          item.quantity,
+          item.unitPrice,
+          item.discountType,
+          item.discountValue,
+        );
+        subtotal += Number(itemCalc.subtotal);
+      }
+      finalAmount = subtotal; // No transaction-level discount for expenses
+    } else {
+      subtotal = dto.amount!;
+      finalAmount = subtotal;
+    }
+
+    // Handle partial payment
+    const totalAmount = finalAmount;
+    const paidAmount = dto.paidAmount !== undefined ? dto.paidAmount : totalAmount;
+    const remainingAmount = totalAmount - paidAmount;
+
+    // Validate partial payment
+    if (paidAmount < 0) {
+      throw new BadRequestException(ARABIC_ERRORS.paidAmountNegative);
+    }
+
+    if (paidAmount > totalAmount) {
+      throw new BadRequestException(ARABIC_ERRORS.paidAmountExceedsTotal);
+    }
+
+    // If partial payment, require contactId
+    if (remainingAmount > 0 && dto.createDebtForRemaining !== false) {
+      if (!dto.contactId) {
+        throw new BadRequestException(ARABIC_ERRORS.contactIdRequiredForPartialPayment);
+      }
+    }
+
+    return this._createTransactionCore({
+      type: TransactionType.EXPENSE,
+      category,
+      amount: paidAmount,
+      paymentMethod: dto.paymentMethod,
+      date: dto.date,
+      branchId,
+      creatorId: user.id,
+
+      notes: dto.notes,
+      items: dto.items,
+      partialPayment: remainingAmount > 0 && dto.contactId
+        ? { paidAmount, contactId: dto.contactId, dueDate: dto.payableDueDate }
+        : undefined,
+      employeeId: dto.employeeId,
+    });
+  }
+
+  // ============================================
+  // PRIVATE METHODS - Core Transaction Logic
+  // ============================================
+
+  /**
+   * Core transaction creation logic shared by createIncome and createExpense
+   * All validation is done in the public methods before calling this
+   */
+  private async _createTransactionCore(params: CreateTransactionCoreParams): Promise<TransactionWithBranchAndCreator> {
+    const {
+      type,
+      category,
+      amount,
+      paymentMethod,
+      date,
+      branchId,
+      creatorId,
+
+      notes,
+      items,
+      discount,
+      partialPayment,
+      employeeId,
+    } = params;
+
+    const hasItems = items && items.length > 0;
+
     // Use Prisma transaction for atomicity
     return this.prisma.$transaction(async (prisma) => {
-      let subtotal = 0;
-      let finalAmount = 0;
-
-
-      // Calculate amounts based on whether it's multi-item or single-amount
+      // Calculate subtotal from items if present
+      let subtotal = amount;
       if (hasItems) {
-        // Multi-item: calculate subtotal from items
-        for (const item of createTransactionDto.items) {
+        subtotal = 0;
+        for (const item of items!) {
           const itemCalc = calculateItemTotal(
             item.quantity,
             item.unitPrice,
@@ -237,71 +409,27 @@ export class TransactionsService {
           );
           subtotal += Number(itemCalc.subtotal);
         }
-
-        // Apply transaction-level discount
-        const discountCalc = calculateDiscount(
-          subtotal,
-          createTransactionDto.discountType,
-          createTransactionDto.discountValue,
-        );
-        finalAmount = Number(discountCalc.total);
-      } else {
-        // Single-amount transaction (no items)
-        subtotal = createTransactionDto.amount;
-
-        // Apply transaction-level discount if provided
-        if (createTransactionDto.discountType && createTransactionDto.discountValue) {
-          const discountCalc = calculateDiscount(
-            subtotal,
-            createTransactionDto.discountType,
-            createTransactionDto.discountValue,
-          );
-          finalAmount = Number(discountCalc.total);
-        } else {
-          finalAmount = subtotal;
-        }
       }
 
-      // Handle partial payment for EXPENSE transactions
-      const totalAmount = finalAmount;
-      const paidAmount = createTransactionDto.paidAmount !== undefined 
-        ? createTransactionDto.paidAmount 
-        : totalAmount;
+      // Handle partial payment and create AccountPayable if needed
+      let linkedPayableId: string | null = null;
+      const totalAmount = amount;
+      const paidAmount = partialPayment ? partialPayment.paidAmount : amount;
       const remainingAmount = totalAmount - paidAmount;
 
-      // Validate partial payment
-      if (paidAmount < 0) {
-        throw new BadRequestException('المبلغ المدفوع لا يمكن أن يكون سالباً');
-      }
-
-      if (paidAmount > totalAmount) {
-        throw new BadRequestException('المبلغ المدفوع لا يمكن أن يتجاوز المبلغ الإجمالي');
-      }
-
-      // If partial payment for EXPENSE, require contactId
-      if (createTransactionDto.type === TransactionType.EXPENSE && remainingAmount > 0) {
-        if (!createTransactionDto.contactId) {
-          throw new BadRequestException('معرف جهة الاتصال مطلوب عند الدفع الجزئي للمصروفات');
-        }
-      }
-
-      // Create AccountPayable for remaining amount if partial payment on EXPENSE
-      let linkedPayableId: string | null = null;
-      if (createTransactionDto.type === TransactionType.EXPENSE && remainingAmount > 0 && createTransactionDto.contactId) {
+      if (partialPayment && remainingAmount > 0) {
         const payable = await prisma.accountPayable.create({
           data: {
             branchId,
-            contactId: createTransactionDto.contactId,
+            contactId: partialPayment.contactId,
             originalAmount: remainingAmount,
             remainingAmount: remainingAmount,
-            date: formatDateForDB(createTransactionDto.date),
-            dueDate: createTransactionDto.payableDueDate 
-              ? formatDateForDB(createTransactionDto.payableDueDate) 
-              : null,
-            status: 'ACTIVE',
-            description: `دين تلقائي من معاملة ${category}`,
-            notes: createTransactionDto.notes || `المبلغ المتبقي من المعاملة`,
-            createdBy: user.id,
+            date: formatDateForDB(date),
+            dueDate: partialPayment.dueDate ? formatDateForDB(partialPayment.dueDate) : null,
+            status: DebtStatus.ACTIVE,
+            description: TransactionErrors.autoDebtDescription(category),
+            notes: notes || ARABIC_ERRORS.remainingAmountNote,
+            createdBy: creatorId,
           },
         });
 
@@ -309,7 +437,7 @@ export class TransactionsService {
 
         // Log payable creation
         await this.auditLogService.logCreate(
-          user.id,
+          creatorId,
           AuditEntityType.ACCOUNT_PAYABLE,
           payable.id,
           payable,
@@ -318,24 +446,24 @@ export class TransactionsService {
 
       // Build transaction data
       const transactionData = {
-        type: createTransactionDto.type,
-        amount: paidAmount, // Amount actually paid
-        totalAmount: totalAmount !== paidAmount ? totalAmount : null, // Store total if different
-        paidAmount: totalAmount !== paidAmount ? paidAmount : null, // Store paid amount if partial
-        subtotal: hasItems || createTransactionDto.discountType ? subtotal : null,
-        date: formatDateForDB(createTransactionDto.date),
-        paymentMethod: createTransactionDto.paymentMethod || null,
+        type,
+        amount: paidAmount,
+        totalAmount: remainingAmount > 0 ? totalAmount : null,
+        paidAmount: remainingAmount > 0 ? paidAmount : null,
+        subtotal: hasItems || discount ? subtotal : null,
+        date: formatDateForDB(date),
+        paymentMethod: paymentMethod || null,
         category,
-        employeeVendorName: createTransactionDto.employeeVendorName || 'N/A',
-        notes: createTransactionDto.notes || null,
-        discountType: createTransactionDto.discountType || null,
-        discountValue: createTransactionDto.discountValue || null,
-        discountReason: createTransactionDto.discountReason || null,
-        branchId: branchId,
-        createdBy: user.id,
-        employeeId: createTransactionDto.employeeId || null,
-        contactId: createTransactionDto.contactId || null,
-        linkedPayableId: linkedPayableId,
+
+        notes: notes || null,
+        discountType: discount?.type || null,
+        discountValue: discount?.value || null,
+        discountReason: discount?.reason || null,
+        branchId,
+        createdBy: creatorId,
+        employeeId: employeeId || null,
+        contactId: partialPayment?.contactId || null,
+        linkedPayableId,
       };
 
       const transaction = await prisma.transaction.create({
@@ -350,49 +478,49 @@ export class TransactionsService {
 
       // Process multi-item transactions
       if (hasItems) {
-        for (const item of createTransactionDto.items) {
+        for (const item of items!) {
           // Validate inventory item exists
           const inventoryItem = await prisma.inventoryItem.findFirst({
             where: {
               id: item.inventoryItemId,
-              branchId: branchId,
+              branchId,
               deletedAt: null,
             },
           });
 
           if (!inventoryItem) {
-            throw new NotFoundException(`صنف المخزون ${item.inventoryItemId} غير موجود في هذا الفرع`);
+            throw new NotFoundException(TransactionErrors.inventoryItemNotFoundInBranch(item.inventoryItemId));
           }
 
-          // For CONSUMPTION, validate sufficient quantity
+          // For CONSUMPTION, validate sufficient quantity and deduct
           if (item.operationType === 'CONSUMPTION') {
             if (Number(inventoryItem.quantity) < item.quantity) {
               throw new BadRequestException(
-                `كمية غير كافية للصنف ${inventoryItem.name}. المتوفر: ${inventoryItem.quantity}, المطلوب: ${item.quantity}`,
+                TransactionErrors.insufficientQuantity(
+                  inventoryItem.name,
+                  Number(inventoryItem.quantity),
+                  item.quantity,
+                ),
               );
             }
 
-            // Deduct from inventory
             await prisma.inventoryItem.update({
               where: { id: item.inventoryItemId },
               data: {
-                quantity: {
-                  decrement: item.quantity,
-                },
+                quantity: { decrement: item.quantity },
                 lastUpdated: getCurrentTimestamp(),
               },
             });
 
-            // Record consumption
             await prisma.inventoryConsumption.create({
               data: {
                 inventoryItemId: item.inventoryItemId,
-                branchId: branchId,
+                branchId,
                 quantity: item.quantity,
                 unit: inventoryItem.unit,
                 reason: `معاملة: ${transaction.id}`,
                 consumedAt: getCurrentTimestamp(),
-                recordedBy: user.id,
+                recordedBy: creatorId,
               },
             });
           } else if (item.operationType === 'PURCHASE') {
@@ -400,24 +528,20 @@ export class TransactionsService {
             const currentQuantity = Number(inventoryItem.quantity);
             const currentCost = Number(inventoryItem.costPerUnit);
             const newQuantity = currentQuantity + item.quantity;
-
-            // Calculate weighted average cost
             const totalValue = currentQuantity * currentCost + item.quantity * item.unitPrice;
             const newCost = newQuantity > 0 ? totalValue / newQuantity : item.unitPrice;
 
             await prisma.inventoryItem.update({
               where: { id: item.inventoryItemId },
               data: {
-                quantity: {
-                  increment: item.quantity,
-                },
+                quantity: { increment: item.quantity },
                 costPerUnit: newCost,
                 lastUpdated: getCurrentTimestamp(),
               },
             });
           }
 
-          // Calculate item totals
+          // Calculate item totals and create link
           const itemCalc = calculateItemTotal(
             item.quantity,
             item.unitPrice,
@@ -425,7 +549,6 @@ export class TransactionsService {
             item.discountValue,
           );
 
-          // Create transaction-inventory link
           await prisma.transactionInventoryItem.create({
             data: {
               transactionId: transaction.id,
@@ -444,7 +567,7 @@ export class TransactionsService {
 
       // Log the creation in audit log
       await this.auditLogService.logCreate(
-        user.id,
+        creatorId,
         AuditEntityType.TRANSACTION,
         transaction.id,
         transaction,
@@ -458,10 +581,9 @@ export class TransactionsService {
           Number(transaction.amount),
           transaction.category,
           transaction.branchId,
-          user.id,
+          creatorId,
         )
         .catch((error) => {
-          // Log error but don't fail the transaction
           console.error('Failed to create transaction notification:', error);
         });
 
@@ -515,10 +637,9 @@ export class TransactionsService {
       }
     }
 
-    // Search filter (searches in employeeVendorName, category, and notes)
+    // Search filter (searches in category, and notes)
     if (filters.search) {
       where.OR = [
-        { employeeVendorName: { contains: filters.search, mode: 'insensitive' } },
         { category: { contains: filters.search, mode: 'insensitive' } },
         { notes: { contains: filters.search, mode: 'insensitive' } },
       ];
@@ -553,6 +674,7 @@ export class TransactionsService {
             discountValue: true,
             total: true,
             operationType: true,
+            notes: true,
             inventoryItem: {
               select: {
                 id: true,
@@ -623,44 +745,111 @@ export class TransactionsService {
   }
 
   /**
-   * Update a transaction
-   */
-  async update(id: string, updateTransactionDto: UpdateTransactionDto, user: RequestUser): Promise<TransactionWithAllRelations> {
-    // First, find the existing transaction
-    const existingTransaction = await this.findOne(id, user);
+ * Update a transaction
+ */
+async update(id: string, updateTransactionDto: UpdateTransactionDto, user: RequestUser): Promise<TransactionWithAllRelations> {
+  // First, find the existing transaction
+  const existingTransaction = await this.findOne(id, user);
 
-    // Validate amount if provided
-    if (updateTransactionDto.amount !== undefined && updateTransactionDto.amount <= 0) {
-      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
+  // Validate amount if provided
+  if (updateTransactionDto.amount !== undefined && updateTransactionDto.amount <= 0) {
+    throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
+  }
+
+  // Validate payment method for income transactions
+  if (
+    (updateTransactionDto.type === TransactionType.INCOME ||
+      existingTransaction.type === TransactionType.INCOME) &&
+    updateTransactionDto.paymentMethod &&
+    updateTransactionDto.paymentMethod !== PaymentMethod.CASH &&
+    updateTransactionDto.paymentMethod !== PaymentMethod.MASTER
+  ) {
+    throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
+  }
+
+  // Build update data
+  const updateData: Prisma.TransactionUpdateInput = {};
+  if (updateTransactionDto.type !== undefined) updateData.type = updateTransactionDto.type;
+  if (updateTransactionDto.amount !== undefined) updateData.amount = updateTransactionDto.amount;
+  if (updateTransactionDto.paymentMethod !== undefined)
+    updateData.paymentMethod = updateTransactionDto.paymentMethod;
+  if (updateTransactionDto.category !== undefined)
+    updateData.category = normalizeCategory(updateTransactionDto.category);
+  if (updateTransactionDto.date !== undefined)
+    updateData.date = formatDateForDB(updateTransactionDto.date);
+
+  if (updateTransactionDto.notes !== undefined) updateData.notes = updateTransactionDto.notes;
+
+  // Handle discount fields
+  if (updateTransactionDto.discountType !== undefined)
+    updateData.discountType = updateTransactionDto.discountType;
+  if (updateTransactionDto.discountValue !== undefined)
+    updateData.discountValue = updateTransactionDto.discountValue;
+  if (updateTransactionDto.discountReason !== undefined)
+    updateData.discountReason = updateTransactionDto.discountReason;
+
+  // Use transaction for atomicity when updating inventory items
+  return this.prisma.$transaction(async (prisma) => {
+    // Update transaction inventory items if provided
+    if (updateTransactionDto.transactionInventoryItems && updateTransactionDto.transactionInventoryItems.length > 0) {
+      // Create a map of item updates for quick lookup
+      const itemUpdatesMap = new Map(
+        updateTransactionDto.transactionInventoryItems.map(item => [item.id, item])
+      );
+
+      // Get ALL existing transaction inventory items
+      const allExistingItems = await prisma.transactionInventoryItem.findMany({
+        where: { transactionId: id },
+      });
+
+      let newTotal = 0;
+
+      for (const existingItem of allExistingItems) {
+        const itemUpdate = itemUpdatesMap.get(existingItem.id);
+
+        if (itemUpdate) {
+          // This item is being updated
+          const newQuantity = itemUpdate.quantity ?? Number(existingItem.quantity);
+          const newUnitPrice = itemUpdate.unitPrice ?? Number(existingItem.unitPrice);
+
+          // Calculate subtotal and total (apply existing discount if any)
+          const subtotal = newQuantity * newUnitPrice;
+          let itemTotal = subtotal;
+
+          // Apply existing item-level discount if present
+          if (existingItem.discountType && existingItem.discountValue) {
+            const discountCalc = calculateDiscount(
+              subtotal,
+              existingItem.discountType,
+              Number(existingItem.discountValue),
+            );
+            itemTotal = Number(discountCalc.total);
+          }
+
+          // Update the transaction inventory item
+          await prisma.transactionInventoryItem.update({
+            where: { id: itemUpdate.id },
+            data: {
+              quantity: newQuantity,
+              unitPrice: newUnitPrice,
+              subtotal: subtotal,
+              total: itemTotal,
+            },
+          });
+
+          newTotal += itemTotal;
+        } else {
+          // This item is not being updated, include its existing total
+          newTotal += Number(existingItem.total);
+        }
+      }
+
+      // Update transaction amount to match total of all items
+      updateData.amount = newTotal;
     }
-
-    // Validate payment method for income transactions
-    if (
-      (updateTransactionDto.type === TransactionType.INCOME ||
-        existingTransaction.type === TransactionType.INCOME) &&
-      updateTransactionDto.paymentMethod &&
-      updateTransactionDto.paymentMethod !== PaymentMethod.CASH &&
-      updateTransactionDto.paymentMethod !== PaymentMethod.MASTER
-    ) {
-      throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
-    }
-
-    // Build update data
-    const updateData: Prisma.TransactionUpdateInput = {};
-    if (updateTransactionDto.type !== undefined) updateData.type = updateTransactionDto.type;
-    if (updateTransactionDto.amount !== undefined) updateData.amount = updateTransactionDto.amount;
-    if (updateTransactionDto.paymentMethod !== undefined)
-      updateData.paymentMethod = updateTransactionDto.paymentMethod;
-    if (updateTransactionDto.category !== undefined)
-      updateData.category = normalizeCategory(updateTransactionDto.category);
-    if (updateTransactionDto.date !== undefined)
-      updateData.date = formatDateForDB(updateTransactionDto.date);
-    if (updateTransactionDto.employeeVendorName !== undefined)
-      updateData.employeeVendorName = updateTransactionDto.employeeVendorName;
-    if (updateTransactionDto.notes !== undefined) updateData.notes = updateTransactionDto.notes;
 
     // Update the transaction
-    const updatedTransaction = await this.prisma.transaction.update({
+    const updatedTransaction = await prisma.transaction.update({
       where: { id },
       data: updateData,
       include: {
@@ -671,7 +860,14 @@ export class TransactionsService {
           select: USER_SELECT,
         },
         inventoryItem: {
-          select: INVENTORY_ITEM_SELECT,
+          select: INVENTORY_ITEM_EXTENDED_SELECT,
+        },
+        transactionInventoryItems: {
+          include: {
+            inventoryItem: {
+              select: INVENTORY_ITEM_EXTENDED_SELECT,
+            },
+          },
         },
       },
     });
@@ -686,7 +882,8 @@ export class TransactionsService {
     );
 
     return updatedTransaction;
-  }
+  });
+}
 
   /**
    * Delete a transaction (soft delete by setting deletedAt timestamp)
@@ -821,110 +1018,94 @@ export class TransactionsService {
   }
 
   /**
-   * Create a purchase expense transaction with optional inventory update
-   * Uses Prisma transaction to ensure atomicity
-   */
-  async createPurchaseWithInventory(
-    createPurchaseDto: CreatePurchaseExpenseDto,
+ * Get expenses by category with filtering support.
+ * Consolidated method that replaces duplicated getSalaryExpenses and getPurchaseExpenses.
+ */
+  async getExpensesByCategory(
     user: RequestUser,
-  ): Promise<TransactionWithFullInventory> {
-    // Validate accountant has a branch assigned
-    if (user.role === UserRole.ACCOUNTANT && !user.branchId) {
-      throw new BadRequestException('Accountant must be assigned to branch');
+    category: TransactionCategory,
+    branchId?: string,
+    startDate?: string,
+    endDate?: string,
+    includeInventory = false,
+  ): Promise<{
+    total: number;
+    count: number;
+    transactions: Array<{
+      id: string;
+      amount: number;
+      date: string;
+      description: string;
+      paymentMethod: PaymentMethod;
+      branchId: string;
+      branchName: string;
+      inventoryItem?: { id: string; name: string; quantity: number; unit: string } | null;
+    }>;
+  }> {
+    // Use helper for branch filter
+    const filterBranchId = getEffectiveBranchFilter(user, branchId);
+
+    // Build where clause
+    const where: Prisma.TransactionWhereInput = {
+      deletedAt: null,
+      type: TransactionType.EXPENSE,
+      category,
+      ...(filterBranchId && { branchId: filterBranchId }),
+    };
+
+    // Apply date range filter
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) where.date.gte = formatDateForDB(startDate);
+      if (endDate) where.date.lte = formatDateForDB(endDate);
     }
 
-    // Validate amount is positive
-    if (createPurchaseDto.amount <= 0) {
-      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
-    }
-
-    // Validate inventory fields if addToInventory is true
-    if (createPurchaseDto.addToInventory) {
-      if (!createPurchaseDto.itemName) {
-        throw new BadRequestException(ERROR_MESSAGES.INVENTORY.ITEM_NAME_REQUIRED);
-      }
-      if (!createPurchaseDto.quantity || createPurchaseDto.quantity <= 0) {
-        throw new BadRequestException(ERROR_MESSAGES.VALIDATION.QUANTITY_POSITIVE);
-      }
-      if (!createPurchaseDto.unit) {
-        throw new BadRequestException(ERROR_MESSAGES.INVENTORY.UNIT_REQUIRED);
-      }
-    }
-
-    // Get default currency from settings
-    const defaultCurrency = await this.settingsService.getDefaultCurrency();
-
-    // Use Prisma transaction to ensure both operations succeed or fail together
-    return this.prisma.$transaction(async (prisma) => {
-      let inventoryItemId: string | null = null;
-
-      // If addToInventory is true, update inventory using InventoryService
-      if (createPurchaseDto.addToInventory && createPurchaseDto.itemName) {
-        inventoryItemId = await this.inventoryService.updateFromPurchase(
-          user.branchId!,
-          createPurchaseDto.itemName,
-          createPurchaseDto.quantity!,
-          createPurchaseDto.unit!,
-          createPurchaseDto.amount,
-          prisma,
-        );
-      }
-
-      // Create the expense transaction
-      const transaction = await prisma.transaction.create({
-        data: {
-          type: TransactionType.EXPENSE,
-          amount: createPurchaseDto.amount,
-          date: formatDateForDB(createPurchaseDto.date),
-          employeeVendorName: createPurchaseDto.vendorName,
-          category: 'Purchase', // Category for purchase expenses
-          notes: createPurchaseDto.notes || null,
-          // Currency is now frontend-only, not stored in database
-          branchId: user.branchId!,
-          createdBy: user.id,
-          inventoryItemId: inventoryItemId,
-        },
+    // Execute queries in parallel
+    const [totalResult, transactions] = await Promise.all([
+      this.prisma.transaction.aggregate({
+        where,
+        _sum: { amount: true },
+        _count: true,
+      }),
+      this.prisma.transaction.findMany({
+        where,
         include: {
-          branch: true,
-          creator: {
-            select: USER_SELECT,
-          },
-          inventoryItem: true,
+          branch: { select: { id: true, name: true } },
+          ...(includeInventory && {
+            inventoryItem: { select: { id: true, name: true, quantity: true, unit: true } },
+          }),
         },
-      });
+        orderBy: { date: 'desc' },
+      }),
+    ]);
 
-      // Log the creation in audit log (within the transaction context)
-      await this.auditLogService.logCreate(
-        user.id,
-        AuditEntityType.TRANSACTION,
-        transaction.id,
-        transaction,
-      );
-
-      // Notify about the transaction (async, don't wait)
-      this.notificationsService
-        .notifyNewTransaction(
-          transaction.id,
-          transaction.type,
-          Number(transaction.amount),
-          transaction.category,
-          transaction.branchId,
-          user.id,
-        )
-        .catch((error) => {
-          // Log error but don't fail the transaction
-          console.error('Failed to create transaction notification:', error);
-        });
-
-      return transaction;
-    });
+    return {
+      total: Number(totalResult._sum.amount || 0),
+      count: totalResult._count,
+      transactions: transactions.map((t) => ({
+        id: t.id,
+        amount: Number(t.amount),
+        date: formatToISODate(t.date),
+        description: t.notes || '',
+        paymentMethod: t.paymentMethod,
+        branchId: t.branchId,
+        branchName: t.branch.name,
+        ...(includeInventory && {
+          inventoryItem: t.inventoryItem
+            ? {
+                id: t.inventoryItem.id,
+                name: t.inventoryItem.name,
+                quantity: Number(t.inventoryItem.quantity),
+                unit: t.inventoryItem.unit,
+              }
+            : null,
+        }),
+      })),
+    };
   }
 
   /**
-   * Get salary expenses with filtering support
-   * Filters transactions where category='salaries'
-   * Supports optional branch and date range filtering
-   * Returns total amount and list of salary transactions
+   * Get salary expenses - wrapper for backward compatibility
    */
   async getSalaryExpenses(
     user: RequestUser,
@@ -932,88 +1113,11 @@ export class TransactionsService {
     startDate?: string,
     endDate?: string,
   ): Promise<SalaryExpensesSummary> {
-    // Build where clause with role-based filtering
-    let where: Prisma.TransactionWhereInput = {
-      deletedAt: null, // Exclude soft-deleted transactions
-      type: TransactionType.EXPENSE,
-      category: 'salaries',
-    };
-
-    // Apply branch filtering based on user role
-    if (user.role === UserRole.ACCOUNTANT) {
-      if (!user.branchId) {
-        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
-      }
-      where.branchId = user.branchId;
-    } else if (user.role === UserRole.ADMIN && branchId) {
-      where.branchId = branchId;
-    }
-
-    // Apply date range filter if provided
-    if (startDate || endDate) {
-      where.date = {};
-      if (startDate) {
-        where.date.gte = formatDateForDB(startDate);
-      }
-      if (endDate) {
-        where.date.lte = formatDateForDB(endDate);
-      }
-    }
-
-    // Execute queries in parallel for best performance
-    const [totalResult, transactions] = await Promise.all([
-      // Get total sum of salary expenses
-      this.prisma.transaction.aggregate({
-        where,
-        _sum: {
-          amount: true,
-        },
-        _count: true,
-      }),
-
-      // Get list of salary transactions
-      this.prisma.transaction.findMany({
-        where,
-        include: {
-          branch: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      }),
-    ]);
-
-    const total = Number(totalResult._sum.amount || 0);
-    const count = totalResult._count;
-
-    // Format transactions for response
-    const formattedTransactions = transactions.map((t) => ({
-      id: t.id,
-      amount: Number(t.amount),
-      date: formatToISODate(t.date),
-      description: t.employeeVendorName,
-      paymentMethod: t.paymentMethod,
-      branchId: t.branchId,
-      branchName: t.branch.name,
-    }));
-
-    return {
-      total,
-      count,
-      transactions: formattedTransactions,
-    };
+    return this.getExpensesByCategory(user, Category.EMPLOYEE_SALARIES, branchId, startDate, endDate, false);
   }
 
   /**
-   * Get purchase expenses with filtering support
-   * Filters transactions where category='purchases'
-   * Supports optional branch and date range filtering
-   * Returns total amount and list of purchase transactions with inventory item details
+   * Get purchase expenses - wrapper for backward compatibility
    */
   async getPurchaseExpenses(
     user: RequestUser,
@@ -1021,342 +1125,15 @@ export class TransactionsService {
     startDate?: string,
     endDate?: string,
   ): Promise<PurchaseExpensesSummary> {
-    // Build where clause with role-based filtering
-    let where: Prisma.TransactionWhereInput = {
-      deletedAt: null, // Exclude soft-deleted transactions
-      type: TransactionType.EXPENSE,
-      category: 'purchases',
-    };
-
-    // Apply branch filtering based on user role
-    if (user.role === UserRole.ACCOUNTANT) {
-      if (!user.branchId) {
-        throw new ForbiddenException(ERROR_MESSAGES.BRANCH.ACCOUNTANT_NOT_ASSIGNED);
-      }
-      where.branchId = user.branchId;
-    } else if (user.role === UserRole.ADMIN && branchId) {
-      where.branchId = branchId;
-    }
-
-    // Apply date range filter if provided
-    if (startDate || endDate) {
-      where.date = {};
-      if (startDate) {
-        where.date.gte = formatDateForDB(startDate);
-      }
-      if (endDate) {
-        where.date.lte = formatDateForDB(endDate);
-      }
-    }
-
-    // Execute queries in parallel for best performance
-    const [totalResult, transactions] = await Promise.all([
-      // Get total sum of purchase expenses
-      this.prisma.transaction.aggregate({
-        where,
-        _sum: {
-          amount: true,
-        },
-        _count: true,
-      }),
-
-      // Get list of purchase transactions with inventory item details
-      this.prisma.transaction.findMany({
-        where,
-        include: {
-          branch: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          inventoryItem: {
-            select: {
-              id: true,
-              name: true,
-              quantity: true,
-              unit: true,
-            },
-          },
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      }),
-    ]);
-
-    const total = Number(totalResult._sum.amount || 0);
-    const count = totalResult._count;
-
-    // Format transactions for response
-    const formattedTransactions = transactions.map((t) => ({
-      id: t.id,
-      amount: Number(t.amount),
-      date: formatToISODate(t.date),
-      description: t.employeeVendorName,
-      paymentMethod: t.paymentMethod,
-      branchId: t.branchId,
-      branchName: t.branch.name,
-      inventoryItem: t.inventoryItem
-        ? {
-            id: t.inventoryItem.id,
-            name: t.inventoryItem.name,
-            quantity: Number(t.inventoryItem.quantity),
-            unit: t.inventoryItem.unit,
-          }
-        : null,
-    }));
-
+    const result = await this.getExpensesByCategory(user, Category.INVENTORY, branchId, startDate, endDate, true);
+    // Ensure inventoryItem is explicitly null (not undefined) for PurchaseExpensesSummary
     return {
-      total,
-      count,
-      transactions: formattedTransactions,
+      ...result,
+      transactions: result.transactions.map((t) => ({
+        ...t,
+        inventoryItem: t.inventoryItem ?? null,
+      })),
     };
   }
 
-  /**
-   * Create transaction with inventory operations and partial payment support
-   * Supports:
-   * - Purchase (add to inventory) or Consumption (deduct from inventory)
-   * - Single inventory item per transaction
-   * - Partial payment with automatic debt creation
-   */
-  async createTransactionWithInventory(
-    dto: any, // Will use CreateTransactionWithInventoryDto
-    user: RequestUser,
-  ): Promise<any> {
-    // Determine branchId based on user role
-    let branchId: string;
-
-    if (user.role === UserRole.ADMIN) {
-      if (!dto.branchId) {
-        throw new BadRequestException('Admin must specify branchId for transaction');
-      }
-      branchId = dto.branchId;
-    } else {
-      if (!user.branchId) {
-        throw new BadRequestException('Accountant must be assigned to branch');
-      }
-      branchId = user.branchId;
-    }
-
-    // Validate amounts
-    if (dto.totalAmount <= 0) {
-      throw new BadRequestException(ERROR_MESSAGES.VALIDATION.AMOUNT_POSITIVE);
-    }
-
-    const paidAmount = dto.paidAmount ?? dto.totalAmount;
-
-    if (paidAmount < 0) {
-      throw new BadRequestException('Paid amount cannot be negative');
-    }
-
-    if (paidAmount > dto.totalAmount) {
-      throw new BadRequestException('Paid amount cannot exceed total amount');
-    }
-
-    const remainingAmount = dto.totalAmount - paidAmount;
-
-    // If creating debt, validate debt fields
-    if (dto.createDebtForRemaining && remainingAmount > 0) {
-      if (!dto.debtCreditorName) {
-        throw new BadRequestException('Creditor name is required when creating debt');
-      }
-    }
-
-    // Use Prisma transaction for atomicity
-    return this.prisma.$transaction(async (prisma) => {
-      let linkedPayableId: string | null = null;
-
-      // Create debt if partial payment
-      if (dto.createDebtForRemaining && remainingAmount > 0) {
-        // Create an AccountPayable record instead of the old Debt
-        const payable = await prisma.accountPayable.create({
-          data: {
-            branchId,
-            contactId: dto.contactId, // Use contactId from the new DTO
-            originalAmount: remainingAmount,
-            remainingAmount: remainingAmount,
-            date: formatDateForDB(dto.date),
-            dueDate: dto.payableDueDate ? formatDateForDB(dto.payableDueDate) : null,
-            status: 'ACTIVE',
-            description: `دين تلقائي من معاملة شراء`,
-            notes: dto.notes || `المبلغ المتبقي من المعاملة`,
-            createdBy: user.id,
-          },
-        });
-
-        linkedPayableId = payable.id;
-
-        // Log debt creation
-        await this.auditLogService.logCreate(
-          user.id,
-          AuditEntityType.ACCOUNT_PAYABLE,
-          payable.id,
-          payable,
-        );
-      }
-
-      // Create the main transaction
-      const transaction = await prisma.transaction.create({
-        data: {
-          type: dto.type,
-          amount: paidAmount, // The amount that actually left the cashbox
-          totalAmount: dto.totalAmount, // The total value of the purchase
-          paidAmount: paidAmount, // Explicitly store what was paid
-          date: formatDateForDB(dto.date),
-          paymentMethod: dto.paymentMethod,
-          category: normalizeCategory(dto.category) || 'General',
-          employeeVendorName: 'N/A', // Not relevant for this type of transaction
-          notes: dto.notes || null,
-          branchId: branchId,
-          createdBy: user.id,
-          linkedPayableId: linkedPayableId, // Link to the new AccountPayable
-          employeeId: dto.employeeId || null, // Save employeeId
-        },
-        include: {
-          branch: true,
-          creator: {
-            select: USER_SELECT,
-          },
-          linkedPayable: true, // Include the new linked payable
-        },
-      });
-
-      // Process inventory item if present
-      if (dto.inventoryItem) {
-        const item = dto.inventoryItem;
-
-        // Get inventory item to validate and check availability
-        const inventoryItem = await prisma.inventoryItem.findFirst({
-          where: {
-            id: item.itemId,
-            branchId: branchId,
-            deletedAt: null,
-          },
-        });
-
-        if (!inventoryItem) {
-          throw new NotFoundException(`Inventory item ${item.itemId} not found in this branch`);
-        }
-
-        // For CONSUMPTION, validate sufficient quantity
-        if (item.operationType === 'CONSUMPTION') {
-          if (Number(inventoryItem.quantity) < item.quantity) {
-            throw new BadRequestException(
-              `Insufficient quantity for ${inventoryItem.name}. Available: ${inventoryItem.quantity}, Requested: ${item.quantity}`,
-            );
-          }
-
-          // Deduct from inventory
-          await prisma.inventoryItem.update({
-            where: { id: item.itemId },
-            data: {
-              quantity: {
-                decrement: item.quantity,
-              },
-              lastUpdated: getCurrentTimestamp(),
-            },
-          });
-
-          // Record consumption
-          await prisma.inventoryConsumption.create({
-            data: {
-              inventoryItemId: item.itemId,
-              branchId: branchId,
-              quantity: item.quantity,
-              unit: inventoryItem.unit,
-              reason: `Transaction: ${transaction.id}`,
-              consumedAt: getCurrentTimestamp(),
-              recordedBy: user.id,
-            },
-          });
-        } else if (item.operationType === 'PURCHASE') {
-          // Add to inventory using weighted average cost
-          if (!item.unitPrice) {
-            throw new BadRequestException('Unit price is required for purchase operations');
-          }
-
-          const currentQuantity = Number(inventoryItem.quantity);
-          const currentCost = Number(inventoryItem.costPerUnit);
-          const newQuantity = currentQuantity + item.quantity;
-
-          // Calculate weighted average cost
-          const totalValue = currentQuantity * currentCost + item.quantity * item.unitPrice;
-          const newCost = newQuantity > 0 ? totalValue / newQuantity : item.unitPrice;
-
-          await prisma.inventoryItem.update({
-            where: { id: item.itemId },
-            data: {
-              quantity: {
-                increment: item.quantity,
-              },
-              costPerUnit: newCost,
-              // Update selling price if provided
-              ...(item.sellingPrice !== undefined && { sellingPrice: item.sellingPrice }),
-              lastUpdated: getCurrentTimestamp(),
-            },
-          });
-        }
-
-        // Create transaction-inventory link with subtotal and total
-        const itemSubtotal = item.quantity * (item.unitPrice || 0);
-        await prisma.transactionInventoryItem.create({
-          data: {
-            transactionId: transaction.id,
-            inventoryItemId: item.itemId,
-            quantity: item.quantity,
-            operationType: item.operationType,
-            unitPrice: item.unitPrice || 0,
-            subtotal: itemSubtotal,
-            total: itemSubtotal, // No item-level discount in this legacy method
-          },
-        });
-      }
-
-      // Log transaction creation
-      await this.auditLogService.logCreate(
-        user.id,
-        AuditEntityType.TRANSACTION,
-        transaction.id,
-        transaction,
-      );
-
-      // Notify about transaction
-      this.notificationsService
-        .notifyNewTransaction(
-          transaction.id,
-          transaction.type,
-          Number(transaction.amount),
-          transaction.category,
-          transaction.branchId,
-          user.id,
-        )
-        .catch((error) => {
-          console.error('Failed to create transaction notification:', error);
-        });
-
-      // Emit WebSocket event
-      this.websocketGateway.emitNewTransaction(transaction);
-
-      // Fetch full transaction with all relations
-      const fullTransaction = await prisma.transaction.findUnique({
-        where: { id: transaction.id },
-        include: {
-          branch: true,
-          creator: {
-            select: USER_SELECT,
-          },
-          linkedPayable: true,
-          transactionInventoryItems: {
-            include: {
-              inventoryItem: true,
-            },
-          },
-        },
-      });
-
-      return fullTransaction;
-    });
-  }
 }

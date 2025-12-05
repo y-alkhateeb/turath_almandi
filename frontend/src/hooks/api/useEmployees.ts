@@ -21,13 +21,16 @@ export const employeeKeys = {
 // Hooks
 
 /**
- * Hook to fetch employees with pagination and filters
+ * Hook to fetch employees with filters
+ * Returns array of employees (no pagination)
+ *
+ * @param filters - Optional EmployeeFilters (status, branchId, search)
+ * @returns Query result with array of employees
  */
 export function useEmployees(filters: EmployeeFilters = {}) {
   return useQuery({
     queryKey: employeeKeys.list(filters),
     queryFn: () => employeeService.getAll(filters),
-    placeholderData: (previousData) => previousData, // Keep previous data while fetching new page
   });
 }
 

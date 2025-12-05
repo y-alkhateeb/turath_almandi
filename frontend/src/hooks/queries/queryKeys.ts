@@ -32,7 +32,7 @@ export const queryKeys = {
     items: 'inventory-items',
   },
   contacts: {
-    all: ['contacts', 'all'],
+    all: ['contacts'], // Base key - matches all contact queries for invalidation
     list: (filters: any) => ['contacts', 'list', filters],
     detail: (id: string) => ['contacts', 'detail', id],
     summary: (branchId?: string) => ['contacts', 'summary', branchId],
@@ -55,12 +55,12 @@ export const queryKeys = {
     profile: ['auth', 'profile'],
   },
   branches: {
-    all: ['branches', 'all'],
+    all: ['branches'], // Base key - matches all branch queries for invalidation
     list: (filters: any) => ['branches', 'list', filters],
     detail: (id: string) => ['branches', 'detail', id],
   },
   users: {
-    all: ['users', 'all'],
+    all: ['users'], // Base key - matches all user queries for invalidation
     list: (filters: any) => ['users', 'list', filters],
     detail: (id: string) => ['users', 'detail', id],
   },

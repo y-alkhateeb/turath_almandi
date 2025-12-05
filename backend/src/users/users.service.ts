@@ -3,7 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
+import { UserRole, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+
+interface UserFilters {
+  role?: UserRole;
+  isActive?: boolean;
+  search?: string;
+}
 
 @Injectable()
 export class UsersService {
@@ -77,27 +84,62 @@ export class UsersService {
     return user;
   }
 
-  async findAll() {
-    return this.prisma.user.findMany({
-      where: { isDeleted: false },
-      select: {
-        id: true,
-        username: true,
-        role: true,
-        branchId: true,
-        isDeleted: true,
-        createdAt: true,
-        updatedAt: true,
-        branch: {
-          select: {
-            id: true,
-            name: true,
-            location: true,
-          },
+  /**
+   * Find all users with filtering
+   * Returns all users matching the filters (no pagination)
+   *
+   * @param filters - Filter parameters (role, isActive, search)
+   * @returns Array of users
+   */
+  async findAll(filters: UserFilters = {}) {
+    // Build where clause
+    const where: Prisma.UserWhereInput = {};
+
+    // Filter by active status (default to active only, unless explicitly set)
+    if (filters.isActive === true) {
+      where.isDeleted = false;
+    } else if (filters.isActive === false) {
+      where.isDeleted = true;
+    }
+    // If isActive is undefined, show all users (both active and inactive)
+
+    // Filter by role
+    if (filters.role) {
+      where.role = filters.role;
+    }
+
+    // Search by username
+    if (filters.search) {
+      where.username = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    const userSelect = {
+      id: true,
+      username: true,
+      role: true,
+      branchId: true,
+      isDeleted: true,
+      deletedAt: true,
+      deletedBy: true,
+      createdAt: true,
+      updatedAt: true,
+      branch: {
+        select: {
+          id: true,
+          name: true,
+          location: true,
         },
       },
+    };
+
+    // Execute query without pagination
+    const users = await this.prisma.user.findMany({
+      where,
+      select: userSelect,
       orderBy: { createdAt: 'desc' },
     });
+
+    return users;
   }
 
   async findOne(id: string) {

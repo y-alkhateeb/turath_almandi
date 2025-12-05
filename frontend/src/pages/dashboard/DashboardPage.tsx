@@ -37,11 +37,12 @@ import {
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import dashboardService from '@/api/services/dashboardService';
-import branchService from '@/api/services/branchService';
 import transactionService from '@/api/services/transactionService';
+import { useBranchList } from '@/hooks/api/useBranches';
 import { useUserInfo } from '@/store/userStore';
 import { TransactionType } from '@/types/enum';
 import { getPaymentMethodLabel } from '@/components/shared/PaymentMethodSelect';
+import { getCategoryLabel, getTransactionTypeLabel } from '@/constants/transaction-categories';
 
 // ============================================
 // TYPES
@@ -75,14 +76,14 @@ function StatCard({
   const variantStyles = {
     default: 'bg-card',
     success: 'bg-secondary/10 border-secondary/20',
-    warning: 'bg-amber-500/10 border-amber-500/20',
+    warning: 'bg-warning-500/10 border-warning-500/20',
     danger: 'bg-destructive/10 border-destructive/20',
   };
 
   const iconStyles = {
     default: 'bg-primary/10 text-primary',
     success: 'bg-secondary/20 text-secondary',
-    warning: 'bg-amber-500/20 text-amber-600 dark:text-amber-400',
+    warning: 'bg-warning-500/20 text-warning-600',
     danger: 'bg-destructive/20 text-destructive',
   };
 
@@ -99,8 +100,8 @@ function StatCard({
               <div
                 className={cn(
                   'flex items-center gap-1 text-xs font-medium',
-                  trend === 'up' && 'text-green-600',
-                  trend === 'down' && 'text-red-600',
+                  trend === 'up' && 'text-success',
+                  trend === 'down' && 'text-destructive',
                   trend === 'neutral' && 'text-muted-foreground'
                 )}
               >
@@ -117,11 +118,6 @@ function StatCard({
   );
 }
 
-
-
-function getTransactionTypeLabel(type: TransactionType): string {
-  return type === TransactionType.INCOME ? 'إيراد' : 'مصروف';
-}
 
 // ============================================
 // MAIN COMPONENT
@@ -156,11 +152,8 @@ export default function DashboardPage() {
   }, [dateRange]);
 
   // Fetch branches (admin only)
-  const { data: branches = [] } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAllActive(),
-    enabled: isAdmin,
-  });
+    // Fetch branches (admin only)
+    const { data: branches = [] } = useBranchList({ enabled: isAdmin });
 
   // Build query params
   const queryParams = useMemo(() => {
@@ -301,12 +294,12 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Banknote className="h-4 w-4 text-green-600" />
+              <Banknote className="h-4 w-4 text-success" />
               الإيرادات النقدية (كاش)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-green-600">
+            <p className="text-3xl font-bold text-success">
               {formatCurrency(stats?.cashRevenue || 0)}
             </p>
           </CardContent>
@@ -315,12 +308,12 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-blue-600" />
+              <CreditCard className="h-4 w-4 text-info-600 dark:text-info-400" />
               إيرادات (ماستر)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-blue-600">
+            <p className="text-3xl font-bold text-info-600 dark:text-info-400">
               {formatCurrency(stats?.masterRevenue || 0)}
             </p>
           </CardContent>
@@ -332,12 +325,12 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <AlertCircle className="h-4 w-4 text-warning-600" />
               إجمالي الديون المستحقة
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-orange-600">
+            <p className="text-3xl font-bold text-warning-600">
               {formatCurrency(stats?.totalDebts || 0)}
             </p>
             {stats?.activeDebts !== undefined && (
@@ -351,12 +344,12 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Package className="h-4 w-4 text-purple-600" />
+              <Package className="h-4 w-4 text-info-600" />
               قيمة المخزون الحالية
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-purple-600">
+            <p className="text-3xl font-bold text-info-600">
               {formatCurrency(stats?.inventoryValue || 0)}
             </p>
           </CardContent>
@@ -419,14 +412,14 @@ export default function DashboardPage() {
                           className={cn(
                             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                             transaction.type === TransactionType.INCOME
-                              ? 'bg-green-500/10 text-green-600'
-                              : 'bg-red-500/10 text-red-600'
+                              ? 'bg-success/10 text-success'
+                              : 'bg-destructive/10 text-destructive'
                           )}
                         >
                           {getTransactionTypeLabel(transaction.type)}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-sm">{transaction.category}</td>
+                      <td className="py-3 px-4 text-sm">{getCategoryLabel(transaction.category)}</td>
                       <td className="py-3 px-4 text-sm">
                         {getPaymentMethodLabel(transaction.paymentMethod)}
                       </td>
@@ -434,8 +427,8 @@ export default function DashboardPage() {
                         <span
                           className={
                             transaction.type === TransactionType.INCOME
-                              ? 'text-green-600'
-                              : 'text-red-600'
+                              ? 'text-success'
+                              : 'text-destructive'
                           }
                         >
                           {transaction.type === TransactionType.INCOME ? '+' : '-'}

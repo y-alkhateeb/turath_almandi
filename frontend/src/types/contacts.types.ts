@@ -9,7 +9,7 @@ export interface Contact {
   address: string | null;
   notes: string | null;
   creditLimit: number | null;
-  branchId: string | null;
+  branchId: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -29,12 +29,12 @@ export interface ContactWithCounts extends Contact {
 export interface CreateContactDto {
   name: string;
   type: ContactType;
+  branchId: string;
   phone?: string;
   email?: string;
   address?: string;
   notes?: string;
   creditLimit?: number;
-  branchId?: string;
 }
 
 export interface UpdateContactDto {

@@ -113,7 +113,7 @@ function NavigationItem({ item, currentPath, onClick, depth = 0 }: NavigationIte
           className={cn(
             'w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all group',
             isParentActive
-              ? 'bg-primary text-primary-foreground shadow-md'
+              ? 'border-r-6 border-primary text-primary'
               : 'text-foreground hover:bg-accent'
           )}
         >
@@ -121,7 +121,7 @@ function NavigationItem({ item, currentPath, onClick, depth = 0 }: NavigationIte
             <span
               className={cn(
                 'shrink-0 transition-transform group-hover:scale-110',
-                isParentActive ? 'text-primary-foreground' : 'text-muted-foreground'
+                isParentActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               {item.icon}
@@ -137,7 +137,7 @@ function NavigationItem({ item, currentPath, onClick, depth = 0 }: NavigationIte
             className={cn(
               'w-4 h-4 transition-transform',
               isExpanded && 'rotate-180',
-              isParentActive ? 'text-primary-foreground' : 'text-muted-foreground'
+              isParentActive ? 'text-primary' : 'text-muted-foreground'
             )}
           />
         </button>
@@ -174,7 +174,7 @@ function NavigationItem({ item, currentPath, onClick, depth = 0 }: NavigationIte
           'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all group',
           depth > 0 && 'py-2 text-sm',
           isActive
-            ? 'bg-primary text-primary-foreground shadow-md'
+            ? 'border-1 border-primary text-primary'
             : 'text-foreground hover:bg-accent'
         )}
       >
@@ -182,7 +182,7 @@ function NavigationItem({ item, currentPath, onClick, depth = 0 }: NavigationIte
           <span
             className={cn(
               'shrink-0 transition-transform group-hover:scale-110',
-              isActive ? 'text-primary-foreground' : 'text-muted-foreground'
+              isActive ? 'text-primary' : 'text-muted-foreground'
             )}
           >
             {item.icon}

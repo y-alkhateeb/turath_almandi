@@ -21,11 +21,6 @@ import { getCurrentTimestamp } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 import { RequestUser } from '../common/interfaces';
 
-interface PaginationParams {
-  page?: number;
-  limit?: number;
-}
-
 interface InventoryFilters {
   branchId?: string;
   search?: string;
@@ -150,16 +145,17 @@ export class InventoryService {
   }
 
   /**
-   * Find all inventory items with pagination and filters
+   * Find all inventory items with filters
+   * Returns all items matching the filters (no pagination)
+   *
+   * @param user - Current user (for role-based access)
+   * @param filters - Filter parameters (branchId, unit, search)
+   * @returns Array of inventory items with metadata
    */
   async findAll(
     user: RequestUser,
-    pagination: PaginationParams = {},
     filters: InventoryFilters = {},
-  ): Promise<{ data: InventoryItemWithMetadata[]; meta: { page: number; limit: number; total: number; totalPages: number } }> {
-    const { page = 1, limit = 50 } = pagination;
-    const skip = (page - 1) * limit;
-
+  ): Promise<InventoryItemWithMetadata[]> {
     // Build where clause based on filters and user role
     let where: Prisma.InventoryItemWhereInput = {
       deletedAt: null, // Exclude soft-deleted inventory items
@@ -178,15 +174,10 @@ export class InventoryService {
       where.name = { contains: filters.search, mode: 'insensitive' };
     }
 
-    // Get total count for pagination
-    const total = await this.prisma.inventoryItem.count({ where });
-
-    // Get inventory items
+    // Get inventory items without pagination
     const items = await this.prisma.inventoryItem.findMany({
       where,
       orderBy: { lastUpdated: 'desc' },
-      skip,
-      take: limit,
       include: {
         branch: {
           select: BRANCH_SELECT,
@@ -209,15 +200,7 @@ export class InventoryService {
       relatedPurchases: item.transactions.filter((t) => t.category === 'Purchase'),
     }));
 
-    return {
-      data: itemsWithMetadata,
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return itemsWithMetadata;
   }
 
   /**

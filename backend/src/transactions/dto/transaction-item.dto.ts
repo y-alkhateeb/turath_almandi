@@ -36,3 +36,22 @@ export class TransactionItemDto {
   @MaxLength(500, { message: 'الملاحظة يجب أن لا تتجاوز 500 حرف' })
   notes?: string;
 }
+
+/**
+ * DTO for updating existing transaction inventory items
+ */
+export class UpdateTransactionItemDto {
+  @IsUUID()
+  @IsNotEmpty({ message: 'معرف عنصر المعاملة مطلوب' })
+  id: string;
+
+  @IsNumber()
+  @IsPositive({ message: 'الكمية يجب أن تكون أكبر من صفر' })
+  @IsOptional()
+  quantity?: number;
+
+  @IsNumber()
+  @Min(0, { message: 'السعر يجب أن يكون صفر أو أكبر' })
+  @IsOptional()
+  unitPrice?: number;
+}

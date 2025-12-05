@@ -183,8 +183,6 @@ export interface InventoryQueryFilters {
   unit?: InventoryUnit;
   branchId?: string;
   search?: string;
-  page?: string;
-  limit?: string;
 }
 
 /**
@@ -193,6 +191,7 @@ export interface InventoryQueryFilters {
 export interface BranchQueryFilters {
   branchId?: string;
   includeInactive?: boolean;
+  search?: string;
 }
 
 /**
@@ -230,8 +229,7 @@ export interface UserQueryFilters {
   role?: UserRole;
   branchId?: string;
   isActive?: boolean;
-  page?: number;
-  limit?: number;
+  search?: string;
 }
 
 import type { ContactType } from './enum';
@@ -265,23 +263,17 @@ export interface DashboardSummaryResponse {
 }
 
 /**
- * Transaction statistics response
+ * Transaction statistics/summary response
+ * Matches backend transactions.service.ts getSummary() return type
  */
 export interface TransactionStatsResponse {
-  totalIncome: number;
-  totalExpenses: number;
-  netProfit: number;
-  totalTransactions: number;
-  byCurrency?: Record<
-    string,
-    {
-      income: number;
-      expenses: number;
-      net: number;
-    }
-  >;
-  byPaymentMethod?: Record<string, number>;
-  byCategory?: Record<string, number>;
+  date: string;
+  branchId: string | null;
+  income_cash: number;
+  income_master: number;
+  total_income: number;
+  total_expense: number;
+  net: number;
 }
 
 /**

@@ -160,7 +160,7 @@ export default function InventoryTable({
                             item.quantity === 0 && 'text-destructive',
                             item.quantity < LOW_STOCK_THRESHOLD &&
                               item.quantity > 0 &&
-                              'text-amber-600 dark:text-amber-400'
+                              'text-warning-600'
                           )}
                         >
                           {formatNumber(item.quantity)}

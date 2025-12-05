@@ -13,6 +13,8 @@ import type { RouteObject } from 'react-router-dom';
 // Lazy load pages
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const TransactionsPage = lazy(() => import('@/pages/transactions/TransactionsPage'));
+const ViewTransactionPage = lazy(() => import('@/pages/transactions/ViewTransactionPage'));
+const EditTransactionPage = lazy(() => import('@/pages/transactions/EditTransactionPage'));
 const CreateExpensePage = lazy(() => import('@/pages/transactions/CreateExpensePage'));
 const CreateIncomePage = lazy(() => import('@/pages/transactions/CreateIncomePage'));
 const ContactsPage = lazy(() => import('@/pages/contacts/ContactsPage'));
@@ -61,6 +63,14 @@ export const dashboardRoutes: RouteObject[] = [
             path: 'transactions/create/income',
             element: <CreateIncomePage />,
           },
+          {
+            path: 'transactions/:id',
+            element: <ViewTransactionPage />,
+          },
+          {
+            path: 'transactions/:id/edit',
+            element: <EditTransactionPage />,
+          },
 
           // Contacts
           {
@@ -100,18 +110,6 @@ export const dashboardRoutes: RouteObject[] = [
             element: <EditEmployeePage />,
           },
 
-          // Branches (Admin only)
-          {
-            path: 'branches',
-            element: <AdminRouteGuard />,
-            children: [
-              {
-                index: true,
-                element: <BranchesPage />,
-              },
-            ],
-          },
-
           // Settings (Admin only)
           {
             path: 'settings',
@@ -120,6 +118,10 @@ export const dashboardRoutes: RouteObject[] = [
               {
                 path: 'users',
                 element: <UsersPage />,
+              },
+              {
+                path: 'branches',
+                element: <BranchesPage />,
               },
             ],
           },

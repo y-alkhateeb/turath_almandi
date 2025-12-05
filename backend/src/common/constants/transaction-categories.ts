@@ -7,7 +7,6 @@ export const INCOME_CATEGORIES = [
   'INVENTORY_SALES',   // مبيعات المخزون - Multi-item ✓ Discount ✓
   'CAPITAL_ADDITION',  // إضافة رأس مال
   'APP_PURCHASES',     // مبيعات التطبيق - Multi-item ✓ Discount ✓
-  'DEBT_PAYMENT',      // دفع دين
 ] as const;
 
 export const EXPENSE_CATEGORIES = [
@@ -16,7 +15,6 @@ export const EXPENSE_CATEGORIES = [
   'SUPPLIES',          // مستلزمات
   'MAINTENANCE',       // صيانة
   'INVENTORY',         // مشتريات مخزون - Multi-item ✓
-  'DEBT',              // دين
   // REMOVED: 'COMPLIMENTARY', 'DISCOUNT', 'TABLE' - now handled as discount reasons
   'CASHIER_SHORTAGE',  // نقص كاشير
   'RETURNS',           // مرتجعات
@@ -29,6 +27,32 @@ export const TRANSACTION_CATEGORIES = [
 ] as const;
 
 export type TransactionCategory = typeof TRANSACTION_CATEGORIES[number];
+
+/**
+ * Enum-like object for type-safe category references.
+ * Use this instead of hardcoded strings.
+ * Example: Category.EMPLOYEE_SALARIES instead of 'EMPLOYEE_SALARIES'
+ */
+export const Category = {
+  // INCOME
+  INVENTORY_SALES: 'INVENTORY_SALES',
+  CAPITAL_ADDITION: 'CAPITAL_ADDITION',
+  APP_PURCHASES: 'APP_PURCHASES',
+  // EXPENSE
+  EMPLOYEE_SALARIES: 'EMPLOYEE_SALARIES',
+  WORKER_DAILY: 'WORKER_DAILY',
+  SUPPLIES: 'SUPPLIES',
+  MAINTENANCE: 'MAINTENANCE',
+  INVENTORY: 'INVENTORY',
+  CASHIER_SHORTAGE: 'CASHIER_SHORTAGE',
+  RETURNS: 'RETURNS',
+  OTHER_EXPENSE: 'OTHER_EXPENSE',
+} as const satisfies Record<TransactionCategory, TransactionCategory>;
+
+/**
+ * Default category when none is specified
+ */
+export const DEFAULT_CATEGORY: TransactionCategory = 'OTHER_EXPENSE';
 
 /**
  * Categories that support multi-item transactions
@@ -55,14 +79,12 @@ export const CATEGORY_LABELS_AR: Record<TransactionCategory, string> = {
   INVENTORY_SALES: 'مبيعات المخزون',
   CAPITAL_ADDITION: 'إضافة رأس مال',
   APP_PURCHASES: 'مبيعات التطبيق',
-  DEBT_PAYMENT: 'دفع دين',
   // EXPENSE
   EMPLOYEE_SALARIES: 'رواتب الموظفين',
   WORKER_DAILY: 'يوميات العمال',
   SUPPLIES: 'مستلزمات',
   MAINTENANCE: 'صيانة',
   INVENTORY: 'مشتريات مخزون',
-  DEBT: 'دين',
   CASHIER_SHORTAGE: 'نقص كاشير',
   RETURNS: 'مرتجعات',
   OTHER_EXPENSE: 'مصروفات أخرى',

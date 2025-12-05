@@ -31,6 +31,11 @@ export const ARABIC_ERRORS: Record<string, string> = {
   noAccessToTransaction: 'ليس لديك صلاحية للوصول إلى هذه المعاملة',
   userMustBeAssignedToBranchToCreateTransactions: 'يجب تعيين فرع للمستخدم لإنشاء المعاملات',
   paymentMethodMustBeCashOrMasterForIncome: 'طريقة الدفع يجب أن تكون نقدي أو ماستر كارد للإيرادات',
+  paidAmountNegative: 'المبلغ المدفوع لا يمكن أن يكون سالباً',
+  paidAmountExceedsTotal: 'المبلغ المدفوع لا يمكن أن يتجاوز المبلغ الإجمالي',
+  contactIdRequiredForPartialPayment: 'معرف جهة الاتصال مطلوب عند الدفع الجزئي للمصروفات',
+  autoDebtDescription: 'دين تلقائي من معاملة',
+  remainingAmountNote: 'المبلغ المتبقي من المعاملة',
 
   // Debt Errors
   debtNotFound: 'الدين غير موجود',
@@ -164,6 +169,21 @@ export const ARABIC_ERRORS: Record<string, string> = {
   status: 'الحالة',
   invoiceNumber: 'رقم الفاتورة',
 } as const;
+
+/**
+ * Transaction validation error helpers with parameters
+ */
+export const TransactionErrors = {
+  categoryNotSupportMultiItem: (category: string) =>
+    `الفئة ${category} لا تدعم إضافة عدة أصناف. الفئات المدعومة: INVENTORY_SALES, APP_PURCHASES, INVENTORY`,
+  categoryNotSupportDiscount: (category: string) =>
+    `الفئة ${category} لا تدعم الخصم. الفئات المدعومة: INVENTORY_SALES, APP_PURCHASES`,
+  autoDebtDescription: (category: string) => `دين تلقائي من معاملة ${category}`,
+  insufficientQuantity: (name: string, available: number, requested: number) =>
+    `كمية غير كافية للصنف ${name}. المتوفر: ${available}, المطلوب: ${requested}`,
+  inventoryItemNotFoundInBranch: (itemId: string) =>
+    `صنف المخزون ${itemId} غير موجود في هذا الفرع`,
+};
 
 /**
  * Translate error message key to Arabic

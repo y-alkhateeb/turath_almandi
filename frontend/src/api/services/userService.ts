@@ -3,7 +3,7 @@
  * All user CRUD operations (Admin only)
  *
  * Endpoints:
- * - GET /users → PaginatedResponse<UserWithBranch>
+ * - GET /users → UserWithBranch[] (array of users with filters)
  * - GET /users/:id → UserWithBranch
  * - POST /users → UserWithBranch (CreateUserDto)
  * - PATCH /users/:id → UserWithBranch (UpdateUserDto)
@@ -15,7 +15,7 @@
 
 import apiClient from '../apiClient';
 import type { UserWithBranch, CreateUserInput, UpdateUserInput } from '#/entity';
-import type { PaginatedResponse, UserQueryFilters } from '#/api';
+import type { UserQueryFilters } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -36,41 +36,18 @@ export enum UserApiEndpoints {
 // ============================================
 
 /**
- * Get all users with pagination and filters
+ * Get all users with filters
  * GET /users
  *
- * @param filters - Optional query filters (role, branchId, isActive, page, limit)
- * @returns PaginatedResponse<UserWithBranch> with users and pagination meta
+ * @param filters - Optional query filters (role, branchId, isActive, search)
+ * @returns Array of users
  * @throws ApiError on 401 (not authenticated), 403 (not admin)
  */
-export const getAll = (filters?: UserQueryFilters): Promise<PaginatedResponse<UserWithBranch>> => {
-  return apiClient.get<PaginatedResponse<UserWithBranch>>({
+export const getAll = (filters?: UserQueryFilters): Promise<UserWithBranch[]> => {
+  return apiClient.get<UserWithBranch[]>({
     url: UserApiEndpoints.Base,
     params: filters,
   });
-};
-
-/**
- * Get all users without pagination (for dropdowns, etc.)
- * GET /users?limit=1000
- *
- * @returns UserWithBranch[] array
- * @throws ApiError on 401 (not authenticated), 403 (not admin)
- */
-export const getAllUnpaginated = (): Promise<UserWithBranch[]> => {
-  return apiClient
-    .get<UserWithBranch[] | PaginatedResponse<UserWithBranch>>({
-      url: UserApiEndpoints.Base,
-      params: { limit: 1000 },
-    })
-    .then((response) => {
-      // If backend returns paginated response, extract data array
-      if (response && typeof response === 'object' && 'data' in response && Array.isArray(response.data)) {
-        return response.data;
-      }
-      // Otherwise assume it's already an array
-      return response as UserWithBranch[];
-    });
 };
 
 /**
@@ -207,7 +184,6 @@ export const setActiveStatus = (userId: string, isDeleted: boolean): Promise<Use
 
 const userService = {
   getAll,
-  getAllUnpaginated,
   getOne,
   create,
   update,

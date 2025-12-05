@@ -56,6 +56,6 @@ export class CreateContactDto {
   notes?: string;
 
   @IsUUID('4', { message: 'معرف الفرع يجب أن يكون UUID صالح' })
-  @IsOptional()
-  branchId?: string;
+  @IsNotEmpty({ message: 'الفرع مطلوب' })
+  branchId: string;
 }

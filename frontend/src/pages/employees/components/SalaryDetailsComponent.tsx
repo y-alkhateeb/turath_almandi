@@ -109,7 +109,7 @@ export function SalaryDetailsComponent({ employeeId, employeeName }: SalaryDetai
                   <span>الخصومات</span>
                   <span className="font-medium">-{formatCurrency(salaryDetails.adjustments.deductions)}</span>
                 </div>
-                <div className="flex justify-between py-2 text-orange-600">
+                <div className="flex justify-between py-2 text-warning-600">
                   <span>السلف</span>
                   <span className="font-medium">-{formatCurrency(salaryDetails.adjustments.advances)}</span>
                 </div>

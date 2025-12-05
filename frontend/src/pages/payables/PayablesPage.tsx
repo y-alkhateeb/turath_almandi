@@ -106,7 +106,7 @@ export default function PayablesPage() {
       case DebtStatus.PAID:
         return <Badge variant="default" className="bg-secondary/10 text-secondary hover:bg-secondary/20">مدفوع</Badge>;
       case DebtStatus.PARTIAL:
-        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400">جزئي</Badge>;
+        return <Badge variant="secondary" className="bg-warning-500/10 text-warning-700 hover:bg-warning-500/20 dark:text-warning-400">جزئي</Badge>;
       default:
         return <Badge variant="secondary" className="bg-destructive/10 text-destructive hover:bg-destructive/20">غير مدفوع</Badge>;
     }

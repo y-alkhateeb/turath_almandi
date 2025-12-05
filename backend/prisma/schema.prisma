@@ -272,7 +272,7 @@ model Transaction {
   paymentMethod      PaymentMethod?  @map("payment_method")
   category           String          @db.VarChar(100)
   date               DateTime        @db.Date
-  employeeVendorName String          @map("employee_vendor_name") @db.VarChar(200)
+
   notes              String?         @db.Text
   inventoryItemId    String?         @map("inventory_item_id") @db.Uuid
   paidAmount         Decimal?        @map("paid_amount") @db.Decimal(15, 2)
@@ -284,7 +284,7 @@ model Transaction {
   subtotal           Decimal?        @map("subtotal") @db.Decimal(15, 2)
   contactId          String?         @map("contact_id") @db.Uuid
   linkedPayableId    String?         @map("linked_payable_id") @db.Uuid
-  // NEW: Link to employee for salary, bonus, advance transactions
+  // Link to employee for salary, bonus, advance transactions
   employeeId         String?         @map("employee_id") @db.Uuid
   linkedReceivableId String?         @map("linked_receivable_id") @db.Uuid
   createdBy          String          @map("created_by") @db.Uuid
@@ -337,7 +337,7 @@ model Contact {
   address     String?     @db.Text
   creditLimit Decimal?    @db.Decimal(15, 2)
   notes       String?     @db.Text
-  branchId    String?     @map("branch_id") @db.Uuid
+  branchId    String      @map("branch_id") @db.Uuid
   createdBy   String      @map("created_by") @db.Uuid
   createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz
@@ -346,7 +346,7 @@ model Contact {
   isDeleted   Boolean     @default(false) @map("is_deleted")
 
   // Relations
-  branch             Branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  branch             Branch              @relation(fields: [branchId], references: [id], onDelete: Restrict)
   creator            User                @relation("ContactCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   deleter            User?               @relation("ContactDeleter", fields: [deletedBy], references: [id], onDelete: SetNull)
   accountsPayable    AccountPayable[]
@@ -402,7 +402,7 @@ model AccountPayable {
   @@map("accounts_payable")
 }
 
-// NEW: Account Receivable Model (Debts Owed to Us)
+// Account Receivable Model (Debts Owed to Us)
 model AccountReceivable {
   id                      String     @id @default(uuid()) @db.Uuid
   contactId               String     @map("contact_id") @db.Uuid
@@ -442,7 +442,7 @@ model AccountReceivable {
   @@map("accounts_receivable")
 }
 
-// NEW: Payable Payment Model
+// Payable Payment Model
 model PayablePayment {
   id            String         @id @default(uuid()) @db.Uuid
   payableId     String         @map("payable_id") @db.Uuid
@@ -472,7 +472,7 @@ model PayablePayment {
   @@map("payable_payments")
 }
 
-// NEW: Receivable Payment Model
+// Receivable Payment Model
 model ReceivablePayment {
   id            String         @id @default(uuid()) @db.Uuid
   receivableId  String         @map("receivable_id") @db.Uuid
@@ -502,7 +502,7 @@ model ReceivablePayment {
   @@map("receivable_payments")
 }
 
-// NEW: Discount Reasons Table
+// Discount Reasons Table
 model DiscountReason {
   id          String    @id @default(uuid()) @db.Uuid
   reason      String    @unique @db.VarChar(200)
@@ -526,7 +526,7 @@ model DiscountReason {
   @@map("discount_reasons")
 }
 
-// 7. Inventory Items Table
+// Inventory Items Table
 model InventoryItem {
   id               String        @id @default(uuid()) @db.Uuid
   branchId         String        @map("branch_id") @db.Uuid

@@ -4,7 +4,7 @@
  *
  * Backend Endpoints (employees.controller.ts):
  * - POST /employees → Create employee
- * - GET /employees → List with pagination & filters
+ * - GET /employees → List with filters (no pagination)
  * - GET /employees/active/:branchId → Active employees by branch
  * - GET /employees/:id → Get one employee
  * - PUT /employees/:id → Update employee
@@ -22,7 +22,6 @@ import type {
   ResignEmployeeInput,
   EmployeeFilters,
 } from '#/entity';
-import type { PaginatedResponse } from '#/api';
 
 // ============================================
 // API ENDPOINTS
@@ -44,15 +43,13 @@ export enum EmployeeApiEndpoints {
 // ============================================
 
 /**
- * Get all employees with pagination and filters
+ * Get all employees with filters
  * GET /employees
  *
  * Supports filtering by:
  * - status: EmployeeStatus (ACTIVE | RESIGNED)
  * - branchId: UUID (accountants auto-filtered to their branch)
  * - search: string (searches name, position)
- * - page: number (default: 1)
- * - limit: number (default: 20)
  *
  * Backend behavior:
  * - Accountants: Auto-filtered to their assigned branch
@@ -61,13 +58,13 @@ export enum EmployeeApiEndpoints {
  * - Results ordered by hireDate DESC
  *
  * @param filters - Optional query filters
- * @returns PaginatedResponse<Employee> with employees and pagination meta
+ * @returns Array of employees
  * @throws ApiError on 401 (not authenticated)
  */
 export const getAll = (
   filters?: EmployeeFilters
-): Promise<PaginatedResponse<Employee>> => {
-  return apiClient.get<PaginatedResponse<Employee>>({
+): Promise<Employee[]> => {
+  return apiClient.get<Employee[]>({
     url: EmployeeApiEndpoints.Base,
     params: filters,
   });

@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { InventoryItem, Branch, CreateInventoryInput, UpdateInventoryInput } from '@/types/entity';
+import { BranchSelect } from '@/components/shared/BranchSelect';
+import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '@/types/entity';
 import { InventoryUnit } from '@/types/enum';
 
 const UNIT_OPTIONS: { value: InventoryUnit; label: string }[] = [
@@ -53,7 +54,6 @@ interface AddEditItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: InventoryItem | null; // null = إضافة جديد
-  branches: Branch[];
   isAdmin: boolean;
   userBranchId: string | null;
   onSave: (data: CreateInventoryInput | UpdateInventoryInput, isEdit: boolean) => void;
@@ -75,7 +75,6 @@ export default function AddEditItemDialog({
   open,
   onOpenChange,
   item,
-  branches,
   isAdmin,
   userBranchId,
   onSave,
@@ -300,26 +299,16 @@ export default function AddEditItemDialog({
             </div>
           </div>
 
-          {/* الفرع - للأدمن فقط وعند الإضافة */}
-          {isAdmin && !isEdit && (
+          {/* الفرع */}
+          {!isEdit && (
             <div className="space-y-2">
               <Label htmlFor="branchId">الفرع *</Label>
-              <Select
+              <BranchSelect
                 value={formData.branchId}
                 onValueChange={(value) => handleChange('branchId', value)}
+                placeholder="اختر الفرع"
                 disabled={isSaving}
-              >
-                <SelectTrigger id="branchId">
-                  <SelectValue placeholder="اختر الفرع" />
-                </SelectTrigger>
-                <SelectContent>
-                  {branches.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id}>
-                      {branch.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
               {errors.branchId && (
                 <p className="text-sm text-destructive">{errors.branchId}</p>
               )}

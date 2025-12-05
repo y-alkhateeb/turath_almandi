@@ -39,6 +39,8 @@ import { useBranches, useDeleteBranch } from '@/hooks/api/useBranches';
 import { useAuth } from '@/hooks/api/useAuth';
 import { formatDate } from '@/utils/format';
 import type { Branch } from '#/entity';
+import type { BranchQueryFilters } from '#/api';
+import { ACTIVITY_STATUS_COLORS } from '@/constants/status-colors';
 
 import { BranchForm } from './components/BranchForm';
 
@@ -46,48 +48,31 @@ export default function BranchesPage() {
   const queryClient = useQueryClient();
   const { isAdmin } = useAuth();
 
-  // State
+  // Filter state
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [showInactive, setShowInactive] = useState(false);
 
   // Dialog State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [branchToEdit, setBranchToEdit] = useState<Branch | undefined>(undefined);
 
-  // Queries - Get all branches including deleted for admins
-  const { data: branches = [], isLoading, error } = useBranches({
-    isActive: showInactive ? undefined : true, // This filters by isDeleted on backend
-    enabled: true,
-  });
+  // Build query filters
+  const filters: BranchQueryFilters = useMemo(() => {
+    const f: BranchQueryFilters = {};
+
+    if (search.trim()) f.search = search;
+    if (statusFilter === 'active') f.includeInactive = false;
+    else if (statusFilter === 'inactive') f.includeInactive = true;
+    else f.includeInactive = isAdmin; // Admins see all by default
+
+    return f;
+  }, [search, statusFilter, isAdmin]);
+
+  // Queries
+  const { data: branches = [], isLoading, error } = useBranches(filters);
   const deleteMutation = useDeleteBranch();
 
-  // Filter branches client-side (since backend doesn't support search)
-  const filteredBranches = useMemo(() => {
-    let filtered = branches;
-
-    // Search filter
-    if (search.trim()) {
-      const searchLower = search.toLowerCase();
-      filtered = filtered.filter(
-        (branch) =>
-          branch.name.toLowerCase().includes(searchLower) ||
-          branch.location.toLowerCase().includes(searchLower) ||
-          branch.managerName.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Status filter
-    if (statusFilter === 'active') {
-      filtered = filtered.filter((branch) => !branch.isDeleted);
-    } else if (statusFilter === 'inactive') {
-      filtered = filtered.filter((branch) => branch.isDeleted);
-    }
-
-    return filtered;
-  }, [branches, search, statusFilter]);
-
-  // Calculate summary stats
+  // Calculate summary stats from all branches
   const summary = useMemo(() => {
     const total = branches.length;
     const active = branches.filter((b) => !b.isDeleted).length;
@@ -117,16 +102,25 @@ export default function BranchesPage() {
     setStatusFilter('all');
   };
 
+  // Handle filter changes
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+  };
+
   const hasActiveFilters = search || statusFilter !== 'all';
 
   // Helper for status badge
   const getStatusBadge = (isDeleted: boolean) => {
     return !isDeleted ? (
-      <Badge variant="secondary" className="bg-secondary/10 text-secondary hover:bg-secondary/20">
+      <Badge variant="secondary" className={ACTIVITY_STATUS_COLORS.active}>
         نشط
       </Badge>
     ) : (
-      <Badge variant="secondary" className="bg-gray-500/10 text-gray-600 hover:bg-gray-500/20">
+      <Badge variant="secondary" className={ACTIVITY_STATUS_COLORS.inactive}>
         غير نشط
       </Badge>
     );
@@ -175,7 +169,7 @@ export default function BranchesPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">الفروع غير النشطة</CardTitle>
-            <Building2 className="h-4 w-4 text-gray-500" />
+            <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{summary.inactive}</div>
@@ -207,13 +201,13 @@ export default function BranchesPage() {
             <div className="relative sm:col-span-2">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="بحث بالاسم، الموقع، أو اسم المدير..."
+                placeholder="بحث بالاسم..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pr-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
               <SelectTrigger>
                 <SelectValue placeholder="حالة الفرع" />
               </SelectTrigger>
@@ -224,20 +218,6 @@ export default function BranchesPage() {
               </SelectContent>
             </Select>
           </div>
-          {isAdmin && (
-            <div className="mt-4 flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="showInactive"
-                checked={showInactive}
-                onChange={(e) => setShowInactive(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300"
-              />
-              <label htmlFor="showInactive" className="text-sm text-muted-foreground cursor-pointer">
-                إظهار الفروع غير النشطة
-              </label>
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -255,12 +235,12 @@ export default function BranchesPage() {
               <Button
                 variant="outline"
                 className="mt-4"
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['branches'] })}
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['branches', 'list'] })}
               >
                 إعادة المحاولة
               </Button>
             </div>
-          ) : filteredBranches.length > 0 ? (
+          ) : branches.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -273,7 +253,7 @@ export default function BranchesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredBranches.map((branch) => (
+                {branches.map((branch) => (
                   <TableRow key={branch.id}>
                     <TableCell className="font-medium">{branch.name}</TableCell>
                     <TableCell>
@@ -347,4 +327,3 @@ export default function BranchesPage() {
     </div>
   );
 }
-

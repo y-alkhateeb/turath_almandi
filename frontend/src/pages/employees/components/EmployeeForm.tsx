@@ -23,8 +23,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
+import { BranchSelect } from '@/components/shared/BranchSelect';
 import { EmployeeStatus } from '@/types/enum';
-import { Branch } from '@/types/entity';
 import { formatDate } from '@/utils/format';
 
 // Schema
@@ -47,7 +47,6 @@ type EmployeeInitialData = Omit<Partial<EmployeeFormValues>, 'hireDate'> & {
 
 interface EmployeeFormProps {
   initialData?: EmployeeInitialData;
-  branches: Branch[];
   onSubmit: (data: EmployeeFormValues) => void;
   isSubmitting?: boolean;
   isEdit?: boolean;
@@ -57,7 +56,6 @@ interface EmployeeFormProps {
 
 export default function EmployeeForm({
   initialData,
-  branches,
   onSubmit,
   isSubmitting,
   isEdit = false,
@@ -128,24 +126,12 @@ export default function EmployeeForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>الفرع</FormLabel>
-                <Select
+                <BranchSelect
+                  value={field.value}
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!isAdmin}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الفرع" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {branches.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>
-                        {branch.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="اختر الفرع"
+                  asFormControl
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -202,7 +188,16 @@ export default function EmployeeForm({
               <FormItem>
                 <FormLabel>الراتب الأساسي</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === '' ? 0 : parseFloat(value) || 0);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -217,7 +212,16 @@ export default function EmployeeForm({
               <FormItem>
                 <FormLabel>البدلات (اختياري)</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === '' ? 0 : parseFloat(value) || 0);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

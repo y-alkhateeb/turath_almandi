@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Query } from '@nestjs/common';
 import { UserRole } from '../common/types/prisma-enums';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,10 +18,28 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  /**
+   * Get all users
+   * Returns all users matching the filters (no pagination)
+   *
+   * Query Parameters:
+   * - role: Filter by user role (ADMIN | ACCOUNTANT)
+   * - isActive: Filter by active status (true | false)
+   * - search: Search by username
+   */
   @Get()
   @Roles([UserRole.ADMIN])
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('role') role?: UserRole,
+    @Query('isActive') isActive?: string,
+    @Query('search') search?: string,
+  ) {
+    const filters = {
+      role,
+      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
+      search,
+    };
+    return this.usersService.findAll(filters);
   }
 
   @Get(':id')

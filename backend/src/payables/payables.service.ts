@@ -468,7 +468,6 @@ export class PayablesService {
           amount: payPayableDto.amountPaid,
           date: new Date(payPayableDto.paymentDate),
           category: 'دفع حسابات دائنة',
-          employeeVendorName: payable.contact.name,
           paymentMethod: payPayableDto.paymentMethod,
           notes: payPayableDto.notes ? `${payPayableDto.notes}` : `دفعة حساب دائن - ${payable.contact.name}`,
           branchId: payable.branchId,

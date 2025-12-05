@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from '@/components/ui';
 import { ContactTypeSelect } from '@/components/shared/ContactTypeSelect';
+import { BranchSelect } from '@/components/shared/BranchSelect';
 import { useCreateContact, useUpdateContact } from '@/hooks/api/useContacts';
 import { ContactType } from '@/types/enum';
 import type { Contact } from '@/types/contacts.types';
@@ -26,6 +27,7 @@ import type { Contact } from '@/types/contacts.types';
 interface FormValues {
   name: string;
   type: ContactType;
+  branchId: string;
   phone?: string;
   email?: string;
   address?: string;
@@ -48,6 +50,7 @@ export function ContactForm({ open, onOpenChange, contactToEdit }: ContactFormPr
     defaultValues: {
       name: '',
       type: ContactType.SUPPLIER,
+      branchId: '',
       phone: '',
       email: '',
       address: '',
@@ -63,6 +66,7 @@ export function ContactForm({ open, onOpenChange, contactToEdit }: ContactFormPr
         form.reset({
           name: contactToEdit.name,
           type: contactToEdit.type,
+          branchId: contactToEdit.branchId || '',
           phone: contactToEdit.phone || '',
           email: contactToEdit.email || '',
           address: contactToEdit.address || '',
@@ -73,6 +77,7 @@ export function ContactForm({ open, onOpenChange, contactToEdit }: ContactFormPr
         form.reset({
           name: '',
           type: ContactType.SUPPLIER,
+          branchId: '',
           phone: '',
           email: '',
           address: '',
@@ -88,6 +93,7 @@ export function ContactForm({ open, onOpenChange, contactToEdit }: ContactFormPr
       // Clean up empty strings
       const cleanedValues = {
         ...values,
+        branchId: values.branchId,
         phone: values.phone || undefined,
         email: values.email || undefined,
         address: values.address || undefined,
@@ -149,6 +155,26 @@ export function ContactForm({ open, onOpenChange, contactToEdit }: ContactFormPr
                       <ContactTypeSelect
                         value={field.value}
                         onValueChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Branch */}
+              <FormField
+                control={form.control}
+                name="branchId"
+                rules={{ required: 'الفرع مطلوب' }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الفرع <span className="text-destructive">*</span></FormLabel>
+                    <FormControl>
+                      <BranchSelect
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        asFormControl={true}
                       />
                     </FormControl>
                     <FormMessage />

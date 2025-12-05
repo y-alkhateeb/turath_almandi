@@ -44,8 +44,9 @@ import {
   Pagination,
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { getCategoryLabel, getTransactionTypeLabel } from '@/constants/transaction-categories';
 import transactionService from '@/api/services/transactionService';
-import branchService from '@/api/services/branchService';
+import { useBranchList } from '@/hooks/api/useBranches';
 import { useUserInfo } from '@/store/userStore';
 import { TransactionType } from '@/types/enum';
 import { getPaymentMethodLabel, getPaymentMethodOptions } from '@/components/shared/PaymentMethodSelect';
@@ -54,11 +55,6 @@ import { getPaymentMethodLabel, getPaymentMethodOptions } from '@/components/sha
 // HELPERS
 // ============================================
 
-
-
-function getTransactionTypeLabel(type: TransactionType): string {
-  return type === TransactionType.INCOME ? 'إيراد' : 'مصروف';
-}
 
 // ============================================
 // MAIN COMPONENT
@@ -110,11 +106,7 @@ export default function TransactionsPage() {
   });
 
   // Fetch branches (admin only)
-  const { data: branches = [] } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAllActive(),
-    enabled: isAdmin,
-  });
+  const { data: branches = [] } = useBranchList({ enabled: isAdmin });
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -206,7 +198,7 @@ export default function TransactionsPage() {
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="بحث بالوصف، الفئة، الملاحظات..."
+              placeholder="بحث بالفئة، الملاحظات..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -357,9 +349,9 @@ export default function TransactionsPage() {
                           {getTransactionTypeLabel(transaction.type)}
                         </span>
                       </TableCell>
-                      <TableCell>{transaction.category}</TableCell>
+                      <TableCell>{getCategoryLabel(transaction.category)}</TableCell>
                       <TableCell className="max-w-[200px] truncate">
-                        {transaction.employeeVendorName || transaction.notes || '-'}
+                        {transaction.notes || '-'}
                       </TableCell>
                       <TableCell>{getPaymentMethodLabel(transaction.paymentMethod)}</TableCell>
                       <TableCell>

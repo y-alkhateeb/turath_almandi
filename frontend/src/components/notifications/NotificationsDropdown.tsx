@@ -120,9 +120,9 @@ function NotificationItem({ notification, onMarkAsRead }: NotificationItemProps)
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <Check className="h-4 w-4 text-green-500" />;
+        return <Check className="h-4 w-4 text-success" />;
       case 'warning':
-        return <Bell className="h-4 w-4 text-yellow-500" />;
+        return <Bell className="h-4 w-4 text-warning-500" />;
       case 'error':
         return <X className="h-4 w-4 text-destructive" />;
       default:

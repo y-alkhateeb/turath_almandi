@@ -4,12 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Pagination } from '@/components/ui/pagination';
 import { useUserInfo } from '@/store/userStore';
 import { UserRole } from '@/types/enum';
 import inventoryService from '@/api/services/inventoryService';
-import branchService from '@/api/services/branchService';
-import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput, RecordConsumptionInput, ConsumptionHistoryItem, Branch } from '@/types/entity';
+import { useBranchList } from '@/hooks/api/useBranches';
+import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput, RecordConsumptionInput, ConsumptionHistoryItem } from '@/types/entity';
 
 import InventoryStats from './components/InventoryStats';
 import InventoryFilters, { type InventoryFiltersState } from './components/InventoryFilters';
@@ -20,7 +19,6 @@ import RecordConsumptionDialog from './components/RecordConsumptionDialog';
 import ConsumptionHistoryDialog from './components/ConsumptionHistoryDialog';
 
 const LOW_STOCK_THRESHOLD = 10;
-const DEFAULT_PAGE_SIZE = 10;
 
 const initialFilters: InventoryFiltersState = {
   search: '',
@@ -33,10 +31,6 @@ export default function InventoryPage() {
   const queryClient = useQueryClient();
   const user = useUserInfo();
   const isAdmin = user?.role === UserRole.ADMIN;
-
-  // Pagination
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Filters
   const [filters, setFilters] = useState<InventoryFiltersState>(initialFilters);
@@ -52,21 +46,18 @@ export default function InventoryPage() {
 
   // Build query params
   const queryParams = useMemo(() => {
-    const params: Record<string, string | number | undefined> = {
-      page,
-      limit: pageSize,
-    };
+    const params: Record<string, string | undefined> = {};
 
     if (filters.search) params.search = filters.search;
     if (filters.unit !== 'all') params.unit = filters.unit;
     if (filters.branchId !== 'all') params.branchId = filters.branchId;
 
     return params;
-  }, [page, pageSize, filters]);
+  }, [filters]);
 
   // Fetch inventory items
   const {
-    data: inventoryData,
+    data: inventoryItems = [],
     isLoading: isLoadingInventory,
     error: inventoryError,
   } = useQuery({
@@ -75,19 +66,11 @@ export default function InventoryPage() {
   });
 
   // Fetch branches for admin
-  const { data: branchesData } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAll(),
-    enabled: isAdmin,
-  });
-
-  const branches: Branch[] = branchesData || [];
+  const { data: branches = [] } = useBranchList({ enabled: isAdmin });
 
   // Filter items by stock status (client-side)
   const filteredItems = useMemo(() => {
-    if (!inventoryData?.data) return [];
-
-    let items = inventoryData.data;
+    let items = inventoryItems;
 
     if (filters.stockStatus !== 'all') {
       items = items.filter((item) => {
@@ -105,18 +88,18 @@ export default function InventoryPage() {
     }
 
     return items;
-  }, [inventoryData?.data, filters.stockStatus]);
+  }, [inventoryItems, filters.stockStatus]);
 
   // Calculate stats
   const stats = useMemo(() => {
-    const items = inventoryData?.data || [];
+    const items = inventoryItems;
     return {
       total: items.length,
       available: items.filter((i) => i.quantity > 0).length,
       low: items.filter((i) => i.quantity > 0 && i.quantity < LOW_STOCK_THRESHOLD).length,
       outOfStock: items.filter((i) => i.quantity === 0).length,
     };
-  }, [inventoryData?.data]);
+  }, [inventoryItems]);
 
   // Mutations
   const createMutation = useMutation({
@@ -204,7 +187,6 @@ export default function InventoryPage() {
 
   const handleFilterChange = (newFilters: InventoryFiltersState) => {
     setFilters(newFilters);
-    setPage(1); // Reset to first page on filter change
   };
 
   const handleAddItem = () => {
@@ -323,27 +305,11 @@ export default function InventoryPage() {
         )}
       </div>
 
-      {/* Pagination */}
-      {inventoryData && inventoryData.meta && inventoryData.meta.totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={inventoryData.meta.totalPages}
-          limit={pageSize}
-          total={inventoryData.meta.total}
-          onPageChange={setPage}
-          onLimitChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-        />
-      )}
-
       {/* Add/Edit Dialog */}
       <AddEditItemDialog
         open={isAddEditDialogOpen}
         onOpenChange={setIsAddEditDialogOpen}
         item={editingItem}
-        branches={branches}
         isAdmin={isAdmin}
         userBranchId={user?.branchId || null}
         onSave={handleSaveItem}

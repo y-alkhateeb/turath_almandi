@@ -5,8 +5,9 @@
  * Endpoints:
  * - GET /transactions?filters → PaginatedResponse<Transaction>
  * - GET /transactions/:id → Transaction
- * - POST /transactions → Transaction (CreateTransactionDto)
- * - PATCH /transactions/:id → Transaction (UpdateTransactionDto)
+ * - POST /transactions/income → Transaction (CreateIncomeInput)
+ * - POST /transactions/expense → Transaction (CreateExpenseInput)
+ * - PUT /transactions/:id → Transaction (UpdateTransactionInput)
  * - DELETE /transactions/:id → void
  * - GET /transactions/summary → TransactionStatsResponse
  *
@@ -14,10 +15,9 @@
  */
 
 import apiClient from '../apiClient';
-import type { Transaction, CreateTransactionInput, UpdateTransactionInput } from '#/entity';
+import type { Transaction, UpdateTransactionInput } from '#/entity';
 import type { PaginatedResponse, TransactionQueryFilters, TransactionStatsResponse } from '#/api';
-import type { TransactionWithInventoryRequest } from '../../types/inventoryOperation.types';
-import { DiscountType, InventoryOperationType, TransactionType } from '@/types/enum';
+import { DiscountType, InventoryOperationType, PaymentMethod } from '@/types/enum';
 
 // ============================================
 // TYPES
@@ -34,6 +34,43 @@ export interface TransactionItemDto {
   operationType: InventoryOperationType;
   discountType?: DiscountType;
   discountValue?: number;
+  notes?: string;
+}
+
+/**
+ * Input for creating INCOME transactions
+ * Matches backend CreateIncomeDto
+ */
+export interface CreateIncomeInput {
+  date: string;
+  category: string;
+  paymentMethod: PaymentMethod;
+  amount?: number;
+  items?: TransactionItemDto[];
+  discountType?: DiscountType;
+  discountValue?: number;
+  discountReason?: string;
+  branchId?: string;
+  notes?: string;
+}
+
+/**
+ * Input for creating EXPENSE transactions
+ * Matches backend CreateExpenseDto
+ */
+export interface CreateExpenseInput {
+  date: string;
+  category: string;
+  paymentMethod?: PaymentMethod;
+  amount?: number;
+  items?: TransactionItemDto[];
+  employeeId?: string;
+  paidAmount?: number;
+  createDebtForRemaining?: boolean;
+  contactId?: string;
+  payableDueDate?: string;
+  branchId?: string;
+  notes?: string;
 }
 
 // ============================================
@@ -65,7 +102,7 @@ export enum TransactionApiEndpoints {
  * - branchId: UUID (accountants auto-filtered to their branch)
  * - startDate: ISO date string (inclusive)
  * - endDate: ISO date string (inclusive)
- * - search: string (searches employeeVendorName, category, notes)
+
  * - page: string (default: 1)
  * - limit: string (default: 10)
  *
@@ -108,79 +145,59 @@ export const getOne = (id: string): Promise<Transaction> => {
 };
 
 /**
- * Create new transaction
- * POST /transactions
+ * Create new INCOME transaction
+ * POST /transactions/income
  *
- * Backend validation (from CreateTransactionDto):
- * - type: Required, INCOME | EXPENSE
+ * Backend validation (from CreateIncomeDto):
+ * - date: Required, ISO date string, not future
+ * - category: Required, IncomeCategory enum
+ * - paymentMethod: Required, CASH | MASTER
  * - amount: Required if no items, positive
- * - paymentMethod: Required for INCOME (CASH | MASTER)
- * - items: Optional TransactionItemDto[] (alternative to amount)
- * - discountType: Optional, DiscountType enum (PERCENTAGE | AMOUNT)
+ * - items: Optional TransactionItemDto[] (for multi-item)
+ * - discountType: Optional, DiscountType enum
  * - discountValue: Optional, >= 0
  * - discountReason: Optional, max 200 chars
- * - category: Optional if not EMPLOYEE_SALARIES
- * - date: Required, ISO date string, not future
- * - employeeVendorName: Optional
- * - notes: Optional
  * - branchId: Optional for admins, auto-assigned for accountants
- * - employeeId: Required if category === 'EMPLOYEE_SALARIES'
- *
- * Backend behavior:
- * - Accountants: branchId auto-set from their assignment
- * - Admins: Must provide branchId
- *
- * @param data - CreateTransactionInput
- * @returns Created Transaction with relations
- * @throws ApiError on 400 (validation), 401, 403, 404
- */
-export const create = (data: CreateTransactionInput): Promise<Transaction> => {
-  return apiClient.post<Transaction>({
-    url: TransactionApiEndpoints.Base,
-    data,
-  });
-};
 
-/**
- * Create purchase expense with optional inventory
- * POST /transactions/purchase
- *
- * Creates an expense transaction for a purchase with optional inventory item creation
- *
- * Backend validation:
- * - date: Required, ISO date, not future
- * - amount: Required, > 0.01
- * - vendorName: Required, 2+ chars
- * - addToInventory: Required boolean
- * - itemName: Required if addToInventory=true
- * - quantity: Required if addToInventory=true, > 0.01
- * - unit: Required if addToInventory=true, InventoryUnit enum
  * - notes: Optional
  *
- * @param data - Purchase expense DTO
- * @returns Created Transaction with linked inventory
+ * @param data - CreateIncomeInput
+ * @returns Created Transaction with relations
  * @throws ApiError on 400 (validation), 401, 403
  */
-export const createPurchase = (data: any): Promise<Transaction> => {
+export const createIncome = (data: CreateIncomeInput): Promise<Transaction> => {
   return apiClient.post<Transaction>({
-    url: '/transactions/purchase',
+    url: '/transactions/income',
     data,
   });
 };
 
 /**
- * Create transaction with inventory operations
- * POST /transactions/with-inventory
+ * Create new EXPENSE transaction
+ * POST /transactions/expense
  *
- * Creates transaction with linked inventory operations
+ * Backend validation (from CreateExpenseDto):
+ * - date: Required, ISO date string, not future
+ * - category: Required, ExpenseCategory enum
+ * - paymentMethod: Optional, CASH | MASTER
+ * - amount: Required if no items, positive
+ * - items: Optional TransactionItemDto[] (for multi-item inventory operations)
+ * - employeeId: Required if category === 'EMPLOYEE_SALARIES'
+ * - paidAmount: Optional, for partial payment
+ * - createDebtForRemaining: Optional, auto-create debt
+ * - contactId: Required if partial payment
+ * - payableDueDate: Optional
+ * - branchId: Optional for admins, auto-assigned for accountants
+
+ * - notes: Optional
  *
- * @param data - TransactionWithInventoryRequest
- * @returns Created Transaction with inventory operations
- * @throws ApiError on 400 (validation), 401, 403, 404
+ * @param data - CreateExpenseInput
+ * @returns Created Transaction with relations
+ * @throws ApiError on 400 (validation), 401, 403
  */
-export const createWithInventory = (data: TransactionWithInventoryRequest): Promise<Transaction> => {
+export const createExpense = (data: CreateExpenseInput): Promise<Transaction> => {
   return apiClient.post<Transaction>({
-    url: '/transactions/with-inventory',
+    url: '/transactions/expense',
     data,
   });
 };
@@ -195,7 +212,7 @@ export const createWithInventory = (data: TransactionWithInventoryRequest): Prom
  * - paymentMethod: Optional, PaymentMethod
  * - category: Optional
  * - date: Optional, ISO date string, not future
- * - employeeVendorName: Optional
+
  * - notes: Optional
  * - discountType: Optional, DiscountType
  * - discountValue: Optional, >= 0
@@ -270,9 +287,8 @@ export const getSummary = (
 const transactionService = {
   getAll,
   getOne,
-  create,
-  createPurchase,
-  createWithInventory,
+  createIncome,
+  createExpense,
   update,
   delete: deleteTransaction,
   getSummary,

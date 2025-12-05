@@ -35,9 +35,8 @@ import { cn } from '@/lib/utils';
 import transactionService from '@/api/services/transactionService';
 import employeeService from '@/api/services/employeeService';
 import inventoryService from '@/api/services/inventoryService';
-import branchService from '@/api/services/branchService';
 import contactService from '@/api/services/contactService';
-import { TransactionType, EmployeeStatus, PaymentMethod, InventoryOperationType, ContactType, UserRole } from '@/types/enum';
+import { EmployeeStatus, PaymentMethod, InventoryOperationType, ContactType, UserRole, DiscountType } from '@/types/enum';
 import {
   EXPENSE_CATEGORIES,
   CATEGORY_LABELS_AR,
@@ -46,6 +45,7 @@ import {
 import { TRANSACTION_CATEGORY_ICONS } from '@/constants/transaction-category-icons';
 import { useUserInfo } from '@/store/userStore';
 import { PaymentMethodButtons, getPaymentMethodLabel } from '@/components/shared/PaymentMethodSelect';
+import { BranchSelect } from '@/components/shared/BranchSelect';
 import {
   type InventoryItemEntry,
   calculateItemTotal,
@@ -60,7 +60,7 @@ interface FormData {
   category: string;
   amount: string;
   date: Date;
-  employeeVendorName: string;
+
   notes: string;
   employeeId: string;
   branchId: string;
@@ -69,6 +69,10 @@ interface FormData {
   isPartialPayment: boolean;
   paidAmount: string;
   supplierId: string;
+  // Transaction-level discount
+  transactionDiscountType: DiscountType | '';
+  transactionDiscountValue: string;
+  transactionDiscountReason: string;
 }
 
 interface FormErrors {
@@ -100,7 +104,7 @@ export default function CreateExpensePage() {
     category: '',
     amount: '',
     date: new Date(),
-    employeeVendorName: '',
+
     notes: '',
     employeeId: '',
     branchId: userBranch?.id || '',
@@ -108,6 +112,9 @@ export default function CreateExpensePage() {
     isPartialPayment: false,
     paidAmount: '',
     supplierId: '',
+    transactionDiscountType: '',
+    transactionDiscountValue: '',
+    transactionDiscountReason: '',
   });
 
   // Inventory items state (for INVENTORY category)
@@ -121,29 +128,18 @@ export default function CreateExpensePage() {
   const isInventoryCategory = formData.category === 'INVENTORY';
 
   // Fetch employees for salary category
-  const { data: employeesData } = useQuery({
+  const { data: employees = [] } = useQuery({
     queryKey: ['employees', { status: EmployeeStatus.ACTIVE }],
-    queryFn: () => employeeService.getAll({ status: EmployeeStatus.ACTIVE, limit: 100 }),
+    queryFn: () => employeeService.getAll({ status: EmployeeStatus.ACTIVE }),
     enabled: formData.category === 'EMPLOYEE_SALARIES',
   });
 
-  const employees = employeesData?.data || [];
-
-  // Fetch branches for admin
-  const { data: branches = [] } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAllActive(),
-    enabled: isAdmin,
-  });
-
   // Fetch inventory items for INVENTORY category
-  const { data: inventoryData } = useQuery({
+  const { data: inventoryList = [] } = useQuery({
     queryKey: ['inventory', { branchId: formData.branchId }],
-    queryFn: () => inventoryService.getAll({ branchId: formData.branchId || undefined, limit: '100' }),
+    queryFn: () => inventoryService.getAll({ branchId: formData.branchId || undefined }),
     enabled: isInventoryCategory && !!formData.branchId,
   });
-
-  const inventoryList = inventoryData?.data || [];
 
   // Fetch suppliers for partial payment (SUPPLIER or BOTH types can be suppliers)
   const { data: suppliersData } = useQuery({
@@ -154,9 +150,9 @@ export default function CreateExpensePage() {
 
   const suppliers = suppliersData?.data || [];
 
-  // Create mutation for regular transactions
+  // Create mutation for expense transactions
   const createMutation = useMutation({
-    mutationFn: transactionService.create,
+    mutationFn: transactionService.createExpense,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -235,13 +231,16 @@ export default function CreateExpensePage() {
 
     // Unified payload construction
     const payload: any = {
-      type: TransactionType.EXPENSE,
       category: formData.category,
       date: toInputDate(formData.date),
-      paymentMethod: formData.paymentMethod,
+      paymentMethod: formData.paymentMethod || undefined,
       branchId: formData.branchId || undefined,
       notes: formData.notes || undefined,
-      employeeVendorName: formData.employeeVendorName || undefined,
+      discountType: formData.transactionDiscountType || undefined,
+      discountValue: formData.transactionDiscountValue
+        ? parseFloat(formData.transactionDiscountValue)
+        : undefined,
+      discountReason: formData.transactionDiscountReason || undefined,
     };
 
     // For inventory category
@@ -255,6 +254,7 @@ export default function CreateExpensePage() {
         quantity: parseFloat(item.quantity),
         unitPrice: parseFloat(item.unitPrice),
         operationType: InventoryOperationType.PURCHASE,
+        notes: item.notes || undefined,
       }));
 
       // Partial payment fields
@@ -289,6 +289,9 @@ export default function CreateExpensePage() {
         newData.isPartialPayment = false;
         newData.paidAmount = '';
         newData.supplierId = '';
+        newData.transactionDiscountType = '';
+        newData.transactionDiscountValue = '';
+        newData.transactionDiscountReason = '';
       }
 
       return newData;
@@ -570,6 +573,17 @@ export default function CreateExpensePage() {
                                 </div>
                               </div>
 
+                              {/* Item Notes */}
+                              <div className="space-y-1">
+                                <Label className="text-xs">ملاحظة خاصة بالصنف (اختياري)</Label>
+                                <Input
+                                  placeholder="ملاحظة..."
+                                  value={item.notes}
+                                  onChange={(e) => updateInventoryItem(item.id, 'notes', e.target.value)}
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+
                               {/* Item Total */}
                               <div className="flex justify-between items-center text-sm">
                                 <span className="text-muted-foreground">الإجمالي:</span>
@@ -671,10 +685,10 @@ export default function CreateExpensePage() {
                       </div>
 
                       {/* Remaining Amount */}
-                      <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                      <div className="p-3 rounded-lg bg-warning-500/10 border border-warning-500/20">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-orange-600">المبلغ المتبقي (دين):</span>
-                          <span className="font-bold text-orange-600">
+                          <span className="text-sm text-warning-600">المبلغ المتبقي (دين):</span>
+                          <span className="font-bold text-warning-600">
                             {formatCurrency(remainingAmount)}
                           </span>
                         </div>
@@ -691,7 +705,7 @@ export default function CreateExpensePage() {
                 <CardHeader className="pb-4">
                   <CardTitle className="text-base">المبلغ</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="amount">المبلغ *</Label>
                     <div className="relative">
@@ -716,6 +730,49 @@ export default function CreateExpensePage() {
                       <p className="text-destructive text-sm">{errors.amount}</p>
                     )}
                   </div>
+
+                  {/* Discount Section */}
+                  <div className="space-y-3 pt-4 border-t">
+                    <Label className="text-sm font-medium">خصم على المعاملة (اختياري)</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="قيمة الخصم"
+                          value={formData.transactionDiscountValue}
+                          onChange={(e) =>
+                            updateField('transactionDiscountValue', e.target.value)
+                          }
+                          className="flex-1"
+                        />
+                        <Select
+                          value={formData.transactionDiscountType}
+                          onValueChange={(v) =>
+                            updateField('transactionDiscountType', v as DiscountType)
+                          }
+                        >
+                          <SelectTrigger className="w-20">
+                            <SelectValue placeholder="%" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={DiscountType.PERCENTAGE}>%</SelectItem>
+                            <SelectItem value={DiscountType.AMOUNT}>مبلغ</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <Input
+                          placeholder="سبب الخصم (اختياري)"
+                          value={formData.transactionDiscountReason}
+                          onChange={(e) =>
+                            updateField('transactionDiscountReason', e.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -726,16 +783,7 @@ export default function CreateExpensePage() {
                 <CardTitle className="text-base">معلومات إضافية</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Vendor Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="employeeVendorName">اسم المورد / الجهة</Label>
-                  <Input
-                    id="employeeVendorName"
-                    placeholder="اختياري"
-                    value={formData.employeeVendorName}
-                    onChange={(e) => updateField('employeeVendorName', e.target.value)}
-                  />
-                </div>
+
 
                 {/* Notes */}
                 <div className="space-y-2">
@@ -763,30 +811,16 @@ export default function CreateExpensePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {isAdmin ? (
-                  <Select
+                <div className="space-y-2">
+                  <BranchSelect
                     value={formData.branchId}
                     onValueChange={(value) => updateField('branchId', value)}
-                  >
-                    <SelectTrigger className={cn(errors.branchId && 'border-destructive')}>
-                      <SelectValue placeholder="اختر الفرع" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {branches.map((branch) => (
-                        <SelectItem key={branch.id} value={branch.id}>
-                          {branch.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <div className="p-3 rounded-md bg-muted">
-                    <span className="font-medium">{userBranch?.name || 'غير محدد'}</span>
-                  </div>
-                )}
-                {errors.branchId && (
-                  <p className="text-destructive text-sm mt-2">{errors.branchId}</p>
-                )}
+                    placeholder="اختر الفرع"
+                  />
+                  {errors.branchId && (
+                    <p className="text-destructive text-sm mt-2">{errors.branchId}</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

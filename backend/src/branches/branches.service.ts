@@ -7,6 +7,11 @@ import { Prisma } from '@prisma/client';
 import { UserRole } from '../common/types/prisma-enums';
 import { RequestUser } from '../common/interfaces';
 
+interface BranchFilters {
+  search?: string;
+  includeInactive?: boolean;
+}
+
 @Injectable()
 export class BranchesService {
   constructor(
@@ -33,44 +38,51 @@ export class BranchesService {
   }
 
   /**
-   * Find all branches with optional filtering
+   * Find all branches with filtering
    * By default, returns only active branches
    * Admin users can request to see all branches (including inactive) with includeInactive=true
    *
    * @param user - Current user (for role-based access)
-   * @param branchId - Optional specific branch ID filter
-   * @param includeInactive - If true and user is ADMIN, include inactive branches (default: false)
-   * @returns Array of branches matching the filter criteria
+   * @param filters - Filter parameters (search, includeInactive)
+   * @returns Array of branches
    */
-  async findAll(user?: RequestUser, branchId?: string, includeInactive: boolean = false) {
+  async findAll(
+    user?: RequestUser,
+    filters: BranchFilters = {},
+  ) {
     // Build where clause
     const where: Prisma.BranchWhereInput = {};
 
-    // Filter by specific branch if provided
-    if (branchId) {
-      where.id = branchId;
-    }
-
     // By default, show only non-deleted branches
     // Admin users can optionally see all branches (including deleted) by setting includeInactive=true
-    if (!includeInactive || user?.role !== UserRole.ADMIN) {
+    if (!filters.includeInactive || user?.role !== UserRole.ADMIN) {
       where.isDeleted = false;
     }
 
-    return this.prisma.branch.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: {
-          select: {
-            users: true,
-            transactions: true,
-            accountsPayable: true,
-            accountsReceivable: true,
-          },
+    // Search by name
+    if (filters.search) {
+      where.name = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    const branchInclude = {
+      _count: {
+        select: {
+          users: true,
+          transactions: true,
+          accountsPayable: true,
+          accountsReceivable: true,
         },
       },
+    };
+
+    // Execute query without pagination
+    const branches = await this.prisma.branch.findMany({
+      where,
+      include: branchInclude,
+      orderBy: { createdAt: 'desc' },
     });
+
+    return branches;
   }
 
   async findOne(id: string) {

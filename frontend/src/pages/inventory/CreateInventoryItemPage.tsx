@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ArrowRight, Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,9 +21,9 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import inventoryService from '@/api/services/inventoryService';
-import branchService from '@/api/services/branchService';
 import { useAuth } from '@/hooks/api/useAuth';
-import type { CreateInventoryInput, Branch, InventoryItem } from '@/types/entity';
+import { BranchSelect } from '@/components/shared/BranchSelect';
+import type { CreateInventoryInput } from '@/types/entity';
 import { InventoryUnit } from '@/types/enum';
 
 const UNIT_OPTIONS: { value: InventoryUnit; label: string }[] = [
@@ -75,13 +75,6 @@ export default function CreateInventoryItemPage() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // Fetch branches for admin users
-    // Fetch branches for admin
-    const { data: branches = [] } = useQuery({
-      queryKey: ['branches'],
-      queryFn: () => branchService.getAllActive(),
-      enabled: isAdmin,
-    });
 
   // Create inventory item mutation
   const createMutation = useMutation({
@@ -299,31 +292,19 @@ export default function CreateInventoryItemPage() {
               </div>
             </div>
 
-            {/* Branch - Admin only */}
-            {isAdmin && (
-              <div className="space-y-2">
-                <Label htmlFor="branchId">الفرع *</Label>
-                <Select
-                  value={formData.branchId}
-                  onValueChange={(value) => handleChange('branchId', value)}
-                  disabled={isSaving}
-                >
-                  <SelectTrigger id="branchId">
-                    <SelectValue placeholder="اختر الفرع" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {branches.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>
-                        {branch.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.branchId && (
-                  <p className="text-sm text-destructive">{errors.branchId}</p>
-                )}
-              </div>
-            )}
+            {/* Branch */}
+            <div className="space-y-2">
+              <Label htmlFor="branchId">الفرع *</Label>
+              <BranchSelect
+                value={formData.branchId}
+                onValueChange={(value) => handleChange('branchId', value)}
+                placeholder="اختر الفرع"
+                disabled={isSaving}
+              />
+              {errors.branchId && (
+                <p className="text-sm text-destructive">{errors.branchId}</p>
+              )}
+            </div>
 
             {/* Notes */}
             <div className="space-y-2">

@@ -468,7 +468,6 @@ export class ReceivablesService {
           amount: collectReceivableDto.amountPaid,
           date: new Date(collectReceivableDto.paymentDate),
           category: 'تحصيل حسابات مدينة',
-          employeeVendorName: receivable.contact.name,
           paymentMethod: collectReceivableDto.paymentMethod,
           notes: collectReceivableDto.notes ? `${collectReceivableDto.notes}` : `تحصيل حساب مدين - ${receivable.contact.name}`,
           branchId: receivable.branchId,

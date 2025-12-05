@@ -178,7 +178,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold flex items-center justify-center text-sm">
                   {(userInfo?.username || 'م').charAt(0).toUpperCase()}
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-card" />
               </div>
 
               {/* User Info - Hidden on mobile */}

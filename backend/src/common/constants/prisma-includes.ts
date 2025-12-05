@@ -60,7 +60,6 @@ export const TRANSACTION_SELECT_FOR_INVENTORY = {
   id: true,
   amount: true,
   date: true,
-  employeeVendorName: true,
   category: true,
 };
 
@@ -71,7 +70,6 @@ export const TRANSACTION_SELECT_MINIMAL = {
   id: true,
   amount: true,
   date: true,
-  employeeVendorName: true,
 };
 
 /**

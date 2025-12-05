@@ -28,19 +28,21 @@ export class BranchesController {
    * Admin users can set includeInactive=true to see all branches (including inactive)
    *
    * Query Parameters:
-   * - branchId: Optional specific branch filter
+   * - search: Search by branch name
    * - includeInactive: If true and user is ADMIN, include inactive branches (default: false)
    */
   @Get()
   @UseGuards(BranchGuard)
   findAll(
     @CurrentUser() user: RequestUser,
-    @Query('branchId') branchId?: string,
+    @Query('search') search?: string,
     @Query('includeInactive') includeInactive?: string,
   ) {
-    // Convert string query parameter to boolean
-    const shouldIncludeInactive = includeInactive === 'true';
-    return this.branchesService.findAll(user, branchId, shouldIncludeInactive);
+    const filters = {
+      search,
+      includeInactive: includeInactive === 'true',
+    };
+    return this.branchesService.findAll(user, filters);
   }
 
   @Get(':id')

@@ -32,14 +32,12 @@ export class PayrollService {
     if (dto.type === EmployeeAdjustmentType.ADVANCE) {
       return this.prisma.$transaction(async (prisma) => {
         // Create an expense transaction for the advance payment
-        const transaction = await this.transactionsService.create(
+        const transaction = await this.transactionsService.createExpense(
           {
-            type: TransactionType.EXPENSE,
             amount: dto.amount,
             category: 'EMPLOYEE_SALARIES',
             date: dto.date,
             employeeId: dto.employeeId,
-            employeeVendorName: `سلفة للموظف: ${employee.name}`,
             notes: dto.description || 'صرف سلفة نقدية',
             branchId: employee.branchId,
             paymentMethod: 'CASH', // Advances are typically cash
@@ -167,14 +165,12 @@ export class PayrollService {
       });
 
       // 5. Create expense transaction
-      const transaction = await this.transactionsService.create(
+      const transaction = await this.transactionsService.createExpense(
         {
-          type: TransactionType.EXPENSE,
           amount: salaryDetails.summary.netSalary,
           category: 'EMPLOYEE_SALARIES',
           date: dto.paymentDate,
           employeeId: dto.employeeId,
-          employeeVendorName: `راتب: ${salaryDetails.employee.name} - ${dto.salaryMonth}`,
           notes: dto.notes || defaultNotes,
           branchId: salaryDetails.employee.branchId,
           paymentMethod: 'CASH',

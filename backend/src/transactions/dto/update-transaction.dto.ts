@@ -7,10 +7,13 @@ import {
   Min,
   ValidateIf,
   MaxLength,
+  ValidateNested,
+  IsArray,
 } from 'class-validator';
 import { TransactionType, PaymentMethod, DiscountType } from '../../common/types/prisma-enums';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsValidCategory } from '../../common/decorators/is-valid-category.decorator';
+import { UpdateTransactionItemDto } from './transaction-item.dto';
 
 export class UpdateTransactionDto {
   @IsEnum(TransactionType)
@@ -37,9 +40,7 @@ export class UpdateTransactionDto {
   @IsOptional()
   date?: string;
 
-  @IsString()
-  @IsOptional()
-  employeeVendorName?: string;
+
 
   @IsString()
   @IsOptional()
@@ -59,4 +60,11 @@ export class UpdateTransactionDto {
   @IsString()
   @MaxLength(200, { message: 'سبب الخصم يجب ألا يتجاوز 200 حرف' })
   discountReason?: string;
+
+  // Transaction inventory items for updating
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateTransactionItemDto)
+  transactionInventoryItems?: UpdateTransactionItemDto[];
 }

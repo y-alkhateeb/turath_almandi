@@ -111,20 +111,7 @@ export const navData: NavItem[] = [
       },
       {
         title: 'إضافة موظف',
-        path: '/employees/create',
-      },
-    ],
-  },
-  {
-    title: 'الفروع',
-    path: '/branches',
-    icon: <Icon icon="lucide:building-2" size={24} />,
-    caption: 'إدارة فروع الشركة',
-    roles: [UserRole.ADMIN], // Admin only
-    children: [
-      {
-        title: 'قائمة الفروع',
-        path: '/branches',
+        path: '/employees/new',
       },
     ],
   },
@@ -158,6 +145,11 @@ export const navData: NavItem[] = [
         title: 'المستخدمين',
         path: '/settings/users',
         icon: <Icon icon="lucide:users" size={20} />,
+      },
+      {
+        title: 'الفروع',
+        path: '/settings/branches',
+        icon: <Icon icon="lucide:building-2" size={20} />,
       },
       {
         title: 'سجل النشاطات',

@@ -16,7 +16,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequestUser } from '../common/interfaces';
-import { parsePagination } from '../common/utils/pagination.util';
 import { EmployeeStatus } from '../common/types/prisma-enums';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 
@@ -32,24 +31,29 @@ export class EmployeesController {
     return this.employeesService.create(createEmployeeDto, user);
   }
 
+  /**
+   * Get all employees
+   * Returns all employees matching the filters (no pagination)
+   *
+   * Query Parameters:
+   * - status: Filter by employee status (ACTIVE | RESIGNED)
+   * - branchId: Filter by branch UUID
+   * - search: Search by name or position
+   */
   @Get()
   findAll(
     @CurrentUser() user: RequestUser,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
     @Query('status') status?: EmployeeStatus,
     @Query('branchId') branchId?: string,
     @Query('search') search?: string,
   ) {
-    const pagination = parsePagination(page, limit);
-
     const filters = {
       status,
       branchId,
       search,
     };
 
-    return this.employeesService.findAll(user, pagination, filters);
+    return this.employeesService.findAll(user, filters);
   }
 
   @Get('active/:branchId')

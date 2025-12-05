@@ -20,11 +20,6 @@ import { formatDateForDB } from '../common/utils/date.utils';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 import { RequestUser } from '../common/interfaces';
 
-interface PaginationParams {
-  page?: number;
-  limit?: number;
-}
-
 interface EmployeeFilters {
   status?: EmployeeStatus;
   branchId?: string;
@@ -122,17 +117,17 @@ export class EmployeesService {
   }
 
   /**
-   * Find all employees with pagination and filters
+   * Find all employees with filters
+   * Returns all employees matching the filters (no pagination)
+   *
+   * @param user - Current user (for role-based access)
+   * @param filters - Filter parameters (status, branchId, search)
+   * @returns Array of employees with relations
    */
   async findAll(
     user: RequestUser,
-    pagination: PaginationParams = {},
     filters: EmployeeFilters = {},
-  ) {
-    const page = pagination.page || 1;
-    const limit = pagination.limit || 10;
-    const skip = (page - 1) * limit;
-
+  ): Promise<EmployeeWithRelations[]> {
     // Build where clause with branch access control
     let where: Prisma.EmployeeWhereInput = {
       deletedAt: null,
@@ -154,34 +149,21 @@ export class EmployeesService {
       ];
     }
 
-    // Execute query with pagination
-    const [employees, total] = await Promise.all([
-      this.prisma.employee.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { hireDate: 'desc' },
-        include: {
-          branch: {
-            select: BRANCH_SELECT,
-          },
-          creator: {
-            select: USER_SELECT,
-          },
+    // Execute query without pagination
+    const employees = await this.prisma.employee.findMany({
+      where,
+      orderBy: { hireDate: 'desc' },
+      include: {
+        branch: {
+          select: BRANCH_SELECT,
         },
-      }),
-      this.prisma.employee.count({ where }),
-    ]);
-
-    return {
-      data: employees,
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        creator: {
+          select: USER_SELECT,
+        },
       },
-    };
+    });
+
+    return employees;
   }
 
   /**

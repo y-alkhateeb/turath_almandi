@@ -9,12 +9,15 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LoginThrottleGuard } from './guards/login-throttle.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RequestUser } from '../common/interfaces';
+import { PrismaService } from '../prisma/prisma.service';
+import { BRANCH_SELECT } from '../common/constants/prisma-includes';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly loginThrottleGuard: LoginThrottleGuard,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post('register')
@@ -39,12 +42,23 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@CurrentUser() user: RequestUser) {
+    // Fetch branch if branchId exists
+    let branch = null;
+    if (user.branchId) {
+      const branchData = await this.prisma.branch.findUnique({
+        where: { id: user.branchId },
+        select: BRANCH_SELECT,
+      });
+      branch = branchData;
+    }
+
     // Return user profile with consistent camelCase property names
     return {
       id: user.id,
       username: user.username,
       role: user.role,
       branchId: user.branchId,
+      branch,
     };
   }
 

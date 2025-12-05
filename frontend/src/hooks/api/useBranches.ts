@@ -3,7 +3,7 @@
  * React Query hooks for branch management with optimistic updates
  *
  * Features:
- * - Branch queries with isActive filtering
+ * - Branch queries with filters (no pagination)
  * - Auto-filtering for accountants (only their assigned branch)
  * - Create/Update/Delete mutations with optimistic updates
  * - Automatic cache invalidation
@@ -26,63 +26,34 @@ import { ApiError } from '@/api/apiClient';
 
 /**
  * useBranches Hook
- * Query branches with optional isActive filtering
+ * Query branches with filters
  * Auto-filters for accountants to show only their assigned branch
  *
- * @param options - Query options
- * @param options.isActive - Optional filter for active branches (default: true for accountants, undefined for admins)
- * @param options.enabled - Optional flag to enable/disable the query (default: true)
- * @returns Query result with branches array
+ * @param filters - Optional BranchQueryFilters (search, includeInactive)
+ * @returns Query result with array of branches
  *
  * @example
  * ```tsx
- * // Get all active branches (default for accountants)
- * const { data: branches, isLoading } = useBranches();
- *
- * // Get all branches including inactive (admins only)
- * const { data: allBranches } = useBranches({ isActive: undefined });
- *
- * // Get only active branches explicitly
- * const { data: activeBranches } = useBranches({ isActive: true });
- *
- * // Conditionally fetch branches (e.g., only for admins)
- * const { data: branches } = useBranches({ enabled: isAdmin });
+ * const { data: branches = [], isLoading } = useBranches({ includeInactive: false });
  * ```
  */
-export const useBranches = (options?: { isActive?: boolean; enabled?: boolean }) => {
-  const { user, isAccountant } = useAuth();
+export const useBranches = (filters?: BranchQueryFilters & { enabled?: boolean }) => {
+  const { isAccountant } = useAuth();
+  const { enabled = true, ...queryFilters } = filters || {};
 
-  // For accountants, default to showing only active branches
-  // For admins, default to showing all branches
-  const includeInactive = isAccountant
-    ? options?.isActive === undefined
-      ? false
-      : !options.isActive
-    : options?.isActive === undefined
-      ? true
-      : !options.isActive;
-
-  const filters: BranchQueryFilters = {
-    includeInactive,
+  // For accountants, always filter to show only active branches
+  const appliedFilters: BranchQueryFilters = {
+    ...queryFilters,
+    includeInactive: isAccountant ? false : queryFilters.includeInactive,
   };
 
   return useQuery<Branch[], ApiError>({
-    queryKey: queryKeys.branches.list(filters),
-    queryFn: async () => {
-      const branches = await branchService.getAll(filters);
-
-      // If user is accountant, filter to show only their assigned branch
-      // This is a client-side filter in addition to server-side filtering
-      if (isAccountant && user?.branchId) {
-        return branches.filter((branch) => branch.id === user.branchId);
-      }
-
-      return branches;
-    },
-    staleTime: 5 * 60 * 1000, // Consider fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Cache for 10 minutes
-    retry: 1, // Only retry once on failure
-    enabled: options?.enabled ?? true, // Default to enabled
+    queryKey: queryKeys.branches.list(appliedFilters),
+    queryFn: () => branchService.getAll(appliedFilters),
+    staleTime: 2 * 60 * 1000, // Consider fresh for 2 minutes
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 1,
+    enabled,
   });
 };
 
@@ -118,6 +89,27 @@ export const useBranch = (
   });
 };
 
+/**
+ * useBranchList Hook
+ * Query a simple list of all active branches
+ * Ideal for populating dropdowns/selects
+ * Uses useBranches internally for consistency
+ *
+ * @param options - Query options (enabled, etc.)
+ * @returns Query result with an array of branches
+ *
+ * @example
+ * ```tsx
+ * const { data: branches = [], isLoading } = useBranchList({ enabled: isAdmin });
+ * ```
+ */
+export const useBranchList = (options?: { enabled?: boolean }) => {
+  return useBranches({
+    includeInactive: false,
+    enabled: options?.enabled ?? true,
+  });
+};
+
 // ============================================
 // MUTATION HOOKS
 // ============================================
@@ -138,7 +130,7 @@ export const useBranch = (
  *       name: 'فرع بغداد',
  *       location: 'بغداد - الكرادة',
  *     });
- *     navigate('/branches');
+ *     navigate('/settings/branches');
  *   } catch (error) {
  *     // Error already handled with toast
  *   }
@@ -148,58 +140,12 @@ export const useBranch = (
 export const useCreateBranch = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<Branch, ApiError, CreateBranchInput, { previousBranches?: [any, Branch[] | undefined][] }>({
+  return useMutation<Branch, ApiError, CreateBranchInput>({
     mutationFn: branchService.create,
 
-    // Optimistic update
-    onMutate: async (newBranch) => {
-      // Cancel outgoing queries to avoid race conditions
-      await queryClient.cancelQueries({ queryKey: queryKeys.branches.all });
-
-      // Snapshot current data for rollback
-      const previousBranches = queryClient.getQueriesData<Branch[]>({
-        queryKey: queryKeys.branches.all,
-      });
-
-      // Optimistically update all branch lists
-      queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
-        if (!old) return old;
-
-        // Create temporary branch with optimistic ID
-        const tempBranch: Branch = {
-          id: `temp-${Date.now()}`,
-          name: newBranch.name,
-          location: newBranch.location,
-          managerName: newBranch.managerName,
-          isDeleted: false,
-          deletedAt: null,
-          deletedBy: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        return [tempBranch, ...old];
-      });
-
-      return { previousBranches };
-    },
-
-    onError: (_error, _newBranch, context) => {
-      // Rollback on error
-      if (context?.previousBranches) {
-        context.previousBranches.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-
-      // Note: Error toast shown by global API interceptor
-    },
-
     onSuccess: (newBranch) => {
-      // Invalidate and refetch all branch queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.branches.all });
-
-      // Show success toast
+      // Invalidate all branch list queries to refetch with new data
+      queryClient.invalidateQueries({ queryKey: ['branches', 'list'] });
       toast.success(`تم إضافة الفرع "${newBranch.name}" بنجاح`);
     },
   });
@@ -226,66 +172,13 @@ export const useCreateBranch = () => {
 export const useUpdateBranch = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    Branch,
-    ApiError,
-    { id: string; data: UpdateBranchInput },
-    { previousBranch?: Branch; previousBranches?: [any, Branch[] | undefined][] }
-  >({
+  return useMutation<Branch, ApiError, { id: string; data: UpdateBranchInput }>({
     mutationFn: ({ id, data }) => branchService.update(id, data),
 
-    // Optimistic update
-    onMutate: async ({ id, data }) => {
-      // Cancel outgoing queries
-      await queryClient.cancelQueries({ queryKey: queryKeys.branches.all });
-      await queryClient.cancelQueries({ queryKey: queryKeys.branches.detail(id) });
-
-      // Snapshot current data
-      const previousBranch = queryClient.getQueryData<Branch>(queryKeys.branches.detail(id));
-      const previousBranches = queryClient.getQueriesData<Branch[]>({
-        queryKey: queryKeys.branches.all,
-      });
-
-      // Optimistically update branch detail
-      queryClient.setQueryData<Branch>(queryKeys.branches.detail(id), (old) => {
-        if (!old) return old;
-        return { ...old, ...data, updatedAt: new Date().toISOString() };
-      });
-
-      // Optimistically update branch in all lists
-      queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
-        if (!old) return old;
-
-        return old.map((branch) =>
-          branch.id === id ? { ...branch, ...data, updatedAt: new Date().toISOString() } : branch
-        );
-      });
-
-      return { previousBranch, previousBranches };
-    },
-
-    onError: (error, { id }, context) => {
-      // Rollback on error
-      if (context?.previousBranch) {
-        queryClient.setQueryData(queryKeys.branches.detail(id), context.previousBranch);
-      }
-      if (context?.previousBranches) {
-        context.previousBranches.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-
-      // Note: Error toast shown by global API interceptor
-    },
-
     onSuccess: (updatedBranch) => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: queryKeys.branches.all });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.branches.detail(updatedBranch.id),
-      });
-
-      // Show success toast
+      // Invalidate all branch queries to refetch with updated data
+      queryClient.invalidateQueries({ queryKey: ['branches', 'list'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.branches.detail(updatedBranch.id) });
       toast.success('تم تحديث الفرع بنجاح');
     },
   });
@@ -311,91 +204,13 @@ export const useUpdateBranch = () => {
 export const useDeleteBranch = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    void,
-    ApiError,
-    string,
-    { previousBranch?: Branch; previousBranches?: [any, Branch[] | undefined][] }
-  >({
+  return useMutation<void, ApiError, string>({
     mutationFn: branchService.delete,
 
-    // Optimistic update - Backend does soft delete (sets isActive = false)
-    // So we update isActive instead of removing the branch
-    onMutate: async (deletedId) => {
-      // Cancel outgoing queries
-      await queryClient.cancelQueries({ queryKey: queryKeys.branches.all });
-      await queryClient.cancelQueries({ queryKey: queryKeys.branches.detail(deletedId) });
-
-      // Snapshot current data
-      const previousBranch = queryClient.getQueryData<Branch>(queryKeys.branches.detail(deletedId));
-      const previousBranches = queryClient.getQueriesData<Branch[]>({
-        queryKey: queryKeys.branches.all,
-      });
-
-      // Optimistically update isDeleted to true (soft delete)
-      queryClient.setQueriesData<Branch[]>({ queryKey: queryKeys.branches.all }, (old) => {
-        if (!old) return old;
-        return old.map((branch) =>
-          branch.id === deletedId
-            ? { ...branch, isDeleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-            : branch
-        );
-      });
-
-      // Update branch detail cache
-      queryClient.setQueryData<Branch>(queryKeys.branches.detail(deletedId), (old) => {
-        if (!old) return old;
-        return { ...old, isDeleted: true, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      });
-
-      return { previousBranch, previousBranches };
-    },
-
-    onError: (_error, deletedId, context) => {
-      // Rollback on error
-      if (context?.previousBranch) {
-        queryClient.setQueryData(queryKeys.branches.detail(deletedId), context.previousBranch);
-      }
-      if (context?.previousBranches) {
-        context.previousBranches.forEach(([queryKey, data]) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-
-      // Note: Error toast shown by global API interceptor
-    },
-
     onSuccess: () => {
-      // Invalidate all branch queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.branches.all });
-
-      // Show success toast - Changed from "deleted" to "deactivated" since it's soft delete
+      // Invalidate all branch list queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['branches', 'list'] });
       toast.success('تم تعطيل الفرع بنجاح');
     },
   });
-};
-
-// ============================================
-// HELPER HOOKS
-// ============================================
-
-/**
- * useActiveBranches Hook
- * Query only active branches (convenience hook)
- *
- * @returns Query result with active branches
- */
-export const useActiveBranches = () => {
-  return useBranches({ isActive: true });
-};
-
-/**
- * useAllBranches Hook
- * Query all branches including inactive (convenience hook)
- * Admin only - accountants always see only their branch
- *
- * @returns Query result with all branches
- */
-export const useAllBranches = () => {
-  return useBranches({ isActive: undefined });
 };

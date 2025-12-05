@@ -61,7 +61,7 @@ export class ContactsService {
    */
   async create(createContactDto: CreateContactDto, user: RequestUser): Promise<ContactWithRelations> {
     // Determine branch ID
-    let branchId: string | null = null;
+    let branchId: string;
 
     if (user.role === UserRole.ACCOUNTANT) {
       if (!user.branchId) {
@@ -69,23 +69,24 @@ export class ContactsService {
       }
       branchId = user.branchId;
     } else {
-      // Admins can optionally specify a branch
-      branchId = createContactDto.branchId || null;
+      // Admins must specify a branch (now required)
+      if (!createContactDto.branchId) {
+        throw new BadRequestException(ERROR_MESSAGES.CONTACT.BRANCH_REQUIRED);
+      }
+      branchId = createContactDto.branchId;
     }
 
     // Check for duplicate name within the same branch
-    if (branchId) {
-      const existingContact = await this.prisma.contact.findFirst({
-        where: {
-          name: createContactDto.name,
-          branchId,
-          isDeleted: false,
-        },
-      });
+    const existingContact = await this.prisma.contact.findFirst({
+      where: {
+        name: createContactDto.name,
+        branchId,
+        isDeleted: false,
+      },
+    });
 
-      if (existingContact) {
-        throw new ConflictException(ERROR_MESSAGES.CONTACT.DUPLICATE_NAME);
-      }
+    if (existingContact) {
+      throw new ConflictException(ERROR_MESSAGES.CONTACT.DUPLICATE_NAME);
     }
 
     // Create the contact
@@ -241,36 +242,45 @@ export class ContactsService {
     // Find the contact first (with branch filtering)
     const existingContact = await this.findOne(id, user);
 
-    // Check for duplicate name if name is being updated
-    if (updateContactDto.name && updateContactDto.name !== existingContact.name) {
-      if (existingContact.branchId) {
-        const duplicateContact = await this.prisma.contact.findFirst({
-          where: {
-            name: updateContactDto.name,
-            branchId: existingContact.branchId,
-            isDeleted: false,
-            id: { not: id },
-          },
-        });
-
-        if (duplicateContact) {
-          throw new ConflictException(ERROR_MESSAGES.CONTACT.DUPLICATE_NAME);
-        }
+    // Validate branchId if provided (must be valid UUID and not null)
+    if (updateContactDto.branchId !== undefined) {
+      if (!updateContactDto.branchId) {
+        throw new BadRequestException(ERROR_MESSAGES.CONTACT.BRANCH_REQUIRED);
       }
     }
+
+    // Check for duplicate name if name is being updated
+    const branchIdForDuplicateCheck = updateContactDto.branchId || existingContact.branchId;
+    if (updateContactDto.name && updateContactDto.name !== existingContact.name) {
+      const duplicateContact = await this.prisma.contact.findFirst({
+        where: {
+          name: updateContactDto.name,
+          branchId: branchIdForDuplicateCheck,
+          isDeleted: false,
+          id: { not: id },
+        },
+      });
+
+      if (duplicateContact) {
+        throw new ConflictException(ERROR_MESSAGES.CONTACT.DUPLICATE_NAME);
+      }
+    }
+
+    // Build update data object, only including fields that are provided
+    const updateData: Prisma.ContactUpdateInput = {};
+    if (updateContactDto.name !== undefined) updateData.name = updateContactDto.name;
+    if (updateContactDto.type !== undefined) updateData.type = updateContactDto.type;
+    if (updateContactDto.phone !== undefined) updateData.phone = updateContactDto.phone;
+    if (updateContactDto.email !== undefined) updateData.email = updateContactDto.email;
+    if (updateContactDto.address !== undefined) updateData.address = updateContactDto.address;
+    if (updateContactDto.creditLimit !== undefined) updateData.creditLimit = updateContactDto.creditLimit;
+    if (updateContactDto.notes !== undefined) updateData.notes = updateContactDto.notes;
+    if (updateContactDto.branchId !== undefined) updateData.branch = { connect: { id: updateContactDto.branchId } };
 
     // Update the contact
     const updatedContact = await this.prisma.contact.update({
       where: { id },
-      data: {
-        name: updateContactDto.name,
-        type: updateContactDto.type,
-        phone: updateContactDto.phone,
-        email: updateContactDto.email,
-        address: updateContactDto.address,
-        creditLimit: updateContactDto.creditLimit,
-        notes: updateContactDto.notes,
-      },
+      data: updateData,
       include: {
         branch: {
           select: BRANCH_SELECT,

@@ -24,11 +24,6 @@ interface InventoryItem {
   branchId: string;
 }
 
-interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-}
-
 // ============================================
 // QUERY KEYS
 // ============================================
@@ -50,21 +45,12 @@ export const inventoryKeys = {
 
 /**
  * Fetch all inventory items (for dropdowns)
+ * Returns all items for the specified branch (no pagination)
  */
 export function useInventoryItems(branchId?: string) {
   return useQuery({
     queryKey: inventoryKeys.items(branchId),
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (branchId) params.append('branchId', branchId);
-      params.append('limit', '1000'); // Get all for dropdown
-
-      const queryString = params.toString();
-      const url = `/inventory?${queryString}`;
-
-      return apiClient.get<PaginatedResponse<InventoryItem>>({ url });
-    },
-    select: (data) => data.data, // Return just the array
+    queryFn: () => inventoryService.getAll(branchId ? { branchId } : undefined),
   });
 }
 

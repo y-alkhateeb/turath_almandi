@@ -1,9 +1,8 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { CreatePurchaseExpenseDto } from './dto/create-purchase-expense.dto';
-import { CreateTransactionWithInventoryDto } from './dto/create-transaction-with-inventory.dto';
+import { CreateIncomeDto } from './dto/create-income.dto';
+import { CreateExpenseDto } from './dto/create-expense.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BranchAccessGuard } from '../common/guards/branch-access.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -16,26 +15,31 @@ import { TransactionType, PaymentMethod } from '../common/types/prisma-enums';
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
-  @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto, @CurrentUser() user: RequestUser) {
-    return this.transactionsService.create(createTransactionDto, user);
+  // ============================================
+  // TRANSACTION CREATION ENDPOINTS
+  // ============================================
+
+  /**
+   * Create a new INCOME transaction
+   * POST /transactions/income
+   */
+  @Post('income')
+  createIncome(@Body() dto: CreateIncomeDto, @CurrentUser() user: RequestUser) {
+    return this.transactionsService.createIncome(dto, user);
   }
 
-  @Post('purchase')
-  createPurchase(
-    @Body() createPurchaseDto: CreatePurchaseExpenseDto,
-    @CurrentUser() user: RequestUser,
-  ) {
-    return this.transactionsService.createPurchaseWithInventory(createPurchaseDto, user);
+  /**
+   * Create a new EXPENSE transaction
+   * POST /transactions/expense
+   */
+  @Post('expense')
+  createExpense(@Body() dto: CreateExpenseDto, @CurrentUser() user: RequestUser) {
+    return this.transactionsService.createExpense(dto, user);
   }
 
-  @Post('with-inventory')
-  createWithInventory(
-    @Body() dto: CreateTransactionWithInventoryDto,
-    @CurrentUser() user: RequestUser,
-  ) {
-    return this.transactionsService.createTransactionWithInventory(dto, user);
-  }
+  // ============================================
+  // QUERY ENDPOINTS
+  // ============================================
 
   @Get()
   findAll(

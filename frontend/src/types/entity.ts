@@ -175,6 +175,7 @@ export interface TransactionInventoryItem {
   discountType: DiscountType | null;
   discountValue: number | null;
   total: number;
+  notes: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -185,6 +186,7 @@ export interface TransactionInventoryItem {
 
 /**
  * Transaction item DTO for creating multi-item transactions
+ * Matches backend TransactionItemDto
  */
 export interface TransactionItemDto {
   inventoryItemId: string;
@@ -193,6 +195,7 @@ export interface TransactionItemDto {
   operationType: InventoryOperationType;
   discountType?: DiscountType;
   discountValue?: number;
+  notes?: string;
 }
 
 /**
@@ -207,7 +210,6 @@ export interface Transaction {
   paymentMethod: PaymentMethod | null;
   category: string;
   date: string;
-  employeeVendorName: string;
   notes: string | null;
   inventoryItemId: string | null;
   paidAmount: number | null;
@@ -253,13 +255,12 @@ export interface CreateTransactionInput {
   type: TransactionType;
   amount?: number;
   paymentMethod?: PaymentMethod;
-  items?: any[];
+  items?: TransactionItemDto[];
   discountType?: string;
   discountValue?: number;
   discountReason?: string;
   category?: string;
   date: string;
-  employeeVendorName?: string;
   notes?: string;
   branchId?: string;
   employeeId?: string;
@@ -274,11 +275,16 @@ export interface UpdateTransactionInput {
   paymentMethod?: PaymentMethod;
   category?: string;
   date?: string;
-  employeeVendorName?: string;
   notes?: string;
   discountType?: string;
   discountValue?: number;
   discountReason?: string;
+  transactionInventoryItems?: Array<{
+    id: string;
+    quantity?: number;
+    unitPrice?: number;
+    notes?: string;
+  }>;
 }
 
 // ============================================
@@ -357,7 +363,6 @@ export interface TransactionForInventory {
   id: string;
   amount: number;
   date: string;
-  employeeVendorName: string;
   category: string;
 }
 
@@ -707,8 +712,6 @@ export interface EmployeeFilters {
   status?: EmployeeStatus;
   branchId?: string;
   search?: string;
-  page?: number;
-  limit?: number;
 }
 
 // ============================================

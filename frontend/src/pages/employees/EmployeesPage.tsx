@@ -10,25 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Pagination } from '@/components/ui/pagination';
 import { useEmployees, useDeleteEmployee } from '@/hooks/api/useEmployees';
 import { useUserInfo } from '@/store/userStore';
 import { UserRole, EmployeeStatus } from '@/types/enum';
 import type { Employee, EmployeeFilters } from '@/types';
 import EmployeeListTable from './components/EmployeeListTable';
-import { useQuery } from '@tanstack/react-query';
-import branchService from '@/api/services/branchService';
-
-const DEFAULT_PAGE_SIZE = 10;
+import { useBranchList } from '@/hooks/api/useBranches';
 
 export default function EmployeesPage() {
   const navigate = useNavigate();
   const user = useUserInfo();
   const isAdmin = user?.role === UserRole.ADMIN;
-
-  // Pagination
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -37,28 +29,21 @@ export default function EmployeesPage() {
 
   // Build query filters
   const filters: EmployeeFilters = useMemo(() => {
-    const f: EmployeeFilters = {
-      page,
-      limit: pageSize,
-    };
+    const f: EmployeeFilters = {};
 
     if (search) f.search = search;
     if (status !== 'all') f.status = status as EmployeeStatus;
     if (branchId !== 'all') f.branchId = branchId;
 
     return f;
-  }, [page, pageSize, search, status, branchId]);
+  }, [search, status, branchId]);
 
   // Data Fetching
-  const { data, isLoading, error } = useEmployees(filters);
+  const { data: employees = [], isLoading, error } = useEmployees(filters);
   const { mutate: deleteEmployee, isPending: isDeleting } = useDeleteEmployee();
 
   // Fetch branches for admin filter
-  const { data: branches } = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => branchService.getAll(),
-    enabled: isAdmin,
-  });
+  const { data: branches = [] } = useBranchList({ enabled: isAdmin });
 
   // Handlers
   const handleAddEmployee = () => {
@@ -149,7 +134,7 @@ export default function EmployeesPage() {
 
       {/* Table */}
       <EmployeeListTable
-        employees={data?.data || []}
+        employees={employees}
         isLoading={isLoading}
         isAdmin={isAdmin}
         onView={handleViewEmployee}
@@ -158,21 +143,6 @@ export default function EmployeesPage() {
         onDelete={handleDeleteEmployee}
         isDeleting={isDeleting}
       />
-
-      {/* Pagination */}
-      {data && data.meta.totalPages > 1 && (
-        <Pagination
-          page={page}
-          totalPages={data.meta.totalPages}
-          limit={pageSize}
-          total={data.meta.total}
-          onPageChange={setPage}
-          onLimitChange={(size) => {
-            setPageSize(size);
-            setPage(1);
-          }}
-        />
-      )}
     </div>
   );
 }

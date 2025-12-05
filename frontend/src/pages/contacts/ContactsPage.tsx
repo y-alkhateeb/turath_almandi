@@ -41,6 +41,7 @@ import { useContacts, useContactsSummary, useDeleteContact } from '@/hooks/api/u
 import { ContactType } from '@/types/enum';
 import { getContactTypeLabel, getContactTypeOptions } from '@/components/shared/ContactTypeSelect';
 import type { Contact } from '@/types/contacts.types';
+import { CONTACT_TYPE_BADGE_COLORS } from '@/constants/contact-type-badges';
 
 import { ContactForm } from './components/ContactForm';
 
@@ -98,11 +99,11 @@ export default function ContactsPage() {
   const getTypeBadge = (type: ContactType) => {
     switch (type) {
       case ContactType.SUPPLIER:
-        return <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">{getContactTypeLabel(type)}</Badge>;
+        return <Badge variant="secondary" className={CONTACT_TYPE_BADGE_COLORS.supplier}>{getContactTypeLabel(type)}</Badge>;
       case ContactType.CUSTOMER:
-        return <Badge variant="secondary" className="bg-secondary/10 text-secondary hover:bg-secondary/20">{getContactTypeLabel(type)}</Badge>;
+        return <Badge variant="secondary" className={CONTACT_TYPE_BADGE_COLORS.customer}>{getContactTypeLabel(type)}</Badge>;
       case ContactType.BOTH:
-        return <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 hover:bg-purple-500/20">{getContactTypeLabel(type)}</Badge>;
+        return <Badge variant="secondary" className={CONTACT_TYPE_BADGE_COLORS.both}>{getContactTypeLabel(type)}</Badge>;
       default:
         return <Badge variant="secondary">{getContactTypeLabel(type)}</Badge>;
     }

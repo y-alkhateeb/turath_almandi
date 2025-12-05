@@ -15,6 +15,7 @@ import {
   getCategoryLabel,
   getTransactionTypeLabel,
   getDiscountTypeLabel,
+  getOperationTypeLabel,
 } from '@/constants/transaction-categories';
 import { getPaymentMethodLabel } from '@/components/shared/PaymentMethodSelect';
 import { TransactionType, DiscountType } from '@/types/enum';
@@ -221,28 +222,73 @@ export default function ViewTransactionPage() {
                   <thead>
                     <tr className="border-b">
                       <th className="text-right py-2 px-3">الصنف</th>
+                      <th className="text-right py-2 px-3">نوع العملية</th>
                       <th className="text-right py-2 px-3">الكمية</th>
                       <th className="text-right py-2 px-3">سعر الوحدة</th>
-                      <th className="text-right py-2 px-3">الإجمالي</th>
+                      <th className="text-right py-2 px-3">الإجمالي قبل الخصم</th>
+                      <th className="text-right py-2 px-3">نوع الخصم</th>
+                      <th className="text-right py-2 px-3">قيمة الخصم</th>
+                      <th className="text-right py-2 px-3">الإجمالي بعد الخصم</th>
                       <th className="text-right py-2 px-3">ملاحظات</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {transaction.transactionInventoryItems.map((item) => (
-                      <tr key={item.id} className="border-b">
-                        <td className="py-2 px-3">
-                          {item.inventoryItem?.name || '-'}
-                        </td>
-                        <td className="py-2 px-3">{item.quantity}</td>
-                        <td className="py-2 px-3">
-                          {formatCurrency(item.unitPrice)}
-                        </td>
-                        <td className="py-2 px-3">{formatCurrency(item.total)}</td>
-                        <td className="py-2 px-3">
-                          {item.notes || '-'}
-                        </td>
-                      </tr>
-                    ))}
+                    {transaction.transactionInventoryItems.map((item) => {
+                      const hasDiscount = item.discountType && item.discountValue;
+                      return (
+                        <tr key={item.id} className="border-b">
+                          <td className="py-2 px-3">
+                            <div className="font-medium">
+                              {item.inventoryItem?.name || '-'}
+                            </div>
+                          </td>
+                          <td className="py-2 px-3">
+                            <Badge variant="outline" className="text-xs">
+                              {getOperationTypeLabel(item.operationType)}
+                            </Badge>
+                          </td>
+                          <td className="py-2 px-3">{item.quantity}</td>
+                          <td className="py-2 px-3">
+                            {formatCurrency(item.unitPrice)}
+                          </td>
+                          <td className="py-2 px-3">
+                            <span className="font-medium">
+                              {formatCurrency(item.subtotal)}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3">
+                            {hasDiscount ? (
+                              <Badge variant="secondary" className="text-xs">
+                                {getDiscountTypeLabel(item.discountType)}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            {hasDiscount ? (
+                              <span className="text-orange-600 font-medium">
+                                {item.discountType === DiscountType.PERCENTAGE
+                                  ? `${item.discountValue}%`
+                                  : formatCurrency(item.discountValue || 0)}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            <span className="font-bold text-green-600">
+                              {formatCurrency(item.total)}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3">
+                            <span className="text-muted-foreground text-xs">
+                              {item.notes || '-'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

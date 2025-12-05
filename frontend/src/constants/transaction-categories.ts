@@ -183,6 +183,14 @@ export const DISCOUNT_TYPE_LABELS_AR = {
 } as const;
 
 /**
+ * Operation type labels in Arabic
+ */
+export const OPERATION_TYPE_LABELS_AR = {
+  PURCHASE: 'شراء',
+  CONSUMPTION: 'استهلاك',
+} as const;
+
+/**
  * Helper function to get Arabic label for transaction type
  */
 export function getTransactionTypeLabel(type: string): string {
@@ -195,4 +203,12 @@ export function getTransactionTypeLabel(type: string): string {
 export function getDiscountTypeLabel(type: string | null | undefined): string {
   if (!type) return '-';
   return DISCOUNT_TYPE_LABELS_AR[type as keyof typeof DISCOUNT_TYPE_LABELS_AR] || type;
+}
+
+/**
+ * Helper function to get Arabic label for operation type
+ */
+export function getOperationTypeLabel(type: string | null | undefined): string {
+  if (!type) return '-';
+  return OPERATION_TYPE_LABELS_AR[type as keyof typeof OPERATION_TYPE_LABELS_AR] || type;
 }

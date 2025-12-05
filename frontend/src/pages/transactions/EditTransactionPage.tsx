@@ -37,6 +37,8 @@ import transactionService from '@/api/services/transactionService';
 import {
   getCategoryLabel,
   getTransactionTypeLabel,
+  getDiscountTypeLabel,
+  getOperationTypeLabel,
 } from '@/constants/transaction-categories';
 import { getPaymentMethodLabel } from '@/components/shared/PaymentMethodSelect';
 import { TransactionType, DiscountType } from '@/types/enum';
@@ -326,9 +328,13 @@ export default function EditTransactionPage() {
                     <thead>
                       <tr className="border-b">
                         <th className="text-right py-2 px-3">الصنف</th>
+                        <th className="text-right py-2 px-3">نوع العملية</th>
                         <th className="text-right py-2 px-3 w-28">الكمية</th>
                         <th className="text-right py-2 px-3 w-32">سعر الوحدة</th>
-                        <th className="text-right py-2 px-3 w-28">الإجمالي</th>
+                        <th className="text-right py-2 px-3 w-32">الإجمالي قبل الخصم</th>
+                        <th className="text-right py-2 px-3">نوع الخصم</th>
+                        <th className="text-right py-2 px-3">قيمة الخصم</th>
+                        <th className="text-right py-2 px-3 w-32">الإجمالي بعد الخصم</th>
                         <th className="text-right py-2 px-3">ملاحظات</th>
                       </tr>
                     </thead>
@@ -336,12 +342,27 @@ export default function EditTransactionPage() {
                       {fields.map((field, index) => {
                         const quantity = form.watch(`inventoryItems.${index}.quantity`) || 0;
                         const unitPrice = form.watch(`inventoryItems.${index}.unitPrice`) || 0;
-                        const total = quantity * unitPrice;
+                        const calculatedSubtotal = quantity * unitPrice;
+                        
+                        // Get original item data for discount info (read-only)
+                        const originalItem = transaction.transactionInventoryItems?.find(
+                          (item) => item.id === field.id
+                        );
+                        const hasDiscount = originalItem?.discountType && originalItem?.discountValue;
+                        const displaySubtotal = originalItem?.subtotal ?? calculatedSubtotal;
+                        const displayTotal = originalItem?.total ?? calculatedSubtotal;
 
                         return (
                           <tr key={field.id} className="border-b">
                             <td className="py-2 px-3">
-                              {field.inventoryItemName || '-'}
+                              <div className="font-medium">
+                                {field.inventoryItemName || '-'}
+                              </div>
+                            </td>
+                            <td className="py-2 px-3">
+                              <Badge variant="outline" className="text-xs">
+                                {getOperationTypeLabel(originalItem?.operationType)}
+                              </Badge>
                             </td>
                             <td className="py-2 px-3">
                               <FormField
@@ -383,8 +404,35 @@ export default function EditTransactionPage() {
                                 )}
                               />
                             </td>
-                            <td className="py-2 px-3 font-medium">
-                              {formatCurrency(total)}
+                            <td className="py-2 px-3">
+                              <span className="font-medium text-muted-foreground">
+                                {formatCurrency(displaySubtotal)}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3">
+                              {hasDiscount ? (
+                                <Badge variant="secondary" className="text-xs">
+                                  {getDiscountTypeLabel(originalItem?.discountType)}
+                                </Badge>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">-</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-3">
+                              {hasDiscount ? (
+                                <span className="text-orange-600 font-medium text-xs">
+                                  {originalItem?.discountType === DiscountType.PERCENTAGE
+                                    ? `${originalItem?.discountValue}%`
+                                    : formatCurrency(originalItem?.discountValue || 0)}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground text-xs">-</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-3">
+                              <span className="font-bold text-green-600">
+                                {formatCurrency(displayTotal)}
+                              </span>
                             </td>
                             <td className="py-2 px-3">
                               <FormField
@@ -409,12 +457,13 @@ export default function EditTransactionPage() {
                     </tbody>
                     <tfoot>
                       <tr className="border-t-2">
-                        <td colSpan={3} className="py-2 px-3 font-bold text-left">
+                        <td colSpan={7} className="py-2 px-3 font-bold text-left">
                           المجموع الكلي:
                         </td>
                         <td className="py-2 px-3 font-bold text-green-600">
                           {formatCurrency(calculateTotal())}
                         </td>
+                        <td></td>
                       </tr>
                     </tfoot>
                   </table>

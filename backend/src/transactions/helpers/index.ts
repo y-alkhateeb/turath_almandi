@@ -30,3 +30,10 @@ export {
   processPurchase,
   type InventoryOperationInput,
 } from './inventory-operations';
+
+// Receivable helpers
+export {
+  processReceivable,
+  type ReceivableInput,
+  type ReceivableResult,
+} from './receivable';

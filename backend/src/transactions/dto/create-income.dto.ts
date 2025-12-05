@@ -9,6 +9,9 @@ import {
   MaxLength,
   IsString,
   ValidateIf,
+  IsBoolean,
+  IsUUID,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod, DiscountType } from '../../common/types/prisma-enums';
@@ -94,4 +97,33 @@ export class CreateIncomeDto extends BaseTransactionDto {
   @IsString()
   @MaxLength(200, { message: 'سبب الخصم يجب ألا يتجاوز 200 حرف' })
   discountReason?: string;
+
+  // ============================================
+  // RECEIVABLE FIELDS (Income only)
+  // ============================================
+
+  /**
+   * هل يتم إنشاء ذمة مدينة تلقائياً؟
+   * @example true
+   */
+  @IsOptional()
+  @IsBoolean()
+  createReceivable?: boolean;
+
+  /**
+   * معرف العميل (مطلوب عند تفعيل createReceivable)
+   * @example '550e8400-e29b-41d4-a716-446655440000'
+   */
+  @ValidateIf((o) => o.createReceivable === true)
+  @IsUUID('4', { message: 'معرف العميل يجب أن يكون UUID صحيح' })
+  @IsNotEmpty({ message: 'يجب تحديد العميل عند إنشاء ذمة مدينة' })
+  contactId?: string;
+
+  /**
+   * تاريخ استحقاق الذمة المدينة (اختياري)
+   * @example '2024-02-15'
+   */
+  @IsOptional()
+  @IsDateString()
+  receivableDueDate?: string;
 }

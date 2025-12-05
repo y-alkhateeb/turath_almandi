@@ -1,13 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Loader2, AlertTriangle, Package } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormDialog } from '@/components/shared/FormDialog';
 import type { InventoryItem, RecordConsumptionInput } from '@/types/entity';
 import { InventoryUnit } from '@/types/enum';
 import { formatNumber } from '@/utils/format';
@@ -144,16 +137,14 @@ export default function RecordConsumptionDialog({
   const unitLabel = UNIT_LABELS[item.unit as InventoryUnit] || item.unit;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>تسجيل استهلاك/تلف</DialogTitle>
-          <DialogDescription>
-            تسجيل نقص في المخزون بسبب الاستهلاك أو التلف
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* معلومات الصنف */}
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="تسجيل استهلاك/تلف"
+      description="تسجيل نقص في المخزون بسبب الاستهلاك أو التلف"
+      maxWidth="sm:max-w-md"
+    >
+      {/* معلومات الصنف */}
         <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
           <Package className="h-5 w-5 text-muted-foreground" />
           <div>
@@ -259,7 +250,7 @@ export default function RecordConsumptionDialog({
             />
           </div>
 
-          <DialogFooter className="gap-2">
+          <div className="flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"
@@ -271,16 +262,15 @@ export default function RecordConsumptionDialog({
             <Button type="submit" disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                  <Loader2 className="h-4 w-4 animate-spin me-2" />
                   جاري التسجيل...
                 </>
               ) : (
                 'تسجيل الاستهلاك'
               )}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }

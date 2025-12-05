@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react';
 import { formatDateTime, formatTime, formatNumber } from '@/utils/format';
 import { Loader2, Calendar, Package, User, Clock } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { FormDialog } from '@/components/shared/FormDialog';
 import type { InventoryItem, ConsumptionHistoryItem } from '@/types/entity';
 import { InventoryUnit } from '@/types/enum';
 
@@ -69,16 +63,14 @@ export default function ConsumptionHistoryDialog({
   const totalConsumption = history.reduce((sum, h) => sum + h.quantity, 0);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>سجل استهلاك: {item.name}</DialogTitle>
-          <DialogDescription>
-            عرض سجل الاستهلاك والتلف لهذا الصنف
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* فلتر التاريخ */}
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`سجل استهلاك: ${item.name}`}
+      description="عرض سجل الاستهلاك والتلف لهذا الصنف"
+      maxWidth="sm:max-w-lg"
+    >
+      {/* فلتر التاريخ */}
         <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
           <div className="space-y-1">
             <Label htmlFor="startDate" className="text-xs">
@@ -181,7 +173,6 @@ export default function ConsumptionHistoryDialog({
             إغلاق
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }

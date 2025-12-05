@@ -13,13 +13,8 @@ import {
   FormLabel,
   FormMessage,
   Textarea,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from '@/components/ui';
+import { FormDialog } from '@/components/shared/FormDialog';
 import { PaymentMethodSelect } from '@/components/shared/PaymentMethodSelect';
 import { useCollectReceivable } from '@/hooks/api/useReceivables';
 import { PaymentMethod } from '@/types/enum';
@@ -81,19 +76,15 @@ export function ReceivableCollectDialog({ open, onOpenChange, receivable }: Rece
   if (!receivable) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>تسجيل تحصيل من العميل</DialogTitle>
-          <DialogDescription>
-            تسجيل دفعة مستلمة من العميل: <span className="font-semibold text-foreground">{receivable.contact?.name}</span>
-            <br />
-            المبلغ المتبقي: <span className="font-semibold text-foreground">{receivable.remainingAmount}</span>
-          </DialogDescription>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="تسجيل تحصيل من العميل"
+      description={`تسجيل دفعة مستلمة من العميل: ${receivable.contact?.name} | المبلغ المتبقي: ${receivable.remainingAmount}`}
+      maxWidth="sm:max-w-lg"
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="amountPaid"
@@ -181,18 +172,17 @@ export function ReceivableCollectDialog({ open, onOpenChange, receivable }: Rece
               )}
             />
 
-            <DialogFooter className="gap-2 sm:gap-0">
+            <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 إلغاء
               </Button>
               <Button type="submit" disabled={collectMutation.isPending}>
-                {collectMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {collectMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                 تسجيل التحصيل
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }

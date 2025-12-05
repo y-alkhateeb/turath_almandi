@@ -32,6 +32,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Checkbox,
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import transactionService from '@/api/services/transactionService';
@@ -54,6 +55,7 @@ import {
   type InventoryItemEntry,
 } from './utils/transaction-helpers';
 import { useUserInfo } from '@/store/userStore';
+import { useCustomers } from '@/hooks/api/useContacts';
 
 interface FormData {
   category: string;
@@ -69,6 +71,10 @@ interface FormData {
   transactionDiscountType: DiscountType | '';
   transactionDiscountValue: string;
   transactionDiscountReason: string;
+  // Receivable fields
+  createReceivable: boolean;
+  customerId: string;
+  receivableDueDate: string;
 }
 
 interface FormErrors {
@@ -77,6 +83,7 @@ interface FormErrors {
   items?: string;
   date?: string;
   branchId?: string;
+  customerId?: string;
 }
 
 // ============================================
@@ -105,6 +112,9 @@ export default function CreateIncomePage() {
     transactionDiscountType: '',
     transactionDiscountValue: '',
     transactionDiscountReason: '',
+    createReceivable: false,
+    customerId: '',
+    receivableDueDate: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -122,6 +132,9 @@ export default function CreateIncomePage() {
     queryFn: () => inventoryService.getAll({ branchId: formData.branchId }),
     enabled: supportsMultiItem && !!formData.branchId,
   });
+
+  // Fetch customers for receivable creation
+  const { data: customersData, isLoading: isLoadingCustomers } = useCustomers({ limit: 100 });
 
   // Calculate totals for multi-item transactions
   const calculations = useMemo(() => {
@@ -207,6 +220,11 @@ export default function CreateIncomePage() {
       newErrors.branchId = 'يرجى اختيار الفرع';
     }
 
+    // Customer is required if createReceivable is enabled
+    if (formData.createReceivable && !formData.customerId) {
+      newErrors.customerId = 'يرجى اختيار العميل';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -220,10 +238,21 @@ export default function CreateIncomePage() {
     // Payment method: force CASH for cash-only categories
     const paymentMethod = cashOnly ? PaymentMethod.CASH : formData.paymentMethod;
 
+    const basePayload = {
+      category: formData.category,
+      paymentMethod,
+      date: toInputDate(formData.date),
+      notes: formData.notes || undefined,
+      branchId: isAdmin ? formData.branchId : undefined,
+      createReceivable: formData.createReceivable || undefined,
+      contactId: formData.createReceivable && formData.customerId ? formData.customerId : undefined,
+      receivableDueDate: formData.createReceivable && formData.receivableDueDate ? formData.receivableDueDate : undefined,
+    };
+
     if (supportsMultiItem) {
       // Multi-item transaction
       createMutation.mutate({
-        category: formData.category,
+        ...basePayload,
         items: formData.items.map((item) => ({
           inventoryItemId: item.inventoryItemId,
           quantity: parseFloat(item.quantity),
@@ -238,22 +267,12 @@ export default function CreateIncomePage() {
           ? parseFloat(formData.transactionDiscountValue)
           : undefined,
         discountReason: formData.transactionDiscountReason || undefined,
-        paymentMethod,
-        date: toInputDate(formData.date),
-
-        notes: formData.notes || undefined,
-        branchId: isAdmin ? formData.branchId : undefined,
       });
     } else {
       // Simple transaction
       createMutation.mutate({
-        category: formData.category,
+        ...basePayload,
         amount: parseFloat(formData.amount),
-        paymentMethod,
-        date: toInputDate(formData.date),
-
-        notes: formData.notes || undefined,
-        branchId: isAdmin ? formData.branchId : undefined,
       });
     }
   };
@@ -749,6 +768,79 @@ export default function CreateIncomePage() {
                     value={formData.paymentMethod}
                     onChange={(value) => updateField('paymentMethod', value)}
                   />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Receivable */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base">ذمة مدينة</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Checkbox
+                    id="createReceivable"
+                    checked={formData.createReceivable}
+                    onCheckedChange={(checked) =>
+                      updateField('createReceivable', checked as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor="createReceivable"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    إنشاء ذمة مدينة
+                  </Label>
+                </div>
+
+                {formData.createReceivable && (
+                  <div className="space-y-4 pt-2 border-t">
+                    {/* Customer Selection */}
+                    <div className="space-y-2">
+                      <Label htmlFor="customerId">
+                        العميل <span className="text-destructive">*</span>
+                      </Label>
+                      <Select
+                        value={formData.customerId}
+                        onValueChange={(value) => updateField('customerId', value)}
+                      >
+                        <SelectTrigger
+                          id="customerId"
+                          className={cn(errors.customerId && 'border-destructive')}
+                        >
+                          <SelectValue placeholder="اختر العميل" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isLoadingCustomers ? (
+                            <div className="p-2 flex justify-center">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            </div>
+                          ) : (
+                            customersData?.data.map((customer) => (
+                              <SelectItem key={customer.id} value={customer.id}>
+                                {customer.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {errors.customerId && (
+                        <p className="text-destructive text-sm">{errors.customerId}</p>
+                      )}
+                    </div>
+
+                    {/* Due Date */}
+                    <div className="space-y-2">
+                      <Label htmlFor="receivableDueDate">تاريخ الاستحقاق (اختياري)</Label>
+                      <Input
+                        id="receivableDueDate"
+                        type="date"
+                        value={formData.receivableDueDate}
+                        onChange={(e) => updateField('receivableDueDate', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>

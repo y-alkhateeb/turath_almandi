@@ -34,6 +34,7 @@ export const ARABIC_ERRORS: Record<string, string> = {
   paidAmountNegative: 'المبلغ المدفوع لا يمكن أن يكون سالباً',
   paidAmountExceedsTotal: 'المبلغ المدفوع لا يمكن أن يتجاوز المبلغ الإجمالي',
   contactIdRequiredForPartialPayment: 'معرف جهة الاتصال مطلوب عند الدفع الجزئي للمصروفات',
+  contactIdRequiredForReceivable: 'معرف العميل مطلوب عند إنشاء ذمة مدينة',
   autoDebtDescription: 'دين تلقائي من معاملة',
   remainingAmountNote: 'المبلغ المتبقي من المعاملة',
 

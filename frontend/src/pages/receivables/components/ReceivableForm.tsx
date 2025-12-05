@@ -18,12 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
 } from '@/components/ui';
+import { FormDialog } from '@/components/shared/FormDialog';
 import { useCustomers } from '@/hooks/api/useContacts';
 import { useCreateReceivable, useUpdateReceivable } from '@/hooks/api/useReceivables';
 import type { AccountReceivable } from '@/types/receivables.types';
@@ -108,14 +104,14 @@ export function ReceivableForm({ open, onOpenChange, receivableToEdit }: Receiva
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? 'تعديل ذمة مدينة' : 'إضافة ذمة مدينة جديدة'}</DialogTitle>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEditing ? 'تعديل ذمة مدينة' : 'إضافة ذمة مدينة جديدة'}
+      maxWidth="sm:max-w-lg"
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Contact */}
               <FormField
@@ -251,18 +247,17 @@ export function ReceivableForm({ open, onOpenChange, receivableToEdit }: Receiva
               )}
             />
 
-            <DialogFooter className="gap-2 sm:gap-0">
+            <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 إلغاء
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                 {isEditing ? 'تحديث' : 'إضافة'}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }

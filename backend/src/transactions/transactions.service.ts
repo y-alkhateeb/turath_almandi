@@ -10,7 +10,7 @@ import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionItemDto } from './dto/transaction-item.dto';
 import { Prisma, EmployeeStatus, DiscountType } from '@prisma/client';
-import { TransactionType, UserRole, PaymentMethod, DebtStatus } from '../common/types/prisma-enums';
+import { TransactionType, UserRole, PaymentMethod, DebtStatus, ContactType } from '../common/types/prisma-enums';
 import { AuditLogService, AuditEntityType } from '../common/audit-log/audit-log.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -48,6 +48,7 @@ import {
   calculateDiscount,
   calculateItemTotal,
   processPartialPayment,
+  processReceivable,
   processInventoryOperation,
 } from './helpers';
 
@@ -72,6 +73,7 @@ interface CreateTransactionCoreParams {
   items?: TransactionItemDto[];
   discount?: { type: DiscountType; value: number; reason?: string };
   partialPayment?: { paidAmount: number; contactId: string; dueDate?: string };
+  receivable?: { contactId: string; dueDate?: string };
   employeeId?: string;
 }
 
@@ -222,6 +224,28 @@ export class TransactionsService {
       throw new BadRequestException(ERROR_MESSAGES.TRANSACTION.PAYMENT_METHOD_INVALID);
     }
 
+    // Validate receivable creation
+    if (dto.createReceivable) {
+      if (!dto.contactId) {
+        throw new BadRequestException(ARABIC_ERRORS.contactIdRequiredForReceivable);
+      }
+
+      // Validate contact exists and is a customer
+      const contact = await this.prisma.contact.findFirst({
+        where: {
+          id: dto.contactId,
+          isDeleted: false,
+          type: {
+            in: [ContactType.CUSTOMER, ContactType.BOTH],
+          },
+        },
+      });
+
+      if (!contact) {
+        throw new NotFoundException('العميل غير موجود أو ليس من نوع عميل');
+      }
+    }
+
     // Calculate amounts
     let subtotal = 0;
     let finalAmount = 0;
@@ -270,6 +294,9 @@ export class TransactionsService {
       items: dto.items,
       discount: dto.discountType && dto.discountValue
         ? { type: dto.discountType, value: dto.discountValue, reason: dto.discountReason }
+        : undefined,
+      receivable: dto.createReceivable && dto.contactId
+        ? { contactId: dto.contactId, dueDate: dto.receivableDueDate }
         : undefined,
     });
   }
@@ -390,6 +417,7 @@ export class TransactionsService {
       items,
       discount,
       partialPayment,
+      receivable,
       employeeId,
     } = params;
 
@@ -564,6 +592,27 @@ export class TransactionsService {
             },
           });
         }
+      }
+
+      // Handle receivable creation for income transactions
+      if (receivable && type === TransactionType.INCOME) {
+        // Use the transaction amount which already includes all discounts
+        // The amount passed to _createTransactionCore is the finalAmount calculated in createIncome
+        await processReceivable(
+          {
+            amount: Number(transaction.amount),
+            branchId,
+            contactId: receivable.contactId,
+            date,
+            dueDate: receivable.dueDate,
+            category,
+            notes,
+            userId: creatorId,
+            transactionId: transaction.id,
+          },
+          prisma,
+          this.auditLogService,
+        );
       }
 
       // Log the creation in audit log

@@ -1,13 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormDialog } from '@/components/shared/FormDialog';
 import { BranchSelect } from '@/components/shared/BranchSelect';
 import type { InventoryItem, CreateInventoryInput, UpdateInventoryInput } from '@/types/entity';
 import { InventoryUnit } from '@/types/enum';
@@ -172,20 +165,14 @@ export default function AddEditItemDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEdit ? 'تعديل صنف' : 'إضافة صنف جديد'}
-          </DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? 'قم بتعديل بيانات الصنف'
-              : 'أدخل بيانات الصنف الجديد'}
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEdit ? 'تعديل صنف' : 'إضافة صنف جديد'}
+      description={isEdit ? 'قم بتعديل بيانات الصنف' : 'أدخل بيانات الصنف الجديد'}
+      maxWidth="sm:max-w-md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -328,7 +315,7 @@ export default function AddEditItemDialog({
             />
           </div>
 
-          <DialogFooter className="gap-2">
+          <div className="flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"
@@ -340,16 +327,15 @@ export default function AddEditItemDialog({
             <Button type="submit" disabled={isSaving}>
               {isSaving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                  <Loader2 className="h-4 w-4 animate-spin me-2" />
                   جاري الحفظ...
                 </>
               ) : (
                 'حفظ'
               )}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+    </FormDialog>
   );
 }

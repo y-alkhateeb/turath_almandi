@@ -52,6 +52,9 @@ export interface CreateIncomeInput {
   discountReason?: string;
   branchId?: string;
   notes?: string;
+  createReceivable?: boolean;
+  contactId?: string;
+  receivableDueDate?: string;
 }
 
 /**

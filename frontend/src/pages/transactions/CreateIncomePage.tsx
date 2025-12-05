@@ -169,6 +169,7 @@ export default function CreateIncomePage() {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['receivables'] });
       navigate('/transactions');
     },
   });

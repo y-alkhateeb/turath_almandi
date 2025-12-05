@@ -156,6 +156,7 @@ export default function CreateExpensePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['payables'] });
       navigate('/transactions');
     },
   });

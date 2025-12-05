@@ -120,12 +120,13 @@ export function useCreateAdjustment() {
 
   return useMutation({
     mutationFn: async (data: CreateAdjustmentInput) => {
-      return apiClient.post({ 
+      return apiClient.post({
         url: '/payroll/adjustments',
         data,
       });
     },
     onSuccess: (_, variables) => {
+      // Invalidate salary details for current month
       queryClient.invalidateQueries({
         queryKey: ['payroll', 'salary-details', variables.employeeId]
       });
@@ -136,6 +137,10 @@ export function useCreateAdjustment() {
       // Also invalidate employees list
       queryClient.invalidateQueries({
         queryKey: ['employees', 'list']
+      });
+      // Invalidate transactions to refresh payment history
+      queryClient.invalidateQueries({
+        queryKey: ['transactions']
       });
       toast.success('تم إضافة التسوية بنجاح');
     },
